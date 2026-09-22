@@ -1,0 +1,250 @@
+<!doctype html>
+<html lang="ja">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>Stats Maker - Cloud Save Test</title>
+  <style>
+    :root{color-scheme:dark}
+    *{box-sizing:border-box}
+    body{
+      margin:0;min-height:100vh;background:#0b1220;color:#eef4ff;
+      font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;
+      display:grid;place-items:center;padding:20px
+    }
+    .card{
+      width:min(760px,100%);background:#111d31;border:1px solid #263750;
+      border-radius:16px;padding:20px;box-shadow:0 18px 45px rgba(0,0,0,.28)
+    }
+    h1{margin:0 0 8px;font-size:22px}
+    h2{font-size:16px;margin:22px 0 8px}
+    p{color:#9fb0c8;line-height:1.6}
+    .grid{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+    @media(max-width:620px){.grid{grid-template-columns:1fr}}
+    input,textarea{
+      width:100%;border:1px solid #334861;background:#0c1627;color:#eef4ff;
+      border-radius:9px;padding:10px;font:inherit
+    }
+    textarea{min-height:78px;resize:vertical}
+    .row{display:flex;gap:8px;flex-wrap:wrap;margin:10px 0}
+    button{
+      border:1px solid #375178;background:#1c3153;color:#f4f7ff;
+      border-radius:10px;padding:10px 13px;font-weight:800;cursor:pointer
+    }
+    button.primary{background:#2d58a0}
+    button.danger{background:#512436;border-color:#774057}
+    .box{
+      margin-top:12px;padding:14px;border-radius:12px;background:#0c1627;
+      border:1px solid #22334b;min-height:72px;white-space:pre-wrap;
+      word-break:break-word;font-family:ui-monospace,SFMono-Regular,Consolas,monospace;
+      font-size:13px;line-height:1.55
+    }
+    .ok{color:#72e39d}.bad{color:#ff8b8b}.muted{color:#91a2bc}
+    .warn{color:#ffd37c}
+    .pill{display:inline-block;padding:3px 7px;border-radius:999px;background:#1d3150;color:#a9bad3;font-size:11px;font-weight:800}
+  </style>
+</head>
+<body>
+<main class="card">
+  <h1>Stats Maker / Cloud Save Test</h1>
+  <p>作成者ログイン → お題保存 → 読み戻しを確認します。匿名ユーザーのままではお題作成できない設計です。</p>
+
+  <h2>1. 作成者ログイン</h2>
+  <div class="grid">
+    <input id="email" type="email" placeholder="メールアドレス">
+    <input id="password" type="password" placeholder="パスワード（6文字以上）">
+  </div>
+  <div class="row">
+    <button id="signupBtn">新規登録</button>
+    <button id="signinBtn" class="primary">ログイン</button>
+    <button id="signoutBtn">ログアウト</button>
+    <button id="authBtn">状態確認</button>
+  </div>
+
+  <h2>2. テスト用お題</h2>
+  <div class="grid">
+    <input id="title" value="Stats Maker Cloud Test" placeholder="お題タイトル">
+    <select id="lang" style="width:100%;border:1px solid #334861;background:#0c1627;color:#eef4ff;border-radius:9px;padding:10px">
+      <option value="ja">日本語</option>
+      <option value="en">English</option>
+    </select>
+  </div>
+  <textarea id="description">クラウド保存テスト用のお題です。</textarea>
+
+  <div class="row">
+    <button id="saveBtn" class="primary">① クラウドへ保存</button>
+    <button id="loadBtn">② 自分のお題を読み込む</button>
+    <button id="deleteBtn" class="danger">③ テストお題を削除</button>
+  </div>
+
+  <div id="output" class="box muted">待機中…</div>
+</main>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="js/supabase.js"></script>
+<script>
+  const $=id=>document.getElementById(id);
+  const out=$('output');
+  let lastTopicId=null;
+
+  function log(msg,state='muted'){
+    out.className='box '+state;
+    out.textContent=msg;
+  }
+
+  async function getUser(){
+    const sb=window.SM_SUPABASE?.client;
+    if(!sb)throw new Error('Supabase client is not ready');
+    const {data,error}=await sb.auth.getUser();
+    if(error)throw error;
+    return data.user;
+  }
+
+  async function requirePermanentUser(){
+    const user=await getUser();
+    if(!user)throw new Error('ログインしていません。');
+    if(user.is_anonymous)throw new Error('現在は匿名ユーザーです。作成者ログインが必要です。');
+    return user;
+  }
+
+  $('authBtn').onclick=async()=>{
+    try{
+      const user=await getUser();
+      if(!user){log('セッションなし。','muted');return}
+      log(
+        'User: '+user.id.slice(0,8)+'…\\nAnonymous: '+String(!!user.is_anonymous)+'\\nEmail: '+(user.email||'(none)'),
+        user.is_anonymous?'warn':'ok'
+      );
+    }catch(e){log('FAIL\\n'+e.message,'bad')}
+  };
+
+  $('signupBtn').onclick=async()=>{
+    try{
+      const email=$('email').value.trim();
+      const password=$('password').value;
+      if(!email||password.length<6)throw new Error('メールアドレスと6文字以上のパスワードを入力してください。');
+
+      const sb=window.SM_SUPABASE.client;
+      await sb.auth.signOut();
+
+      const {data,error}=await sb.auth.signUp({email,password});
+      if(error)throw error;
+
+      if(data.session){
+        log('PASS\\n新規登録＋ログイン成功。\\nこのままクラウド保存テストへ進めます。','ok');
+      }else{
+        log('登録受付。\\n確認メールが有効な場合は、メール内リンクを押してから「ログイン」してください。','warn');
+      }
+    }catch(e){log('FAIL\\n'+e.message,'bad')}
+  };
+
+  $('signinBtn').onclick=async()=>{
+    try{
+      const email=$('email').value.trim();
+      const password=$('password').value;
+      if(!email||!password)throw new Error('メールとパスワードを入力してください。');
+
+      const sb=window.SM_SUPABASE.client;
+      await sb.auth.signOut();
+
+      const {data,error}=await sb.auth.signInWithPassword({email,password});
+      if(error)throw error;
+
+      log('PASS\\n作成者ログイン成功。\\nUser: '+data.user.id.slice(0,8)+'…','ok');
+    }catch(e){log('FAIL\\n'+e.message,'bad')}
+  };
+
+  $('signoutBtn').onclick=async()=>{
+    try{
+      await window.SM_SUPABASE.client.auth.signOut();
+      log('ログアウトしました。','muted');
+    }catch(e){log('FAIL\\n'+e.message,'bad')}
+  };
+
+  $('saveBtn').onclick=async()=>{
+    try{
+      const user=await requirePermanentUser();
+      const sb=window.SM_SUPABASE.client;
+
+      const payload={
+        owner_id:user.id,
+        title:$('title').value.trim()||'Untitled',
+        description:$('description').value.trim(),
+        language_code:$('lang').value,
+        score_scale:100,
+        weighted:false,
+        visibility:'private',
+        allow_ratings:true,
+        show_community:true
+      };
+
+      const {data,error}=await sb.from('topics').insert(payload).select('id,title,language_code,visibility').single();
+      if(error)throw error;
+
+      lastTopicId=data.id;
+
+      const items=[
+        {topic_id:data.id,name:'Target A',position:0},
+        {topic_id:data.id,name:'Target B',position:1}
+      ];
+      const criteria=[
+        {topic_id:data.id,name:'Story',weight:1,position:0},
+        {topic_id:data.id,name:'Impact',weight:1,position:1}
+      ];
+
+      const [{error:itemErr},{error:critErr}]=await Promise.all([
+        sb.from('topic_items').insert(items),
+        sb.from('criteria').insert(criteria)
+      ]);
+      if(itemErr)throw itemErr;
+      if(critErr)throw critErr;
+
+      log(
+        'PASS\\nクラウド保存成功。\\nTopic ID: '+data.id.slice(0,8)+'…\\nItems: 2\\nCriteria: 2',
+        'ok'
+      );
+    }catch(e){log('FAIL\\n'+e.message,'bad')}
+  };
+
+  $('loadBtn').onclick=async()=>{
+    try{
+      const user=await requirePermanentUser();
+      const sb=window.SM_SUPABASE.client;
+
+      const {data,error}=await sb
+        .from('topics')
+        .select('id,title,description,language_code,visibility,topic_items(id,name,position),criteria(id,name,weight,position)')
+        .eq('owner_id',user.id)
+        .order('created_at',{ascending:false})
+        .limit(5);
+
+      if(error)throw error;
+      if(!data.length){log('保存済みのお題はまだありません。','muted');return}
+
+      const text=data.map((t,i)=>
+        `${i+1}. ${t.title}\\n   ${t.language_code} / ${t.visibility}\\n   items=${t.topic_items?.length||0}, criteria=${t.criteria?.length||0}\\n   id=${t.id.slice(0,8)}…`
+      ).join('\\n\\n');
+
+      lastTopicId=data[0].id;
+      log('PASS\\nクラウドから読み込み成功。\\n\\n'+text,'ok');
+    }catch(e){log('FAIL\\n'+e.message,'bad')}
+  };
+
+  $('deleteBtn').onclick=async()=>{
+    try{
+      await requirePermanentUser();
+      if(!lastTopicId)throw new Error('削除対象がありません。先に保存または読み込みしてください。');
+
+      const {error}=await window.SM_SUPABASE.client
+        .from('topics')
+        .delete()
+        .eq('id',lastTopicId);
+
+      if(error)throw error;
+      log('PASS\\nテストお題を削除しました。','ok');
+      lastTopicId=null;
+    }catch(e){log('FAIL\\n'+e.message,'bad')}
+  };
+</script>
+</body>
+</html>
