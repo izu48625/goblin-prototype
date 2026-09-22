@@ -1,0 +1,132 @@
+<!doctype html>
+<html lang="ja">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>Stats Maker - Supabase Test</title>
+  <style>
+    :root{color-scheme:dark}
+    *{box-sizing:border-box}
+    body{
+      margin:0;
+      min-height:100vh;
+      background:#0b1220;
+      color:#eef4ff;
+      font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;
+      display:grid;
+      place-items:center;
+      padding:20px;
+    }
+    .card{
+      width:min(620px,100%);
+      background:#111d31;
+      border:1px solid #263750;
+      border-radius:16px;
+      padding:20px;
+      box-shadow:0 18px 45px rgba(0,0,0,.28);
+    }
+    h1{margin:0 0 6px;font-size:22px}
+    p{color:#9fb0c8;line-height:1.6}
+    .row{display:flex;gap:10px;flex-wrap:wrap;margin:14px 0}
+    button{
+      border:1px solid #375178;
+      background:#1c3153;
+      color:#f4f7ff;
+      border-radius:10px;
+      padding:11px 14px;
+      font-weight:800;
+      cursor:pointer;
+    }
+    button.primary{background:#2d58a0}
+    .box{
+      margin-top:14px;
+      padding:14px;
+      border-radius:12px;
+      background:#0c1627;
+      border:1px solid #22334b;
+      min-height:90px;
+      white-space:pre-wrap;
+      word-break:break-word;
+      font-family:ui-monospace,SFMono-Regular,Consolas,monospace;
+      font-size:13px;
+      line-height:1.55;
+    }
+    .ok{color:#72e39d}
+    .bad{color:#ff8b8b}
+    .muted{color:#91a2bc}
+  </style>
+</head>
+<body>
+  <main class="card">
+    <h1>Stats Maker / Supabase 接続テスト</h1>
+    <p>本体へ組み込む前に、DB接続とAnonymous Authだけを確認します。</p>
+
+    <div class="row">
+      <button id="checkBtn">① 接続確認</button>
+      <button id="anonBtn" class="primary">② 匿名ログイン</button>
+      <button id="sessionBtn">③ セッション確認</button>
+    </div>
+
+    <div id="output" class="box">待機中…</div>
+  </main>
+
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="js/supabase.js"></script>
+  <script>
+    const out=document.getElementById('output');
+    const log=(msg,ok=null)=>{
+      out.className='box '+(ok===true?'ok':ok===false?'bad':'muted');
+      out.textContent=msg;
+    };
+
+    document.getElementById('checkBtn').addEventListener('click',async()=>{
+      try{
+        if(!window.SM_SUPABASE?.ready)throw new Error('Supabase client is not ready');
+        const {data,error}=await window.SM_SUPABASE.client
+          .from('topics')
+          .select('id')
+          .limit(1);
+        if(error)throw error;
+        log('PASS\nSupabaseへ接続できました。\n公開topicsテーブルへのSELECTも成功しています。',true);
+      }catch(err){
+        log('FAIL\n'+(err?.message||String(err)),false);
+      }
+    });
+
+    document.getElementById('anonBtn').addEventListener('click',async()=>{
+      try{
+        if(!window.SM_SUPABASE?.ready)throw new Error('Supabase client is not ready');
+        const {data,error}=await window.SM_SUPABASE.client.auth.signInAnonymously();
+        if(error)throw error;
+        const id=data?.user?.id||data?.session?.user?.id||'unknown';
+        log(
+          'PASS\nAnonymous Auth成功。\nUser ID: '+id.slice(0,8)+'…\n\n※完全なIDはこの画面で共有しなくてOKです。',
+          true
+        );
+      }catch(err){
+        log('FAIL\n'+(err?.message||String(err)),false);
+      }
+    });
+
+    document.getElementById('sessionBtn').addEventListener('click',async()=>{
+      try{
+        if(!window.SM_SUPABASE?.ready)throw new Error('Supabase client is not ready');
+        const {data,error}=await window.SM_SUPABASE.client.auth.getSession();
+        if(error)throw error;
+        const session=data?.session;
+        if(!session){
+          log('セッションなし。先に「② 匿名ログイン」を押してください。',null);
+          return;
+        }
+        const u=session.user;
+        log(
+          'PASS\nセッション保持中。\nAnonymous: '+String(!!u?.is_anonymous)+'\nUser ID: '+String(u?.id||'').slice(0,8)+'…',
+          true
+        );
+      }catch(err){
+        log('FAIL\n'+(err?.message||String(err)),false);
+      }
+    });
+  </script>
+</body>
+</html>
