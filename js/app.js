@@ -9,6 +9,7 @@
   const IMAGE_SIZE = 160;
   const IMAGE_QUALITY = 0.76;
   const $ = id => document.getElementById(id);
+  const t = (key,vars={}) => window.SM_I18N?.t(key,vars) ?? key;
 
   const sampleSheet = () => ({
     id: makeId(),
@@ -36,11 +37,11 @@
     updatedAt:Date.now()
   });
 
-  const blankSheet = (title='新しいお題') => ({
+  const blankSheet = (title=t('fallback.newTopic')) => ({
     id:makeId(),
     title,
     desc:'',
-    cols:['評価1','評価2','評価3','評価4'],
+    cols:[1,2,3,4].map(n=>t('fallback.metric',{n})),
     rows:[
       {name:'',image:'',note:'',scores:[null,null,null,null]},
       {name:'',image:'',note:'',scores:[null,null,null,null]},
@@ -77,7 +78,7 @@
 
   function normalizeSheet(s){
     if(!s.id)s.id=makeId();
-    if(!Array.isArray(s.cols)||!s.cols.length)s.cols=['評価1','評価2'];
+    if(!Array.isArray(s.cols)||!s.cols.length)s.cols=[1,2].map(n=>t('fallback.metric',{n}));
     if(!Array.isArray(s.rows)||!s.rows.length)s.rows=[{name:'',image:'',note:'',scores:Array(s.cols.length).fill(null)}];
     s.rows.forEach(r=>{
       if(typeof r.name!=='string')r.name='';
@@ -114,19 +115,19 @@
 
   function clone(obj){return JSON.parse(JSON.stringify(obj))}
 
-  function scheduleSave(message='自動保存しました。'){
+  function scheduleSave(message=t('save.auto')){
     clearTimeout(saveTimer);
-    $('saveBadge').textContent='保存中…';
+    $('saveBadge').textContent=t('save.saving');
     saveTimer=setTimeout(()=>{
       try{
         const s=activeSheet();
         s.updatedAt=Date.now();
         localStorage.setItem(STORAGE_KEY,JSON.stringify(library));
-        $('saveBadge').textContent='保存済み';
+        $('saveBadge').textContent=t('save.saved');
         if(message)$('statusText').textContent=message;
       }catch(e){
-        $('saveBadge').textContent='保存失敗';
-        $('statusText').textContent='保存容量が不足しました。画像を減らすか、不要なシートを削除してください。';
+        $('saveBadge').textContent=t('save.failed');
+        $('statusText').textContent=t('save.quota');
       }
     },220);
   }
@@ -209,7 +210,7 @@
     return String(s).replace(/[&<>"']/g,ch=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[ch]));
   }
   function metricValue(row,key){return key==='avg'?avg(row):row.scores[Number(key)]??null}
-  function metricLabel(key){const s=activeSheet();return key==='avg'?'総合平均':(s.cols[Number(key)]||`評価${Number(key)+1}`)}
+  function metricLabel(key){const s=activeSheet();return key==='avg'?t('metric.overallAverage'):(s.cols[Number(key)]||t('fallback.metric',{n:Number(key)+1}))}
 
   function rowMatchesFilter(row,index){
     const s=activeSheet();
@@ -268,7 +269,7 @@
   async function exportBackup(){
     const payload={
       app:'Stats Maker',
-      version:'0.13',
+      version:'1.0-A2',
       exportedAt:new Date().toISOString(),
       library
     };
@@ -284,9 +285,9 @@
       if(navigator.canShare && navigator.canShare({files:[file]})){
         await navigator.share({
           files:[file],
-          title:'Stats Maker バックアップ'
+          title:t('backup.shareTitle')
         });
-        $('statusText').textContent='バックアップJSONを共有/保存しました。';
+        $('statusText').textContent=t('backup.shared');
         return;
       }
     }catch(e){
@@ -296,7 +297,7 @@
     // Fallback for browsers without file sharing.
     const fallbackBlob=new Blob([json],{type:'application/octet-stream'});
     downloadBlob(fallbackBlob,filename);
-    $('statusText').textContent='バックアップJSONを書き出しました。';
+    $('statusText').textContent=t('backup.exported');
   }
 
   function openImportDialog(){
@@ -325,9 +326,9 @@
       localStorage.setItem(STORAGE_KEY,JSON.stringify(library));
       closeImportDialog();
       renderAll();
-      $('statusText').textContent='バックアップを復元しました。';
+      $('statusText').textContent=t('backup.restored');
     }catch(e){
-      $('statusText').textContent='このJSONはStats Makerのバックアップとして読み込めませんでした。';
+      $('statusText').textContent=t('backup.invalid');
     }
   }
 
@@ -338,7 +339,7 @@
 
   function exportCsv(){
     const s=activeSheet();
-    const headers=['対象',...s.cols,'平均','ランク','メモ'];
+    const headers=[t('table.target'),...s.cols,t('table.average'),t('table.rank'),t('table.note')];
     const lines=[headers.map(csvEscape).join(',')];
     s.rows.forEach(row=>{
       const vals=[
@@ -353,7 +354,7 @@
     const bom='\ufeff';
     const blob=new Blob([bom+lines.join('\r\n')],{type:'text/csv;charset=utf-8'});
     downloadBlob(blob,safeFilename(s.title||'stats-maker','csv'));
-    $('statusText').textContent='CSVを書き出しました。';
+    $('statusText').textContent=t('csv.exported');
   }
 
   function setViewOnly(enabled){
@@ -373,7 +374,7 @@
 
     document.body.classList.toggle('viewOnly',viewOnlyMode);
     $('viewOnlyBanner').classList.toggle('hidden',!viewOnlyMode);
-    $('viewOnlyBtn').textContent=viewOnlyMode?'閲覧中':'閲覧';
+    $('viewOnlyBtn').textContent=viewOnlyMode?t('tools.viewing'):t('tools.view');
 
     renderViewMode();
 
@@ -433,7 +434,7 @@
 
     ctx.fillStyle='#eef4ff';
     ctx.font='900 54px -apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif';
-    ctx.fillText(fitText(ctx,s.title||'無題のシート',width-168),84,158);
+    ctx.fillText(fitText(ctx,s.title||t('fallback.untitledSheet'),width-168),84,158);
 
     ctx.fillStyle='#93a3ba';
     ctx.font='500 24px -apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif';
@@ -452,7 +453,7 @@
 
       ctx.fillStyle='#eef4ff';
       ctx.font='800 30px -apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif';
-      const name=item.row.name.trim()||`対象${item.index+1}`;
+      const name=item.row.name.trim()||t('fallback.target',{n:item.index+1});
       ctx.fillText(fitText(ctx,name,610),160,y+61);
 
       ctx.textAlign='right';
@@ -468,7 +469,7 @@
     const fy=height-footerH+20;
     ctx.fillStyle='#6f819b';
     ctx.font='700 20px -apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif';
-    ctx.fillText(`${s.rows.length}対象 / ${s.cols.length}項目 / ${s.scale||100}点満点`,84,fy+28);
+    ctx.fillText(t('share.summary',{rows:s.rows.length,cols:s.cols.length,scale:s.scale||100}),84,fy+28);
     ctx.textAlign='right';
     ctx.fillText('Created with Stats Maker',width-84,fy+28);
     ctx.textAlign='left';
@@ -480,7 +481,7 @@
     const canvas=buildShareCanvas();
     const blob=await new Promise(resolve=>canvas.toBlob(resolve,'image/png',0.95));
     if(!blob){
-      $('statusText').textContent='画像を生成できませんでした。';
+      $('statusText').textContent=t('image.failed');
       return;
     }
 
@@ -514,7 +515,7 @@
   }
 
   function renderSheetSelect(){
-    $('sheetSelect').innerHTML=library.sheets.map(s=>`<option value="${s.id}">${esc(s.title||'無題のシート')}</option>`).join('');
+    $('sheetSelect').innerHTML=library.sheets.map(s=>`<option value="${s.id}">${esc(s.title||t('fallback.untitledSheet'))}</option>`).join('');
     $('sheetSelect').value=library.activeId;
   }
 
@@ -528,18 +529,18 @@
   function renderTable(){
     const s=activeSheet();
     let h='<thead><tr>';
-    h+='<th class="indexHead">#</th><th class="nameHead">画像 / 対象</th>';
+    h+=`<th class="indexHead">#</th><th class="nameHead">${esc(t('table.imageTarget'))}</th>`;
 
     s.cols.forEach((name,ci)=>{
       h+=`<th class="metricHead">
         <div class="metricHeaderBox">
           <div class="metricHeaderMain">
             <span class="metricHeaderName">${esc(name)}</span>
-            <button class="metricEditBtnV13" data-edit-col="${ci}" type="button" aria-label="${esc(name)}の名前を編集">✎</button>
+            <button class="metricEditBtnV13" data-edit-col="${ci}" type="button" aria-label="${esc(t('aria.editMetric',{name}))}">✎</button>
           </div>
           <div class="headerSortRow">
-            <button class="headerSortBtn" data-sort-now="${ci}" data-sort-dir="asc" type="button" aria-label="${esc(name)}を昇順">▲</button>
-            <button class="headerSortBtn" data-sort-now="${ci}" data-sort-dir="desc" type="button" aria-label="${esc(name)}を降順">▼</button>
+            <button class="headerSortBtn" data-sort-now="${ci}" data-sort-dir="asc" type="button" aria-label="${esc(t('aria.sortAsc',{name}))}">▲</button>
+            <button class="headerSortBtn" data-sort-now="${ci}" data-sort-dir="desc" type="button" aria-label="${esc(t('aria.sortDesc',{name}))}">▼</button>
           </div>
         </div>
       </th>`;
@@ -547,10 +548,10 @@
 
     h+=`<th class="avgHead">
       <div class="avgHeaderBox">
-        <div class="avgHeaderMain">平均</div>
+        <div class="avgHeaderMain">${esc(t('table.average'))}</div>
         <div class="headerSortRow">
-          <button class="headerSortBtn" data-sort-now="avg" data-sort-dir="asc" type="button" aria-label="平均を昇順">▲</button>
-          <button class="headerSortBtn" data-sort-now="avg" data-sort-dir="desc" type="button" aria-label="平均を降順">▼</button>
+          <button class="headerSortBtn" data-sort-now="avg" data-sort-dir="asc" type="button" aria-label="${esc(t('aria.sortAsc',{name:t('table.average')}))}">▲</button>
+          <button class="headerSortBtn" data-sort-now="avg" data-sort-dir="desc" type="button" aria-label="${esc(t('aria.sortDesc',{name:t('table.average')}))}">▼</button>
         </div>
       </div>
     </th><th class="deleteHead"></th></tr></thead><tbody>`;
@@ -560,9 +561,9 @@
       h+='<tr>';
       h+=`<td class="indexCell">${displayIndex+1}</td>`;
       h+=`<td class="nameCell"><div class="nameWrap">
-        <button class="thumbBtn" data-pick-image="${index}" type="button" aria-label="画像を選択">${row.image?`<img src="${row.image}" alt="">`:'＋'}</button>
-        <input class="nameInput" data-row-name="${index}" value="${esc(row.name)}" placeholder="対象名">
-        <button class="removeImg ${row.image?'':'hidden'}" data-remove-image="${index}" type="button" aria-label="画像を削除">×</button>
+        <button class="thumbBtn" data-pick-image="${index}" type="button" aria-label="${esc(t('aria.chooseImage'))}">${row.image?`<img src="${row.image}" alt="">`:'＋'}</button>
+        <input class="nameInput" data-row-name="${index}" value="${esc(row.name)}" placeholder="${esc(t('table.targetName'))}">
+        <button class="removeImg ${row.image?'':'hidden'}" data-remove-image="${index}" type="button" aria-label="${esc(t('aria.removeImage'))}">×</button>
         <input class="hidden fileInput" data-image-input="${index}" type="file" accept="image/*">
       </div></td>`;
 
@@ -574,11 +575,11 @@
       h+=`<td class="avgCell ${heatClass(a)}"><span class="avgValue">${fmt(a)}</span><span class="grade">${grade(a)}</span></td>`;
       const rp=rowProgress(row);
       h+=`<td class="deleteCell"><div class="rowActionWrap">
-        <span class="progressPill ${rp.pct===100?'complete':''}" title="入力進捗">${rp.done}/${rp.total}</span>
-        <button class="rowNoteBtn ${row.note?'hasNote':''}" data-note-row="${index}" type="button" aria-label="メモ">📝</button>
-        <button class="rowMove" data-move-row-up="${index}" type="button" aria-label="上へ">▲</button>
-        <button class="rowMove" data-move-row-down="${index}" type="button" aria-label="下へ">▼</button>
-        <button class="rowDelete" data-delete-row="${index}" type="button" aria-label="削除">×</button>
+        <span class="progressPill ${rp.pct===100?'complete':''}" title="${esc(t('aria.progress'))}">${rp.done}/${rp.total}</span>
+        <button class="rowNoteBtn ${row.note?'hasNote':''}" data-note-row="${index}" type="button" aria-label="${esc(t('aria.note'))}">📝</button>
+        <button class="rowMove" data-move-row-up="${index}" type="button" aria-label="${esc(t('aria.up'))}">▲</button>
+        <button class="rowMove" data-move-row-down="${index}" type="button" aria-label="${esc(t('aria.down'))}">▼</button>
+        <button class="rowDelete" data-delete-row="${index}" type="button" aria-label="${esc(t('aria.delete'))}">×</button>
       </div></td></tr>`;
     });
     h+='</tbody>';
@@ -595,12 +596,12 @@
     document.querySelectorAll('[data-edit-col]').forEach(el=>el.addEventListener('click',e=>{
       e.stopPropagation();
       const i=+e.currentTarget.dataset.editCol;
-      const current=s.cols[i]||`評価${i+1}`;
-      const next=window.prompt('評価項目名を編集',current);
+      const current=s.cols[i]||t('fallback.metric',{n:i+1});
+      const next=window.prompt(t('metric.editPrompt'),current);
       if(next===null)return;
       s.cols[i]=next.trim()||current;
       renderAll();
-      scheduleSave('評価項目名を保存しました。');
+      scheduleSave(t('metric.saved'));
     }));
 
     document.querySelectorAll('[data-score-row]').forEach(el=>el.addEventListener('change',e=>{
@@ -631,12 +632,12 @@
 
     document.querySelectorAll('[data-delete-row]').forEach(el=>el.addEventListener('click',e=>{
       const idx=+e.currentTarget.dataset.deleteRow;
-      if(s.rows.length<=1){$('statusText').textContent='最後の1行は削除できません。';return;}
-      const rowName=s.rows[idx]?.name.trim()||`対象${idx+1}`;
-      if(!window.confirm(`「${rowName}」を削除しますか？\nこの行の点数・メモも削除されます。`))return;
+      if(s.rows.length<=1){$('statusText').textContent=t('row.lastCannotDelete');return;}
+      const rowName=s.rows[idx]?.name.trim()||t('fallback.target',{n:idx+1});
+      if(!window.confirm(t('row.deleteConfirm',{name:rowName})))return;
       s.rows.splice(idx,1);
       s.compare=s.compare.filter(i=>i!==idx).map(i=>i>idx?i-1:i);
-      renderAll();scheduleSave('行を削除しました。');
+      renderAll();scheduleSave(t('row.deleted'));
     }));
 
     document.querySelectorAll('[data-pick-image]').forEach(el=>el.addEventListener('click',e=>{
@@ -649,21 +650,21 @@
       const idx=+e.currentTarget.dataset.imageInput;
       const file=e.currentTarget.files&&e.currentTarget.files[0];
       if(!file)return;
-      $('statusText').textContent='画像を処理しています…';
+      $('statusText').textContent=t('image.processing');
       try{
         const data=await resizeImage(file);
         s.rows[idx].image=data;
         renderAll();
-        scheduleSave('画像を追加しました。');
+        scheduleSave(t('image.added'));
       }catch(err){
-        $('statusText').textContent='画像を読み込めませんでした。別の画像を試してください。';
+        $('statusText').textContent=t('image.readFailed');
       }
     }));
 
     document.querySelectorAll('[data-remove-image]').forEach(el=>el.addEventListener('click',e=>{
       const idx=+e.currentTarget.dataset.removeImage;
       s.rows[idx].image='';
-      renderAll();scheduleSave('画像を削除しました。');
+      renderAll();scheduleSave(t('image.removed'));
     }));
   }
 
@@ -703,7 +704,7 @@
     s.sortDesc=true;
 
     renderAll();
-    $('statusText').textContent=`${metricLabel(key)}を${desc?'降順':'昇順'}に並べ替えました。以後、採点しても順番は自動では変わりません。`;
+    $('statusText').textContent=t('sort.done',{metric:metricLabel(key),direction:desc?t('sort.desc'):t('sort.asc')});
     scheduleSave('');
   }
 
@@ -736,7 +737,7 @@
 
   function renderRanking(){
     const s=activeSheet();
-    $('rankMetric').innerHTML='<option value="avg">総合平均</option>'+s.cols.map((c,i)=>`<option value="${i}">${esc(c||`評価${i+1}`)}</option>`).join('');
+    $('rankMetric').innerHTML=`<option value="avg">${esc(t('metric.overallAverage'))}</option>`+s.cols.map((c,i)=>`<option value="${i}">${esc(c||t('fallback.metric',{n:i+1}))}</option>`).join('');
     $('rankMetric').value=String(s.rankMetric);
 
     $('rankTopBtn').classList.toggle('active',s.rankMode!=='bottom');
@@ -744,7 +745,7 @@
 
     const list=filteredRows().map(({row,index})=>({
       row,index,
-      name:row.name.trim()||`対象${index+1}`,
+      name:row.name.trim()||t('fallback.target',{n:index+1}),
       value:metricValue(row,s.rankMetric)
     })).sort((a,b)=>{
       if(s.rankMode==='bottom')return (a.value??Infinity)-(b.value??Infinity);
@@ -777,7 +778,7 @@
     // Keep only valid indices and remove duplicates.
     s.compare=[...new Set((s.compare||[]).filter(i=>Number.isInteger(i)&&i>=0&&i<s.rows.length))];
 
-    $('compareChips').innerHTML=s.rows.map((r,i)=>`<button class="chip${s.compare.includes(i)?' active':''}" data-compare="${i}" type="button">${esc(r.name.trim()||`対象${i+1}`)}</button>`).join('');
+    $('compareChips').innerHTML=s.rows.map((r,i)=>`<button class="chip${s.compare.includes(i)?' active':''}" data-compare="${i}" type="button">${esc(r.name.trim()||t('fallback.target',{n:i+1}))}</button>`).join('');
 
     document.querySelectorAll('[data-compare]').forEach(el=>el.addEventListener('click',e=>{
       const i=+e.currentTarget.dataset.compare;
@@ -794,7 +795,7 @@
     $('compareLegend').innerHTML=s.compare.map((ri,idx)=>`
       <div class="legendItem">
         <span class="legendDot" style="background:${compareColor(idx,total)}"></span>
-        <span class="legendText">${esc(s.rows[ri]?.name.trim()||`対象${ri+1}`)}</span>
+        <span class="legendText">${esc(s.rows[ri]?.name.trim()||t('fallback.target',{n:ri+1}))}</span>
       </div>`).join('');
 
     $('radarTab').classList.toggle('active',s.compareView==='radar');
@@ -803,11 +804,11 @@
     $('barBox').classList.toggle('hidden',s.compareView!=='bar');
 
     if(!s.compare.length){
-      $('compareHint').textContent='好きな数だけ選択できます。';
+      $('compareHint').textContent=t('compare.none');
     }else if(s.compare.length>=8 && s.compareView==='radar'){
-      $('compareHint').textContent=`${s.compare.length}件を比較中。件数が多い場合は「横棒」が見やすいです。`;
+      $('compareHint').textContent=t('compare.many',{count:s.compare.length});
     }else{
-      $('compareHint').textContent=`${s.compare.length}件を比較中。`;
+      $('compareHint').textContent=t('compare.count',{count:s.compare.length});
     }
 
     renderCompareStats();
@@ -829,7 +830,7 @@
       const max=vals.length?Math.max(...vals):null;
       const min=vals.length?Math.min(...vals):null;
       return `<div class="compareStat">
-        <div class="compareStatLabel">${esc(row?.name.trim()||`対象${ri+1}`)}</div>
+        <div class="compareStatLabel">${esc(row?.name.trim()||t('fallback.target',{n:ri+1}))}</div>
         <div class="compareStatValue">${fmt(a)} <span class="rankGrade">${grade(a)}</span></div>
         <div class="rankGrade">MAX ${fmt(max)} / MIN ${fmt(min)}</div>
       </div>`;
@@ -878,7 +879,7 @@
       ctx.fillStyle='#73859e';
       ctx.font='10px sans-serif';
       ctx.textAlign='center';
-      ctx.fillText('比較する対象を選択',w/2,h/2);
+      ctx.fillText(t('compare.choose'),w/2,h/2);
       return;
     }
 
@@ -886,7 +887,7 @@
       ctx.fillStyle='#73859e';
       ctx.font='10px sans-serif';
       ctx.textAlign='center';
-      ctx.fillText(n===0?'共通して採点済みの項目がありません':'レーダー表示には全員が採点済みの共通項目が3つ以上必要です',w/2,h/2);
+      ctx.fillText(n===0?t('compare.noCommon'):t('compare.needThree'),w/2,h/2);
       return;
     }
 
@@ -922,7 +923,7 @@
       ctx.stroke();
 
       const lp=point(i,1.22);
-      let label=s.cols[ci]||`評価${ci+1}`;
+      let label=s.cols[ci]||t('fallback.metric',{n:ci+1});
       if(label.length>7)label=label.slice(0,7)+'…';
       ctx.fillText(label,lp.x,lp.y);
     });
@@ -952,23 +953,23 @@
     const cols=activeCompareColumnIndices();
 
     if(!s.compare.length){
-      $('barCompare').innerHTML='<div class="status">比較する対象を選択してください。</div>';
+      $('barCompare').innerHTML=`<div class="status">${esc(t('compare.chooseLong'))}</div>`;
       return;
     }
 
     if(!cols.length){
-      $('barCompare').innerHTML='<div class="status">選択した対象に採点済みの項目がありません。</div>';
+      $('barCompare').innerHTML=`<div class="status">${esc(t('compare.noScored'))}</div>`;
       return;
     }
 
     $('barCompare').innerHTML=cols.map(ci=>{
-      const c=s.cols[ci]||`評価${ci+1}`;
+      const c=s.cols[ci]||t('fallback.metric',{n:ci+1});
 
       const rows=s.compare.map((ri,idx)=>{
         const row=s.rows[ri];
         const v=Number.isFinite(row?.scores?.[ci])?row.scores[ci]:null;
         return `<div class="barRow">
-          <div class="barName">${esc(row?.name.trim()||`対象${ri+1}`)}</div>
+          <div class="barName">${esc(row?.name.trim()||t('fallback.target',{n:ri+1}))}</div>
           <div class="barTrack">
             <div class="barFill" style="width:${v==null?0:(v/(s.scale||100))*100}%;background:${compareColor(idx,s.compare.length)}"></div>
           </div>
@@ -1020,7 +1021,7 @@
     if(s.weighted){
       const pct=normalizedWeightPercentages(s.weights);
       const parts=s.cols.map((c,i)=>`${c} ${pct[i].toFixed(1).replace('.0','')}%`).join(' / ');
-      $('weightSummary').textContent=`加重平均：${parts}`;
+      $('weightSummary').textContent=t('weight.weightedSummary',{parts});
     }
   }
 
@@ -1028,7 +1029,7 @@
     const s=activeSheet();
     s.weighted=!!enabled;
     renderAll();
-    scheduleSave(enabled?'重み付けをONにしました。':'重み付けをOFFにしました。');
+    scheduleSave(enabled?t('weight.enabled'):t('weight.disabled'));
     if(enabled)setTimeout(openWeightDialog,30);
   }
 
@@ -1054,22 +1055,22 @@
 
     document.querySelectorAll('[data-weight-pct]').forEach(el=>{
       const i=+el.dataset.weightPct;
-      el.innerHTML=`${pct[i].toFixed(1).replace('.0','')}%<small>配分</small>`;
+      el.innerHTML=`${pct[i].toFixed(1).replace('.0','')}%<small>${esc(t('weight.distribution'))}</small>`;
     });
 
     $('weightMiniBar').innerHTML=pct.map((p,i)=>
       `<div class="weightMiniSeg" style="width:${p}%;background:${palette[i%palette.length]}"></div>`
     ).join('');
-    $('weightTotal').textContent='実際の配分 合計100%';
+    $('weightTotal').textContent=t('weight.total');
   }
 
   function renderWeightDialogRows(){
     const s=activeSheet();
     $('weightRows').innerHTML=s.cols.map((c,i)=>`
       <div class="weightRow">
-        <div class="weightRowName">${esc(c||`評価${i+1}`)}</div>
+        <div class="weightRowName">${esc(c||t('fallback.metric',{n:i+1}))}</div>
         <input class="weightRange" data-weight-range="${i}" type="range" min="0" max="100" step="1" value="${Math.max(0,Math.min(100,Math.round(Number(weightDraft[i])||0)))}">
-        <div class="weightPct" data-weight-pct="${i}">0%<small>配分</small></div>
+        <div class="weightPct" data-weight-pct="${i}">0%<small>${esc(t('weight.distribution'))}</small></div>
       </div>`).join('');
 
     document.querySelectorAll('[data-weight-range]').forEach(el=>{
@@ -1098,7 +1099,7 @@
     s.weights=(any?weightDraft:s.cols.map(()=>1)).map(v=>Math.max(0,Number(v)||0));
     closeWeightDialog();
     renderAll();
-    scheduleSave('重み設定を更新しました。');
+    scheduleSave(t('weight.updated'));
   }
 
   function renderScaleMode(){
@@ -1123,7 +1124,7 @@
     });
     s.scale=nextScale;
     renderAll();
-    scheduleSave(`${nextScale}点モードへ変更しました。既存点数も自動変換しています。`);
+    scheduleSave(t('scale.changed',{scale:nextScale}));
   }
 
 
@@ -1151,7 +1152,7 @@
       const metrics=s.cols.map((c,ci)=>{
         const v=row.scores[ci];
         return `<div class="overviewMetric ${heatClass(v)}">
-          <div class="overviewMetricName">${esc(c||`評価${ci+1}`)}</div>
+          <div class="overviewMetricName">${esc(c||t('fallback.metric',{n:ci+1}))}</div>
           <div class="overviewMetricValue">${fmt(v)}</div>
         </div>`;
       }).join('');
@@ -1160,7 +1161,7 @@
         <div class="overviewCardTop">
           <div class="overviewThumb">${row.image?`<img src="${row.image}" alt="">`:'—'}</div>
           <div class="overviewName">
-            ${esc(row.name.trim()||`対象${ri+1}`)}
+            ${esc(row.name.trim()||t('fallback.target',{n:ri+1}))}
             <div class="overviewMeta">
               <span class="progressPill ${rp.pct===100?'complete':''}">${rp.done}/${rp.total}</span>
               ${row.note?`<span class="overviewNote">${esc(row.note)}</span>`:''}
@@ -1179,12 +1180,12 @@
 
   function renderFitTable(){
     const s=activeSheet();
-    let h='<thead><tr><th>#</th><th class="fitName">対象</th>';
+    let h=`<thead><tr><th>#</th><th class="fitName">${esc(t('table.target'))}</th>`;
     s.cols.forEach(c=>h+=`<th>${esc(c)}</th>`);
-    h+='<th>平均</th></tr></thead><tbody>';
+    h+=`<th>${esc(t('table.average'))}</th></tr></thead><tbody>`;
     filteredRows().forEach(({row,index:ri})=>{
       const a=avg(row);
-      h+=`<tr><td>${ri+1}</td><td class="fitName"><div class="fitNameInner"><span class="fitThumb">${row.image?`<img src="${row.image}" alt="">`:'—'}</span><span>${esc(row.name.trim()||`対象${ri+1}`)}</span></div></td>`;
+      h+=`<tr><td>${ri+1}</td><td class="fitName"><div class="fitNameInner"><span class="fitThumb">${row.image?`<img src="${row.image}" alt="">`:'—'}</span><span>${esc(row.name.trim()||t('fallback.target',{n:ri+1}))}</span></div></td>`;
       row.scores.slice(0,s.cols.length).forEach(v=>{
         h+=`<td class="${heatClass(v)}">${fmt(v)}</td>`;
       });
@@ -1259,10 +1260,10 @@
     const s=activeSheet();
     $('columnManage').innerHTML=s.cols.map((c,ci)=>`
       <div class="columnChip">
-        <button class="columnMoveBtn" data-move-col-left="${ci}" type="button" aria-label="左へ">◀</button>
-        <span class="columnChipName">${esc(c||`評価${ci+1}`)}</span>
-        <button class="columnMoveBtn" data-move-col-right="${ci}" type="button" aria-label="右へ">▶</button>
-        <button class="columnDeleteBtn" data-delete-col="${ci}" type="button" aria-label="${esc(c||`評価${ci+1}`)}を削除">×</button>
+        <button class="columnMoveBtn" data-move-col-left="${ci}" type="button" aria-label="${esc(t('aria.left'))}">◀</button>
+        <span class="columnChipName">${esc(c||t('fallback.metric',{n:ci+1}))}</span>
+        <button class="columnMoveBtn" data-move-col-right="${ci}" type="button" aria-label="${esc(t('aria.right'))}">▶</button>
+        <button class="columnDeleteBtn" data-delete-col="${ci}" type="button" aria-label="${esc(t('aria.deleteMetric',{name:c||t('fallback.metric',{n:ci+1})}))}">×</button>
       </div>`).join('');
 
     document.querySelectorAll('[data-delete-col]').forEach(el=>el.addEventListener('click',e=>{
@@ -1296,17 +1297,17 @@
     }
 
     renderAll();
-    scheduleSave('評価項目を移動しました。');
+    scheduleSave(t('metric.moved'));
   }
 
   function deleteColumn(ci){
     const s=activeSheet();
     if(s.cols.length<=1){
-      $('statusText').textContent='最後の1項目は削除できません。';
+      $('statusText').textContent=t('metric.lastCannotDelete');
       return;
     }
-    const name=s.cols[ci]||`評価${ci+1}`;
-    if(!window.confirm(`評価項目「${name}」を削除しますか？\n全対象のこの項目の点数も削除されます。`))return;
+    const name=s.cols[ci]||t('fallback.metric',{n:ci+1});
+    if(!window.confirm(t('metric.deleteConfirm',{name})))return;
     s.cols.splice(ci,1);
     s.weights.splice(ci,1);
     s.rows.forEach(r=>r.scores.splice(ci,1));
@@ -1321,7 +1322,7 @@
     }
 
     renderAll();
-    scheduleSave(`${name} を削除しました。`);
+    scheduleSave(t('metric.deleted',{name}));
   }
 
   function renderSidebar(){renderRanking();renderCompare();renderSummary()}
@@ -1337,7 +1338,7 @@
     renderFitTable();
     renderColumnManager();
     renderSidebar();
-    $('filterCount').textContent=`${filteredRows().length}/${s.rows.length}件`;
+    $('filterCount').textContent=t('count.filtered',{visible:filteredRows().length,total:s.rows.length});
     renderViewMode();
   }
 
@@ -1349,7 +1350,7 @@
     const s=activeSheet();
     noteEditingRow=index;
     const row=s.rows[index];
-    $('noteDialogTitle').textContent=`メモ：${row.name.trim()||`対象${index+1}`}`;
+    $('noteDialogTitle').textContent=t('note.forTarget',{name:row.name.trim()||t('fallback.target',{n:index+1})});
     $('noteTextarea').value=row.note||'';
     $('noteDialogBackdrop').classList.remove('hidden');
     setTimeout(()=>$('noteTextarea').focus(),30);
@@ -1367,7 +1368,7 @@
     s.rows[noteEditingRow].note=$('noteTextarea').value.trim();
     closeNoteDialog();
     renderAll();
-    scheduleSave('メモを保存しました。');
+    scheduleSave(t('note.saved'));
   }
 
   function moveRow(index,dir){
@@ -1383,7 +1384,7 @@
     });
 
     renderAll();
-    scheduleSave('評価対象を移動しました。');
+    scheduleSave(t('row.moved'));
   }
 
   function addRow(){
@@ -1391,7 +1392,7 @@
     if(!s || !Array.isArray(s.rows))return;
 
     if(s.rows.length>=MAX_ROWS){
-      $('statusText').textContent=`行は最大${MAX_ROWS}件までです。`;
+      $('statusText').textContent=t('row.max',{max:MAX_ROWS});
       return;
     }
 
@@ -1427,16 +1428,16 @@
       }
     });
 
-    scheduleSave('新しい行を追加しました。絞り込みは「すべて」に戻しました。');
+    scheduleSave(t('row.added'));
   }
 
   function addColumn(){
     const s=activeSheet();
-    if(s.cols.length>=MAX_COLS){$('statusText').textContent=`評価項目は最大${MAX_COLS}個までです。`;return;}
-    s.cols.push(`評価${s.cols.length+1}`);
+    if(s.cols.length>=MAX_COLS){$('statusText').textContent=t('metric.max',{max:MAX_COLS});return;}
+    s.cols.push(t('fallback.metric',{n:s.cols.length+1}));
     s.weights.push(1);
     s.rows.forEach(r=>r.scores.push(null));
-    renderAll();scheduleSave('評価項目を追加しました。');
+    renderAll();scheduleSave(t('metric.added'));
   }
 
 
@@ -1468,29 +1469,29 @@
   }
 
   function createNewSheet(){
-    const s=blankSheet(`新しいお題 ${library.sheets.length+1}`);
-    library.sheets.push(s);library.activeId=s.id;renderAll();scheduleSave('新しいシートを作成しました。');
+    const s=blankSheet(`${t('fallback.newTopic')} ${library.sheets.length+1}`);
+    library.sheets.push(s);library.activeId=s.id;renderAll();scheduleSave(t('sheet.created'));
   }
 
   function duplicateSheet(){
     const src=activeSheet(),copy=clone(src);
-    copy.id=makeId();copy.title=(src.title||'無題')+' のコピー';copy.updatedAt=Date.now();
-    library.sheets.push(copy);library.activeId=copy.id;renderAll();scheduleSave('シートを複製しました。');
+    copy.id=makeId();copy.title=(src.title||t('fallback.untitledSheet'))+t('fallback.copySuffix');copy.updatedAt=Date.now();
+    library.sheets.push(copy);library.activeId=copy.id;renderAll();scheduleSave(t('sheet.duplicated'));
   }
 
   function deleteActiveSheet(){
-    if(library.sheets.length<=1){$('statusText').textContent='最後の1シートは削除できません。';return;}
+    if(library.sheets.length<=1){$('statusText').textContent=t('sheet.lastCannotDelete');return;}
     const current=activeSheet();
-    if(!window.confirm(`シート「${current.title||'無題のシート'}」を削除しますか？\nこの操作は元に戻せません。`))return;
+    if(!window.confirm(t('sheet.deleteConfirm',{name:current.title||t('fallback.untitledSheet')})))return;
     const idx=library.sheets.findIndex(s=>s.id===library.activeId);
     library.sheets.splice(idx,1);
     library.activeId=library.sheets[Math.max(0,idx-1)].id;
-    renderAll();scheduleSave('シートを削除しました。');
+    renderAll();scheduleSave(t('sheet.deleted'));
   }
 
   $('titleInput').addEventListener('input',e=>{activeSheet().title=e.currentTarget.value;renderSheetSelect();scheduleSave('');});
   $('descInput').addEventListener('input',e=>{activeSheet().desc=e.currentTarget.value;scheduleSave('');});
-  $('sheetSelect').addEventListener('change',e=>{library.activeId=e.currentTarget.value;renderAll();scheduleSave('シートを切り替えました。');});
+  $('sheetSelect').addEventListener('change',e=>{library.activeId=e.currentTarget.value;renderAll();scheduleSave(t('sheet.switched'));});
   $('viewOnlyBtn').addEventListener('click',()=>setViewOnly(!viewOnlyMode));
   $('exitViewOnlyBtn').addEventListener('click',()=>setViewOnly(false));
   $('exportJsonBtn').addEventListener('click',exportBackup);
@@ -1574,7 +1575,7 @@
     renderOverview();
     renderFitTable();
     renderSidebar();
-    $('filterCount').textContent=`${filteredRows().length}/${activeSheet().rows.length}件`;
+    $('filterCount').textContent=t('count.filtered',{visible:filteredRows().length,total:activeSheet().rows.length});
     scheduleSave('');
   });
   $('gradeFilter').addEventListener('change',e=>{
@@ -1583,19 +1584,19 @@
     renderOverview();
     renderFitTable();
     renderSidebar();
-    $('filterCount').textContent=`${filteredRows().length}/${activeSheet().rows.length}件`;
+    $('filterCount').textContent=t('count.filtered',{visible:filteredRows().length,total:activeSheet().rows.length});
     scheduleSave('');
   });
   $('compareAllBtn').addEventListener('click',()=>{
     const s=activeSheet();
     s.compare=s.rows.map((_,i)=>i);
     renderCompare();
-    scheduleSave('すべての対象を比較に追加しました。');
+    scheduleSave(t('compare.addAll'));
   });
   $('compareClearBtn').addEventListener('click',()=>{
     activeSheet().compare=[];
     renderCompare();
-    scheduleSave('比較対象をすべて解除しました。');
+    scheduleSave(t('compare.clearAll'));
   });
   $('radarTab').addEventListener('click',()=>{activeSheet().compareView='radar';renderCompare();scheduleSave('');});
   $('barTab').addEventListener('click',()=>{activeSheet().compareView='bar';renderCompare();scheduleSave('');});
@@ -1605,6 +1606,13 @@
     window.__smv03Resize=setTimeout(()=>{if(activeSheet().compareView==='radar')drawRadar();if(activeSheet().viewMode==='fit')applyFitScale();},100);
   });
 
+  window.addEventListener('statsmaker:languagechange',()=>{
+    window.SM_I18N?.applyTranslations();
+    renderAll();
+    if(viewOnlyMode)$('viewOnlyBtn').textContent=t('tools.viewing');
+  });
+
   renderAll();
+  window.SM_I18N?.applyTranslations();
   scheduleSave('');
 })();
