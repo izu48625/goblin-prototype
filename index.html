@@ -4,7 +4,7 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
   <meta name="theme-color" content="#07101f">
-  <title>Stats Maker V1.0-A2</title>
+  <title>Stats Maker V1.0-B</title>
   <link rel="stylesheet" href="css/style.css">
 </head>
 <body>
@@ -20,11 +20,13 @@
       <div class="brandMark">S</div>
       <div>
         <div class="brandTitle">STATS MAKER</div>
-        <div class="brandSub">V1.0-A2 · i18n R1</div>
+        <div class="brandSub">V1.0-B · Regression Pass R1</div>
       </div>
       <div class="langSwitch" aria-label="Language">
-        <button class="langBtn" data-lang="ja" type="button">日本語</button>
-        <button class="langBtn" data-lang="en" type="button">English</button>
+        <span class="langIcon" aria-hidden="true">🌐</span>
+        <button class="langBtn" data-lang="ja" type="button" aria-label="日本語">JA</button>
+        <span class="langDivider" aria-hidden="true"></span>
+        <button class="langBtn" data-lang="en" type="button" aria-label="English">EN</button>
       </div>
     </div>
 
@@ -84,7 +86,7 @@
 
       <div class="filterBar">
         <input id="searchInput" class="searchInput" type="search" placeholder="対象名・メモを検索" data-i18n-placeholder="filter.search">
-        <select id="gradeFilter" class="filterSelect" aria-label="評価で絞り込み">
+        <select id="gradeFilter" class="filterSelect" aria-label="評価で絞り込み" data-i18n-aria="filter.gradeAria">
           <option value="all" data-i18n="filter.all">すべて</option>
           <option value="SS">SS</option>
           <option value="S">S</option>
@@ -93,7 +95,7 @@
           <option value="C" data-i18n="filter.cOrBelow">C以下</option>
           <option value="unrated" data-i18n="filter.unrated">未採点</option>
         </select>
-        <span id="filterCount" class="filterCount">0件</span>
+        <span id="filterCount" class="filterCount">0</span>
       </div>
 
       <div id="utilityBar" class="utilityBar hidden">
@@ -106,7 +108,7 @@
 
       <div id="normalSheetView">
         <div class="tableWrap">
-          <table id="scoreTable" aria-label="採点表"></table>
+          <table id="scoreTable" aria-label="採点表" data-i18n-aria="table.scoreTableAria"></table>
         </div>
         <div class="emptyAddRow">
           <button id="addRowWideBtn" class="btn ghost" type="button" style="width:100%" data-i18n="action.addRowLong">＋ 行を追加</button>
@@ -135,7 +137,7 @@
         </div>
         <div id="fitViewport" class="fitViewport">
           <div id="fitCanvas" class="fitCanvas">
-            <table id="fitTable" class="fitTable" aria-label="全体縮小表示"></table>
+            <table id="fitTable" class="fitTable" aria-label="全体縮小表示" data-i18n-aria="fit.tableAria"></table>
           </div>
         </div>
       </div>
@@ -181,7 +183,7 @@
         <div id="compareLegend" class="compareLegend"></div>
 
         <div id="radarBox" class="chartBox">
-          <canvas id="radarCanvas" aria-label="レーダーチャート"></canvas>
+          <canvas id="radarCanvas" aria-label="レーダーチャート" data-i18n-aria="compare.radarAria"></canvas>
         </div>
         <div id="barBox" class="chartBox hidden">
           <div id="barCompare" class="barCompare"></div>

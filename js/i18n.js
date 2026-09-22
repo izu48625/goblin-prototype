@@ -5,6 +5,7 @@
 
   const messages={
     ja:{
+      'app.documentTitle':'Stats Maker',
       'viewOnly.mode':'閲覧モード',
       'viewOnly.subtitle':'編集操作を隠して結果だけを見ています',
       'viewOnly.back':'編集に戻る',
@@ -38,6 +39,10 @@
       'weight.title':'重み設定',
       'weight.short':'重み',
       'filter.search':'対象名・メモを検索',
+      'filter.gradeAria':'評価で絞り込み',
+      'table.scoreTableAria':'採点表',
+      'fit.tableAria':'全体縮小表示',
+      'compare.radarAria':'レーダーチャート',
       'filter.all':'すべて',
       'filter.cOrBelow':'C以下',
       'filter.unrated':'未採点',
@@ -172,6 +177,7 @@
     },
 
     en:{
+      'app.documentTitle':'Stats Maker',
       'viewOnly.mode':'View Mode',
       'viewOnly.subtitle':'Editing controls are hidden so you can focus on results.',
       'viewOnly.back':'Back to Editing',
@@ -205,6 +211,10 @@
       'weight.title':'Weight Settings',
       'weight.short':'Weight',
       'filter.search':'Search targets or notes',
+      'filter.gradeAria':'Filter by grade',
+      'table.scoreTableAria':'Score table',
+      'fit.tableAria':'Fit view table',
+      'compare.radarAria':'Radar chart',
       'filter.all':'All',
       'filter.cOrBelow':'C or lower',
       'filter.unrated':'Unrated',
@@ -363,6 +373,7 @@
 
   function applyTranslations(){
     document.documentElement.lang=locale;
+    document.title=t('app.documentTitle');
 
     document.querySelectorAll('[data-i18n]').forEach(el=>{
       el.textContent=t(el.dataset.i18n);
