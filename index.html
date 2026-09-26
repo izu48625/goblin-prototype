@@ -1,162 +1,200 @@
 <!doctype html>
 <html lang="ja">
 <head>
-  <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-  <meta name="theme-color" content="#07101f">
-  <title>Stats Maker</title>
-  <style>
-    html,body{margin:0;width:100%;height:100%;background:#07101f;overflow:hidden}
-    .hidden{display:none!important}
-    #basicRoot{position:fixed;inset:0;background:#07101f}
-    #basicFrame{display:block;width:100%;height:100%;border:0;background:#07101f}
-    #extLauncher{
-      position:fixed;right:16px;bottom:calc(18px + env(safe-area-inset-bottom));
-      z-index:100;min-height:48px;padding:0 17px;
-      border:1px solid #638dff;border-radius:999px;
-      background:linear-gradient(180deg,#668fff,#4f79e6);
-      color:#fff;font:900 13px system-ui;
-      box-shadow:0 12px 32px rgba(45,89,190,.38);cursor:pointer;
-    }
-    #extBackdrop{
-      position:fixed;inset:0;z-index:110;background:rgba(2,8,18,.58);
-      display:flex;align-items:flex-end;
-    }
-    #extSheet{
-      box-sizing:border-box;width:100%;max-height:min(80dvh,780px);overflow:auto;
-      background:#091526;color:#edf4ff;border:1px solid #29405d;border-bottom:0;
-      border-radius:20px 20px 0 0;padding:9px 14px calc(20px + env(safe-area-inset-bottom));
-      font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",system-ui,sans-serif;
-      box-shadow:0 -20px 55px rgba(0,0,0,.42);
-    }
-    .extHandle{width:44px;height:4px;border-radius:999px;background:#4a6280;margin:0 auto 10px}
-    .extHead{
-      position:sticky;top:-9px;z-index:2;display:flex;align-items:center;
-      justify-content:space-between;gap:10px;background:#091526;padding:9px 0 8px;
-    }
-    .extHead h2{margin:0;font-size:20px}
-    .extHead p{margin:4px 0 0;color:#8397b3;font-size:11px}
-    #extClose{
-      width:42px;height:42px;border:1px solid #304967;border-radius:10px;
-      background:#102039;color:#dce8f7;font-size:20px;cursor:pointer;
-    }
-    .extGroup{margin:15px 0}
-    .extGroupTitle{font-size:10px;color:#6f87a8;font-weight:950;letter-spacing:.12em;margin-bottom:8px}
-    .extGrid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:9px}
-    .extCard{
-      min-height:82px;border:1px solid #263f5e;border-radius:12px;
-      background:#0e1d31;color:#fff;text-align:left;padding:11px;cursor:pointer;
-    }
-    .extCard b{display:block;font-size:13px}
-    .extCard span{display:block;margin-top:5px;color:#8298b6;font-size:10px;line-height:1.4}
-    .extCard:hover{background:#132743;border-color:#3c5c83}
-    .extCard:active{transform:scale(.985)}
-    @media(max-width:850px){.extGrid{grid-template-columns:repeat(2,minmax(0,1fr))}}
-    @media(max-width:430px){
-      #extSheet{padding-left:12px;padding-right:12px}
-      .extGrid{grid-template-columns:1fr 1fr;gap:8px}
-      .extCard{min-height:74px;padding:10px}
-      .extHead h2{font-size:18px}
-    }
-  </style>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#07101f">
+<title>Stats Maker</title>
+<style>
+:root{--bg:#07101f;--text:#edf4ff;--muted:#8da2be;--accent:#5f8dff}
+*{box-sizing:border-box}
+html,body{margin:0;width:100%;height:100%;overflow:hidden;background:var(--bg);font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",system-ui,sans-serif}
+button{font:inherit}
+.hidden{display:none!important}
+#basicRoot{position:fixed;inset:0;background:var(--bg)}
+#basicFrame{display:block;width:100%;height:100%;border:0;background:var(--bg)}
+#extLauncher{
+  position:fixed;z-index:105;right:24px;bottom:calc(28px + env(safe-area-inset-bottom));
+  width:224px;min-height:66px;border:1px solid #79a1ff;border-radius:18px;
+  background:linear-gradient(135deg,#5f8dff,#3f69d8);color:white;
+  display:flex;align-items:center;gap:12px;padding:10px 16px;cursor:pointer;
+  box-shadow:0 18px 50px rgba(34,79,188,.46),0 0 0 5px rgba(95,141,255,.12)
+}
+#extLauncher:hover{transform:translateY(-2px)}
+#extLauncher:active{transform:scale(.985)}
+.launchIcon{width:42px;height:42px;flex:none;border-radius:12px;display:grid;place-items:center;background:rgba(255,255,255,.15);font-size:28px}
+.launchText{min-width:0;text-align:left}
+.launchTitle{display:block;font-size:16px;font-weight:950}
+.launchSub{display:block;margin-top:2px;font-size:10px;font-weight:750;color:#dce8ff}
+#extBackdrop{position:fixed;inset:0;z-index:120;background:rgba(2,8,18,.66);backdrop-filter:blur(7px);display:flex;align-items:flex-end}
+#extSheet{width:100%;max-height:min(82dvh,820px);overflow:auto;padding:10px 18px calc(22px + env(safe-area-inset-bottom));color:var(--text);background:#091526;border:1px solid #29405d;border-bottom:0;border-radius:22px 22px 0 0;box-shadow:0 -25px 70px rgba(0,0,0,.52)}
+.extHandle{width:48px;height:5px;margin:0 auto 10px;border-radius:999px;background:#46617f}
+.extHead{position:sticky;top:-10px;z-index:3;display:flex;align-items:center;justify-content:space-between;gap:14px;background:#091526;padding:10px 0 12px;border-bottom:1px solid rgba(72,100,133,.35)}
+.extHeadMain h2{margin:0;font-size:22px}
+.extHeadMain p{margin:4px 0 0;color:var(--muted);font-size:11px}
+.extHeadActions{display:flex;align-items:center;gap:8px;flex:none}
+.langSwitch{display:flex;align-items:center;padding:4px;border:1px solid #304a69;border-radius:10px;background:#0d1c31}
+.langSwitch button{min-width:42px;height:34px;padding:0 10px;border:0;border-radius:7px;background:transparent;color:#8da2be;font-weight:900;cursor:pointer}
+.langSwitch button.active{background:#315da2;color:#fff}
+#extClose{width:42px;height:42px;border:1px solid #304a69;border-radius:10px;background:#102039;color:#e2ebf7;font-size:20px;cursor:pointer}
+.extGroup{margin:18px 0}
+.extGroupTitle{margin-bottom:8px;color:#7190b8;font-size:10px;font-weight:950;letter-spacing:.13em;text-transform:uppercase}
+.extGrid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:10px}
+.extCard{min-height:92px;padding:13px;border:1px solid #29425f;border-radius:14px;background:linear-gradient(180deg,#102039,#0c192b);color:#fff;text-align:left;cursor:pointer}
+.extCard:hover{transform:translateY(-2px);border-color:#5076aa;background:#132641}
+.extCard:active{transform:scale(.985)}
+.extCard b{display:block;font-size:13px}
+.extCard .desc{display:block;margin-top:6px;color:#8ea3be;font-size:10px;line-height:1.45}
+.extBadge{display:inline-block;margin-bottom:9px;padding:3px 7px;border-radius:999px;background:#17325a;color:#94b8ff;font-size:8px;font-weight:950;letter-spacing:.09em}
+@media(max-width:900px){.extGrid{grid-template-columns:repeat(2,minmax(0,1fr))}}
+@media(max-width:600px){
+  #extLauncher{right:12px;left:12px;bottom:calc(12px + env(safe-area-inset-bottom));width:auto;min-height:58px;border-radius:15px;padding:8px 14px}
+  .launchIcon{width:38px;height:38px;font-size:25px}
+  .launchTitle{font-size:15px}
+  #extSheet{padding-left:12px;padding-right:12px}
+  .extHeadMain h2{font-size:19px}
+  .extGrid{grid-template-columns:1fr 1fr;gap:8px}
+  .extCard{min-height:82px;padding:11px}
+  .extHead{align-items:flex-start}
+}
+@media(max-width:390px){.extGrid{grid-template-columns:1fr}}
+</style>
 </head>
 <body>
-  <div id="basicRoot">
-    <iframe id="basicFrame" src="base.html" title="Stats Maker"></iframe>
-  </div>
-
-  <button id="extLauncher" type="button">＋ 拡張機能</button>
-
-  <div id="extBackdrop" class="hidden">
-    <section id="extSheet">
-      <div class="extHandle"></div>
-      <div class="extHead">
-        <div>
-          <h2>拡張機能</h2>
-          <p>基本表の対象・画像・評価項目・点数をそのまま使います。</p>
-        </div>
-        <button id="extClose" type="button" aria-label="閉じる">×</button>
+<div id="basicRoot"><iframe id="basicFrame" title="Stats Maker"></iframe></div>
+<button id="extLauncher" type="button">
+  <span class="launchIcon">＋</span>
+  <span class="launchText">
+    <span id="launcherTitle" class="launchTitle">拡張機能</span>
+    <span id="launcherSub" class="launchSub">グラフ・カードを作る</span>
+  </span>
+</button>
+<div id="extBackdrop" class="hidden">
+  <section id="extSheet">
+    <div class="extHandle"></div>
+    <div class="extHead">
+      <div class="extHeadMain">
+        <h2 id="pickerTitle">拡張機能</h2>
+        <p id="pickerDesc">基本表の対象・画像・評価項目・点数をそのまま使います。</p>
       </div>
-      <div id="extGroups"></div>
-    </section>
-  </div>
+      <div class="extHeadActions">
+        <div class="langSwitch" aria-label="Language">
+          <button id="langJa" type="button">JA</button>
+          <button id="langEn" type="button">EN</button>
+        </div>
+        <button id="extClose" type="button">×</button>
+      </div>
+    </div>
+    <div id="extGroups"></div>
+  </section>
+</div>
+<script type="module">
+import {createProject} from "./app/js/core/project.js";
+import {saveProject} from "./app/js/core/store.js";
+import {syncSourceProject} from "./app/js/core/source-sync.js";
 
-  <script type="module">
-    import {createProject} from "./js/core/project.js";
-    import {saveProject} from "./js/core/store.js";
-    import {syncSourceProject} from "./js/core/source-sync.js";
+const EXTENSIONS=[{"group": {"ja": "人気", "en": "Popular"}, "type": "ranking-card", "name": {"ja": "Ranking Card", "en": "Ranking Card"}, "desc": {"ja": "総合平均または評価項目でランキング", "en": "Rank by overall average or any metric"}}, {"group": {"ja": "人気", "en": "Popular"}, "type": "stat-card", "name": {"ja": "Stat Card", "en": "Stat Card"}, "desc": {"ja": "対象の画像と評価を1枚のカードに", "en": "Turn one subject into a visual stat card"}}, {"group": {"ja": "人気", "en": "Popular"}, "type": "bar", "name": {"ja": "Bar Chart", "en": "Bar Chart"}, "desc": {"ja": "評価項目を棒グラフで比較", "en": "Compare a metric with horizontal bars"}}, {"group": {"ja": "人気", "en": "Popular"}, "type": "radar", "name": {"ja": "Radar Chart", "en": "Radar Chart"}, "desc": {"ja": "複数対象を全評価項目で比較", "en": "Compare multiple subjects across metrics"}}, {"group": {"ja": "比較", "en": "Compare"}, "type": "quadrant", "name": {"ja": "Quadrant", "en": "Quadrant"}, "desc": {"ja": "任意の2項目で4象限マップ", "en": "Map subjects on any two metrics"}}, {"group": {"ja": "比較", "en": "Compare"}, "type": "dot", "name": {"ja": "Dot Chart", "en": "Dot Chart"}, "desc": {"ja": "項目ごとの差をシンプルに比較", "en": "Compare one metric with a clean dot plot"}}, {"group": {"ja": "比較", "en": "Compare"}, "type": "range", "name": {"ja": "Range / Dumbbell", "en": "Range / Dumbbell"}, "desc": {"ja": "2項目の差を見せる", "en": "Show the gap between two metrics"}}, {"group": {"ja": "比較", "en": "Compare"}, "type": "scatter", "name": {"ja": "Scatter", "en": "Scatter"}, "desc": {"ja": "任意の2項目を散布図に", "en": "Plot any two metrics as a scatter chart"}}, {"group": {"ja": "ランキング", "en": "Ranking"}, "type": "tier-list", "name": {"ja": "Tier List", "en": "Tier List"}, "desc": {"ja": "評価をTier形式で整理", "en": "Organize subjects into visual tiers"}}, {"group": {"ja": "数値表示", "en": "Show a Number"}, "type": "ring", "name": {"ja": "Ring Gauge", "en": "Ring Gauge"}, "desc": {"ja": "対象の評価をリングで表示", "en": "Show a subject's scores as ring gauges"}}];
+const UI={
+  ja:{launcherTitle:"拡張機能",launcherSub:"グラフ・カードを作る",pickerTitle:"拡張機能",pickerDesc:"基本表の対象・画像・評価項目・点数をそのまま使います。",badge:"VISUAL"},
+  en:{launcherTitle:"Visual Tools",launcherSub:"Create charts & cards",pickerTitle:"Visual Tools",pickerDesc:"Uses names, images, metrics and scores from your current sheet.",badge:"VISUAL"}
+};
+const frame=document.getElementById("basicFrame");
+const backdrop=document.getElementById("extBackdrop");
+const groupsHost=document.getElementById("extGroups");
 
-    const EXTENSIONS=[["Popular", "ranking-card", "Ranking Card", "総合平均または評価項目でランキング"], ["Popular", "stat-card", "Stat Card", "対象を切替えて画像・点数を連動"], ["Popular", "bar", "Bar Chart", "総合平均または評価項目を棒グラフ化"], ["Popular", "radar", "Radar Chart", "対象を選んで全評価項目で比較"], ["Compare", "quadrant", "Quadrant", "任意の2評価項目をX/Y軸に設定"], ["Compare", "dot", "Dot Chart", "総合平均または任意の評価項目を比較"], ["Compare", "range", "Range / Dumbbell", "任意の2評価項目の差を比較"], ["Compare", "scatter", "Scatter", "任意の2評価項目をX/Y軸に設定"], ["Ranking", "tier-list", "Tier List", "総合平均または評価項目でTier分類"], ["Show a Number", "ring", "Ring Gauge", "対象を切替えて項目別評価を表示"]];
-    const frame=document.getElementById("basicFrame");
-    const backdrop=document.getElementById("extBackdrop");
-    const groupsHost=document.getElementById("extGroups");
+function detectLanguage(){
+  const v2=localStorage.getItem("statsMakerV2Language");
+  const base=localStorage.getItem("statsMaker.locale");
+  if(v2==="en"||v2==="ja")return v2;
+  if(base==="en"||base==="ja")return base;
+  return (navigator.language||"ja").toLowerCase().startsWith("ja")?"ja":"en";
+}
+let language=detectLanguage();
 
-    function buildExtensionGrid(){
-      const groups=[...new Set(EXTENSIONS.map(x=>x[0]))];
-      groups.forEach(group=>{
-        const section=document.createElement("div");
-        section.className="extGroup";
-        section.innerHTML='<div class="extGroupTitle"></div><div class="extGrid"></div>';
-        section.querySelector(".extGroupTitle").textContent=group;
-        const grid=section.querySelector(".extGrid");
-
-        EXTENSIONS.filter(x=>x[0]===group).forEach(([,type,name,desc])=>{
-          const button=document.createElement("button");
-          button.type="button";
-          button.className="extCard";
-          button.innerHTML="<b></b><span></span>";
-          button.querySelector("b").textContent=name;
-          button.querySelector("span").textContent=desc;
-          button.addEventListener("click",()=>openExtension(type));
-          grid.appendChild(button);
-        });
-        groupsHost.appendChild(section);
-      });
-    }
-
-    function getLiveSheetAndPersist(){
-      let sheet=null;
-      try{
-        const win=frame.contentWindow;
-        const liveLibrary=win?.__statsMakerGetLibrary?.();
-        if(liveLibrary){
-          localStorage.setItem("statsMakerV014Library",JSON.stringify(liveLibrary));
-        }
-        sheet=win?.__statsMakerGetActiveSheet?.()||null;
-      }catch(error){
-        console.warn("Stats Maker bridge",error);
-      }
-      return sheet;
-    }
-
-    function openExtension(type){
-      const sheet=getLiveSheetAndPersist();
-      const project=createProject(type);
-
-      if(sheet?.id){
-        project.settings.sourceSheetId=sheet.id;
-      }
-
-      syncSourceProject(project,{},sheet);
-      saveProject(project);
-      location.href=`editor.html?id=${encodeURIComponent(project.id)}`;
-    }
-
-    document.getElementById("extLauncher").addEventListener("click",()=>{
-      backdrop.classList.remove("hidden");
+function renderLanguage(){
+  const u=UI[language];
+  document.documentElement.lang=language;
+  document.getElementById("launcherTitle").textContent=u.launcherTitle;
+  document.getElementById("launcherSub").textContent=u.launcherSub;
+  document.getElementById("pickerTitle").textContent=u.pickerTitle;
+  document.getElementById("pickerDesc").textContent=u.pickerDesc;
+  document.getElementById("langJa").classList.toggle("active",language==="ja");
+  document.getElementById("langEn").classList.toggle("active",language==="en");
+  groupsHost.innerHTML="";
+  const groupNames=[];
+  EXTENSIONS.forEach(item=>{
+    const group=item.group[language];
+    if(!groupNames.includes(group))groupNames.push(group);
+  });
+  groupNames.forEach(groupName=>{
+    const section=document.createElement("div");
+    section.className="extGroup";
+    section.innerHTML='<div class="extGroupTitle"></div><div class="extGrid"></div>';
+    section.querySelector(".extGroupTitle").textContent=groupName;
+    const grid=section.querySelector(".extGrid");
+    EXTENSIONS.filter(item=>item.group[language]===groupName).forEach(item=>{
+      const button=document.createElement("button");
+      button.type="button";
+      button.className="extCard";
+      button.innerHTML='<span class="extBadge"></span><b></b><span class="desc"></span>';
+      button.querySelector(".extBadge").textContent=u.badge;
+      button.querySelector("b").textContent=item.name[language];
+      button.querySelector(".desc").textContent=item.desc[language];
+      button.addEventListener("click",()=>openExtension(item.type));
+      grid.appendChild(button);
     });
-    document.getElementById("extClose").addEventListener("click",()=>{
-      backdrop.classList.add("hidden");
-    });
-    backdrop.addEventListener("click",event=>{
-      if(event.target===backdrop)backdrop.classList.add("hidden");
-    });
+    groupsHost.appendChild(section);
+  });
+}
 
-    buildExtensionGrid();
+function setLanguage(next,reloadBase=true){
+  language=next==="en"?"en":"ja";
+  localStorage.setItem("statsMakerV2Language",language);
+  localStorage.setItem("statsMaker.locale",language);
+  renderLanguage();
+  if(reloadBase)frame.src=`base/index.html?v=r10&lang=${language}`;
+}
 
-    if(new URLSearchParams(location.search).get("extensions")==="1"){
-      requestAnimationFrame(()=>backdrop.classList.remove("hidden"));
-    }
-  </script>
+function getLiveSheetAndPersist(){
+  let sheet=null;
+  try{
+    const win=frame.contentWindow;
+    const lib=win?.__statsMakerGetLibrary?.();
+    if(lib)localStorage.setItem("statsMakerV014Library",JSON.stringify(lib));
+    sheet=win?.__statsMakerGetActiveSheet?.()||null;
+  }catch(error){console.warn("Stats Maker bridge",error)}
+  return sheet;
+}
+
+function openExtension(type){
+  const sheet=getLiveSheetAndPersist();
+  const project=createProject(type);
+  if(sheet?.id)project.settings.sourceSheetId=sheet.id;
+  syncSourceProject(project,{},sheet);
+  saveProject(project);
+  location.href=`app/editor.html?v=r10&id=${encodeURIComponent(project.id)}`;
+}
+
+document.getElementById("extLauncher").addEventListener("click",()=>backdrop.classList.remove("hidden"));
+document.getElementById("extClose").addEventListener("click",()=>backdrop.classList.add("hidden"));
+backdrop.addEventListener("click",event=>{if(event.target===backdrop)backdrop.classList.add("hidden")});
+document.getElementById("langJa").addEventListener("click",()=>setLanguage("ja"));
+document.getElementById("langEn").addEventListener("click",()=>setLanguage("en"));
+
+window.addEventListener("message",event=>{
+  if(event.origin!==location.origin||event.data?.type!=="statsmaker:languagechange")return;
+  const next=event.data.locale==="en"?"en":"ja";
+  if(next!==language){
+    language=next;
+    localStorage.setItem("statsMakerV2Language",language);
+    renderLanguage();
+  }
+});
+
+setLanguage(language,true);
+if(new URLSearchParams(location.search).get("extensions")==="1"){
+  requestAnimationFrame(()=>backdrop.classList.remove("hidden"));
+}
+</script>
 </body>
 </html>

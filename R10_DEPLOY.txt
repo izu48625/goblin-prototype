@@ -1,0 +1,19 @@
+Stats Maker R10 ROOT DEPLOY
+
+Copy these 3 items directly into the goblin-prototype repository root:
+1. index.html
+2. app/
+3. base/
+
+Do not copy the contents of app/ into the repository root.
+
+Existing cloud-test, supabase-test, old css/, old js/ can remain.
+R10 does not use the old root css/ or js/ folders.
+
+Expected home URL:
+https://izu48625.github.io/goblin-prototype/
+
+Expected extension editor URL:
+https://izu48625.github.io/goblin-prototype/app/editor.html?...
+
+If the extension URL does NOT contain /app/editor.html, an old build is being opened.
