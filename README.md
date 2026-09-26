@@ -107,3 +107,11 @@ Publish / Community / Remixへ進む。
 - Scatter labels move away from chart edges.
 - Long Japanese names and labels wrap more safely.
 - Ring layout adapts to the number of displayed criteria.
+
+
+## R9 Formal Split Shell
+- `/v2/` now opens the legacy/base Stats Maker sheet first.
+- The 10 V2 visual tools open from the floating `拡張機能` launcher.
+- Base sheet names, criteria, scores, notes and row images are bridged into V2 source-linked projects.
+- Editor back button returns to the extension picker over the base screen.
+- The old standalone "何を作りますか？" V2 home is no longer the formal entry screen.

@@ -4,57 +4,159 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
   <meta name="theme-color" content="#07101f">
-  <title>Stats Maker V2</title>
-  <link rel="stylesheet" href="css/base.css">
+  <title>Stats Maker</title>
+  <style>
+    html,body{margin:0;width:100%;height:100%;background:#07101f;overflow:hidden}
+    .hidden{display:none!important}
+    #basicRoot{position:fixed;inset:0;background:#07101f}
+    #basicFrame{display:block;width:100%;height:100%;border:0;background:#07101f}
+    #extLauncher{
+      position:fixed;right:16px;bottom:calc(18px + env(safe-area-inset-bottom));
+      z-index:100;min-height:48px;padding:0 17px;
+      border:1px solid #638dff;border-radius:999px;
+      background:linear-gradient(180deg,#668fff,#4f79e6);
+      color:#fff;font:900 13px system-ui;
+      box-shadow:0 12px 32px rgba(45,89,190,.38);cursor:pointer;
+    }
+    #extBackdrop{
+      position:fixed;inset:0;z-index:110;background:rgba(2,8,18,.58);
+      display:flex;align-items:flex-end;
+    }
+    #extSheet{
+      box-sizing:border-box;width:100%;max-height:min(80dvh,780px);overflow:auto;
+      background:#091526;color:#edf4ff;border:1px solid #29405d;border-bottom:0;
+      border-radius:20px 20px 0 0;padding:9px 14px calc(20px + env(safe-area-inset-bottom));
+      font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",system-ui,sans-serif;
+      box-shadow:0 -20px 55px rgba(0,0,0,.42);
+    }
+    .extHandle{width:44px;height:4px;border-radius:999px;background:#4a6280;margin:0 auto 10px}
+    .extHead{
+      position:sticky;top:-9px;z-index:2;display:flex;align-items:center;
+      justify-content:space-between;gap:10px;background:#091526;padding:9px 0 8px;
+    }
+    .extHead h2{margin:0;font-size:20px}
+    .extHead p{margin:4px 0 0;color:#8397b3;font-size:11px}
+    #extClose{
+      width:42px;height:42px;border:1px solid #304967;border-radius:10px;
+      background:#102039;color:#dce8f7;font-size:20px;cursor:pointer;
+    }
+    .extGroup{margin:15px 0}
+    .extGroupTitle{font-size:10px;color:#6f87a8;font-weight:950;letter-spacing:.12em;margin-bottom:8px}
+    .extGrid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:9px}
+    .extCard{
+      min-height:82px;border:1px solid #263f5e;border-radius:12px;
+      background:#0e1d31;color:#fff;text-align:left;padding:11px;cursor:pointer;
+    }
+    .extCard b{display:block;font-size:13px}
+    .extCard span{display:block;margin-top:5px;color:#8298b6;font-size:10px;line-height:1.4}
+    .extCard:hover{background:#132743;border-color:#3c5c83}
+    .extCard:active{transform:scale(.985)}
+    @media(max-width:850px){.extGrid{grid-template-columns:repeat(2,minmax(0,1fr))}}
+    @media(max-width:430px){
+      #extSheet{padding-left:12px;padding-right:12px}
+      .extGrid{grid-template-columns:1fr 1fr;gap:8px}
+      .extCard{min-height:74px;padding:10px}
+      .extHead h2{font-size:18px}
+    }
+  </style>
 </head>
 <body>
-<header class="app-header">
-  <div class="brand-wrap">
-    <div class="brand-mark">S</div>
-    <div>
-      <div class="brand">STATS MAKER</div>
-      <div class="brand-sub">Data → Visual</div>
-    </div>
+  <div id="basicRoot">
+    <iframe id="basicFrame" src="base.html" title="Stats Maker"></iframe>
   </div>
-  <div class="header-actions">
-    <button id="langBtn" class="btn ghost compact">🌐 JA</button>
+
+  <button id="extLauncher" type="button">＋ 拡張機能</button>
+
+  <div id="extBackdrop" class="hidden">
+    <section id="extSheet">
+      <div class="extHandle"></div>
+      <div class="extHead">
+        <div>
+          <h2>拡張機能</h2>
+          <p>基本表の対象・画像・評価項目・点数をそのまま使います。</p>
+        </div>
+        <button id="extClose" type="button" aria-label="閉じる">×</button>
+      </div>
+      <div id="extGroups"></div>
+    </section>
   </div>
-</header>
 
-<main class="home-shell">
-  <section class="hero">
-    <div class="hero-copy">
-      <div class="eyebrow" data-i18n="home.eyebrow">DATA VISUAL MAKER</div>
-      <h1 data-i18n="home.title">数字を、そのまま使えるビジュアルへ。</h1>
-      <p data-i18n="home.desc">ランキング、能力カード、4象限マップを、ログインなしで作成・保存・画像化できます。</p>
-    </div>
-  </section>
+  <script type="module">
+    import {createProject} from "./js/core/project.js";
+    import {saveProject} from "./js/core/store.js";
+    import {syncSourceProject} from "./js/core/source-sync.js";
 
-  <section class="section-block">
-    <div class="section-head">
-      <div>
-        <div class="eyebrow" data-i18n="home.createEyebrow">CREATE</div>
-        <h2 data-i18n="home.createTitle">何を作りますか？</h2>
-      </div>
-    </div>
-    <div id="createGrid" class="template-grid"></div>
-  </section>
+    const EXTENSIONS=[["Popular", "ranking-card", "Ranking Card", "総合平均または評価項目でランキング"], ["Popular", "stat-card", "Stat Card", "対象を切替えて画像・点数を連動"], ["Popular", "bar", "Bar Chart", "総合平均または評価項目を棒グラフ化"], ["Popular", "radar", "Radar Chart", "対象を選んで全評価項目で比較"], ["Compare", "quadrant", "Quadrant", "任意の2評価項目をX/Y軸に設定"], ["Compare", "dot", "Dot Chart", "総合平均または任意の評価項目を比較"], ["Compare", "range", "Range / Dumbbell", "任意の2評価項目の差を比較"], ["Compare", "scatter", "Scatter", "任意の2評価項目をX/Y軸に設定"], ["Ranking", "tier-list", "Tier List", "総合平均または評価項目でTier分類"], ["Show a Number", "ring", "Ring Gauge", "対象を切替えて項目別評価を表示"]];
+    const frame=document.getElementById("basicFrame");
+    const backdrop=document.getElementById("extBackdrop");
+    const groupsHost=document.getElementById("extGroups");
 
-  <section class="section-block">
-    <div class="section-head">
-      <div>
-        <div class="eyebrow" data-i18n="home.projectsEyebrow">LOCAL FIRST</div>
-        <h2 data-i18n="home.projectsTitle">My Projects</h2>
-      </div>
-    </div>
-    <div id="projectGrid" class="project-grid"></div>
-    <div id="emptyProjects" class="empty-state hidden">
-      <div class="empty-icon">✦</div>
-      <div data-i18n="home.empty">まだProjectはありません。上から作成してください。</div>
-    </div>
-  </section>
-</main>
+    function buildExtensionGrid(){
+      const groups=[...new Set(EXTENSIONS.map(x=>x[0]))];
+      groups.forEach(group=>{
+        const section=document.createElement("div");
+        section.className="extGroup";
+        section.innerHTML='<div class="extGroupTitle"></div><div class="extGrid"></div>';
+        section.querySelector(".extGroupTitle").textContent=group;
+        const grid=section.querySelector(".extGrid");
 
-<script type="module" src="js/home.js"></script>
+        EXTENSIONS.filter(x=>x[0]===group).forEach(([,type,name,desc])=>{
+          const button=document.createElement("button");
+          button.type="button";
+          button.className="extCard";
+          button.innerHTML="<b></b><span></span>";
+          button.querySelector("b").textContent=name;
+          button.querySelector("span").textContent=desc;
+          button.addEventListener("click",()=>openExtension(type));
+          grid.appendChild(button);
+        });
+        groupsHost.appendChild(section);
+      });
+    }
+
+    function getLiveSheetAndPersist(){
+      let sheet=null;
+      try{
+        const win=frame.contentWindow;
+        const liveLibrary=win?.__statsMakerGetLibrary?.();
+        if(liveLibrary){
+          localStorage.setItem("statsMakerV014Library",JSON.stringify(liveLibrary));
+        }
+        sheet=win?.__statsMakerGetActiveSheet?.()||null;
+      }catch(error){
+        console.warn("Stats Maker bridge",error);
+      }
+      return sheet;
+    }
+
+    function openExtension(type){
+      const sheet=getLiveSheetAndPersist();
+      const project=createProject(type);
+
+      if(sheet?.id){
+        project.settings.sourceSheetId=sheet.id;
+      }
+
+      syncSourceProject(project,{},sheet);
+      saveProject(project);
+      location.href=`editor.html?id=${encodeURIComponent(project.id)}`;
+    }
+
+    document.getElementById("extLauncher").addEventListener("click",()=>{
+      backdrop.classList.remove("hidden");
+    });
+    document.getElementById("extClose").addEventListener("click",()=>{
+      backdrop.classList.add("hidden");
+    });
+    backdrop.addEventListener("click",event=>{
+      if(event.target===backdrop)backdrop.classList.add("hidden");
+    });
+
+    buildExtensionGrid();
+
+    if(new URLSearchParams(location.search).get("extensions")==="1"){
+      requestAnimationFrame(()=>backdrop.classList.remove("hidden"));
+    }
+  </script>
 </body>
 </html>
