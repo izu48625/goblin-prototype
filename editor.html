@@ -1,0 +1,126 @@
+<!doctype html>
+<html lang="ja">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+  <meta name="theme-color" content="#07101f">
+  <title>Stats Maker Editor</title>
+  <link rel="stylesheet" href="css/base.css">
+  <link rel="stylesheet" href="css/editor.css">
+</head>
+<body class="editor-body">
+<header class="editor-header">
+  <div class="editor-header-left">
+    <a href="index.html" class="editor-back-btn" aria-label="拡張機能一覧へ戻る">
+      <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M14.8 5.2 8 12l6.8 6.8"/></svg>
+    </a>
+    <input id="projectTitleInput" class="project-title-input" value="">
+  </div>
+
+  <div class="save-state-wrap">
+    <span id="saveState" class="save-state">Saved</span>
+  </div>
+
+  <div class="editor-header-actions">
+    <button id="undoBtn" class="btn ghost compact" title="Undo">↶</button>
+    <button id="redoBtn" class="btn ghost compact" title="Redo">↷</button>
+    <button id="langBtn" class="btn ghost compact">🌐 JA</button>
+    <button id="exportBtn" class="btn primary compact" data-i18n="common.export">共有</button>
+    <button id="moreBtn" class="btn ghost compact" aria-label="More">⋯</button>
+  </div>
+</header>
+
+<div id="moreMenu" class="more-menu hidden">
+  <button id="jpgBtn" type="button" data-i18n="common.jpg">JPG保存</button>
+  <button id="backupBtn" type="button" data-i18n="common.backup">Project保存</button>
+  <button id="restoreBtn" type="button" data-i18n="common.restore">Project読込</button>
+</div>
+
+<div class="editor-layout">
+  <aside class="editor-sidebar">
+    <nav class="panel-tabs">
+      <button class="panel-tab active" data-panel="data" data-i18n="editor.data">DATA</button>
+      <button class="panel-tab" data-panel="style" data-i18n="editor.style">STYLE</button>
+      <button class="panel-tab" data-panel="text" data-i18n="editor.text">TEXT</button>
+      <button class="panel-tab" data-panel="canvas" data-i18n="editor.canvas">CANVAS</button>
+    </nav>
+
+    <div id="panelContent" class="panel-content"></div>
+  </aside>
+
+  <main class="preview-area">
+    <div id="sourceQuickBar" class="source-quick-bar hidden"></div>
+    <div class="preview-toolbar">
+      <div id="typeBadge" class="type-badge"></div>
+      <div class="zoom-controls">
+        <button id="fitZoomBtn" class="btn ghost compact fit-btn" data-i18n="common.fit">Fit</button>
+        <button id="zoomOutBtn" class="btn ghost compact" aria-label="Zoom out">−</button>
+        <span id="zoomLabel" class="zoom-label">55%</span>
+        <button id="zoomInBtn" class="btn ghost compact" aria-label="Zoom in">＋</button>
+      </div>
+    </div>
+
+    <div id="canvasStage" class="canvas-stage">
+      <div id="canvasShell" class="canvas-shell">
+        <div id="previewRoot" class="preview-root"></div>
+      </div>
+    </div>
+  </main>
+</div>
+
+<nav class="mobile-bottom-tabs">
+  <button class="mobile-tab active" data-panel="data" data-i18n="editor.data">DATA</button>
+  <button class="mobile-tab" data-panel="style" data-i18n="editor.style">STYLE</button>
+  <button class="mobile-tab" data-panel="text" data-i18n="editor.text">TEXT</button>
+  <button class="mobile-tab" data-panel="canvas" data-i18n="editor.canvas">CANVAS</button>
+</nav>
+
+<div id="mobileSheetBackdrop" class="sheet-backdrop hidden">
+  <section id="mobileSheet" class="mobile-sheet" aria-label="Editor panel">
+    <div class="sheet-handle"></div>
+
+    <div class="mobile-sheet-head">
+      <div>
+        <div id="mobilePanelTitle" class="mobile-sheet-title">DATA</div>
+        <div id="mobileSaveState" class="mobile-save-state">Saved</div>
+      </div>
+
+      <div class="mobile-sheet-actions">
+        <button id="mobileUndoBtn" class="sheet-icon-btn" type="button" aria-label="Undo">↶</button>
+        <button id="mobileRedoBtn" class="sheet-icon-btn" type="button" aria-label="Redo">↷</button>
+        <button id="mobileLangBtn" class="sheet-icon-btn sheet-lang-btn" type="button">JA</button>
+        <button id="mobileExportBtn" class="sheet-icon-btn sheet-export-btn" type="button">PNG</button>
+        <button id="mobileDoneBtn" class="sheet-done-btn" type="button" data-i18n="common.done">完了</button>
+      </div>
+    </div>
+
+    <div id="mobilePanelContent"></div>
+  </section>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js"></script>
+<script type="module" src="js/editor/editor.js"></script>
+
+<div id="exportPreviewModal" class="export-preview-modal hidden" role="dialog" aria-modal="true">
+  <div class="export-preview-card">
+    <div class="export-preview-head">
+      <div>
+        <b id="exportPreviewTitle">PNGプレビュー</b>
+        <span>画像が完成しました</span>
+      </div>
+      <button id="exportPreviewClose" type="button" aria-label="Close">×</button>
+    </div>
+    <div class="export-preview-image-wrap">
+      <img id="exportPreviewImage" alt="Export preview">
+    </div>
+    <p class="export-preview-help">
+      「共有 / 保存」を押して、共有シートから「画像を保存」または「ファイルに保存」を選んでください。
+    </p>
+    <div class="export-preview-actions">
+      <button id="exportPreviewShare" class="btn primary" type="button">共有 / 保存</button>
+      <button id="exportPreviewDismiss" class="btn ghost" type="button">閉じる</button>
+    </div>
+  </div>
+</div>
+</body>
+</html>
