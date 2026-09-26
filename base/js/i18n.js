@@ -21,6 +21,7 @@
       'action.addRowLong':'＋ 行を追加',
       'action.addMetric':'＋ 項目',
       'action.manageMetrics':'項目管理',
+      'action.hideMetrics':'項目管理を隠す',
       'action.scoringSettings':'採点設定',
       'action.more':'その他',
       'action.settings':'⚙ 設定',

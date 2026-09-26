@@ -1,18 +1,16 @@
-
 (function(){
 "use strict";
 const __modules=Object.create(null);
 const __cache=Object.create(null);
-
 function __define(id,factory){__modules[id]=factory}
 function __require(id){
-  if(__cache[id])return __cache[id].exports;
-  const factory=__modules[id];
-  if(!factory)throw new Error("Module not found: "+id);
-  const module={exports:{}};
-  __cache[id]=module;
-  factory(__require,module.exports,module);
-  return module.exports;
+ if(__cache[id])return __cache[id].exports;
+ const factory=__modules[id];
+ if(!factory)throw new Error("Module not found: "+id);
+ const module={exports:{}};
+ __cache[id]=module;
+ factory(__require,module.exports,module);
+ return module.exports;
 }
 
 __define("core/export.js",function(__require,__exports,__module){
@@ -2567,7 +2565,7 @@ const id=params.get("id");
 let project=getProject(id);
 if(!project){
   alert(getLanguage()==="ja"?"Projectが見つかりません":"Project not found");
-  location.href="../index.html?extensions=1";
+  location.href="../index.html?extensions=1&v=r13";
   throw new Error("Project not found");
 }
 
@@ -5859,7 +5857,6 @@ const waffleChart={
 Object.assign(__exports,{waffleChart});
 
 });
-
 window.StatsMakerRequire=__require;
 window.StatsMakerRuntimeReady=true;
 })();

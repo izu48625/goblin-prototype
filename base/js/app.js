@@ -1441,9 +1441,14 @@
   function syncColumnManagerVisibility(){
     const panel=$('columnManage');
     if(!panel)return;
-    const s=activeSheet();
-    const fitMode=(s.viewMode||'sheet')==='fit';
-    panel.classList.toggle('hidden',!columnManagerVisible || fitMode);
+    panel.classList.toggle('hidden',!columnManagerVisible);
+
+    const button=$('columnManageBtn');
+    if(button){
+      button.textContent=columnManagerVisible
+        ? t('action.hideMetrics')
+        : t('action.manageMetrics');
+    }
   }
 
   function toggleScoreSettings(){

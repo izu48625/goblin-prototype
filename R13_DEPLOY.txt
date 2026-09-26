@@ -1,0 +1,25 @@
+Stats Maker R13 FORMAL SPLIT
+
+IMPORTANT:
+Replace ALL THREE at repository root:
+- index.html
+- base/  (overwrite the whole folder)
+- app/   (overwrite the whole folder)
+
+R13 adds cache-busting query strings to every runtime asset so GitHub Pages cannot mix old editor.html with new runtime.bundle.js.
+
+Expected URLs:
+Home:
+https://izu48625.github.io/goblin-prototype/?v=r13
+
+Editor:
+https://izu48625.github.io/goblin-prototype/app/editor.html?v=r13&id=...
+
+R13 fixes:
+- Row ×: immediate delete, no confirm.
+- Metric ×: immediate delete, no confirm.
+- Whole-sheet delete still asks for confirmation.
+- Metric manager visible initially.
+- Metric manager button toggles show/hide and label changes.
+- Old/stale editor HTML is tolerated: export modal DOM is auto-created before editor startup.
+- All main files have v=r13 cache-busting.
