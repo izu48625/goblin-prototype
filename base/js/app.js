@@ -53,6 +53,7 @@
 
   let library = loadLibrary();
   let saveTimer = null;
+  let columnManagerVisible = true;
 
   function makeId(){
     return 's_' + Date.now().toString(36) + '_' + Math.random().toString(36).slice(2,8);
@@ -633,8 +634,6 @@
     document.querySelectorAll('[data-delete-row]').forEach(el=>el.addEventListener('click',e=>{
       const idx=+e.currentTarget.dataset.deleteRow;
       if(s.rows.length<=1){$('statusText').textContent=t('row.lastCannotDelete');return;}
-      const rowName=s.rows[idx]?.name.trim()||t('fallback.target',{n:idx+1});
-      if(!window.confirm(t('row.deleteConfirm',{name:rowName})))return;
       s.rows.splice(idx,1);
       s.compare=s.compare.filter(i=>i!==idx).map(i=>i>idx?i-1:i);
       renderAll();scheduleSave(t('row.deleted'));
@@ -1137,9 +1136,7 @@
     $('sheetViewBtn').classList.toggle('active',mode==='sheet');
     $('overviewViewBtn').classList.toggle('active',mode==='overview');
     $('fitViewBtn').classList.toggle('active',mode==='fit');
-    // Drawer state is controlled only by the user. Entering Fit view closes it,
-    // but returning to other views must never reopen it automatically.
-    if(mode==='fit')$('columnManage').classList.add('hidden');
+    syncColumnManagerVisibility();
     if(mode==='fit'){
       setTimeout(()=>{renderFitTable();applyFitScale();},0);
     }
@@ -1307,7 +1304,6 @@
       return;
     }
     const name=s.cols[ci]||t('fallback.metric',{n:ci+1});
-    if(!window.confirm(t('metric.deleteConfirm',{name})))return;
     s.cols.splice(ci,1);
     s.weights.splice(ci,1);
     s.rows.forEach(r=>r.scores.splice(ci,1));
@@ -1337,6 +1333,7 @@
     renderOverview();
     renderFitTable();
     renderColumnManager();
+    syncColumnManagerVisibility();
     renderSidebar();
     $('filterCount').textContent=t('count.filtered',{visible:filteredRows().length,total:s.rows.length});
     renderViewMode();
@@ -1441,22 +1438,32 @@
   }
 
 
+  function syncColumnManagerVisibility(){
+    const panel=$('columnManage');
+    if(!panel)return;
+    const s=activeSheet();
+    const fitMode=(s.viewMode||'sheet')==='fit';
+    panel.classList.toggle('hidden',!columnManagerVisible || fitMode);
+  }
+
   function toggleScoreSettings(){
     const panel=$('scoreSettingsPanel');
     panel.classList.toggle('hidden');
     if(!panel.classList.contains('hidden')){
       $('utilityBar').classList.add('hidden');
       $('columnManage').classList.add('hidden');
+    }else{
+      syncColumnManagerVisibility();
     }
   }
 
   function toggleColumnManage(){
-    const panel=$('columnManage');
-    panel.classList.toggle('hidden');
-    if(!panel.classList.contains('hidden')){
+    columnManagerVisible=!columnManagerVisible;
+    if(columnManagerVisible){
       $('scoreSettingsPanel').classList.add('hidden');
       $('utilityBar').classList.add('hidden');
     }
+    syncColumnManagerVisibility();
   }
 
   function toggleMoreTools(){
@@ -1465,6 +1472,8 @@
     if(!panel.classList.contains('hidden')){
       $('scoreSettingsPanel').classList.add('hidden');
       $('columnManage').classList.add('hidden');
+    }else{
+      syncColumnManagerVisibility();
     }
   }
 

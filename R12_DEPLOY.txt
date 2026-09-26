@@ -1,0 +1,31 @@
+Stats Maker R12 FORMAL SPLIT
+
+Replace/add these items in the goblin-prototype repository root:
+- index.html
+- base/
+- app/
+
+R12 production structure:
+- /index.html                 Home shell + large Visual Tools button
+- /base/                     Main Stats Maker table (split CSS/JS)
+- /app/editor.html           Visual editor
+- /app/js/runtime.bundle.js  Production JS runtime bundle
+- /app/js/editor-entry.js    Guarded editor startup
+- /app/js/launcher.js        Visual Tools launcher
+- /app/src/                  Editable V2 source modules
+- /app/css/                  Editor CSS
+
+Why runtime.bundle.js:
+The codebase remains split and maintainable, but production no longer depends on a deep browser ES-module import chain. This prevents the previous blank editor caused by mixed/incorrect asset paths.
+
+UX changes:
+- Row × deletes immediately.
+- Metric × deletes immediately.
+- Metric manager is visible at startup.
+- Metric manager button toggles show/hide.
+- JA / EN retained.
+- Large Visual Tools button retained.
+- Editor errors are shown on-screen instead of a black page.
+
+Correct editor URL after opening an extension:
+.../goblin-prototype/app/editor.html?v=r12&id=...
