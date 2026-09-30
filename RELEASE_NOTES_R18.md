@@ -50,3 +50,25 @@ Anonymous Sign-Ins must be enabled for Community rating.
 - Added owner-scoped RLS policies for anonymous creators.
 - Added `R18_C4_GUEST_PUBLISH_MIGRATION.sql` for existing Supabase projects.
 - The UI warns that clearing browser data may remove control of guest-published pages.
+
+
+## C6 Remix / Community / visual limits
+- Public pages now show Remix + Share as the primary actions. The old "Rate this" entry was removed.
+- Remix now opens a blank personal scoring copy instead of copying the creator's scores.
+- Remixed sheets keep source Community metadata and show a Community participation panel in the normal Stats Maker screen.
+- Community submission is allowed only while target names/order, metric names/order, and scoring scale match the original public sheet.
+- A visible warning explains that adding/removing/changing the original structure disables Community submission.
+- Users can either publish their own remixed sheet or submit their rating to the original Community from the same scoring screen.
+- Base limits remain 40 targets / 10 metrics.
+- Visual safety limits:
+  - Ranking Card: default 10, max 20
+  - Bar: default 10, max 20
+  - Dot: default 10, max 20
+  - Range/Dumbbell: default 10, max 20
+  - Scatter/Quadrant: all points may render up to the sheet limit; labels default to 15 and can be 10/15/20/all
+  - Radar: max 6 targets and 10 metrics
+  - Tier List: all 40 targets supported
+  - Stat Card: up to the sheet's 10 metrics
+  - Ring Gauge: up to all 10 metrics
+- Empty metric scores stay missing instead of becoming zero in linked metric/range visuals.
+- Active cache key: r18c6.
