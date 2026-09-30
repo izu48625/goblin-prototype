@@ -5,9 +5,9 @@
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
   <meta name="theme-color" content="#07101f">
   <title>Stats Maker V1.0-A2.1</title>
-  <link rel="stylesheet" href="css/style.css?v=r18c3">
+  <link rel="stylesheet" href="css/style.css?v=r18c4">
 </head>
-<body data-build="R18-COMPLETE-C3">
+<body data-build="R18-COMPLETE-C4">
 <div id="viewOnlyBanner" class="viewOnlyBanner hidden">
   <div class="viewOnlyText"><span data-i18n="viewOnly.mode">閲覧モード</span>
     <span class="viewOnlySub" data-i18n="viewOnly.subtitle">編集操作を隠して結果だけを見ています</span>
@@ -297,7 +297,7 @@
       <button id="publishCloseBtn" class="iconCloseBtn" type="button" aria-label="Close">×</button>
     </div>
 
-    <div id="publishAuthPane">
+    <div id="publishAuthPane" class="hidden" aria-hidden="true">
       <div class="publishNotice" data-i18n="publish.authNotice">公開する時だけ作成者アカウントが必要です。作成・編集はログインなしで使えます。</div>
       <div class="publishAuthGrid">
         <input id="publishEmail" type="email" autocomplete="email" placeholder="メールアドレス" data-i18n-placeholder="publish.email">
@@ -311,10 +311,11 @@
     </div>
 
     <div id="publishSettingsPane" class="hidden">
+      <div class="publishNotice publishGuestNotice" data-i18n="publish.guestNotice">登録なしでそのまま公開できます。このブラウザのデータを消すと、公開内容を更新・非公開化できなくなる場合があります。</div>
       <div class="publishUserRow">
-        <span class="publishUserLabel" data-i18n="publish.signedIn">ログイン中</span>
+        <span class="publishUserLabel" data-i18n="publish.publisher">公開者</span>
         <span id="publishUserText"></span>
-        <button id="publishSignOutBtn" class="textBtn" type="button" data-i18n="publish.signout">ログアウト</button>
+        <button id="publishSignOutBtn" class="textBtn hidden" type="button" data-i18n="publish.signout">ログアウト</button>
       </div>
       <div class="publishPreviewCard">
         <div id="publishPreviewTitle" class="publishPreviewTitle"></div>
@@ -350,11 +351,11 @@
 </div>
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-<script src="../cloud/supabase.js?v=r18c3"></script>
-<script src="../cloud/publish-model.js?v=r18c3"></script>
-<script src="js/i18n.js?v=r18c3"></script>
-<script src="js/app.js?v=r18c3"></script>
-<script src="js/publish-guard.js?v=r18c3"></script>
+<script src="../cloud/supabase.js?v=r18c4"></script>
+<script src="../cloud/publish-model.js?v=r18c4"></script>
+<script src="js/i18n.js?v=r18c4"></script>
+<script src="js/app.js?v=r18c4"></script>
+<script src="js/publish-guard.js?v=r18c4"></script>
 <script>
 window.addEventListener("statsmaker:languagechange",event=>{
   try{
