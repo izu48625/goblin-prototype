@@ -104,10 +104,13 @@ export function getSourceModel(project,explicitSheet=null){
   };
 
   const metricValue=(row,key)=>{
-    if(key==="avg")return average(row);
+    if(key==="avg"){
+      const hasAny=row?.scores?.some(Number.isFinite);
+      return hasAny?average(row):null;
+    }
     const ci=Number(String(key).replace("c:",""));
     const value=row?.scores?.[ci];
-    return Number.isFinite(value)?value:0;
+    return Number.isFinite(value)?value:null;
   };
 
   const criterionMean=ci=>{
@@ -191,7 +194,7 @@ function syncMetricItems(project,model,key){
     imageRef:null,
     imageShape:"circle",
     enabled:true
-  }));
+  })).filter(item=>Number.isFinite(item.value));
 
   if(project.type==="ranking-card"){
     project.data.items.sort((a,b)=>
