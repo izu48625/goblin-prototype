@@ -57,7 +57,7 @@ export function createRankingProject(){
   p.settings={
     template:"sports",
     unit:"PTS",
-    topN:5,
+    topN:10,
     sort:"manual",
     showRank:true,
     showNote:true,
