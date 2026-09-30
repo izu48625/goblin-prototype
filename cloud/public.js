@@ -56,10 +56,10 @@
         ${data.description?`<div class="desc">${esc(data.description)}</div>`:''}
         <div class="meta"><span class="pill">${scale}${ja?'点満点':'-point scale'}</span><span class="pill">${rows.length}${ja?'対象':' targets'}</span><span class="pill">${criteria.length}${ja?'項目':' metrics'}</span><span class="pill">${weighted?(ja?'重み付け':'Weighted'):(ja?'均等平均':'Equal weight')}</span></div>
         <div class="primaryActions">
-          <button id="rateBtn" class="actionBtn primary" ${data.allow_ratings?'':'disabled'}>${ja?'自分も採点する':'Rate this'}</button>
           <button id="remixBtn" class="actionBtn remix">${ja?'Remixして使う':'Remix this'}</button>
           <button id="shareBtn" class="actionBtn">${ja?'共有':'Share'}</button>
         </div>
+        <div class="notice">${ja?'Communityへ参加したい場合は「Remixして使う」で自分の採点シートを作成し、採点後に「Communityに参加」を押してください。':'To join Community ratings, remix this sheet, score it, then use “Join Community” from your copy.'}</div>
         ${rows.some(row=>row.hasLocalImage)?`<div class="notice">${ja?'現在、作成者のローカル画像は公開ページへアップロードされません。':'Creator-local images are not uploaded to the public page yet.'}</div>`:''}
       </section>
       <div class="grid">
@@ -71,13 +71,12 @@
       </div>
       <section id="communitySection" class="card communityBlock"><div class="sectionHead"><div><h2>${ja?'Community':'Community'}</h2><div class="sectionSub">${ja?'みんなの評価を集計':'Aggregated participant ratings'}</div></div></div><div id="communityContent" class="emptyCommunity">${ja?'集計中…':'Loading community…'}</div></section>`;
 
-    document.getElementById('rateBtn').onclick=()=>{if(data.allow_ratings)location.href=`rate.html?id=${encodeURIComponent(id)}`};
     document.getElementById('remixBtn').onclick=()=>{
       try{
         const sheet=window.SM_REMIX.buildSheet(data,snap,dbCriteria,items,ja?'ja':'en');
         window.SM_REMIX.saveSheet(sheet);
         toast(ja?'Remixしました。編集画面へ移動します。':'Remixed. Opening the editor…');
-        setTimeout(()=>{location.href='index.html?remixed=1'},500);
+        setTimeout(()=>{location.href='index.html?remixed=1&v=r18c6'},500);
       }catch(e){toast((ja?'Remixに失敗しました：':'Remix failed: ')+(e?.message||e))}
     };
     document.getElementById('shareBtn').onclick=async()=>{
