@@ -701,6 +701,7 @@
       renderSidebar();
       renderOverview();
       renderFitTable();
+      renderCommunityParticipation();
       scheduleSave('');
     }));
 
@@ -718,6 +719,7 @@
         renderOverview();
         renderFitTable();
         renderColumnManager();
+        renderCommunityParticipation();
         scheduleSave('');
       });
 
@@ -747,6 +749,7 @@
         renderOverview();
         renderFitTable();
         renderColumnManager();
+        renderCommunityParticipation();
 
         if(e.currentTarget.dataset.cancelled==='1'){
           delete e.currentTarget.dataset.cancelled;
