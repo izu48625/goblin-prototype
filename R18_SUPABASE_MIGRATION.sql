@@ -76,8 +76,8 @@ begin
   returning id,status,public.rating_sets.submitted_at
     into v_rating_set_id,v_status,v_submitted_at;
 
-  delete from public.scores
-  where rating_set_id=v_rating_set_id;
+  delete from public.scores s
+  where s.rating_set_id = v_rating_set_id;
 
   insert into public.scores(topic_id,rating_set_id,item_id,criterion_id,score)
   select
