@@ -1,6 +1,6 @@
-# Stats Maker R18 Complete Candidate C2
+# Stats Maker R18 Complete Candidate C4
 
-Build: `R18-COMPLETE-C2`
+Build: `R18-COMPLETE-C4`
 
 ## Base sheet
 - Metric names are now edited inline in the table header.
@@ -42,3 +42,11 @@ Anonymous Sign-Ins must be enabled for Community rating.
 - Added hard inline Publish dialog fallback on the Publish button itself.
 - Cache/build key bumped to `r18c2`.
 - All active source modules passed syntax validation after the fix.
+
+## C4 guest publish
+- Publish no longer requires email/password registration.
+- When no Supabase session exists, Stats Maker starts an anonymous authenticated session automatically.
+- Guest creators can publish, update, and make their own pages private while the anonymous session remains on the device.
+- Added owner-scoped RLS policies for anonymous creators.
+- Added `R18_C4_GUEST_PUBLISH_MIGRATION.sql` for existing Supabase projects.
+- The UI warns that clearing browser data may remove control of guest-published pages.
