@@ -52,6 +52,8 @@ export const quadrant={
     wrap.querySelector(".axis-y").textContent=y.label||"Y";
 
     const placed=[];
+    const labelLimit=Math.max(1,Math.min(40,Number(project.settings?.labelLimit)||15));
+    let pointIndex=0;
     for(const item of (project.data.items||[]).filter(i=>i.enabled!==false&&Number.isFinite(i.x)&&Number.isFinite(i.y))){
       const xp=((Number(item.x)-x.min)/(x.max-x.min))*100;
       const yp=((Number(item.y)-y.min)/(y.max-y.min))*100;
@@ -74,8 +76,10 @@ export const quadrant={
           console.warn("Quadrant image load failed",e);
         }
       }
-      point.querySelector(".quad-point-name").textContent=item.name||"";
+      point.querySelector(".quad-point-name").textContent=pointIndex<labelLimit?(item.name||""):"";
+      if(pointIndex>=labelLimit)point.classList.add("label-hidden");
       chart.appendChild(point);
+      pointIndex++;
     }
 
     root.appendChild(wrap);
