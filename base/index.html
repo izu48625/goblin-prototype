@@ -5,9 +5,9 @@
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
   <meta name="theme-color" content="#07101f">
   <title>Stats Maker V1.0-A2.1</title>
-  <link rel="stylesheet" href="css/style.css?v=r13">
+  <link rel="stylesheet" href="css/style.css?v=r18">
 </head>
-<body data-build="R13">
+<body data-build="R18">
 <div id="viewOnlyBanner" class="viewOnlyBanner hidden">
   <div class="viewOnlyText"><span data-i18n="viewOnly.mode">閲覧モード</span>
     <span class="viewOnlySub" data-i18n="viewOnly.subtitle">編集操作を隠して結果だけを見ています</span>
@@ -43,6 +43,7 @@
     </div>
 
     <div class="topActions editOnly">
+      <button id="publishBtn" class="btn publishBtn" type="button" data-i18n="publish.button">公開する</button>
       <button id="newSheetBtn" class="btn primary" type="button" data-i18n="action.new">＋ 新規</button>
       <button id="duplicateBtn" class="btn" type="button" data-i18n="action.duplicate">複製</button>
       <button id="deleteSheetBtn" class="btn danger" type="button" data-i18n="action.delete">削除</button>
@@ -285,8 +286,74 @@
   </div>
 </div>
 
-<script src="js/i18n.js?v=r13"></script>
-<script src="js/app.js?v=r13"></script>
+
+<div id="publishDialogBackdrop" class="dialogBackdrop hidden">
+  <div class="dialog publishDialog" role="dialog" aria-modal="true" aria-labelledby="publishDialogTitle">
+    <div class="publishDialogHead">
+      <div>
+        <h3 id="publishDialogTitle" data-i18n="publish.title">公開</h3>
+        <p data-i18n="publish.subtitle">普段の編集はローカル保存のまま。公開した時だけクラウドへ送ります。</p>
+      </div>
+      <button id="publishCloseBtn" class="iconCloseBtn" type="button" aria-label="Close">×</button>
+    </div>
+
+    <div id="publishAuthPane">
+      <div class="publishNotice" data-i18n="publish.authNotice">公開する時だけ作成者アカウントが必要です。作成・編集はログインなしで使えます。</div>
+      <div class="publishAuthGrid">
+        <input id="publishEmail" type="email" autocomplete="email" placeholder="メールアドレス" data-i18n-placeholder="publish.email">
+        <input id="publishPassword" type="password" autocomplete="current-password" placeholder="パスワード（6文字以上）" data-i18n-placeholder="publish.password">
+      </div>
+      <div class="publishAuthActions">
+        <button id="publishSignUpBtn" class="btn" type="button" data-i18n="publish.signup">新規登録</button>
+        <button id="publishSignInBtn" class="btn primary" type="button" data-i18n="publish.signin">ログイン</button>
+      </div>
+      <div class="publishFutureAuth" data-i18n="publish.futureAuth">Google / Appleログインは後続工程で追加予定</div>
+    </div>
+
+    <div id="publishSettingsPane" class="hidden">
+      <div class="publishUserRow">
+        <span class="publishUserLabel" data-i18n="publish.signedIn">ログイン中</span>
+        <span id="publishUserText"></span>
+        <button id="publishSignOutBtn" class="textBtn" type="button" data-i18n="publish.signout">ログアウト</button>
+      </div>
+      <div class="publishPreviewCard">
+        <div id="publishPreviewTitle" class="publishPreviewTitle"></div>
+        <div id="publishPreviewMeta" class="publishPreviewMeta"></div>
+      </div>
+      <div class="publishSettingBlock">
+        <div class="publishSettingTitle" data-i18n="publish.visibility">公開範囲</div>
+        <label class="publishChoice">
+          <input type="radio" name="publishVisibility" value="public" checked>
+          <span><b data-i18n="publish.public">公開</b><small data-i18n="publish.publicHelp">URLから誰でも閲覧できます。</small></span>
+        </label>
+        <label class="publishChoice">
+          <input type="radio" name="publishVisibility" value="unlisted">
+          <span><b data-i18n="publish.unlisted">URL限定</b><small data-i18n="publish.unlistedHelp">URLを知っている人だけ閲覧できます。</small></span>
+        </label>
+      </div>
+      <div class="publishWarning" data-i18n="publish.imageWarning">現在、対象画像はまだクラウドへ送りません。名前・評価項目・点数・平均は公開ページへ反映されます。</div>
+      <div class="publishFooter">
+        <button id="publishUnpublishBtn" class="btn danger hidden" type="button" data-i18n="publish.unpublish">非公開に戻す</button>
+        <button id="publishExecuteBtn" class="btn publishBtn" type="button" data-i18n="publish.execute">公開してURLを作る</button>
+      </div>
+      <div id="publishResult" class="publishResult hidden">
+        <div class="publishResultLabel" data-i18n="publish.resultLabel">公開URL</div>
+        <input id="publishUrlInput" class="publishUrlInput" readonly>
+        <div class="publishResultActions">
+          <button id="publishCopyBtn" class="btn" type="button" data-i18n="publish.copy">URLをコピー</button>
+          <button id="publishOpenBtn" class="btn primary" type="button" data-i18n="publish.open">公開ページを開く</button>
+        </div>
+      </div>
+    </div>
+    <div id="publishStatus" class="publishStatus"></div>
+  </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="../cloud/supabase.js?v=r18"></script>
+<script src="../cloud/publish-model.js?v=r18"></script>
+<script src="js/i18n.js?v=r18"></script>
+<script src="js/app.js?v=r18"></script>
 <script>
 window.addEventListener("statsmaker:languagechange",event=>{
   try{

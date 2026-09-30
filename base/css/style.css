@@ -1167,3 +1167,25 @@ html[lang="en"] .rankModeBtn{
     padding:0 5px;
   }
 }
+
+/* R15 Publish MVP */
+.publishBtn{background:linear-gradient(180deg,#1f805f,#176649);border-color:#339a76;color:#f2fff9}
+.publishDialog{width:min(610px,calc(100vw - 24px));max-height:min(780px,calc(100vh - 28px));overflow:auto}
+.publishDialogHead{display:flex;align-items:flex-start;justify-content:space-between;gap:14px;margin-bottom:14px}
+.publishDialogHead h3{margin:0 0 5px}.publishDialogHead p{margin:0;color:var(--muted);line-height:1.5;font-size:11px}
+.iconCloseBtn{width:32px;height:32px;border:1px solid var(--line);border-radius:9px;background:#101d30;color:#aebed3;font-size:18px;cursor:pointer}
+.publishNotice,.publishWarning{padding:11px 12px;border:1px solid #29415f;border-radius:10px;background:#0c1829;color:#9fb0c8;font-size:11px;line-height:1.55}
+.publishWarning{margin-top:14px;border-color:#5a4825;background:#1b170f;color:#d7bf88}
+.publishAuthGrid{display:grid;grid-template-columns:1fr 1fr;gap:9px;margin-top:12px}
+.publishAuthGrid input,.publishUrlInput{width:100%;min-height:39px;border:1px solid #314762;border-radius:9px;background:#0a1525;color:#eff5ff;padding:0 10px;font:inherit}
+.publishAuthActions,.publishResultActions{display:flex;gap:8px;flex-wrap:wrap;margin-top:10px}
+.publishFutureAuth{color:#70829d;font-size:10px;margin-top:10px}.publishUserRow{display:flex;align-items:center;gap:8px;padding:8px 0 12px;font-size:11px;color:#a9bad0}
+.publishUserLabel{color:#70dca7;font-weight:900}.textBtn{margin-left:auto;border:0;background:transparent;color:#8da8ce;text-decoration:underline;cursor:pointer}
+.publishPreviewCard{border:1px solid #293d58;border-radius:11px;background:#0b1728;padding:12px}.publishPreviewTitle{font-size:15px;font-weight:950}
+.publishPreviewMeta{margin-top:5px;color:#8193ae;font-size:10px}.publishSettingBlock{margin-top:14px}.publishSettingTitle{font-size:11px;font-weight:900;color:#aebdd2;margin-bottom:7px}
+.publishChoice{display:flex;gap:9px;align-items:flex-start;padding:10px;border:1px solid #273b55;border-radius:10px;margin-top:7px;background:#0d192a;cursor:pointer}
+.publishChoice input{margin-top:3px}.publishChoice span{display:flex;flex-direction:column;gap:3px}.publishChoice b{font-size:11px}.publishChoice small{color:#7e90a9;font-size:10px;line-height:1.45}
+.publishFooter{display:flex;justify-content:flex-end;gap:8px;flex-wrap:wrap;margin-top:14px}
+.publishStatus{min-height:18px;margin-top:10px;color:#92a5c0;font-size:10px;line-height:1.5;white-space:pre-wrap}.publishStatus.ok{color:#6fdfa2}.publishStatus.error{color:#ff8f8f}
+.publishResult{margin-top:14px;padding:12px;border:1px solid #31567d;border-radius:11px;background:#0c1a2d}.publishResultLabel{font-size:10px;color:#92a6c3;margin-bottom:6px}
+@media(max-width:620px){.publishAuthGrid{grid-template-columns:1fr}.topActions{flex-wrap:wrap}.publishDialog{width:calc(100vw - 14px)}}

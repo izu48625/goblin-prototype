@@ -525,6 +525,11 @@
     $('titleInput').value=s.title||'';
     $('descInput').value=s.desc||'';
     renderSheetSelect();
+
+    const publishBtn=$('publishBtn');
+    if(publishBtn){
+      publishBtn.textContent=s.cloudTopicId?t('publish.buttonUpdate'):t('publish.button');
+    }
   }
 
   function renderTable(){
@@ -1322,6 +1327,208 @@
   }
 
   function renderSidebar(){renderRanking();renderCompare();renderSummary()}
+
+  const publishState={user:null,url:''};
+
+  function setPublishStatus(message='',type=''){
+    const el=$('publishStatus');
+    if(!el)return;
+    el.textContent=message;
+    el.className='publishStatus'+(type?' '+type:'');
+  }
+
+  function publicPageUrl(topicId){
+    const url=new URL('../public.html',location.href);
+    url.searchParams.set('id',topicId);
+    return url.href;
+  }
+
+  function isPermanentUser(user){return !!user&&!user.is_anonymous}
+
+  function buildPublishModel(sheet){
+    const locale=window.SM_I18N?.getLanguage?.()||'ja';
+    const builder=window.SM_PUBLISH_MODEL?.build;
+    if(!builder)throw new Error('Publish model is not ready.');
+    return builder(sheet,locale);
+  }
+
+  function migrationHint(error){
+    const message=String(error?.message||error||'');
+    return /snapshot|schema cache|column/i.test(message)?'\n'+t('publish.migrationRequired'):'';
+  }
+
+  async function refreshPublishAuth(){
+    const sb=window.SM_SUPABASE?.client;
+    if(!sb){
+      setPublishStatus(t('publish.errorPrefix')+'Supabase client is not ready','error');
+      return null;
+    }
+    const {data,error}=await sb.auth.getUser();
+    publishState.user=error?null:(data.user||null);
+    const signedIn=isPermanentUser(publishState.user);
+    $('publishAuthPane').classList.toggle('hidden',signedIn);
+    $('publishSettingsPane').classList.toggle('hidden',!signedIn);
+
+    if(signedIn){
+      const s=activeSheet();
+      let model=null;
+      try{model=buildPublishModel(s)}catch{}
+      $('publishUserText').textContent=publishState.user.email||`${publishState.user.id.slice(0,8)}…`;
+      $('publishPreviewTitle').textContent=s.title.trim()||t('fallback.untitledSheet');
+      $('publishPreviewMeta').textContent=t('publish.meta',{
+        rows:model?.rows?.length??s.rows.filter(r=>r.name.trim()).length,
+        cols:model?.criteria?.length??s.cols.length,
+        scale:s.scale||100
+      });
+      const vis=s.cloudVisibility==='unlisted'?'unlisted':'public';
+      document.querySelectorAll('input[name="publishVisibility"]').forEach(r=>r.checked=r.value===vis);
+      $('publishExecuteBtn').textContent=s.cloudTopicId?t('publish.updateExecute'):t('publish.execute');
+      $('publishUnpublishBtn').classList.toggle('hidden',!s.cloudTopicId);
+    }
+    return publishState.user;
+  }
+
+  async function openPublishDialog(){
+    $('publishDialogBackdrop').classList.remove('hidden');
+    $('publishResult').classList.add('hidden');
+    setPublishStatus('');
+    await refreshPublishAuth();
+    const s=activeSheet();
+    if(s.cloudTopicId&&s.cloudVisibility!=='private'){
+      publishState.url=publicPageUrl(s.cloudTopicId);
+      $('publishUrlInput').value=publishState.url;
+      $('publishResult').classList.remove('hidden');
+    }
+  }
+
+  function closePublishDialog(){$('publishDialogBackdrop').classList.add('hidden')}
+
+  async function publishSignUp(){
+    try{
+      const email=$('publishEmail').value.trim(),password=$('publishPassword').value;
+      if(!email||password.length<6)throw new Error(t('publish.authRequired'));
+      const sb=window.SM_SUPABASE.client;
+      const current=(await sb.auth.getUser()).data.user;
+      if(current?.is_anonymous)await sb.auth.signOut();
+      const {data,error}=await sb.auth.signUp({email,password});
+      if(error)throw error;
+      if(data.session){setPublishStatus(t('publish.signupSuccess'),'ok');await refreshPublishAuth()}
+      else setPublishStatus(t('publish.signupConfirm'));
+    }catch(e){setPublishStatus(t('publish.authErrorPrefix')+(e?.message||String(e)),'error')}
+  }
+
+  async function publishSignIn(){
+    try{
+      const email=$('publishEmail').value.trim(),password=$('publishPassword').value;
+      if(!email||!password)throw new Error(t('publish.authRequired'));
+      const sb=window.SM_SUPABASE.client;
+      const current=(await sb.auth.getUser()).data.user;
+      if(current?.is_anonymous)await sb.auth.signOut();
+      const {error}=await sb.auth.signInWithPassword({email,password});
+      if(error)throw error;
+      setPublishStatus(t('publish.signinSuccess'),'ok');
+      await refreshPublishAuth();
+    }catch(e){setPublishStatus(t('publish.authErrorPrefix')+(e?.message||String(e)),'error')}
+  }
+
+  async function publishSignOut(){
+    try{
+      await window.SM_SUPABASE.client.auth.signOut();
+      publishState.user=null;
+      setPublishStatus(t('publish.signoutSuccess'));
+      await refreshPublishAuth();
+    }catch(e){setPublishStatus(t('publish.authErrorPrefix')+(e?.message||String(e)),'error')}
+  }
+
+  async function clearPublishedStructure(sb,topicId){
+    const {error:itemError}=await sb.from('topic_items').delete().eq('topic_id',topicId);
+    if(itemError)throw itemError;
+    const {error:criteriaError}=await sb.from('criteria').delete().eq('topic_id',topicId);
+    if(criteriaError)throw criteriaError;
+  }
+
+  function structureMatches(model,currentTopic,items,criteria){
+    if(Number(currentTopic.score_scale)!==Number(model.scale))return false;
+    if(!!currentTopic.weighted!==!!model.weighted)return false;
+    const a=[...items].sort((x,y)=>x.position-y.position),b=[...criteria].sort((x,y)=>x.position-y.position);
+    if(a.length!==model.rows.length||b.length!==model.criteria.length)return false;
+    if(a.some((x,i)=>x.name!==model.rows[i].name||Number(x.position)!==i))return false;
+    if(b.some((x,i)=>x.name!==model.criteria[i].name||Number(x.position)!==i||Math.abs(Number(x.weight)-Number(model.criteria[i].weight))>0.0001))return false;
+    return true;
+  }
+
+  async function insertPublishedStructure(sb,topicId,model){
+    const items=model.rows.map(row=>({topic_id:topicId,name:row.name,image_url:null,position:row.position}));
+    const criteria=model.criteria.map(item=>({topic_id:topicId,name:item.name,weight:item.weight,position:item.position}));
+    if(items.length){const {error}=await sb.from('topic_items').insert(items);if(error)throw error}
+    if(criteria.length){const {error}=await sb.from('criteria').insert(criteria);if(error)throw error}
+  }
+
+  async function executePublish(){
+    try{
+      const sb=window.SM_SUPABASE?.client;if(!sb)throw new Error('Supabase client is not ready');
+      const {data,error}=await sb.auth.getUser();if(error)throw error;const user=data.user;if(!user)throw new Error(t('publish.authRequired'));if(user.is_anonymous)throw new Error(t('publish.anonRequired'));
+      const s=activeSheet(),model=buildPublishModel(s),visibility=document.querySelector('input[name="publishVisibility"]:checked')?.value||'public';setPublishStatus(t('publish.busy'));
+      const now=new Date().toISOString();
+      const basePayload={owner_id:user.id,title:model.title,description:model.description,language_code:model.language,score_scale:model.scale,weighted:model.weighted,visibility,allow_ratings:true,show_community:true,snapshot_version:model.version,snapshot:model,snapshot_updated_at:now,published_at:now};
+      let topicId=s.cloudTopicId||'',updating=false,versioned=false;
+
+      if(topicId){
+        updating=true;
+        const [{data:hasSubs,error:subErr},{data:current,error:currentErr},{data:items,error:itemErr},{data:criteria,error:critErr}]=await Promise.all([
+          sb.rpc('topic_has_submissions',{p_topic_id:topicId}),
+          sb.from('topics').select('id,score_scale,weighted').eq('id',topicId).eq('owner_id',user.id).single(),
+          sb.from('topic_items').select('id,name,position').eq('topic_id',topicId).order('position'),
+          sb.from('criteria').select('id,name,weight,position').eq('topic_id',topicId).order('position')
+        ]);
+        if(subErr)throw subErr;if(currentErr)throw currentErr;if(itemErr)throw itemErr;if(critErr)throw critErr;
+        const same=structureMatches(model,current,items||[],criteria||[]);
+
+        if(hasSubs&&!same){
+          const oldTopicId=topicId;
+          const {data:newTopic,error:newErr}=await sb.from('topics').insert({...basePayload,source_topic_id:oldTopicId}).select('id').single();
+          if(newErr)throw newErr;topicId=newTopic.id;await insertPublishedStructure(sb,topicId,model);versioned=true;updating=false;
+        }else{
+          const {data:updateData,error:updateError}=await sb.from('topics').update(basePayload).eq('id',topicId).eq('owner_id',user.id).select('id').single();
+          if(updateError)throw updateError;topicId=updateData.id;
+          if(!hasSubs){await clearPublishedStructure(sb,topicId);await insertPublishedStructure(sb,topicId,model)}
+        }
+      }else{
+        const {data:insertData,error:insertError}=await sb.from('topics').insert(basePayload).select('id').single();if(insertError)throw insertError;topicId=insertData.id;await insertPublishedStructure(sb,topicId,model);
+      }
+
+      s.cloudTopicId=topicId;s.cloudVisibility=visibility;s.cloudPublishedAt=now;scheduleSave('');publishState.url=publicPageUrl(topicId);$('publishUrlInput').value=publishState.url;$('publishResult').classList.remove('hidden');$('publishUnpublishBtn').classList.remove('hidden');$('publishExecuteBtn').textContent=t('publish.updateExecute');setPublishStatus(versioned?t('publish.versionedSuccess'):(updating?t('publish.updateSuccess'):t('publish.success')),'ok');renderHeader();
+    }catch(e){setPublishStatus(t('publish.errorPrefix')+(e?.message||String(e))+migrationHint(e),'error')}
+  }
+
+  async function unpublishTopic(){
+    try{
+      const sb=window.SM_SUPABASE?.client;
+      if(!sb)throw new Error('Supabase client is not ready');
+      const {data,error}=await sb.auth.getUser();
+      if(error)throw error;
+      const s=activeSheet();
+      if(!data.user||!s.cloudTopicId)throw new Error(t('publish.authRequired'));
+
+      const {error:updateError}=await sb.from('topics')
+        .update({visibility:'private'}).eq('id',s.cloudTopicId).eq('owner_id',data.user.id);
+      if(updateError)throw updateError;
+
+      s.cloudVisibility='private';scheduleSave('');
+      $('publishResult').classList.add('hidden');
+      setPublishStatus(t('publish.unpublishSuccess'),'ok');
+      renderHeader();
+    }catch(e){setPublishStatus(t('publish.errorPrefix')+(e?.message||String(e)),'error')}
+  }
+
+  async function copyPublishUrl(){
+    if(!publishState.url)return;
+    try{await navigator.clipboard.writeText(publishState.url);setPublishStatus(t('publish.copySuccess'),'ok')}
+    catch{setPublishStatus(t('publish.copyFailed'),'error')}
+  }
+
+  function openPublishedPage(){if(publishState.url)window.open(publishState.url,'_blank','noopener')}
+
   function renderAll(){
     const s=activeSheet();
     renderHeader();
@@ -1490,6 +1697,9 @@
   function duplicateSheet(){
     const src=activeSheet(),copy=clone(src);
     copy.id=makeId();copy.title=(src.title||t('fallback.untitledSheet'))+t('fallback.copySuffix');copy.updatedAt=Date.now();
+    delete copy.cloudTopicId;
+    delete copy.cloudVisibility;
+    delete copy.cloudPublishedAt;
     library.sheets.push(copy);library.activeId=copy.id;renderAll();scheduleSave(t('sheet.duplicated'));
   }
 
@@ -1524,6 +1734,17 @@
   $('sharePreviewBackdrop').addEventListener('click',e=>{
     if(e.target===$('sharePreviewBackdrop'))closeSharePreview();
   });
+
+  $('publishBtn').addEventListener('click',openPublishDialog);
+  $('publishCloseBtn').addEventListener('click',closePublishDialog);
+  $('publishDialogBackdrop').addEventListener('click',e=>{if(e.target===$('publishDialogBackdrop'))closePublishDialog()});
+  $('publishSignUpBtn').addEventListener('click',publishSignUp);
+  $('publishSignInBtn').addEventListener('click',publishSignIn);
+  $('publishSignOutBtn').addEventListener('click',publishSignOut);
+  $('publishExecuteBtn').addEventListener('click',executePublish);
+  $('publishUnpublishBtn').addEventListener('click',unpublishTopic);
+  $('publishCopyBtn').addEventListener('click',copyPublishUrl);
+  $('publishOpenBtn').addEventListener('click',openPublishedPage);
 
   $('newSheetBtn').addEventListener('click',createNewSheet);
   $('duplicateBtn').addEventListener('click',duplicateSheet);

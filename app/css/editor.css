@@ -202,8 +202,8 @@
 .quad-label.bl{left:2%;bottom:2%}.quad-label.br{right:2%;bottom:2%}
 .axis-x{position:absolute;right:0;bottom:-5%;font-size:1.8cqw;color:var(--visual-muted,#a8b3c7)}
 .axis-y{position:absolute;left:-1%;top:-4%;font-size:1.8cqw;color:var(--visual-muted,#a8b3c7)}
-.quad-point{position:absolute;transform:translate(-50%,50%);display:flex;align-items:center;gap:.6cqw}
-.quad-point-dot{width:2.3cqw;height:2.3cqw;border-radius:50%;background:var(--visual-accent,#70a0ff);box-shadow:0 0 0 .7cqw rgba(109,153,255,.16)}
+.quad-point{position:absolute;transform:translate(-50%,50%);display:flex;align-items:center;gap:.75cqw}
+.quad-point-dot{display:inline-block;flex:0 0 auto;width:2.6cqw;height:2.6cqw;min-width:14px;min-height:14px;aspect-ratio:1/1;border-radius:50%;background:var(--visual-accent,#70a0ff);border:.16cqw solid rgba(255,255,255,.58);box-shadow:0 0 0 .55cqw rgba(109,153,255,.18), inset 0 0 0 .08cqw rgba(255,255,255,.12);overflow:hidden;object-fit:cover}
 .quad-point-name{font-size:1.8cqw;font-weight:900;white-space:nowrap;text-shadow:0 1px 2px rgba(0,0,0,.65)}
 
 @media(max-width:760px){
@@ -698,10 +698,13 @@
 .quad-point-dot.has-image{
   width:4.8cqw;
   height:4.8cqw;
+  min-width:24px;
+  min-height:24px;
+  aspect-ratio:1/1;
   background-size:cover;
   background-position:center;
-  border:.28cqw solid var(--visual-accent);
-  box-shadow:0 0 0 .7cqw rgba(111,156,255,.14);
+  border:.24cqw solid var(--visual-accent);
+  box-shadow:0 0 0 .55cqw rgba(111,156,255,.14);
 }
 .quad-point-dot.has-image.shape-square{border-radius:2px}
 .quad-point-dot.has-image.shape-rounded{border-radius:1.1cqw}

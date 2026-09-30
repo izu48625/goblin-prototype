@@ -1,0 +1,130 @@
+(async()=>{
+  'use strict';
+  const status=document.getElementById('status');
+  const content=document.getElementById('content');
+  const esc=value=>String(value??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+  const num=value=>{if(value===null||value===undefined||value==='')return null;const n=Number(value);return Number.isFinite(n)?n:null};
+  const fmt=value=>{const n=num(value);return n===null?'—':(Number.isInteger(n)?String(n):n.toFixed(1))};
+  const average=(scores,criteria,weighted)=>{let total=0,den=0;scores.forEach((raw,i)=>{const score=num(raw);if(score===null)return;const w=weighted?Math.max(0,Number(criteria[i]?.weight??1)):1;total+=score*w;den+=w});return den?Math.round(total/den*10)/10:null};
+
+  function toast(message){const old=document.querySelector('.toast');old?.remove();const el=document.createElement('div');el.className='toast';el.textContent=message;document.body.appendChild(el);setTimeout(()=>el.remove(),2200)}
+
+  async function getOwnSubmitted(sb,topicId,items,criteria,weighted){
+    try{
+      const {data:sessionData}=await sb.auth.getSession();
+      if(!sessionData.session)return null;
+      const {data:rs,error:rsError}=await sb.from('rating_sets').select('id,status').eq('topic_id',topicId).maybeSingle();
+      if(rsError||!rs)return null;
+      const {data:scores,error:scoreError}=await sb.from('scores').select('item_id,criterion_id,score').eq('rating_set_id',rs.id);
+      if(scoreError)return null;
+      const map=new Map((scores||[]).map(s=>[`${s.item_id}|${s.criterion_id}`,num(s.score)]));
+      const values=items.map(item=>{
+        const row=criteria.map(c=>map.get(`${item.id}|${c.id}`)??null);
+        return {itemId:item.id,name:item.name,value:average(row,criteria,weighted)};
+      });
+      return {status:rs.status,values};
+    }catch{return null}
+  }
+
+  try{
+    const id=new URLSearchParams(location.search).get('id');
+    if(!id)throw new Error('Topic ID is missing.');
+    const sb=window.SM_SUPABASE?.client;if(!sb)throw new Error('Supabase is not ready.');
+
+    const {data,error}=await sb.from('topics')
+      .select('*,topic_items(id,name,position,image_url),criteria(id,name,weight,position)')
+      .eq('id',id).single();
+    if(error)throw error;
+
+    const ja=data.language_code!=='en';document.documentElement.lang=ja?'ja':'en';document.title=`${data.title} - Stats Maker`;
+    const items=(data.topic_items||[]).sort((a,b)=>a.position-b.position);
+    const dbCriteria=(data.criteria||[]).sort((a,b)=>a.position-b.position);
+    const snap=(data.snapshot&&typeof data.snapshot==='object'&&!Array.isArray(data.snapshot))?data.snapshot:{};
+    const criteria=(Array.isArray(snap.criteria)&&snap.criteria.length)?snap.criteria:dbCriteria.map(c=>({name:c.name,weight:Number(c.weight??1)}));
+    const rows=(Array.isArray(snap.rows)&&snap.rows.length)?snap.rows:items.map(i=>({name:i.name,note:'',scores:Array(criteria.length).fill(null)}));
+    const scale=Number(snap.scale||data.score_scale||100)===10?10:100;
+    const weighted=typeof snap.weighted==='boolean'?snap.weighted:!!data.weighted;
+
+    const creatorRanking=rows.map((row,index)=>({index,name:row.name||`${ja?'対象':'Target'} ${index+1}`,value:average(Array.isArray(row.scores)?row.scores:[],criteria,weighted)})).filter(x=>x.value!==null).sort((a,b)=>b.value-a.value||a.index-b.index);
+    const tableHead=criteria.map(c=>`<th>${esc(c.name)}</th>`).join('');
+    const tableRows=rows.map(row=>{const scores=Array.isArray(row.scores)?row.scores:[];const av=average(scores,criteria,weighted);return `<tr><td>${esc(row.name)}</td>${criteria.map((_,i)=>{const n=num(scores[i]);return `<td class="${n===null?'na':'score'}">${n===null?'—':fmt(n)}</td>`}).join('')}<td class="avg">${av===null?'—':fmt(av)}</td></tr>`}).join('');
+
+    content.innerHTML=`
+      <section class="hero">
+        <div class="eyebrow">${data.visibility==='unlisted'?(ja?'URL限定公開':'Unlisted'):(ja?'公開':'Public')}</div>
+        <h1>${esc(data.title)}</h1>
+        ${data.description?`<div class="desc">${esc(data.description)}</div>`:''}
+        <div class="meta"><span class="pill">${scale}${ja?'点満点':'-point scale'}</span><span class="pill">${rows.length}${ja?'対象':' targets'}</span><span class="pill">${criteria.length}${ja?'項目':' metrics'}</span><span class="pill">${weighted?(ja?'重み付け':'Weighted'):(ja?'均等平均':'Equal weight')}</span></div>
+        <div class="primaryActions">
+          <button id="rateBtn" class="actionBtn primary" ${data.allow_ratings?'':'disabled'}>${ja?'自分も採点する':'Rate this'}</button>
+          <button id="remixBtn" class="actionBtn remix">${ja?'Remixして使う':'Remix this'}</button>
+          <button id="shareBtn" class="actionBtn">${ja?'共有':'Share'}</button>
+        </div>
+        ${rows.some(row=>row.hasLocalImage)?`<div class="notice">${ja?'現在、作成者のローカル画像は公開ページへアップロードされません。':'Creator-local images are not uploaded to the public page yet.'}</div>`:''}
+      </section>
+      <div class="grid">
+        <section class="card"><h2>${ja?'作成者の公開スコア':'Creator Scores'}</h2><div class="tableWrap"><table><thead><tr><th>${ja?'対象':'Target'}</th>${tableHead}<th>${ja?'平均':'Average'}</th></tr></thead><tbody>${tableRows}</tbody></table></div></section>
+        <aside>
+          <section class="card"><h2>${ja?'作成者ランキング':'Creator Ranking'}</h2><div class="ranking">${creatorRanking.length?creatorRanking.slice(0,10).map((item,i)=>`<div class="rankRow"><div class="rankNo">${i+1}</div><div class="rankName">${esc(item.name)}</div><div class="rankValue">${fmt(item.value)}</div></div>`).join(''):`<div class="emptyCommunity">${ja?'採点データがありません。':'No scored data yet.'}</div>`}</div></section>
+          <section class="card" style="margin-top:14px"><h2>${ja?'評価項目':'Metrics'}</h2><div class="criteria">${criteria.map(c=>`<span>${esc(c.name)}</span>`).join('')}</div></section>
+        </aside>
+      </div>
+      <section id="communitySection" class="card communityBlock"><div class="sectionHead"><div><h2>${ja?'Community':'Community'}</h2><div class="sectionSub">${ja?'みんなの評価を集計':'Aggregated participant ratings'}</div></div></div><div id="communityContent" class="emptyCommunity">${ja?'集計中…':'Loading community…'}</div></section>`;
+
+    document.getElementById('rateBtn').onclick=()=>{if(data.allow_ratings)location.href=`rate.html?id=${encodeURIComponent(id)}`};
+    document.getElementById('remixBtn').onclick=()=>{
+      try{
+        const sheet=window.SM_REMIX.buildSheet(data,snap,dbCriteria,items,ja?'ja':'en');
+        window.SM_REMIX.saveSheet(sheet);
+        toast(ja?'Remixしました。編集画面へ移動します。':'Remixed. Opening the editor…');
+        setTimeout(()=>{location.href='index.html?remixed=1'},500);
+      }catch(e){toast((ja?'Remixに失敗しました：':'Remix failed: ')+(e?.message||e))}
+    };
+    document.getElementById('shareBtn').onclick=async()=>{
+      try{
+        if(navigator.share){
+          await navigator.share({title:data.title,text:data.description||'',url:location.href});
+        }else{
+          await navigator.clipboard.writeText(location.href);
+          toast(ja?'URLをコピーしました。':'URL copied.');
+        }
+      }catch(e){if(e?.name!=='AbortError')toast(ja?'共有できませんでした。':'Could not share.')}
+    };
+
+    if(data.show_community){
+      const [countRes,itemRes,criterionRes,own]=await Promise.all([
+        sb.rpc('get_topic_participant_count',{p_topic_id:id}),
+        sb.rpc('get_community_item_summary',{p_topic_id:id}),
+        sb.rpc('get_community_criterion_summary',{p_topic_id:id}),
+        getOwnSubmitted(sb,id,items,dbCriteria,weighted)
+      ]);
+      if(countRes.error||itemRes.error||criterionRes.error)throw(countRes.error||itemRes.error||criterionRes.error);
+      const participant=Number(countRes.data||0);
+      const itemSummary=itemRes.data||[];const criterionSummary=criterionRes.data||[];
+      const itemById=new Map(items.map(i=>[i.id,i]));const critById=new Map(dbCriteria.map(c=>[c.id,c]));
+      const communityRanking=itemSummary.map(s=>({itemId:s.item_id,name:itemById.get(s.item_id)?.name||'',count:Number(s.response_count||0),value:num(s.avg_overall)})).sort((a,b)=>(b.value??-1)-(a.value??-1));
+      const cMap=new Map(criterionSummary.map(s=>[`${s.item_id}|${s.criterion_id}`,s]));
+
+      let communityTable='';
+      if(items.length&&dbCriteria.length){
+        communityTable=`<div class="tableWrap"><table><thead><tr><th>${ja?'対象':'Target'}</th>${dbCriteria.map(c=>`<th>${esc(c.name)}</th>`).join('')}<th>${ja?'総合':'Overall'}</th></tr></thead><tbody>${items.map(item=>{const overall=communityRanking.find(x=>x.itemId===item.id);return `<tr><td>${esc(item.name)}</td>${dbCriteria.map(c=>{const s=cMap.get(`${item.id}|${c.id}`);return `<td class="${s?.avg_score==null?'na':'score'}">${s?.avg_score==null?'—':fmt(s.avg_score)}</td>`}).join('')}<td class="${overall?.value==null?'na':'avg'}">${overall?.value==null?'—':fmt(overall.value)}</td></tr>`}).join('')}</tbody></table></div>`;
+      }
+
+      let ownHtml='';
+      if(own){
+        const commMap=new Map(communityRanking.map(x=>[x.itemId,x.value]));
+        const rowsOwn=own.values.filter(x=>x.value!==null).map(x=>{const c=commMap.get(x.itemId)??null;const diff=c===null?null:Math.round((x.value-c)*10)/10;return `<tr><td>${esc(x.name)}</td><td class="score">${fmt(x.value)}</td><td class="${c===null?'na':'avg'}">${fmt(c)}</td><td class="${diff===null?'na':diff>=0?'diffPlus':'diffMinus'}">${diff===null?'—':`${diff>0?'+':''}${fmt(diff)}`}</td></tr>`}).join('');
+        if(rowsOwn)ownHtml=`<section class="card" style="margin-top:14px"><h2>${ja?'あなた vs Community':'You vs Community'}</h2><div class="tableWrap"><table><thead><tr><th>${ja?'対象':'Target'}</th><th>${ja?'あなた':'You'}</th><th>Community</th><th>${ja?'差':'Diff'}</th></tr></thead><tbody>${rowsOwn}</tbody></table></div></section>`;
+      }
+
+      document.getElementById('communityContent').className='';
+      document.getElementById('communityContent').innerHTML=`
+        <div class="communityHero"><div class="participantBox"><div><div class="participantNumber">${participant}</div><div class="participantLabel">${ja?'参加者':'PARTICIPANTS'}</div></div></div><div class="privacyNote">${participant<5?(ja?'5人未満では平均点を表示しません。人数だけ表示して個人の評価を守ります。':'Averages stay hidden until 5 eligible participants have submitted ratings.'):(ja?'5人以上集まったためCommunity平均を表示しています。':'Community averages are available because at least 5 eligible participants have submitted.')}</div></div>
+        <div class="communityGrid"><section><h2>${ja?'Community Ranking':'Community Ranking'}</h2><div class="ranking">${communityRanking.length?communityRanking.slice(0,10).map((item,i)=>`<div class="rankRow"><div class="rankNo">${i+1}</div><div class="rankName">${esc(item.name)}</div><div class="rankValue">${item.value===null?'—':fmt(item.value)}</div></div>`).join(''):`<div class="emptyCommunity">${ja?'まだ投稿された評価がありません。':'No submitted ratings yet.'}</div>`}</div></section><section><h2>${ja?'項目別Community平均':'Community Metric Averages'}</h2>${communityTable}</section></div>${ownHtml}`;
+    }else{
+      document.getElementById('communityContent').textContent=ja?'この公開ページではCommunity集計が非表示です。':'Community results are hidden for this page.';
+    }
+
+    status.classList.add('hidden');content.classList.remove('hidden');
+  }catch(e){console.error(e);status.textContent='Could not load this Stats Maker page.\n'+(e?.message||String(e));}
+})();

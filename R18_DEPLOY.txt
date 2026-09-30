@@ -1,0 +1,41 @@
+Stats Maker R18 Integrated Candidate
+
+You only deploy R18. R15/R16/R17 do NOT need separate deployment.
+
+STEP 1 — Supabase
+Run R18_SUPABASE_MIGRATION.sql once in SQL Editor.
+Your existing DB-R2 schema is required.
+
+STEP 2 — Anonymous ratings
+In Supabase Authentication settings, enable Anonymous Sign-Ins if it is not already enabled.
+
+STEP 3 — GitHub
+Overwrite/add these in the goblin-prototype repository root:
+- index.html
+- public.html
+- rate.html
+- base/
+- app/
+- cloud/
+
+Commit suggestion:
+Stats Maker R18 Integrated Candidate
+
+Open:
+https://izu48625.github.io/goblin-prototype/?v=r18
+
+TEST FLOW
+1. Create a sheet locally.
+2. Publish it.
+3. Open the public URL in a private window.
+4. Remix it and confirm a new local sheet appears.
+5. Open the public URL again and choose Rate this / 自分も採点.
+6. Submit a rating.
+7. Confirm participant count becomes 1.
+8. With fewer than 5 participants, Community averages should stay hidden/blank.
+9. Community averages appear after 5 eligible participants.
+
+Notes:
+- Creator images are still local-only.
+- Community raw individual scores are never public.
+- Structural creator edits after the first Community submission automatically create a new version.
