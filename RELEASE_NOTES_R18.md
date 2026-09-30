@@ -1,6 +1,6 @@
-# Stats Maker R18 Complete Candidate C1
+# Stats Maker R18 Complete Candidate C2
 
-Build: `R18-COMPLETE-C1`
+Build: `R18-COMPLETE-C2`
 
 ## Base sheet
 - Metric names are now edited inline in the table header.
@@ -36,3 +36,9 @@ Existing R18 Public Viewer, Remix, anonymous Community rating and privacy thresh
 ## Supabase
 The existing `R18_SUPABASE_MIGRATION.sql` is still required once.
 Anonymous Sign-Ins must be enabled for Community rating.
+
+## C2 hotfix
+- Fixed editor parse failure (`Unexpected reserved word`) caused by `await` inside non-async `forEach` callbacks in Quadrant and Ranking Card source modules.
+- Added hard inline Publish dialog fallback on the Publish button itself.
+- Cache/build key bumped to `r18c2`.
+- All active source modules passed syntax validation after the fix.
