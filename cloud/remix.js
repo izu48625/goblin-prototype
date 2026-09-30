@@ -8,28 +8,43 @@
       ? snapshot.criteria
       : criteriaFallback.map(c=>({name:c.name,weight:Number(c.weight??1)}));
 
-    const rows=(Array.isArray(snapshot?.rows)&&snapshot.rows.length)
+    const sourceRows=(Array.isArray(snapshot?.rows)&&snapshot.rows.length)
       ? snapshot.rows
       : itemsFallback.map(i=>({name:i.name,note:'',scores:Array(criteria.length).fill(null)}));
+
+    const cols=criteria.map(c=>String(c.name||'').trim()).filter(Boolean);
+    const rows=sourceRows.map(row=>({
+      name:String(row.name||'').trim(),
+      image:'',
+      note:'',
+      // Remix starts as the user's own scoring sheet.
+      scores:Array(cols.length).fill(null)
+    })).filter(row=>row.name);
+
+    const orderedItems=[...itemsFallback].sort((a,b)=>Number(a.position)-Number(b.position));
+    const orderedCriteria=[...criteriaFallback].sort((a,b)=>Number(a.position)-Number(b.position));
+    const scale=Number(snapshot?.scale||topic.score_scale||100)===10?10:100;
 
     return {
       id:makeId(),
       title:`${topic.title}${locale==='ja'?'（Remix）':' (Remix)'}`,
       desc:topic.description||'',
-      cols:criteria.map(c=>String(c.name||'').trim()).filter(Boolean),
-      rows:rows.map(row=>({
-        name:String(row.name||'').trim(),
-        image:'',
-        note:String(row.note||''),
-        scores:Array.isArray(row.scores)?row.scores.slice(0,criteria.length):Array(criteria.length).fill(null)
-      })).filter(row=>row.name),
+      cols,
+      rows,
       sortKey:null,sortDesc:true,rankMetric:'avg',compare:[],compareView:'radar',
       viewMode:'sheet',fitMode:'auto',fitZoom:1,
       weighted:typeof snapshot?.weighted==='boolean'?snapshot.weighted:!!topic.weighted,
       weights:criteria.map(c=>Number.isFinite(Number(c.weight))?Math.max(0,Number(c.weight)):1),
-      scale:Number(snapshot?.scale||topic.score_scale||100)===10?10:100,
+      scale,
       sourceTopicId:topic.id,
       sourceTopicTitle:topic.title,
+      sourceCommunity:{
+        scale,
+        rowNames:rows.map(r=>r.name),
+        columnNames:cols.slice(),
+        itemIds:orderedItems.map(i=>i.id),
+        criterionIds:orderedCriteria.map(c=>c.id)
+      },
       remixedAt:Date.now(),
       updatedAt:Date.now()
     };

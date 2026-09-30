@@ -104,10 +104,13 @@ export function getSourceModel(project,explicitSheet=null){
   };
 
   const metricValue=(row,key)=>{
-    if(key==="avg")return average(row);
+    if(key==="avg"){
+      const hasAny=row?.scores?.some(Number.isFinite);
+      return hasAny?average(row):null;
+    }
     const ci=Number(String(key).replace("c:",""));
     const value=row?.scores?.[ci];
-    return Number.isFinite(value)?value:0;
+    return Number.isFinite(value)?value:null;
   };
 
   const criterionMean=ci=>{
@@ -191,7 +194,7 @@ function syncMetricItems(project,model,key){
     imageRef:null,
     imageShape:"circle",
     enabled:true
-  }));
+  })).filter(item=>Number.isFinite(item.value));
 
   if(project.type==="ranking-card"){
     project.data.items.sort((a,b)=>
@@ -210,8 +213,8 @@ function syncMetricItems(project,model,key){
   }else if(project.type==="bar"){
     const currentTop=Number(project.settings.topN);
     project.settings.topN=Number.isFinite(currentTop)&&currentTop>0
-      ? Math.min(30,Math.max(1,currentTop))
-      : Math.min(30,Math.max(1,project.data.items.length));
+      ? Math.min(20,Math.max(1,currentTop))
+      : Math.min(10,Math.max(1,project.data.items.length));
     project.settings.unit="";
     project.settings.showCategory=false;
     project.settings.autoMax=false;
@@ -222,6 +225,7 @@ function syncMetricItems(project,model,key){
     project.settings.min=0;
     project.settings.max=model.scale;
     project.settings.autoRange=false;
+    project.settings.displayLimit=Math.min(20,Math.max(1,Number(project.settings.displayLimit)||10));
     project.meta.subtitle=label;
   }else if(project.type==="tier-list"){
     project.meta.subtitle=label;
@@ -306,6 +310,9 @@ function syncXY(project,model,xValue,yValue){
     project.settings.rangeMode=project.settings.rangeMode||"auto";
     project.settings.scaleMax=model.scale;
     project.settings.minDisplayWidth=model.scale===10?2:20;
+    project.settings.labelLimit=Math.min(40,Math.max(1,Number(project.settings.labelLimit)||15));
+  }else if(project.type==="quadrant"){
+    project.settings.labelLimit=Math.min(40,Math.max(1,Number(project.settings.labelLimit)||15));
   }
   project.meta.subtitle=`${xLabel} × ${yLabel}`;
 
@@ -337,9 +344,10 @@ function syncRange(project,model,aValue,bValue){
     id:`src_${r.rawIndex}`,
     sourceRawIndex:r.rawIndex,
     name:r.name,
-    value:Number.isFinite(r.scores[ai])?r.scores[ai]:0,
-    value2:Number.isFinite(r.scores[bi])?r.scores[bi]:0
+    value:Number.isFinite(r.scores[ai])?r.scores[ai]:null,
+    value2:Number.isFinite(r.scores[bi])?r.scores[bi]:null
   }));
+  project.settings.displayLimit=Math.min(20,Math.max(1,Number(project.settings.displayLimit)||10));
 }
 
 function syncRing(project,model,rawIndex){
@@ -355,7 +363,7 @@ function syncRing(project,model,rawIndex){
       ci
     }))
     .filter(item=>Number.isFinite(item.value))
-    .slice(0,6)
+    .slice(0,10)
     .map(({id,label,value,max,unit})=>({id,label,value,max,unit}));
   project.meta.title=row?.name||String(model.sheet.title||"Stats Maker");
   project.meta.subtitle=row?String(model.sheet.title||""):"項目平均";
@@ -385,7 +393,7 @@ function syncRadar(project,model,rawIndices){
   const axisIndices=model.criteria
     .map((_,ci)=>ci)
     .filter(ci=>selectedRows.some(row=>Number.isFinite(row.scores[ci])))
-    .slice(0,12);
+    .slice(0,10);
 
   project.data.axes=axisIndices.map(ci=>({
     id:`axis_${ci}`,

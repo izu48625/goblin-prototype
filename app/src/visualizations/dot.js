@@ -3,8 +3,8 @@ export const dotChart={
   id:"dot",labelKey:"viz.dot",
   validate:p=>Array.isArray(p.data?.items),
   render(project,root){
-    const s={min:0,max:100,autoRange:false,unit:"",showValues:true,showGrid:true,...project.settings};
-    const items=(project.data.items||[]).filter(x=>x.enabled!==false);
+    const s={min:0,max:100,autoRange:false,unit:"",showValues:true,showGrid:true,displayLimit:10,...project.settings};
+    const items=(project.data.items||[]).filter(x=>x.enabled!==false).slice(0,Math.max(1,Math.min(20,Number(s.displayLimit)||10)));
     let min=n(s.min),max=n(s.max);
     if(s.autoRange && items.length){
       const vals=items.map(x=>n(x.value));

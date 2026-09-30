@@ -4,15 +4,16 @@ export const ringGauge={
   validate:p=>Array.isArray(p.data?.items),
   render(project,root){
     const s={style:"thick",columns:3,showPercent:true,...project.settings};
-    const items=(project.data.items||[]).slice(0,6);
+    const items=(project.data.items||[]).slice(0,10);
     root.innerHTML="";
     const w=document.createElement("div");w.className=`visual ring-visual ring-style-${s.style}`;
     w.innerHTML=`<div class="generic-kicker">RING GAUGE</div><div class="viz-title generic-title"></div><div class="viz-subtitle generic-subtitle"></div><div class="ring-grid"></div>`;
     w.querySelector(".generic-title").textContent=project.meta.title||"Ring";
     w.querySelector(".generic-subtitle").textContent=project.meta.subtitle||"";
     const grid=w.querySelector(".ring-grid");
-    const autoCols=items.length<=2?Math.max(1,items.length):(items.length===4?2:3);
-    const cols=Math.max(1,Math.min(3,Number(s.columns)||autoCols));
+    const autoCols=items.length<=2?Math.max(1,items.length):(items.length===4?2:(items.length>=7?5:3));
+    const requested=Math.max(1,Math.min(5,Number(s.columns)||autoCols));
+    const cols=items.length>=7?5:requested;
     grid.style.gridTemplateColumns=`repeat(${cols},1fr)`;
     items.forEach(item=>{
       const max=Math.max(1,n(item.max)||100),value=n(item.value),pct=Math.max(0,Math.min(100,value/max*100));

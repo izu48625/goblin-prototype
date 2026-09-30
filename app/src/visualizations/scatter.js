@@ -72,7 +72,7 @@ export const scatterChart={
   id:"scatter",labelKey:"viz.scatter",
   validate:p=>Array.isArray(p.data?.items),
   render(project,root){
-    const s={rangeMode:"auto",scaleMax:100,minDisplayWidth:null,showAverage:true,showMedian:false,showTrend:false,showLabels:true,categoryColors:true,...project.settings};
+    const s={rangeMode:"auto",scaleMax:100,minDisplayWidth:null,showAverage:true,showMedian:false,showTrend:false,showLabels:true,labelLimit:15,categoryColors:true,...project.settings};
     const raw=(project.data.items||[]).filter(i=>i.enabled!==false);
     const items=raw.map(i=>({...i,x:finite(i.x),y:finite(i.y)})).filter(i=>i.x!==null&&i.y!==null);
     const scaleMax=Number(s.scaleMax)||Math.max(Number(s.xAxis?.max)||0,Number(s.yAxis?.max)||0,100);
@@ -143,7 +143,7 @@ export const scatterChart={
       if(s.categoryColors&&item.category)c.setAttribute("fill",palette[Math.max(0,cats.indexOf(item.category))%palette.length]);
       g.appendChild(c);svg.appendChild(g);
 
-      if(s.showLabels===false)return;
+      if(s.showLabels===false || index>=Math.max(1,Math.min(40,Number(s.labelLimit)||15)))return;
       const label=String(item.name||"").trim();if(!label)return;
       const fontSize=label.length>18?18:label.length>12?20:22;
       const maxW=220;
