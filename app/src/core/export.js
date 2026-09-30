@@ -597,8 +597,9 @@ function renderTier(project){
 function renderRing(project){
   const {canvas,ctx,c,width,height}=baseCanvas(project);
   const y0=drawHeader(ctx,project,c,width,{kicker:"RING GAUGE",top:70});
-  const items=(project.data?.items||[]).slice(0,6);
-  const cols=Math.max(1,Math.min(3,Number(project.settings?.columns)||3)),rows=Math.ceil(items.length/cols);
+  const items=(project.data?.items||[]).slice(0,10);
+  const requested=Math.max(1,Math.min(5,Number(project.settings?.columns)||3));
+  const cols=items.length>=7?5:requested,rows=Math.ceil(items.length/cols);
   const availH=height-y0-height*.06,cellW=width*.85/cols,cellH=availH/Math.max(1,rows),startX=width*.075;
   items.forEach((it,i)=>{
     const col=i%cols,row=Math.floor(i/cols),cx=startX+cellW*(col+.5),cy=y0+cellH*(row+.5),r=Math.min(cellW,cellH)*.27;
