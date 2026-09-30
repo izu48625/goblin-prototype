@@ -3,8 +3,10 @@ export const rangeChart={
   id:"range",labelKey:"viz.range",
   validate:p=>Array.isArray(p.data?.items),
   render(project,root){
-    const s={labelA:"A",labelB:"B",unit:"",autoRange:true,min:0,max:100,showDiff:true,diffMode:"value",...project.settings};
-    const items=project.data.items||[];let min=n(s.min),max=n(s.max);
+    const s={labelA:"A",labelB:"B",unit:"",autoRange:true,min:0,max:100,showDiff:true,diffMode:"value",displayLimit:10,...project.settings};
+    const items=(project.data.items||[])
+      .filter(item=>item.enabled!==false&&Number.isFinite(item.value)&&Number.isFinite(item.value2))
+      .slice(0,Math.max(1,Math.min(20,Number(s.displayLimit)||10)));let min=n(s.min),max=n(s.max);
     if(s.autoRange && items.length){const all=items.flatMap(i=>[n(i.value),n(i.value2)]);min=Math.min(...all);max=Math.max(...all);const pad=Math.max(1,(max-min)*.12);min-=pad;max+=pad}
     if(max<=min)max=min+1;
     root.innerHTML="";
