@@ -248,11 +248,16 @@ export function createScatterProject(){
     {id:uid("item"),name:"E",x:55,y:80,category:"Beta"}
   ];
   p.settings={
-    xAxis:{label:"評価1",min:0,max:80},
-    yAxis:{label:"評価2",min:60,max:100},
+    xAxis:{label:"評価1",min:0,max:100},
+    yAxis:{label:"評価2",min:0,max:100},
+    rangeMode:"auto",
+    scaleMax:100,
+    minDisplayWidth:20,
     showAverage:true,
-    showTrend:true,
-    showLabels:true
+    showMedian:false,
+    showTrend:false,
+    showLabels:true,
+    categoryColors:true
   };
   return p;
 }
