@@ -1221,3 +1221,31 @@ html[lang="en"] .rankModeBtn{
   box-shadow:0 24px 70px rgba(0,0,0,.52);
   padding:14px;
 }
+
+
+/* R18 C6: Remix -> Community participation */
+.communityJoinPanel{
+  width:min(1520px,calc(100% - 20px));
+  margin:0 auto 9px;
+  padding:11px 12px;
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:14px;
+  border-color:#34557c;
+  background:linear-gradient(180deg,rgba(16,34,58,.98),rgba(11,24,43,.98));
+}
+.communityJoinCopy{min-width:0}
+.communityJoinTitle{font-size:13px;font-weight:950;color:#eef5ff;margin-top:2px}
+.communityJoinNotice{margin-top:5px;color:#9fb2cb;font-size:10px;line-height:1.55;max-width:920px}
+.communityJoinReason{margin-top:6px;color:#ffb38f;font-size:10px;font-weight:850;line-height:1.5}
+.communityJoinActions{display:flex;align-items:flex-end;flex-direction:column;gap:6px;min-width:190px}
+.communityJoinStatus{min-height:15px;color:#93a8c2;font-size:9px;text-align:right;max-width:300px}
+.communityJoinStatus.ok{color:#6fe1aa}
+.communityJoinStatus.error{color:#ff9696}
+#communityJoinBtn:disabled{opacity:.45;cursor:not-allowed}
+@media(max-width:760px){
+  .communityJoinPanel{width:calc(100% - 12px);flex-direction:column;align-items:stretch;padding:10px}
+  .communityJoinActions{align-items:stretch;min-width:0}
+  .communityJoinStatus{text-align:left;max-width:none}
+}
