@@ -26,7 +26,7 @@ export const barChart={
 
     const items=(project.data.items||[])
       .filter(x=>x.enabled!==false)
-      .slice(0,Math.max(1,Math.min(30,Number(settings.topN)||10)));
+      .slice(0,Math.max(1,Math.min(20,Number(settings.topN)||10)));
 
     const maxValue=settings.autoMax
       ? Math.max(1,...items.map(x=>safeNumber(x.value))) * 1.08
