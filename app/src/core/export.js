@@ -385,10 +385,14 @@ function renderQuadrant(project){
   ctx.setLineDash([10,8]);ctx.strokeStyle=c.muted;ctx.globalAlpha=.65;
   ctx.beginPath();ctx.moveTo(xp(xa.split??50),T);ctx.lineTo(xp(xa.split??50),B);ctx.moveTo(L,yp(ya.split??50));ctx.lineTo(R,yp(ya.split??50));ctx.stroke();
   ctx.setLineDash([]);ctx.globalAlpha=1;
-  (project.data?.items||[]).filter(i=>i.enabled!==false).forEach(item=>{
+  const quadItems=(project.data?.items||[]).filter(i=>i.enabled!==false&&Number.isFinite(i.x)&&Number.isFinite(i.y));
+  const labelLimit=Math.max(1,Math.min(40,Number(project.settings?.labelLimit)||15));
+  quadItems.forEach((item,index)=>{
     const x=xp(item.x),y=yp(item.y);
     ctx.fillStyle=c.accent;ctx.beginPath();ctx.arc(x,y,width*.012,0,Math.PI*2);ctx.fill();
-    font(ctx,width*.015,800,c.family);ctx.fillStyle=c.text;ctx.fillText(ellipsis(ctx,item.name||"",width*.16),x+width*.016,y-width*.012);
+    if(index<labelLimit){
+      font(ctx,width*.015,800,c.family);ctx.fillStyle=c.text;ctx.fillText(ellipsis(ctx,item.name||"",width*.16),x+width*.016,y-width*.012);
+    }
   });
   font(ctx,width*.017,800,c.family);ctx.fillStyle=c.muted;ctx.textAlign="right";ctx.fillText(xa.label||"X",R,B+width*.05);
   ctx.textAlign="left";ctx.fillText(ya.label||"Y",L,T-width*.015);
@@ -484,7 +488,7 @@ function renderScatter(project){
   items.forEach((item,index)=>{
     const x=points[index].x,y=points[index].y,r=Math.max(5,width*.0095);
     ctx.fillStyle=c.accent;ctx.beginPath();ctx.arc(x,y,r,0,Math.PI*2);ctx.fill();
-    if(settings.showLabels===false)return;
+    if(settings.showLabels===false || index>=Math.max(1,Math.min(40,Number(settings.labelLimit)||15)))return;
 
     const raw=String(item.name||"").trim();if(!raw)return;
     let size=width*(raw.length>18?.014:raw.length>12?.0155:.017);
@@ -520,7 +524,9 @@ function renderScatter(project){
 function renderDot(project){
   const {canvas,ctx,c,width,height}=baseCanvas(project);
   const y0=drawHeader(ctx,project,c,width,{kicker:"DOT CHART",top:70});
-  const items=(project.data?.items||[]).filter(x=>x.enabled!==false);
+  const items=(project.data?.items||[])
+    .filter(x=>x.enabled!==false)
+    .slice(0,Math.max(1,Math.min(20,Number(project.settings?.displayLimit)||10)));
   const min=Number(project.settings?.min)||0,max=Number(project.settings?.max)||100;
   const pad=width*.075,labelW=width*.24,right=width*.12,rowH=Math.min(width*.085,(height-y0-height*.07)/Math.max(1,items.length));
   items.forEach((item,i)=>{
@@ -537,8 +543,10 @@ function renderDot(project){
 function renderRange(project){
   const {canvas,ctx,c,width,height}=baseCanvas(project);
   const y0=drawHeader(ctx,project,c,width,{kicker:"RANGE",top:70});
-  const items=project.data?.items||[];
-  let vals=items.flatMap(i=>[Number(i.value)||0,Number(i.value2)||0]);
+  const items=(project.data?.items||[])
+    .filter(i=>i.enabled!==false&&Number.isFinite(i.value)&&Number.isFinite(i.value2))
+    .slice(0,Math.max(1,Math.min(20,Number(project.settings?.displayLimit)||10)));
+  let vals=items.flatMap(i=>[Number(i.value),Number(i.value2)]);
   let min=project.settings?.autoRange!==false?Math.min(...vals,0):(Number(project.settings?.min)||0);
   let max=project.settings?.autoRange!==false?Math.max(...vals,100):(Number(project.settings?.max)||100);
   if(max<=min)max=min+1;
