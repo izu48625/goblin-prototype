@@ -1386,6 +1386,17 @@
 
   function isPermanentUser(user){return !!user&&!user.is_anonymous}
 
+  async function ensurePublishUser(){
+    const sb=window.SM_SUPABASE?.client;
+    if(!sb)throw new Error('Supabase client is not ready');
+    const {data:sessionData,error:sessionError}=await sb.auth.getSession();
+    if(sessionError)throw sessionError;
+    if(sessionData?.session?.user)return sessionData.session.user;
+    const {data,error}=await sb.auth.signInAnonymously();
+    if(error)throw new Error((t('publish.guestStartFailed')||'Could not start guest publish. ')+(error.message||error));
+    return data.user;
+  }
+
   function buildPublishModel(sheet){
     const locale=window.SM_I18N?.getLanguage?.()||'ja';
     const builder=window.SM_PUBLISH_MODEL?.build;
@@ -1404,29 +1415,34 @@
       setPublishStatus(t('publish.errorPrefix')+'Supabase client is not ready','error');
       return null;
     }
-    const {data,error}=await sb.auth.getUser();
-    publishState.user=error?null:(data.user||null);
-    const signedIn=isPermanentUser(publishState.user);
-    $('publishAuthPane').classList.toggle('hidden',signedIn);
-    $('publishSettingsPane').classList.toggle('hidden',!signedIn);
-
-    if(signedIn){
-      const s=activeSheet();
-      let model=null;
-      try{model=buildPublishModel(s)}catch{}
-      $('publishUserText').textContent=publishState.user.email||`${publishState.user.id.slice(0,8)}…`;
-      $('publishPreviewTitle').textContent=s.title.trim()||t('fallback.untitledSheet');
-      $('publishPreviewMeta').textContent=t('publish.meta',{
-        rows:model?.rows?.length??s.rows.filter(r=>r.name.trim()).length,
-        cols:model?.criteria?.length??s.cols.length,
-        scale:s.scale||100
-      });
-      const vis=s.cloudVisibility==='unlisted'?'unlisted':'public';
-      document.querySelectorAll('input[name="publishVisibility"]').forEach(r=>r.checked=r.value===vis);
-      $('publishExecuteBtn').textContent=s.cloudTopicId?t('publish.updateExecute'):t('publish.execute');
-      $('publishUnpublishBtn').classList.toggle('hidden',!s.cloudTopicId);
+    let user=null;
+    try{user=await ensurePublishUser()}
+    catch(error){
+      publishState.user=null;
+      $('publishAuthPane')?.classList.add('hidden');
+      $('publishSettingsPane')?.classList.remove('hidden');
+      setPublishStatus(t('publish.errorPrefix')+(error?.message||String(error)),'error');
+      return null;
     }
-    return publishState.user;
+    publishState.user=user;
+    $('publishAuthPane')?.classList.add('hidden');
+    $('publishSettingsPane')?.classList.remove('hidden');
+
+    const s=activeSheet();
+    let model=null;
+    try{model=buildPublishModel(s)}catch{}
+    if($('publishUserText')) $('publishUserText').textContent=user?.is_anonymous?t('publish.guestLabel'):(user?.email||`${user?.id?.slice(0,8)||''}…`);
+    $('publishPreviewTitle').textContent=s.title.trim()||t('fallback.untitledSheet');
+    $('publishPreviewMeta').textContent=t('publish.meta',{
+      rows:model?.rows?.length??s.rows.filter(r=>r.name.trim()).length,
+      cols:model?.criteria?.length??s.cols.length,
+      scale:s.scale||100
+    });
+    const vis=s.cloudVisibility==='unlisted'?'unlisted':'public';
+    document.querySelectorAll('input[name="publishVisibility"]').forEach(r=>r.checked=r.value===vis);
+    $('publishExecuteBtn').textContent=s.cloudTopicId?t('publish.updateExecute'):t('publish.execute');
+    $('publishUnpublishBtn').classList.toggle('hidden',!s.cloudTopicId);
+    return user;
   }
 
   async function openPublishDialog(){
@@ -1522,7 +1538,7 @@
   async function executePublish(){
     try{
       const sb=window.SM_SUPABASE?.client;if(!sb)throw new Error('Supabase client is not ready');
-      const {data,error}=await sb.auth.getUser();if(error)throw error;const user=data.user;if(!user)throw new Error(t('publish.authRequired'));if(user.is_anonymous)throw new Error(t('publish.anonRequired'));
+      const user=await ensurePublishUser();if(!user)throw new Error(t('publish.guestStartFailed'));
       const s=activeSheet(),model=buildPublishModel(s),visibility=document.querySelector('input[name="publishVisibility"]:checked')?.value||'public';setPublishStatus(t('publish.busy'));
       const now=new Date().toISOString();
       const basePayload={owner_id:user.id,title:model.title,description:model.description,language_code:model.language,score_scale:model.scale,weighted:model.weighted,visibility,allow_ratings:true,show_community:true,snapshot_version:model.version,snapshot:model,snapshot_updated_at:now,published_at:now};
@@ -1560,13 +1576,12 @@
     try{
       const sb=window.SM_SUPABASE?.client;
       if(!sb)throw new Error('Supabase client is not ready');
-      const {data,error}=await sb.auth.getUser();
-      if(error)throw error;
+      const user=await ensurePublishUser();
       const s=activeSheet();
-      if(!data.user||!s.cloudTopicId)throw new Error(t('publish.authRequired'));
+      if(!user||!s.cloudTopicId)throw new Error(t('publish.authRequired'));
 
       const {error:updateError}=await sb.from('topics')
-        .update({visibility:'private'}).eq('id',s.cloudTopicId).eq('owner_id',data.user.id);
+        .update({visibility:'private'}).eq('id',s.cloudTopicId).eq('owner_id',user.id);
       if(updateError)throw updateError;
 
       s.cloudVisibility='private';scheduleSave('');
