@@ -5,9 +5,9 @@
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
   <meta name="theme-color" content="#07101f">
   <title>Stats Maker V1.0-A2.1</title>
-  <link rel="stylesheet" href="css/style.css?v=r18c2">
+  <link rel="stylesheet" href="css/style.css?v=r18c3">
 </head>
-<body data-build="R18-COMPLETE-C2">
+<body data-build="R18-COMPLETE-C3">
 <div id="viewOnlyBanner" class="viewOnlyBanner hidden">
   <div class="viewOnlyText"><span data-i18n="viewOnly.mode">閲覧モード</span>
     <span class="viewOnlySub" data-i18n="viewOnly.subtitle">編集操作を隠して結果だけを見ています</span>
@@ -287,8 +287,8 @@
 </div>
 
 
-<div id="publishDialogBackdrop" class="dialogBackdrop hidden">
-  <div class="dialog publishDialog" role="dialog" aria-modal="true" aria-labelledby="publishDialogTitle">
+<div id="publishDialogBackdrop" class="dialogBackdrop hidden" style="position:fixed;inset:0;z-index:320;display:grid;place-items:center;padding:14px;background:rgba(0,0,0,.72);">
+  <div class="dialog publishDialog" role="dialog" aria-modal="true" aria-labelledby="publishDialogTitle" style="border:1px solid #314762;border-radius:16px;background:#0f1b2e;color:#edf4ff;box-shadow:0 24px 70px rgba(0,0,0,.52);padding:14px;">
     <div class="publishDialogHead">
       <div>
         <h3 id="publishDialogTitle" data-i18n="publish.title">公開</h3>
@@ -350,11 +350,11 @@
 </div>
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-<script src="../cloud/supabase.js?v=r18c2"></script>
-<script src="../cloud/publish-model.js?v=r18c2"></script>
-<script src="js/i18n.js?v=r18c2"></script>
-<script src="js/app.js?v=r18c2"></script>
-<script src="js/publish-guard.js?v=r18c2"></script>
+<script src="../cloud/supabase.js?v=r18c3"></script>
+<script src="../cloud/publish-model.js?v=r18c3"></script>
+<script src="js/i18n.js?v=r18c3"></script>
+<script src="js/app.js?v=r18c3"></script>
+<script src="js/publish-guard.js?v=r18c3"></script>
 <script>
 window.addEventListener("statsmaker:languagechange",event=>{
   try{

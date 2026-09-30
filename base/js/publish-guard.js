@@ -25,7 +25,7 @@
           showFallbackError('Publish Error: '+(error?.message||String(error)));
         });
     }else{
-      showFallbackError('Publish UI failed to start. Reload this page once. Build: R18 Complete C2');
+      showFallbackError('Publish UI failed to start. Reload this page once. Build: R18 Complete C3');
     }
   }
 
@@ -52,5 +52,5 @@
     bind();
   }
 
-  window.__SM_R18_COMPLETE_BUILD__='R18-COMPLETE-C2';
+  window.__SM_R18_COMPLETE_BUILD__='R18-COMPLETE-C3';
 })();
