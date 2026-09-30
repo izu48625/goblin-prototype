@@ -73,7 +73,8 @@ export const rankingCard={
 
     const list=wrap.querySelector(".ranking-list");
 
-    items.forEach((item,index)=>{
+    for(let index=0;index<items.length;index++){
+      const item=items[index];
       const val=safeNumber(item.value);
       if(val!==lastValue){
         lastRank=index+1;
@@ -146,8 +147,7 @@ export const rankingCard={
       row.querySelector(".ranking-unit").textContent=settings.unit||"";
 
       list.appendChild(row);
-    });
-
+    }
     root.appendChild(wrap);
   }
 };
