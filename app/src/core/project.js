@@ -108,7 +108,8 @@ export function createQuadrantProject(){
     xAxis:{label:"評価1",min:0,max:100,split:50},
     yAxis:{label:"評価2",min:0,max:100,split:50},
     quadrants:{topLeft:"Technical",topRight:"Superstar",bottomLeft:"Specialist",bottomRight:"Physical"},
-    markerMode:"dot"
+    markerMode:"dot",
+    labelLimit:15
   };
   return p;
 }
@@ -177,7 +178,7 @@ export function createDotProject(){
     {id:uid("item"),name:"対象C",value:80,category:"",enabled:true},
     {id:uid("item"),name:"対象D",value:74,category:"",enabled:true}
   ];
-  p.settings={unit:"PTS",min:0,max:100,autoRange:false,showValues:true,showGrid:true};
+  p.settings={unit:"PTS",min:0,max:100,autoRange:false,showValues:true,showGrid:true,displayLimit:10};
   return p;
 }
 
@@ -257,6 +258,7 @@ export function createScatterProject(){
     showMedian:false,
     showTrend:false,
     showLabels:true,
+    labelLimit:15,
     categoryColors:true
   };
   return p;
@@ -271,7 +273,7 @@ export function createRangeProject(){
     {id:uid("item"),name:"対象C",value:78,value2:69},
     {id:uid("item"),name:"対象D",value:65,value2:82}
   ];
-  p.settings={labelA:"評価1",labelB:"評価2",unit:"",autoRange:true,min:0,max:100,showDiff:true};
+  p.settings={labelA:"評価1",labelB:"評価2",unit:"",autoRange:true,min:0,max:100,showDiff:true,displayLimit:10};
   return p;
 }
 
