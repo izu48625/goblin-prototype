@@ -52,7 +52,7 @@ export const quadrant={
     wrap.querySelector(".axis-y").textContent=y.label||"Y";
 
     const placed=[];
-    (project.data.items||[]).filter(i=>i.enabled!==false&&Number.isFinite(i.x)&&Number.isFinite(i.y)).forEach(item=>{
+    for(const item of (project.data.items||[]).filter(i=>i.enabled!==false&&Number.isFinite(i.x)&&Number.isFinite(i.y))){
       const xp=((Number(item.x)-x.min)/(x.max-x.min))*100;
       const yp=((Number(item.y)-y.min)/(y.max-y.min))*100;
       const cluster=placed.filter(p=>Math.hypot(p.x-xp,p.y-yp)<12).length;
@@ -76,7 +76,7 @@ export const quadrant={
       }
       point.querySelector(".quad-point-name").textContent=item.name||"";
       chart.appendChild(point);
-    });
+    }
 
     root.appendChild(wrap);
   }
