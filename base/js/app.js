@@ -520,6 +520,111 @@
     $('sheetSelect').value=library.activeId;
   }
 
+  function communityEligibility(sheet=activeSheet()){
+    const source=sheet?.sourceCommunity;
+    if(!sheet?.sourceTopicId || !source){
+      return {visible:false,eligible:false,reason:''};
+    }
+    const rows=(sheet.rows||[]).map(r=>String(r?.name||'').trim());
+    const cols=(sheet.cols||[]).map(v=>String(v||'').trim());
+    const sameRows=Array.isArray(source.rowNames)
+      && rows.length===source.rowNames.length
+      && rows.every((name,i)=>name===String(source.rowNames[i]||'').trim());
+    const sameCols=Array.isArray(source.columnNames)
+      && cols.length===source.columnNames.length
+      && cols.every((name,i)=>name===String(source.columnNames[i]||'').trim());
+    const sameScale=Number(sheet.scale||100)===Number(source.scale||100);
+    const idsOk=Array.isArray(source.itemIds)
+      && Array.isArray(source.criterionIds)
+      && source.itemIds.length===rows.length
+      && source.criterionIds.length===cols.length
+      && source.itemIds.every(Boolean)
+      && source.criterionIds.every(Boolean);
+    const eligible=sameRows&&sameCols&&sameScale&&idsOk;
+    return {visible:true,eligible,reason:eligible?'':t('community.changed')};
+  }
+
+  function renderCommunityParticipation(){
+    const panel=$('communityJoinPanel');
+    const button=$('communityJoinBtn');
+    const reason=$('communityJoinReason');
+    if(!panel||!button||!reason)return;
+    const s=activeSheet();
+    const state=communityEligibility(s);
+    panel.classList.toggle('hidden',!state.visible);
+    if(!state.visible)return;
+    button.disabled=!state.eligible;
+    button.textContent=s.sourceCommunitySubmittedAt
+      ? t('community.updateButton')
+      : t('community.joinButton');
+    reason.textContent=state.reason;
+    reason.classList.toggle('hidden',!state.reason);
+  }
+
+  function setCommunityStatus(message='',mode=''){
+    const el=$('communityJoinStatus');
+    if(!el)return;
+    el.textContent=message;
+    el.className='communityJoinStatus'+(mode?' '+mode:'');
+  }
+
+  async function submitCommunityRating(){
+    const s=activeSheet();
+    const state=communityEligibility(s);
+    if(!state.visible || !state.eligible){
+      setCommunityStatus(state.reason||t('community.changed'),'error');
+      return;
+    }
+    const source=s.sourceCommunity;
+    const payload=[];
+    let completeRows=0;
+    for(let ri=0;ri<s.rows.length;ri++){
+      const row=s.rows[ri];
+      let complete=s.cols.length>0;
+      for(let ci=0;ci<s.cols.length;ci++){
+        const value=row?.scores?.[ci];
+        if(!Number.isFinite(value)){
+          complete=false;
+          continue;
+        }
+        payload.push({
+          item_id:source.itemIds[ri],
+          criterion_id:source.criterionIds[ci],
+          score:value
+        });
+      }
+      if(complete)completeRows++;
+    }
+    if(completeRows<1){
+      setCommunityStatus(t('community.needScore'),'error');
+      return;
+    }
+
+    const button=$('communityJoinBtn');
+    try{
+      button.disabled=true;
+      setCommunityStatus(t('community.saving'));
+      const sb=window.SM_SUPABASE?.client;
+      if(!sb)throw new Error('Supabase client is not ready');
+      await ensurePublishUser();
+      const {data,error}=await sb.rpc('save_my_topic_rating',{
+        p_topic_id:s.sourceTopicId,
+        p_scores:payload,
+        p_submit:true
+      });
+      if(error)throw error;
+      const wasUpdate=!!s.sourceCommunitySubmittedAt;
+      s.sourceCommunitySubmittedAt=Date.now();
+      scheduleSave('');
+      renderCommunityParticipation();
+      setCommunityStatus(wasUpdate?t('community.updateSuccess'):t('community.success'),'ok');
+    }catch(error){
+      console.error(error);
+      setCommunityStatus(t('community.errorPrefix')+(error?.message||String(error)),'error');
+      renderCommunityParticipation();
+    }
+  }
+
   function renderHeader(){
     const s=activeSheet();
     $('titleInput').value=s.title||'';
@@ -530,6 +635,7 @@
     if(publishBtn){
       publishBtn.textContent=s.cloudTopicId?t('publish.buttonUpdate'):t('publish.button');
     }
+    renderCommunityParticipation();
   }
 
   function renderTable(){
@@ -1815,6 +1921,7 @@
   $('publishUnpublishBtn').addEventListener('click',unpublishTopic);
   $('publishCopyBtn').addEventListener('click',copyPublishUrl);
   $('publishOpenBtn').addEventListener('click',openPublishedPage);
+  $('communityJoinBtn').addEventListener('click',submitCommunityRating);
 
   $('newSheetBtn').addEventListener('click',createNewSheet);
   $('duplicateBtn').addEventListener('click',duplicateSheet);
