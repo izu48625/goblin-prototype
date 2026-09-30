@@ -15,7 +15,7 @@ const id=params.get("id");
 let project=getProject(id);
 if(!project){
   alert(getLanguage()==="ja"?"Projectが見つかりません":"Project not found");
-  location.href="../index.html?extensions=1&v=r18c2";
+  location.href="../index.html?extensions=1&v=r18c6";
   throw new Error("Project not found");
 }
 
@@ -452,6 +452,15 @@ function buildLinkedDataPanel(p,model){
       value=>mutate(x=>syncSourceProject(x,{bIndex:Number(value)}))
     ));
     sec.appendChild(grid);
+    const count=document.createElement("div");count.className="field";
+    const countLabel=document.createElement("label");countLabel.textContent=getLanguage()==="ja"?"表示件数":"Visible targets";
+    count.appendChild(countLabel);
+    count.appendChild(choiceButtons(
+      [5,10,15,20].map(n=>({value:n,label:String(n)})),
+      Number(p.settings.displayLimit||10),
+      value=>mutate(x=>x.settings.displayLimit=Number(value))
+    ));
+    sec.appendChild(count);
     sec.appendChild(toggleOption("Difference",p.settings.showDiff!==false,()=>mutate(x=>x.settings.showDiff=x.settings.showDiff===false)));
     sec.appendChild(choiceButtons(
       [{value:"value",label:"Value"},{value:"percent",label:"%"}],
@@ -492,19 +501,52 @@ function buildLinkedDataPanel(p,model){
   }
 
   if(p.type==="bar"){
+    const count=document.createElement("div");count.className="field";
+    const label=document.createElement("label");label.textContent=getLanguage()==="ja"?"表示件数":"Visible targets";
+    count.appendChild(label);
+    count.appendChild(choiceButtons(
+      [5,10,15,20].map(n=>({value:n,label:String(n)})),
+      Number(p.settings.topN||10),
+      value=>mutate(x=>x.settings.topN=Number(value))
+    ));
+    options.appendChild(count);
     options.appendChild(toggleOption(t("bar.showValues"),p.settings.showValues!==false,()=>mutate(x=>x.settings.showValues=x.settings.showValues===false)));
     options.appendChild(toggleOption(t("bar.showGrid"),p.settings.showGrid!==false,()=>mutate(x=>x.settings.showGrid=x.settings.showGrid===false)));
   }
 
   if(p.type==="dot"){
+    const count=document.createElement("div");count.className="field";
+    const label=document.createElement("label");label.textContent=getLanguage()==="ja"?"表示件数":"Visible targets";
+    count.appendChild(label);
+    count.appendChild(choiceButtons(
+      [5,10,15,20].map(n=>({value:n,label:String(n)})),
+      Number(p.settings.displayLimit||10),
+      value=>mutate(x=>x.settings.displayLimit=Number(value))
+    ));
+    options.appendChild(count);
     options.appendChild(toggleOption("Values",p.settings.showValues!==false,()=>mutate(x=>x.settings.showValues=x.settings.showValues===false)));
     options.appendChild(toggleOption("Guide",p.settings.showGrid!==false,()=>mutate(x=>x.settings.showGrid=x.settings.showGrid===false)));
   }
 
   if(p.type==="radar"){
+    const note=document.createElement("div");note.className="source-info-note";
+    note.textContent=getLanguage()==="ja"?"比較対象は最大6件。項目は最大10件まで表示します。":"Up to 6 targets and 10 metrics are shown.";
+    options.appendChild(note);
     options.appendChild(toggleOption(t("radar.showValues"),!!p.settings.showValues,()=>mutate(x=>x.settings.showValues=!x.settings.showValues)));
     options.appendChild(toggleOption(t("radar.showLegend"),p.settings.showLegend!==false,()=>mutate(x=>x.settings.showLegend=x.settings.showLegend===false)));
     options.appendChild(toggleOption(t("radar.showAxisLabels"),p.settings.showAxisLabels!==false,()=>mutate(x=>x.settings.showAxisLabels=x.settings.showAxisLabels===false)));
+  }
+
+  if(p.type==="quadrant"){
+    const labels=document.createElement("div");labels.className="field";
+    const label=document.createElement("label");label.textContent=getLanguage()==="ja"?"ラベル表示数":"Label count";
+    labels.appendChild(label);
+    labels.appendChild(choiceButtons(
+      [10,15,20,40].map(n=>({value:n,label:n===40?(getLanguage()==="ja"?"すべて":"All"):String(n)})),
+      Number(p.settings.labelLimit||15),
+      value=>mutate(x=>x.settings.labelLimit=Number(value))
+    ));
+    options.appendChild(labels);
   }
 
   if(p.type==="scatter"){
@@ -519,6 +561,15 @@ function buildLinkedDataPanel(p,model){
       value=>mutate(x=>x.settings.rangeMode=value)
     ));
     options.appendChild(range);
+    const labels=document.createElement("div");labels.className="field";
+    const labelsText=document.createElement("label");labelsText.textContent=getLanguage()==="ja"?"ラベル表示数":"Label count";
+    labels.appendChild(labelsText);
+    labels.appendChild(choiceButtons(
+      [10,15,20,40].map(n=>({value:n,label:n===40?(getLanguage()==="ja"?"すべて":"All"):String(n)})),
+      Number(p.settings.labelLimit||15),
+      value=>mutate(x=>x.settings.labelLimit=Number(value))
+    ));
+    options.appendChild(labels);
     options.appendChild(toggleOption(getLanguage()==="ja"?"平均線":"Average lines",p.settings.showAverage!==false,()=>mutate(x=>x.settings.showAverage=x.settings.showAverage===false)));
     options.appendChild(toggleOption(getLanguage()==="ja"?"ラベル":"Labels",p.settings.showLabels!==false,()=>mutate(x=>x.settings.showLabels=x.settings.showLabels===false)));
     options.appendChild(toggleOption(getLanguage()==="ja"?"トレンド線":"Trend line",!!p.settings.showTrend,()=>mutate(x=>x.settings.showTrend=!x.settings.showTrend)));
