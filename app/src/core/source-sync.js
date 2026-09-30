@@ -285,8 +285,8 @@ function syncXY(project,model,xValue,yValue){
     id:`src_${r.rawIndex}`,
     sourceRawIndex:r.rawIndex,
     name:r.name,
-    x:Number.isFinite(r.scores[xi])?r.scores[xi]:0,
-    y:Number.isFinite(r.scores[yi])?r.scores[yi]:0,
+    x:Number.isFinite(r.scores[xi])?r.scores[xi]:null,
+    y:Number.isFinite(r.scores[yi])?r.scores[yi]:null,
     category:"",
     enabled:true,
     imageData:r.image,
@@ -302,6 +302,11 @@ function syncXY(project,model,xValue,yValue){
     ...(project.settings.yAxis||{}),
     label:yLabel,min:0,max:model.scale,split:model.scale/2
   };
+  if(project.type==="scatter"){
+    project.settings.rangeMode=project.settings.rangeMode||"auto";
+    project.settings.scaleMax=model.scale;
+    project.settings.minDisplayWidth=model.scale===10?2:20;
+  }
   project.meta.subtitle=`${xLabel} × ${yLabel}`;
 
   if(project.type==="quadrant"){

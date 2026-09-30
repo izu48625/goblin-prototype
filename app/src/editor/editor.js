@@ -15,7 +15,7 @@ const id=params.get("id");
 let project=getProject(id);
 if(!project){
   alert(getLanguage()==="ja"?"Projectが見つかりません":"Project not found");
-  location.href="../index.html?extensions=1&v=r18";
+  location.href="../index.html?extensions=1&v=r18c1";
   throw new Error("Project not found");
 }
 
@@ -508,10 +508,20 @@ function buildLinkedDataPanel(p,model){
   }
 
   if(p.type==="scatter"){
-    options.appendChild(toggleOption("Average lines",p.settings.showAverage!==false,()=>mutate(x=>x.settings.showAverage=x.settings.showAverage===false)));
-    options.appendChild(toggleOption("Median lines",!!p.settings.showMedian,()=>mutate(x=>x.settings.showMedian=!x.settings.showMedian)));
-    options.appendChild(toggleOption("Trend line",p.settings.showTrend!==false,()=>mutate(x=>x.settings.showTrend=x.settings.showTrend===false)));
-    options.appendChild(toggleOption("Labels",p.settings.showLabels!==false,()=>mutate(x=>x.settings.showLabels=x.settings.showLabels===false)));
+    const range=document.createElement("div");
+    range.className="field";
+    const rangeLabel=document.createElement("label");
+    rangeLabel.textContent=getLanguage()==="ja"?"表示範囲":"Range";
+    range.appendChild(rangeLabel);
+    range.appendChild(choiceButtons(
+      [{value:"auto",label:"Auto"},{value:"full",label:"Full"}],
+      p.settings.rangeMode||"auto",
+      value=>mutate(x=>x.settings.rangeMode=value)
+    ));
+    options.appendChild(range);
+    options.appendChild(toggleOption(getLanguage()==="ja"?"平均線":"Average lines",p.settings.showAverage!==false,()=>mutate(x=>x.settings.showAverage=x.settings.showAverage===false)));
+    options.appendChild(toggleOption(getLanguage()==="ja"?"ラベル":"Labels",p.settings.showLabels!==false,()=>mutate(x=>x.settings.showLabels=x.settings.showLabels===false)));
+    options.appendChild(toggleOption(getLanguage()==="ja"?"トレンド線":"Trend line",!!p.settings.showTrend,()=>mutate(x=>x.settings.showTrend=!x.settings.showTrend)));
   }
 
   if(p.type==="ring"){
@@ -1171,7 +1181,16 @@ function buildDataPanel(){
       const xg=document.createElement("div");xg.className="inline-grid";xg.appendChild(field("X Label",p.settings.xAxis.label,v=>mutate(x=>x.settings.xAxis.label=v)));xg.appendChild(field("X Max",p.settings.xAxis.max,v=>mutate(x=>x.settings.xAxis.max=numberValue(v)),"number"));axes.appendChild(xg);
       const yg=document.createElement("div");yg.className="inline-grid";yg.appendChild(field("Y Label",p.settings.yAxis.label,v=>mutate(x=>x.settings.yAxis.label=v)));yg.appendChild(field("Y Max",p.settings.yAxis.max,v=>mutate(x=>x.settings.yAxis.max=numberValue(v)),"number"));axes.appendChild(yg);
     }
-    const tg=document.createElement("div");tg.className="option-list";tg.appendChild(toggleOption("Average lines",p.settings.showAverage!==false,()=>mutate(x=>x.settings.showAverage=x.settings.showAverage===false)));tg.appendChild(toggleOption("Median lines",!!p.settings.showMedian,()=>mutate(x=>x.settings.showMedian=!x.settings.showMedian)));tg.appendChild(toggleOption("Trend line",p.settings.showTrend!==false,()=>mutate(x=>x.settings.showTrend=x.settings.showTrend===false)));tg.appendChild(toggleOption("Category colors",p.settings.categoryColors!==false,()=>mutate(x=>x.settings.categoryColors=x.settings.categoryColors===false)));tg.appendChild(toggleOption("Labels",p.settings.showLabels!==false,()=>mutate(x=>x.settings.showLabels=x.settings.showLabels===false)));axes.appendChild(tg);frag.appendChild(axes);
+    const rangeWrap=document.createElement("div");rangeWrap.className="field";
+    const rangeLabel=document.createElement("label");rangeLabel.textContent=getLanguage()==="ja"?"表示範囲":"Range";rangeWrap.appendChild(rangeLabel);
+    rangeWrap.appendChild(choiceButtons([{value:"auto",label:"Auto"},{value:"full",label:"Full"}],p.settings.rangeMode||"auto",v=>mutate(x=>x.settings.rangeMode=v)));
+    axes.appendChild(rangeWrap);
+    const tg=document.createElement("div");tg.className="option-list";
+    tg.appendChild(toggleOption(getLanguage()==="ja"?"平均線":"Average lines",p.settings.showAverage!==false,()=>mutate(x=>x.settings.showAverage=x.settings.showAverage===false)));
+    tg.appendChild(toggleOption(getLanguage()==="ja"?"ラベル":"Labels",p.settings.showLabels!==false,()=>mutate(x=>x.settings.showLabels=x.settings.showLabels===false)));
+    tg.appendChild(toggleOption(getLanguage()==="ja"?"トレンド線":"Trend line",!!p.settings.showTrend,()=>mutate(x=>x.settings.showTrend=!x.settings.showTrend)));
+    tg.appendChild(toggleOption(getLanguage()==="ja"?"カテゴリ色":"Category colors",p.settings.categoryColors!==false,()=>mutate(x=>x.settings.categoryColors=x.settings.categoryColors===false)));
+    axes.appendChild(tg);frag.appendChild(axes);
     const imp=section("Paste / CSV");imp.appendChild(createDataImport({kind:"scatter",onImport:(rows,mode)=>mutate(x=>{const m=rows.map(r=>({id:newItemId(),name:r.name,x:r.x,y:r.y,category:r.category||""}));x.data.items=mode==="append"?[...x.data.items,...m]:m})}));frag.appendChild(imp);
   }
 

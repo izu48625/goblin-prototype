@@ -957,26 +957,31 @@
       gap:3px;
       padding:3px 4px 1px;
     }
-    .metricHeaderName{
+    .metricHeaderInput{
+      width:100%;
       min-width:0;
-      overflow:hidden;
-      text-overflow:ellipsis;
-      white-space:nowrap;
-      text-align:center;
-      font-size:10px;
-      font-weight:950;
-      color:#e0e9f6;
-    }
-    .metricEditBtnV13{
-      flex:0 0 auto;
-      width:21px;height:21px;
-      border:0;border-radius:6px;
+      height:25px;
+      border:1px solid transparent;
+      border-radius:6px;
       background:transparent;
-      color:#70839d;
-      font-size:10px;
-      padding:0;
+      color:#e0e9f6;
+      padding:2px 4px;
+      text-align:center;
+      font:950 10px/1.2 inherit;
+      outline:none;
+      text-overflow:ellipsis;
+      transition:border-color .12s ease,background .12s ease,box-shadow .12s ease;
     }
-    .metricEditBtnV13:hover{background:#243752;color:#fff}
+    .metricHeaderInput:hover{
+      border-color:rgba(111,152,255,.22);
+      background:rgba(31,53,84,.42);
+    }
+    .metricHeaderInput:focus{
+      border-color:#6f98ff;
+      background:#0a1728;
+      box-shadow:0 0 0 2px rgba(111,152,255,.16);
+      color:#fff;
+    }
     .headerSortRow{
       display:grid;
       grid-template-columns:1fr 1fr;
@@ -1189,3 +1194,6 @@ html[lang="en"] .rankModeBtn{
 .publishStatus{min-height:18px;margin-top:10px;color:#92a5c0;font-size:10px;line-height:1.5;white-space:pre-wrap}.publishStatus.ok{color:#6fdfa2}.publishStatus.error{color:#ff8f8f}
 .publishResult{margin-top:14px;padding:12px;border:1px solid #31567d;border-radius:11px;background:#0c1a2d}.publishResultLabel{font-size:10px;color:#92a6c3;margin-bottom:6px}
 @media(max-width:620px){.publishAuthGrid{grid-template-columns:1fr}.topActions{flex-wrap:wrap}.publishDialog{width:calc(100vw - 14px)}}
+
+/* R18 Complete: keep iOS from zooming during inline metric editing. */
+@media(max-width:760px){.metricHeaderInput{font-size:16px;transform:scale(.625);transform-origin:center;width:160%;margin-left:-30%}}

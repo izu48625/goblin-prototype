@@ -395,23 +395,128 @@ function renderQuadrant(project){
   return canvas;
 }
 
+function scatterNiceStep(raw){
+  if(!Number.isFinite(raw)||raw<=0)return 1;
+  const pow=10**Math.floor(Math.log10(raw));
+  const f=raw/pow;
+  return (f<=1?1:f<=2?2:f<=5?5:10)*pow;
+}
+function scatterRange(values,scaleMax,minWidth,mode){
+  if(mode==="full"||!values.length)return {min:0,max:scaleMax,step:scatterNiceStep(scaleMax/5)};
+  let min=Math.min(...values),max=Math.max(...values),w=max-min;
+  if(w<minWidth){
+    const mid=(min+max)/2;min=mid-minWidth/2;max=mid+minWidth/2;w=minWidth;
+  }else{
+    const pad=w*.2;min-=pad;max+=pad;w=max-min;
+  }
+  let step=scatterNiceStep(w/4);
+  min=Math.floor(min/step)*step;max=Math.ceil(max/step)*step;
+  if(max-min<minWidth){
+    const need=minWidth-(max-min);min-=need/2;max+=need/2;
+    min=Math.floor(min/step)*step;max=Math.ceil(max/step)*step;
+  }
+  if(min<0){max-=min;min=0}
+  if(max>scaleMax){min-=max-scaleMax;max=scaleMax}
+  min=Math.max(0,min);max=Math.min(scaleMax,max);
+  if(max-min<minWidth){
+    if(max===scaleMax)min=Math.max(0,scaleMax-minWidth);
+    else max=Math.min(scaleMax,min+minWidth);
+  }
+  step=scatterNiceStep((max-min)/4);
+  return {min,max,step};
+}
+function scatterTicks(range){
+  const out=[],eps=range.step/100;
+  let v=Math.ceil((range.min-eps)/range.step)*range.step;
+  for(;v<=range.max+eps&&out.length<8;v+=range.step)out.push(Math.round(v*1000)/1000);
+  if(!out.length||Math.abs(out[0]-range.min)>eps)out.unshift(range.min);
+  if(Math.abs(out.at(-1)-range.max)>eps)out.push(range.max);
+  return [...new Set(out)].slice(0,7);
+}
+function scatterBoxOverlap(a,b,pad=6){return !(a.x2+pad<b.x1||a.x1-pad>b.x2||a.y2+pad<b.y1||a.y1-pad>b.y2)}
+
 function renderScatter(project){
   const {canvas,ctx,c,width,height}=baseCanvas(project);
-  const {L,R,T,B}=drawXYAxes(ctx,c,width,height,project,"SCATTER");
-  const xa=project.settings?.xAxis||{},ya=project.settings?.yAxis||{};
-  const xmin=Number(xa.min)||0,xmax=Number(xa.max)||100,ymin=Number(ya.min)||0,ymax=Number(ya.max)||100;
-  const xp=v=>L+(Number(v)-xmin)/(xmax-xmin||1)*(R-L),yp=v=>B-(Number(v)-ymin)/(ymax-ymin||1)*(B-T);
-  for(let i=1;i<5;i++){
-    const x=L+(R-L)*i/5,y=T+(B-T)*i/5;ctx.strokeStyle=c.border;ctx.globalAlpha=.5;ctx.beginPath();ctx.moveTo(x,T);ctx.lineTo(x,B);ctx.moveTo(L,y);ctx.lineTo(R,y);ctx.stroke();ctx.globalAlpha=1;
-  }
-  (project.data?.items||[]).forEach(item=>{
-    const x=xp(item.x),y=yp(item.y);ctx.fillStyle=c.accent;ctx.beginPath();ctx.arc(x,y,width*.011,0,Math.PI*2);ctx.fill();
-    if(project.settings?.showLabels!==false){font(ctx,width*.014,700,c.family);ctx.fillStyle=c.text;ctx.fillText(ellipsis(ctx,item.name||"",width*.14),x+width*.014,y-width*.01)}
+  const settings=project.settings||{};
+  const items=(project.data?.items||[]).filter(item=>item.enabled!==false&&Number.isFinite(item.x)&&Number.isFinite(item.y));
+  const scaleMax=Number(settings.scaleMax)||Math.max(Number(settings.xAxis?.max)||0,Number(settings.yAxis?.max)||0,100);
+  const minWidth=Number(settings.minDisplayWidth)||(scaleMax===10?2:20);
+  const xr=scatterRange(items.map(i=>Number(i.x)),scaleMax,minWidth,settings.rangeMode||"auto");
+  const yr=scatterRange(items.map(i=>Number(i.y)),scaleMax,minWidth,settings.rangeMode||"auto");
+
+  const pad=width*.075;
+  font(ctx,width*.018,900,c.family);ctx.fillStyle=c.accent;ctx.fillText("SCATTER",pad,70);
+  font(ctx,width*.046,900,c.family);ctx.fillStyle=c.text;ctx.fillText(ellipsis(ctx,project.meta?.title||"Scatter",width-pad*2),pad,122);
+  font(ctx,width*.017,650,c.family);ctx.fillStyle=c.muted;ctx.fillText(ellipsis(ctx,project.meta?.subtitle||"",width-pad*2),pad,157);
+
+  const L=width*.12,R=width*.93,T=height*.20,B=height*.84;
+  const xp=v=>L+(v-xr.min)/(xr.max-xr.min||1)*(R-L);
+  const yp=v=>B-(v-yr.min)/(yr.max-yr.min||1)*(B-T);
+
+  ctx.lineWidth=Math.max(1.2,width*.0015);
+  scatterTicks(xr).forEach(v=>{
+    const x=xp(v);ctx.strokeStyle=c.border;ctx.globalAlpha=.42;ctx.beginPath();ctx.moveTo(x,T);ctx.lineTo(x,B);ctx.stroke();ctx.globalAlpha=1;
+    font(ctx,width*.014,700,c.family);ctx.fillStyle=c.muted;ctx.textAlign="center";ctx.fillText(fmt(v),x,B+width*.026);
   });
-  font(ctx,width*.017,800,c.family);ctx.fillStyle=c.muted;ctx.textAlign="right";ctx.fillText(xa.label||"X",R,B+width*.05);ctx.textAlign="left";ctx.fillText(ya.label||"Y",L,T-width*.015);
+  scatterTicks(yr).forEach(v=>{
+    const y=yp(v);ctx.strokeStyle=c.border;ctx.globalAlpha=.42;ctx.beginPath();ctx.moveTo(L,y);ctx.lineTo(R,y);ctx.stroke();ctx.globalAlpha=1;
+    font(ctx,width*.014,700,c.family);ctx.fillStyle=c.muted;ctx.textAlign="right";ctx.fillText(fmt(v),L-width*.012,y+5);
+  });
+  ctx.textAlign="left";ctx.strokeStyle=c.muted;ctx.lineWidth=Math.max(2,width*.002);ctx.beginPath();ctx.moveTo(L,T);ctx.lineTo(L,B);ctx.lineTo(R,B);ctx.stroke();
+
+  const reserved=[];
+  if(items.length&&settings.showAverage!==false){
+    const ax=items.reduce((a,b)=>a+Number(b.x),0)/items.length;
+    const ay=items.reduce((a,b)=>a+Number(b.y),0)/items.length;
+    const vx=xp(ax),hy=yp(ay);
+    ctx.setLineDash([10,8]);ctx.strokeStyle=c.accent;ctx.globalAlpha=.68;ctx.beginPath();ctx.moveTo(vx,T);ctx.lineTo(vx,B);ctx.moveTo(L,hy);ctx.lineTo(R,hy);ctx.stroke();ctx.setLineDash([]);ctx.globalAlpha=1;
+    font(ctx,width*.0145,850,c.family);ctx.fillStyle=c.accent;
+    const xl=`${settings.xAxis?.label||"X"} AVG ${fmt(ax)}`;
+    const yl=`${settings.yAxis?.label||"Y"} AVG ${fmt(ay)}`;
+    const xw=Math.min(width*.22,ctx.measureText(xl).width+12),yw=Math.min(width*.22,ctx.measureText(yl).width+12);
+    const xb={x1:Math.min(R-xw,vx+8),y1:T+8,x2:Math.min(R,vx+8+xw),y2:T+32};
+    const yb={x1:R-yw-8,y1:Math.max(T,Math.min(B-28,hy-30)),x2:R-8,y2:Math.max(T,Math.min(B-28,hy-30))+26};
+    ctx.fillText(xl,xb.x1+4,xb.y2-5);ctx.fillText(yl,yb.x1+4,yb.y2-5);reserved.push(xb,yb);
+  }
+
+  const points=items.map(i=>({x:xp(Number(i.x)),y:yp(Number(i.y))}));
+  const placed=[...reserved];
+  items.forEach((item,index)=>{
+    const x=points[index].x,y=points[index].y,r=Math.max(5,width*.0095);
+    ctx.fillStyle=c.accent;ctx.beginPath();ctx.arc(x,y,r,0,Math.PI*2);ctx.fill();
+    if(settings.showLabels===false)return;
+
+    const raw=String(item.name||"").trim();if(!raw)return;
+    let size=width*(raw.length>18?.014:raw.length>12?.0155:.017);
+    font(ctx,size,800,c.family);const maxW=width*.22;
+    const lines=wrapLines(ctx,raw,maxW,2);const h=lines.length*size*1.25;
+    const w=Math.min(maxW,Math.max(...lines.map(line=>ctx.measureText(line).width),40));
+    const gap=width*.014;
+    const cand=[
+      {x1:x+gap,y1:y-gap-h,x2:x+gap+w,y2:y-gap,align:"left"},
+      {x1:x-gap-w,y1:y-gap-h,x2:x-gap,y2:y-gap,align:"right"},
+      {x1:x+gap,y1:y+gap,x2:x+gap+w,y2:y+gap+h,align:"left"},
+      {x1:x-gap-w,y1:y+gap,x2:x-gap,y2:y+gap+h,align:"right"},
+      {x1:x-w/2,y1:y-gap-h,x2:x+w/2,y2:y-gap,align:"center"},
+      {x1:x-w/2,y1:y+gap,x2:x+w/2,y2:y+gap+h,align:"center"}
+    ];
+    let box=cand.find(b=>b.x1>=L&&b.x2<=R&&b.y1>=T&&b.y2<=B&&!placed.some(p=>scatterBoxOverlap(b,p))&&!points.some((p,pi)=>pi!==index&&p.x>=b.x1-10&&p.x<=b.x2+10&&p.y>=b.y1-10&&p.y<=b.y2+10));
+    if(!box)box=cand.find(b=>b.x1>=L&&b.x2<=R&&b.y1>=T&&b.y2<=B)||cand[0];
+    placed.push(box);
+
+    const midx=(box.x1+box.x2)/2,midy=(box.y1+box.y2)/2;
+    if(Math.hypot(midx-x,midy-y)>width*.045){
+      ctx.strokeStyle=c.muted;ctx.globalAlpha=.7;ctx.lineWidth=Math.max(1,width*.0012);ctx.beginPath();ctx.moveTo(x,y);ctx.lineTo(midx,midy);ctx.stroke();ctx.globalAlpha=1;
+    }
+    ctx.textAlign=box.align;ctx.fillStyle=c.text;font(ctx,size,850,c.family);
+    const tx=box.align==="left"?box.x1:box.align==="right"?box.x2:midx;
+    lines.forEach((line,li)=>ctx.fillText(line,tx,box.y1+size*(1+li*1.22)));
+  });
+
+  font(ctx,width*.017,850,c.family);ctx.fillStyle=c.muted;ctx.textAlign="center";ctx.fillText(settings.xAxis?.label||"X",(L+R)/2,height*.93);
+  ctx.textAlign="left";ctx.fillText(settings.yAxis?.label||"Y",L,T-width*.015);
   return canvas;
 }
-
 function renderDot(project){
   const {canvas,ctx,c,width,height}=baseCanvas(project);
   const y0=drawHeader(ctx,project,c,width,{kicker:"DOT CHART",top:70});

@@ -7,7 +7,7 @@ export const quadrant={
   labelKey:"viz.quadrant",
 
   validate(project){
-    return project.data.items.every(x=>Number.isFinite(Number(x.x))&&Number.isFinite(Number(x.y)));
+    return Array.isArray(project.data?.items);
   },
 
   async render(project,root){
@@ -52,7 +52,7 @@ export const quadrant={
     wrap.querySelector(".axis-y").textContent=y.label||"Y";
 
     const placed=[];
-    (project.data.items||[]).filter(i=>i.enabled!==false).forEach(item=>{
+    (project.data.items||[]).filter(i=>i.enabled!==false&&Number.isFinite(i.x)&&Number.isFinite(i.y)).forEach(item=>{
       const xp=((Number(item.x)-x.min)/(x.max-x.min))*100;
       const yp=((Number(item.y)-y.min)/(y.max-y.min))*100;
       const cluster=placed.filter(p=>Math.hypot(p.x-xp,p.y-yp)<12).length;

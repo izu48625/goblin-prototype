@@ -541,8 +541,7 @@
       h+=`<th class="metricHead">
         <div class="metricHeaderBox">
           <div class="metricHeaderMain">
-            <span class="metricHeaderName">${esc(name)}</span>
-            <button class="metricEditBtnV13" data-edit-col="${ci}" type="button" aria-label="${esc(t('aria.editMetric',{name}))}">✎</button>
+            <input class="metricHeaderInput" data-col-name="${ci}" value="${esc(name)}" aria-label="${esc(t('aria.editMetric',{name}))}" autocomplete="off" spellcheck="false">
           </div>
           <div class="headerSortRow">
             <button class="headerSortBtn" data-sort-now="${ci}" data-sort-dir="asc" type="button" aria-label="${esc(t('aria.sortAsc',{name}))}">▲</button>
@@ -599,16 +598,58 @@
       scheduleSave('');
     }));
 
-    document.querySelectorAll('[data-edit-col]').forEach(el=>el.addEventListener('click',e=>{
-      e.stopPropagation();
-      const i=+e.currentTarget.dataset.editCol;
-      const current=s.cols[i]||t('fallback.metric',{n:i+1});
-      const next=window.prompt(t('metric.editPrompt'),current);
-      if(next===null)return;
-      s.cols[i]=next.trim()||current;
-      renderAll();
-      scheduleSave(t('metric.saved'));
-    }));
+    document.querySelectorAll('[data-col-name]').forEach(el=>{
+      const i=+el.dataset.colName;
+      const fallback=t('fallback.metric',{n:i+1});
+
+      el.addEventListener('focus',e=>{
+        e.currentTarget.dataset.original=s.cols[i]||fallback;
+      });
+
+      el.addEventListener('input',e=>{
+        s.cols[i]=e.currentTarget.value;
+        renderSidebar();
+        renderOverview();
+        renderFitTable();
+        renderColumnManager();
+        scheduleSave('');
+      });
+
+      el.addEventListener('keydown',e=>{
+        if(e.key==='Enter'){
+          e.preventDefault();
+          e.currentTarget.blur();
+          return;
+        }
+        if(e.key==='Escape'){
+          e.preventDefault();
+          const original=e.currentTarget.dataset.original||fallback;
+          s.cols[i]=original;
+          e.currentTarget.value=original;
+          e.currentTarget.dataset.cancelled='1';
+          e.currentTarget.blur();
+        }
+      });
+
+      el.addEventListener('blur',e=>{
+        const original=e.currentTarget.dataset.original||fallback;
+        const value=e.currentTarget.value.trim();
+        const finalName=value||original||fallback;
+        s.cols[i]=finalName;
+        e.currentTarget.value=finalName;
+        renderSidebar();
+        renderOverview();
+        renderFitTable();
+        renderColumnManager();
+
+        if(e.currentTarget.dataset.cancelled==='1'){
+          delete e.currentTarget.dataset.cancelled;
+          scheduleSave('');
+        }else{
+          scheduleSave(t('metric.saved'));
+        }
+      });
+    });
 
     document.querySelectorAll('[data-score-row]').forEach(el=>el.addEventListener('change',e=>{
       const ri=+e.currentTarget.dataset.scoreRow,ci=+e.currentTarget.dataset.scoreCol;
@@ -1389,19 +1430,33 @@
   }
 
   async function openPublishDialog(){
-    $('publishDialogBackdrop').classList.remove('hidden');
-    $('publishResult').classList.add('hidden');
+    const backdrop=$('publishDialogBackdrop');
+    if(!backdrop)return;
+    backdrop.classList.remove('hidden');
+    $('publishResult')?.classList.add('hidden');
     setPublishStatus('');
-    await refreshPublishAuth();
+    try{
+      await refreshPublishAuth();
+    }catch(error){
+      console.error('[Stats Maker] Publish auth refresh failed',error);
+      setPublishStatus(t('publish.errorPrefix')+(error?.message||String(error)),'error');
+    }
     const s=activeSheet();
     if(s.cloudTopicId&&s.cloudVisibility!=='private'){
       publishState.url=publicPageUrl(s.cloudTopicId);
-      $('publishUrlInput').value=publishState.url;
-      $('publishResult').classList.remove('hidden');
+      if($('publishUrlInput'))$('publishUrlInput').value=publishState.url;
+      $('publishResult')?.classList.remove('hidden');
     }
   }
 
-  function closePublishDialog(){$('publishDialogBackdrop').classList.add('hidden')}
+  function closePublishDialog(){$('publishDialogBackdrop')?.classList.add('hidden')}
+
+  // Independent entry point used by the R18 Complete publish guard.
+  window.SM_PUBLISH_UI={
+    open:openPublishDialog,
+    close:closePublishDialog,
+    refresh:refreshPublishAuth
+  };
 
   async function publishSignUp(){
     try{
