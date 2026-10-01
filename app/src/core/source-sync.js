@@ -199,6 +199,7 @@ function syncMetricItems(project,model,key,rawIndices){
   const fullPool=["ranking-card","bar","dot","tier-list"].includes(project.type);
   const max=fullPool?40:20;
   const fallback=fullPool?40:10;
+  const legacyAutoPool=fullPool && project.type!=="tier-list" && !project.settings.sourcePoolMode;
   const useRaw=fullPool && project.type!=="tier-list" && project.settings.sourcePoolMode!=="custom"
     ? undefined
     : rawIndices;
@@ -230,7 +231,7 @@ function syncMetricItems(project,model,key,rawIndices){
 
   if(project.type==="ranking-card"){
 
-    const currentTop=Number(project.settings.topN);
+    const currentTop=legacyAutoPool?10:Number(project.settings.topN);
     project.settings.topN=Number.isFinite(currentTop)&&currentTop>0
       ? Math.min(20,Math.max(1,currentTop))
       : 10;
@@ -253,7 +254,9 @@ function syncMetricItems(project,model,key,rawIndices){
     project.settings.min=0;
     project.settings.max=model.scale;
     project.settings.autoRange=false;
-    project.settings.displayLimit=Math.min(20,Math.max(1,Number(project.settings.displayLimit)||10));
+    project.settings.displayLimit=legacyAutoPool
+      ? 10
+      : Math.min(20,Math.max(1,Number(project.settings.displayLimit)||10));
     project.meta.subtitle=label;
   }else if(project.type==="tier-list"){
     project.meta.subtitle=label;
