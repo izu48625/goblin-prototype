@@ -499,6 +499,23 @@ function buildLinkedDataPanel(p,model){
     frag.appendChild(sec);
   }
 
+  if(["ranking-card","bar","dot"].includes(p.type)){
+    const sec=section(getLanguage()==="ja"?"表示対象":"Visible targets");
+    const fallback=model.rows.slice(0,Math.min(10,model.rows.length)).map(row=>row.rawIndex);
+    sec.appendChild(sourceSubjectChecks(
+      model,
+      Array.isArray(p.settings.sourceItemIndices)?p.settings.sourceItemIndices:fallback,
+      indices=>mutate(x=>{
+        syncSourceProject(x,{itemIndices:indices});
+        const visible=Math.max(1,indices.length);
+        if(x.type==="ranking-card"||x.type==="bar")x.settings.topN=Math.min(20,visible);
+        if(x.type==="dot")x.settings.displayLimit=Math.min(20,visible);
+      }),
+      {max:20}
+    ));
+    frag.appendChild(sec);
+  }
+
   if(p.type==="quadrant" || p.type==="scatter"){
     const sec=section("軸");
     const grid=document.createElement("div");
@@ -525,6 +542,20 @@ function buildLinkedDataPanel(p,model){
       sec.appendChild(split);
     }
     frag.appendChild(sec);
+
+    const highlight=section(getLanguage()==="ja"?"強調表示":"Highlight targets");
+    const help=document.createElement("div");
+    help.className="source-info-note";
+    help.textContent=getLanguage()==="ja"
+      ?"見つけやすくしたい対象を選び、丸の色を個別に変更できます。"
+      :"Choose targets to make their points easier to spot and set a color for each.";
+    highlight.appendChild(help);
+    highlight.appendChild(sourceHighlightControls(
+      model,
+      p.settings.highlightColors||{},
+      colors=>mutate(x=>x.settings.highlightColors=colors)
+    ));
+    frag.appendChild(highlight);
   }
 
   if(p.type==="range"){
@@ -560,6 +591,19 @@ function buildLinkedDataPanel(p,model){
       v=>mutate(x=>x.settings.diffMode=v)
     ));
     frag.appendChild(sec);
+
+    const subjects=section(getLanguage()==="ja"?"表示対象":"Visible targets");
+    const fallback=model.rows.slice(0,Math.min(10,model.rows.length)).map(row=>row.rawIndex);
+    subjects.appendChild(sourceSubjectChecks(
+      model,
+      Array.isArray(p.settings.sourceRangeIndices)?p.settings.sourceRangeIndices:fallback,
+      indices=>mutate(x=>{
+        syncSourceProject(x,{rangeIndices:indices});
+        x.settings.displayLimit=Math.min(20,Math.max(1,indices.length));
+      }),
+      {max:20}
+    ));
+    frag.appendChild(subjects);
   }
 
   if(p.type==="radar"){
@@ -567,7 +611,8 @@ function buildLinkedDataPanel(p,model){
     sec.appendChild(sourceSubjectChecks(
       model,
       p.settings.sourceSeriesIndices||[],
-      indices=>mutate(x=>syncSourceProject(x,{seriesIndices:indices}))
+      indices=>mutate(x=>syncSourceProject(x,{seriesIndices:indices})),
+      {max:6}
     ));
     frag.appendChild(sec);
   }
