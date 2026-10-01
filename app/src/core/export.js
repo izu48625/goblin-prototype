@@ -184,7 +184,7 @@ function drawCover(ctx,img,x,y,w,h,shape="rounded"){
   ctx.restore();
 }
 
-async async function renderRanking(project){
+async function renderRanking(project){
   const {canvas,ctx,c,width,height}=baseCanvas(project);
   const settings=project.settings||{};
   const items=(project.data?.items||[]).filter(x=>x.enabled!==false)
@@ -259,7 +259,7 @@ async async function renderRanking(project){
   return canvas;
 }
 
-async async function renderStat(project){
+async function renderStat(project){
   const {canvas,ctx,c,width,height}=baseCanvas(project);
   const pad=width*.12;
   const top=height*.07;
