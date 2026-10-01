@@ -1490,7 +1490,7 @@
   function publicPageUrl(topicId){
     const url=new URL('../public.html',location.href);
     url.searchParams.set('id',topicId);
-    url.searchParams.set('v','r19p1');
+    url.searchParams.set('v','r19p2');
     return url.href;
   }
 

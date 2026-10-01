@@ -25,3 +25,11 @@
 - Fixed stale R18 cache references in the main editor/public entry points and the old Remix redirect.
 - No database migration is required.
 - Active cache key: r19p1.
+
+## P2 Ranking labels
+- Renamed creator-facing ranking labels for clarity:
+  - 作成者1位 → あなたの総合1位
+  - 作成者ランキング → あなたの総合ランキング
+  - Community Ranking → Community総合ランキング
+- English labels updated to “Your Overall #1”, “Your Overall Ranking”, and “Community Overall Ranking”.
+- Active cache key: r19p2.

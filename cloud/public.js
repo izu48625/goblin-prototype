@@ -80,7 +80,7 @@
 
         <div class="summaryStrip">
           <div class="summaryStat">
-            <div class="summaryLabel">${ja?'作成者1位':'Creator #1'}</div>
+            <div class="summaryLabel">${ja?'あなたの総合1位':'Your Overall #1'}</div>
             <div class="summaryValue accent">${creatorTop?fmt(creatorTop.value):'—'}</div>
             <div class="summarySub">${creatorTop?esc(creatorTop.name):(ja?'採点なし':'No scores')}</div>
           </div>
@@ -119,7 +119,7 @@
         </section>
         <aside>
           <section class="card">
-            <div class="cardTitleRow"><h2>${ja?'作成者ランキング':'Creator Ranking'}</h2><span class="smallBadge">TOP ${Math.min(10,creatorRanking.length)}</span></div>
+            <div class="cardTitleRow"><h2>${ja?'あなたの総合ランキング':'Your Overall Ranking'}</h2><span class="smallBadge">TOP ${Math.min(10,creatorRanking.length)}</span></div>
             <div class="ranking">${creatorRanking.length?creatorRanking.slice(0,10).map((item,i)=>`<div class="rankRow"><div class="rankNo">${i+1}</div><div class="rankName">${esc(item.name)}</div><div class="rankValue">${fmt(item.value)}</div></div>`).join(''):`<div class="emptyCommunity">${ja?'採点データがありません。':'No scored data yet.'}</div>`}</div>
           </section>
           <section class="card" style="margin-top:14px">
@@ -141,7 +141,7 @@
         const sheet=window.SM_REMIX.buildSheet(data,snap,dbCriteria,items,ja?'ja':'en');
         window.SM_REMIX.saveSheet(sheet);
         toast(ja?'Remixしました。編集画面へ移動します。':'Remixed. Opening the editor…');
-        setTimeout(()=>{location.href='index.html?remixed=1&v=r19p1'},500);
+        setTimeout(()=>{location.href='index.html?remixed=1&v=r19p2'},500);
       }catch(e){toast((ja?'Remixに失敗しました：':'Remix failed: ')+(e?.message||e))}
     };
     document.getElementById('shareBtn').onclick=async()=>{
@@ -169,7 +169,7 @@
           }
           sessionStorage.setItem('statsMaker:openPublish','1');
         }catch{}
-        location.href='index.html?v=r19p1&from=public';
+        location.href='index.html?v=r19p2&from=public';
       };
     };
 
@@ -202,7 +202,7 @@
       document.getElementById('communityContent').className='';
       document.getElementById('communityContent').innerHTML=`
         <div class="communityHero"><div class="participantBox"><div><div class="participantNumber">${participant}</div><div class="participantLabel">${ja?'参加者':'PARTICIPANTS'}</div></div></div><div class="privacyNote">${participant<5?(ja?'5人未満では平均点を表示しません。人数だけ表示して個人の評価を守ります。':'Averages stay hidden until 5 eligible participants have submitted ratings.'):(ja?'5人以上集まったためCommunity平均を表示しています。':'Community averages are available because at least 5 eligible participants have submitted.')}</div></div>
-        <div class="communityGrid"><section><h2>${ja?'Community Ranking':'Community Ranking'}</h2><div class="ranking">${communityRanking.length?communityRanking.slice(0,10).map((item,i)=>`<div class="rankRow"><div class="rankNo">${i+1}</div><div class="rankName">${esc(item.name)}</div><div class="rankValue">${item.value===null?'—':fmt(item.value)}</div></div>`).join(''):`<div class="emptyCommunity">${ja?'まだ投稿された評価がありません。':'No submitted ratings yet.'}</div>`}</div></section><section><h2>${ja?'項目別Community平均':'Community Metric Averages'}</h2>${communityTable}</section></div>${ownHtml}`;
+        <div class="communityGrid"><section><h2>${ja?'Community総合ランキング':'Community Overall Ranking'}</h2><div class="ranking">${communityRanking.length?communityRanking.slice(0,10).map((item,i)=>`<div class="rankRow"><div class="rankNo">${i+1}</div><div class="rankName">${esc(item.name)}</div><div class="rankValue">${item.value===null?'—':fmt(item.value)}</div></div>`).join(''):`<div class="emptyCommunity">${ja?'まだ投稿された評価がありません。':'No submitted ratings yet.'}</div>`}</div></section><section><h2>${ja?'項目別Community平均':'Community Metric Averages'}</h2>${communityTable}</section></div>${ownHtml}`;
     }else{
       document.getElementById('communityContent').textContent=ja?'この公開ページではCommunity集計が非表示です。':'Community results are hidden for this page.';
     }
