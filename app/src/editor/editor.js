@@ -500,18 +500,22 @@ function buildLinkedDataPanel(p,model){
   }
 
   if(["ranking-card","bar","dot"].includes(p.type)){
-    const sec=section(getLanguage()==="ja"?"表示対象":"Visible targets");
-    const fallback=model.rows.slice(0,Math.min(10,model.rows.length)).map(row=>row.rawIndex);
+    const sec=section(getLanguage()==="ja"?"集計対象":"Ranking pool");
+    const fallback=model.rows.map(row=>row.rawIndex);
+    const note=document.createElement("div");
+    note.className="source-info-note";
+    note.textContent=getLanguage()==="ja"
+      ?"初期状態では全対象を集計し、その中から上位10件を表示します。チェックを外すと、選択した対象だけで順位を計算します。"
+      :"By default all targets are included and the top 10 are shown. Uncheck targets to rank only the selected pool.";
+    sec.appendChild(note);
     sec.appendChild(sourceSubjectChecks(
       model,
       Array.isArray(p.settings.sourceItemIndices)?p.settings.sourceItemIndices:fallback,
       indices=>mutate(x=>{
+        x.settings.sourcePoolMode="custom";
         syncSourceProject(x,{itemIndices:indices});
-        const visible=Math.max(1,indices.length);
-        if(x.type==="ranking-card"||x.type==="bar")x.settings.topN=Math.min(20,visible);
-        if(x.type==="dot")x.settings.displayLimit=Math.min(20,visible);
       }),
-      {max:20}
+      {max:40}
     ));
     frag.appendChild(sec);
   }

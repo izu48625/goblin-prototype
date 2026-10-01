@@ -196,10 +196,18 @@ function syncMetricItems(project,model,key,rawIndices){
   const label=model.metricLabel(key);
   project.settings.sourceMetricKey=key;
 
-  const max=project.type==="tier-list"?40:20;
-  const fallback=project.type==="tier-list"?40:10;
-  const selection=selectedRows(model,rawIndices,max,fallback);
-  if(project.type!=="tier-list")project.settings.sourceItemIndices=selection.indices;
+  const fullPool=["ranking-card","bar","dot","tier-list"].includes(project.type);
+  const max=fullPool?40:20;
+  const fallback=fullPool?40:10;
+  const legacyAutoPool=fullPool && project.type!=="tier-list" && !project.settings.sourcePoolMode;
+  const useRaw=fullPool && project.type!=="tier-list" && project.settings.sourcePoolMode!=="custom"
+    ? undefined
+    : rawIndices;
+  const selection=selectedRows(model,useRaw,max,fallback);
+  if(project.type!=="tier-list"){
+    project.settings.sourceItemIndices=selection.indices;
+    if(!project.settings.sourcePoolMode)project.settings.sourcePoolMode="all";
+  }
 
   project.data.items=selection.rows.map(r=>({
     id:`src_${r.rawIndex}`,
@@ -214,25 +222,28 @@ function syncMetricItems(project,model,key,rawIndices){
     enabled:true
   })).filter(item=>Number.isFinite(item.value));
 
-  if(project.type==="ranking-card"){
+  if(["ranking-card","bar","dot"].includes(project.type)){
     project.data.items.sort((a,b)=>
       Number(b.value)-Number(a.value)
       || Number(a.sourceRawIndex)-Number(b.sourceRawIndex)
     );
+  }
 
-    const currentTop=Number(project.settings.topN);
+  if(project.type==="ranking-card"){
+
+    const currentTop=legacyAutoPool?10:Number(project.settings.topN);
     project.settings.topN=Number.isFinite(currentTop)&&currentTop>0
       ? Math.min(20,Math.max(1,currentTop))
-      : Math.min(20,Math.max(1,project.data.items.length));
+      : 10;
     project.settings.unit="";
     project.settings.headerLabel=label;
     project.settings.showCategory=false;
     project.meta.subtitle=`${label}ランキング`;
   }else if(project.type==="bar"){
-    const currentTop=Number(project.settings.topN);
+    const currentTop=legacyAutoPool?10:Number(project.settings.topN);
     project.settings.topN=Number.isFinite(currentTop)&&currentTop>0
       ? Math.min(20,Math.max(1,currentTop))
-      : Math.min(10,Math.max(1,project.data.items.length));
+      : 10;
     project.settings.unit="";
     project.settings.showCategory=false;
     project.settings.autoMax=false;
@@ -243,7 +254,9 @@ function syncMetricItems(project,model,key,rawIndices){
     project.settings.min=0;
     project.settings.max=model.scale;
     project.settings.autoRange=false;
-    project.settings.displayLimit=Math.min(20,Math.max(1,Number(project.settings.displayLimit)||10));
+    project.settings.displayLimit=legacyAutoPool
+      ? 10
+      : Math.min(20,Math.max(1,Number(project.settings.displayLimit)||10));
     project.meta.subtitle=label;
   }else if(project.type==="tier-list"){
     project.meta.subtitle=label;
