@@ -196,8 +196,9 @@ function syncMetricItems(project,model,key,rawIndices){
   const label=model.metricLabel(key);
   project.settings.sourceMetricKey=key;
 
-  const max=project.type==="tier-list"?40:20;
-  const fallback=project.type==="tier-list"?40:10;
+  const fullPool=["ranking-card","bar","dot","tier-list"].includes(project.type);
+  const max=fullPool?40:20;
+  const fallback=fullPool?40:10;
   const selection=selectedRows(model,rawIndices,max,fallback);
   if(project.type!=="tier-list")project.settings.sourceItemIndices=selection.indices;
 
@@ -214,16 +215,19 @@ function syncMetricItems(project,model,key,rawIndices){
     enabled:true
   })).filter(item=>Number.isFinite(item.value));
 
-  if(project.type==="ranking-card"){
+  if(["ranking-card","bar","dot"].includes(project.type)){
     project.data.items.sort((a,b)=>
       Number(b.value)-Number(a.value)
       || Number(a.sourceRawIndex)-Number(b.sourceRawIndex)
     );
+  }
+
+  if(project.type==="ranking-card"){
 
     const currentTop=Number(project.settings.topN);
     project.settings.topN=Number.isFinite(currentTop)&&currentTop>0
       ? Math.min(20,Math.max(1,currentTop))
-      : Math.min(20,Math.max(1,project.data.items.length));
+      : 10;
     project.settings.unit="";
     project.settings.headerLabel=label;
     project.settings.showCategory=false;
@@ -232,7 +236,7 @@ function syncMetricItems(project,model,key,rawIndices){
     const currentTop=Number(project.settings.topN);
     project.settings.topN=Number.isFinite(currentTop)&&currentTop>0
       ? Math.min(20,Math.max(1,currentTop))
-      : Math.min(10,Math.max(1,project.data.items.length));
+      : 10;
     project.settings.unit="";
     project.settings.showCategory=false;
     project.settings.autoMax=false;
