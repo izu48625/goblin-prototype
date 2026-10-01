@@ -5,9 +5,9 @@
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
   <meta name="theme-color" content="#07101f">
   <title>Stats Maker V1.0-A2.1</title>
-  <link rel="stylesheet" href="css/style.css?v=r19p2">
+  <link rel="stylesheet" href="css/style.css?v=r20p1">
 </head>
-<body data-build="R19-P2">
+<body data-build="R20-P1">
 <div id="viewOnlyBanner" class="viewOnlyBanner hidden">
   <div class="viewOnlyText"><span data-i18n="viewOnly.mode">閲覧モード</span>
     <span class="viewOnlySub" data-i18n="viewOnly.subtitle">編集操作を隠して結果だけを見ています</span>
@@ -54,7 +54,7 @@
     <div class="communityJoinCopy">
       <div class="eyebrow">COMMUNITY</div>
       <div class="communityJoinTitle" data-i18n="community.joinTitle">Communityに参加</div>
-      <div id="communityJoinNotice" class="communityJoinNotice" data-i18n="community.joinNotice">元の公開作品と対象・評価項目・点数尺度が同じ場合のみ、Communityへ評価を投稿できます。対象や評価項目を追加・削除した場合は、元作品のCommunityには参加できません。</div>
+      <div id="communityJoinNotice" class="communityJoinNotice" data-i18n="community.joinNotice">元の公開作品と対象・評価項目・点数尺度が同じ場合のみ、Communityへ評価を投稿できます。対象や評価項目を追加・削除した場合は参加できません。同じ参加者の再投稿は新しい1票を増やさず、既存評価の更新になります。</div>
       <div id="communityJoinReason" class="communityJoinReason hidden"></div>
     </div>
     <div class="communityJoinActions">
@@ -364,11 +364,11 @@
 </div>
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-<script src="../cloud/supabase.js?v=r19p2"></script>
-<script src="../cloud/publish-model.js?v=r19p2"></script>
-<script src="js/i18n.js?v=r19p2"></script>
-<script src="js/app.js?v=r19p2"></script>
-<script src="js/publish-guard.js?v=r19p2"></script>
+<script src="../cloud/supabase.js?v=r20p1"></script>
+<script src="../cloud/publish-model.js?v=r20p1"></script>
+<script src="js/i18n.js?v=r20p1"></script>
+<script src="js/app.js?v=r20p1"></script>
+<script src="js/publish-guard.js?v=r20p1"></script>
 <script>
 window.addEventListener("statsmaker:languagechange",event=>{
   try{
