@@ -69,3 +69,25 @@ a{color:inherit}
   .publicFooter{flex-direction:column;align-items:flex-start}
 }
 
+/* ===== R20 Community core ===== */
+.privacyNote{display:flex;flex-direction:column;gap:6px}
+.privacyNote b{color:#d6e3f5;font-size:11px}
+.privacyNote span{color:#91a4bf;font-size:10px;line-height:1.6}
+.rankName small{display:block;margin-top:3px;color:#6f86a5;font-size:8px;font-weight:800}
+.metricSummaryGrid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}
+.metricSummaryCard{position:relative;padding:11px;border:1px solid #2b4564;border-radius:11px;background:#0a1728;min-width:0}
+.metricSummaryName{color:#91a6c3;font-size:9px;font-weight:900;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.metricSummaryValue{margin-top:5px;color:#91b5ff;font-size:22px;font-weight:1000;line-height:1}
+.metricSummaryScale{position:absolute;right:9px;bottom:9px;color:#617a9a;font-size:8px;font-weight:850}
+.privacyLock{min-height:124px;display:grid;place-content:center;gap:7px;text-align:center;padding:16px;border:1px dashed #36506f;border-radius:12px;background:#091625}
+.privacyLock b{color:#bed0e8;font-size:12px}
+.privacyLock span{max-width:320px;color:#7188a7;font-size:9px;line-height:1.6}
+.privacyLock.compact{min-height:124px}
+.communityMatrix{margin-top:14px;padding-top:14px;border-top:1px solid #263d59}
+.compareCommunityCard{margin-top:14px;background:#0c192a}
+.communityGrid>section{min-width:0}
+@media(max-width:520px){
+  .metricSummaryGrid{grid-template-columns:1fr 1fr}
+  .metricSummaryValue{font-size:19px}
+}
+
