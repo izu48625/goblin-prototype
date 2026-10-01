@@ -68,7 +68,11 @@ export const quadrant={
       const key=String(item.sourceRawIndex??item.id??pointIndex);
       const highlight=project.settings?.highlightColors?.[key]||"";
       if(highlight){
-        dot.style.background=highlight;
+        // Keep the selected target color explicit even when marker styles or
+        // image-marker rules are also active.
+        dot.style.backgroundColor=highlight;
+        dot.style.borderColor=highlight;
+        dot.style.setProperty("--point-highlight-color",highlight);
         dot.classList.add("highlighted");
       }
       if(item.imageRef){
