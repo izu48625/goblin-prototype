@@ -91,7 +91,7 @@ export function createStatCardProject(){
       {id:uid("stat"),label:"評価6",value:84}
     ]
   };
-  p.settings={template:"sports",maxStats:12};
+  p.settings={template:"sports",maxStats:10};
   return p;
 }
 
