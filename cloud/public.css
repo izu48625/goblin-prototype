@@ -23,6 +23,7 @@ a{color:inherit}
 .visibilityBadge{display:inline-flex;align-items:center;gap:7px;padding:7px 10px;border-radius:999px;border:1px solid #365577;background:#0b192a;color:#bed0e8;font-size:9px;font-weight:950;letter-spacing:.05em}
 .visibilityBadge:before{content:"";width:7px;height:7px;border-radius:50%;background:var(--good);box-shadow:0 0 0 4px rgba(109,218,162,.09)}
 .visibilityBadge.unlisted:before{background:var(--warn);box-shadow:0 0 0 4px rgba(214,179,108,.09)}
+.visibilityBadge.private:before{background:#8290a5;box-shadow:0 0 0 4px rgba(130,144,165,.09)}
 .updatedAt{color:#7187a5;font-size:9px;font-weight:800}
 .hero h1{max-width:900px}
 .heroScope{margin-top:12px;padding:9px 11px;border-left:3px solid #496f9f;background:rgba(6,14,25,.36);border-radius:0 9px 9px 0;color:#91a6c3;font-size:10px;line-height:1.55}
