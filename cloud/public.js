@@ -38,6 +38,10 @@
     if(error)throw error;
 
     const ja=data.language_code!=='en';document.documentElement.lang=ja?'ja':'en';document.title=`${data.title} - Stats Maker`;
+    const metaDescription=document.querySelector('meta[name="description"]');
+    if(metaDescription)metaDescription.content=data.description||`${data.title} - Stats Maker`;
+    const footerOpen=document.getElementById('footerOpenApp');
+    if(footerOpen)footerOpen.textContent=ja?'Stats Makerを開く':'Open Stats Maker';
     let currentUser=null;
     try{currentUser=(await sb.auth.getUser()).data?.user||null}catch{}
     const isOwner=!!currentUser&&currentUser.id===data.owner_id;
