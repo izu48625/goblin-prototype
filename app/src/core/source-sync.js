@@ -173,12 +173,10 @@ function criterionIndex(model,value,fallback=0){
 
 function selectedRows(model,rawIndices,max=20,fallbackCount=10){
   const valid=new Set(model.rows.map(r=>r.rawIndex));
-  let indices=Array.isArray(rawIndices)
+  const explicit=Array.isArray(rawIndices);
+  let indices=explicit
     ? rawIndices.map(Number).filter(Number.isInteger).filter(i=>valid.has(i))
-    : [];
-  if(!indices.length){
-    indices=model.rows.slice(0,Math.min(fallbackCount,model.rows.length)).map(r=>r.rawIndex);
-  }
+    : model.rows.slice(0,Math.min(fallbackCount,model.rows.length)).map(r=>r.rawIndex);
   indices=[...new Set(indices)].slice(0,max);
   return {
     indices,
@@ -394,14 +392,12 @@ function syncRing(project,model,rawIndex){
 
 function syncRadar(project,model,rawIndices){
   const valid=new Set(model.rows.map(r=>r.rawIndex));
-  let indices=Array.isArray(rawIndices)
+  const explicit=Array.isArray(rawIndices);
+  let indices=explicit
     ? rawIndices.map(Number).filter(Number.isInteger).filter(i=>valid.has(i))
-    : [];
+    : model.compare.filter(i=>valid.has(i));
 
-  if(!indices.length){
-    indices=model.compare.filter(i=>valid.has(i));
-  }
-  if(!indices.length){
+  if(!explicit && !indices.length){
     indices=model.rows.slice(0,Math.min(3,model.rows.length)).map(r=>r.rawIndex);
   }
   indices=[...new Set(indices)].slice(0,6);
@@ -496,7 +492,6 @@ export function syncSourceProject(project,changes={},explicitSheet=null){
       project,model,
       changes.seriesIndices
         ?? project.settings.sourceSeriesIndices
-        ?? model.compare
     );
   }
   return project;
