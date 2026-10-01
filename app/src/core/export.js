@@ -184,7 +184,7 @@ function drawCover(ctx,img,x,y,w,h,shape="rounded"){
   ctx.restore();
 }
 
-async function renderRanking(project){
+async async function renderRanking(project){
   const {canvas,ctx,c,width,height}=baseCanvas(project);
   const settings=project.settings||{};
   const items=(project.data?.items||[]).filter(x=>x.enabled!==false)
@@ -195,6 +195,7 @@ async function renderRanking(project){
   const bottom=height*.075;
   const available=Math.max(200,height-y0-bottom);
   const rowH=Math.min(width*.105,(available-gap*(items.length-1))/Math.max(1,items.length));
+  const maxValue=Math.max(1,...items.map(x=>Number(x.value)||0));
   let lastVal=null,lastRank=0;
 
   for(let i=0;i<items.length;i++){
@@ -202,19 +203,31 @@ async function renderRanking(project){
     const y=y0+i*(rowH+gap);
     const val=Number(item.value)||0;
     if(val!==lastVal){lastRank=i+1;lastVal=val}
-    const stroke=lastRank===1?"#E8C45A":lastRank===2?"#BFC8D6":lastRank===3?"#C88E59":c.border;
+    const medal=lastRank===1?"#E8C45A":lastRank===2?"#BFC8D6":lastRank===3?"#C88E59":c.border;
+    const stroke=settings.highlightTop3!==false&&lastRank<=3?medal:c.border;
     fillRound(ctx,pad,y,width-pad*2,rowH,rowH*.12,c.surface,stroke,Math.max(2,width*.002));
+
+    if(settings.showBars!==false){
+      const ratio=Math.max(0,Math.min(1,val/maxValue));
+      ctx.save();
+      ctx.globalAlpha=.10;
+      fillRound(ctx,pad,y,(width-pad*2)*ratio,rowH,rowH*.12,c.accent);
+      ctx.restore();
+    }
 
     const rankSize=rowH*.42;
     const rx=pad+rowH*.15, ry=y+(rowH-rankSize)/2;
-    fillRound(ctx,rx,ry,rankSize,rankSize,rankSize*.2,lastRank<=3?stroke:"#34445D");
-    font(ctx,rankSize*.48,900,c.family);
-    ctx.fillStyle=lastRank<=3?"#132034":c.muted;
-    ctx.textAlign="center";
-    ctx.textBaseline="middle";
-    ctx.fillText(String(lastRank),rx+rankSize/2,ry+rankSize/2+1);
-    ctx.textAlign="left";
-    ctx.textBaseline="alphabetic";
+    if(settings.showRank!==false){
+      fillRound(ctx,rx,ry,rankSize,rankSize,rankSize*.2,
+        settings.highlightTop3!==false&&lastRank<=3?medal:"#34445D");
+      font(ctx,rankSize*.48,900,c.family);
+      ctx.fillStyle=settings.highlightTop3!==false&&lastRank<=3?"#132034":c.muted;
+      ctx.textAlign="center";
+      ctx.textBaseline="middle";
+      ctx.fillText(String(lastRank),rx+rankSize/2,ry+rankSize/2+1);
+      ctx.textAlign="left";
+      ctx.textBaseline="alphabetic";
+    }
 
     const av=rowH*.5, ax=rx+rankSize+rowH*.14, ay=y+(rowH-av)/2;
     const src=await itemImage(item);
@@ -231,7 +244,7 @@ async function renderRanking(project){
     }
 
     const tx=ax+av+rowH*.14;
-    const valueW=width*.17;
+    const valueW=width*.19;
     font(ctx,rowH*.25,900,c.family);ctx.fillStyle=c.text;
     ctx.fillText(ellipsis(ctx,item.name||"",width-pad-tx-valueW),tx,y+rowH*.43);
     const meta=[settings.showCategory!==false?item.category:"",settings.showNote!==false?item.note:""].filter(Boolean).join(" · ");
@@ -240,13 +253,13 @@ async function renderRanking(project){
       ctx.fillText(ellipsis(ctx,meta,width-pad-tx-valueW),tx,y+rowH*.68);
     }
     font(ctx,rowH*.3,900,c.family);ctx.fillStyle=c.text;ctx.textAlign="right";
-    ctx.fillText(fmt(val),width-pad-rowH*.08,y+rowH*.58);
+    ctx.fillText(`${fmt(val)}${settings.unit||""}`,width-pad-rowH*.08,y+rowH*.58);
     ctx.textAlign="left";
   }
   return canvas;
 }
 
-async function renderStat(project){
+async async function renderStat(project){
   const {canvas,ctx,c,width,height}=baseCanvas(project);
   const pad=width*.12;
   const top=height*.07;
@@ -281,11 +294,12 @@ async function renderStat(project){
   const lineY=iy+imageSize+cardH*.055;
   ctx.strokeStyle=c.border;ctx.lineWidth=2;ctx.beginPath();ctx.moveTo(pad+cardW*.08,lineY);ctx.lineTo(pad+cardW*.92,lineY);ctx.stroke();
 
-  const stats=(project.data?.stats||[]).slice(0,12);
+  const stats=(project.data?.stats||[]).slice(0,10);
   const cols=2, rows=Math.ceil(stats.length/cols);
   const gridX=pad+cardW*.08, gridW=cardW*.84;
   const gridTop=lineY+cardH*.055;
-  const cellW=gridW/2, cellH=Math.min(cardH*.105,(top+cardH-cardH*.08-gridTop)/Math.max(1,rows));
+  const footerY=top+cardH-cardH*.065;
+  const cellW=gridW/2, cellH=Math.min(cardH*.105,(footerY-gridTop-cardH*.035)/Math.max(1,rows));
 
   stats.forEach((s,i)=>{
     const col=i%2,row=Math.floor(i/2),x=gridX+col*cellW,y=gridTop+row*cellH;
@@ -296,26 +310,43 @@ async function renderStat(project){
     ctx.textAlign="left";
     ctx.strokeStyle=c.border;ctx.lineWidth=1;ctx.beginPath();ctx.moveTo(x,y+cellH*.72);ctx.lineTo(x+cellW*.92,y+cellH*.72);ctx.stroke();
   });
+
+  font(ctx,width*.017,700,c.family);ctx.fillStyle=c.muted;
+  ctx.fillText(ellipsis(ctx,project.data?.team||"",gridW*.45),gridX,footerY);
+  ctx.textAlign="right";
+  ctx.fillText(project.data?.tier?`TIER ${project.data.tier}`:"",gridX+gridW,footerY);
+  ctx.textAlign="left";
   return canvas;
 }
 
 function renderBar(project){
   const {canvas,ctx,c,width,height}=baseCanvas(project);
+  const settings={unit:"",showValues:true,showCategory:true,showGrid:true,autoMax:true,max:100,topN:10,...project.settings};
   const y0=drawHeader(ctx,project,c,width,{kicker:"BAR CHART",top:70});
-  const items=(project.data?.items||[]).filter(x=>x.enabled!==false).slice(0,Math.min(20,project.settings?.topN||10));
-  const pad=width*.075, labelW=width*.22, right=width*.1;
-  const max=Math.max(1,project.settings?.autoMax?Math.max(...items.map(i=>Number(i.value)||0)):Number(project.settings?.max)||100);
+  const items=(project.data?.items||[]).filter(x=>x.enabled!==false)
+    .slice(0,Math.max(1,Math.min(20,Number(settings.topN)||10)));
+  const pad=width*.075, labelW=width*.24, right=width*.13;
+  const rawMax=settings.autoMax?Math.max(1,...items.map(i=>Number(i.value)||0))*1.08:Math.max(1,Number(settings.max)||100);
   const rowH=Math.min(width*.08,(height-y0-height*.07)/Math.max(1,items.length));
   items.forEach((item,i)=>{
     const y=y0+i*rowH;
-    font(ctx,rowH*.25,800,c.family);ctx.fillStyle=c.text;
-    ctx.fillText(ellipsis(ctx,item.name||"",labelW*.9),pad,y+rowH*.55);
-    const bx=pad+labelW,bw=width-pad-right-bx,by=y+rowH*.28,bh=rowH*.28;
+    font(ctx,rowH*.24,800,c.family);ctx.fillStyle=c.text;
+    ctx.fillText(ellipsis(ctx,item.name||"",labelW*.9),pad,y+rowH*.43);
+    if(settings.showCategory!==false && item.category){
+      font(ctx,rowH*.14,600,c.family);ctx.fillStyle=c.muted;
+      ctx.fillText(ellipsis(ctx,item.category,labelW*.9),pad,y+rowH*.68);
+    }
+    const bx=pad+labelW,bw=width-pad-right-bx,by=y+rowH*.30,bh=rowH*.25;
     fillRound(ctx,bx,by,bw,bh,bh/2,c.border);
-    fillRound(ctx,bx,by,bw*Math.max(0,Math.min(1,(Number(item.value)||0)/max)),bh,bh/2,c.accent);
-    if(project.settings?.showValues!==false){
-      font(ctx,rowH*.25,900,c.family);ctx.fillStyle=c.text;ctx.textAlign="right";
-      ctx.fillText(fmt(item.value),width-right*.5,y+rowH*.55);ctx.textAlign="left";
+    if(settings.showGrid!==false){
+      ctx.save();ctx.globalAlpha=.45;ctx.strokeStyle=c.muted;ctx.lineWidth=1;
+      [1,2,3].forEach(q=>{const gx=bx+bw*q/4;ctx.beginPath();ctx.moveTo(gx,by-bh*.35);ctx.lineTo(gx,by+bh*1.35);ctx.stroke()});
+      ctx.restore();
+    }
+    fillRound(ctx,bx,by,bw*Math.max(0,Math.min(1,(Number(item.value)||0)/rawMax)),bh,bh/2,c.accent);
+    if(settings.showValues!==false){
+      font(ctx,rowH*.24,900,c.family);ctx.fillStyle=c.text;ctx.textAlign="right";
+      ctx.fillText(`${fmt(item.value)}${settings.unit||""}`,width-pad,y+rowH*.55);ctx.textAlign="left";
     }
   });
   return canvas;
@@ -324,11 +355,12 @@ function renderBar(project){
 function renderRadar(project){
   const {canvas,ctx,c,width,height}=baseCanvas(project);
   const y0=drawHeader(ctx,project,c,width,{kicker:"RADAR",top:65});
-  const axes=project.data?.axes||[], series=project.data?.series||[];
+  const axes=(project.data?.axes||[]).slice(0,10), series=(project.data?.series||[]).slice(0,6);
   const n=axes.length;
   if(n<3)return canvas;
   const cx=width*.5,cy=y0+(height-y0)*.46,r=Math.min(width*.34,(height-y0)*.34);
   const levels=Math.max(3,Math.min(8,Number(project.settings?.gridLevels)||5));
+  const strokeWidth=Math.max(2,Math.min(10,Number(project.settings?.strokeWidth)||4));
   for(let l=1;l<=levels;l++){
     const rr0=r*l/levels;
     ctx.beginPath();
@@ -348,18 +380,26 @@ function renderRadar(project){
     }
   });
   series.forEach((s,si)=>{
-    ctx.beginPath();
-    axes.forEach((ax,i)=>{
+    const color=s.color||c.accent;
+    const pts=axes.map((ax,i)=>{
       const a=-Math.PI/2+i*Math.PI*2/n,max=Math.max(1,Number(ax.max)||100),v=Number(s.values?.[i])||0,rr0=r*Math.max(0,Math.min(1,v/max));
-      const x=cx+Math.cos(a)*rr0,y=cy+Math.sin(a)*rr0;
-      if(i===0)ctx.moveTo(x,y);else ctx.lineTo(x,y);
+      return {x:cx+Math.cos(a)*rr0,y:cy+Math.sin(a)*rr0,v};
     });
-    ctx.closePath();ctx.strokeStyle=s.color||c.accent;ctx.lineWidth=Math.max(2,width*.004);ctx.stroke();
-    ctx.globalAlpha=Math.max(.08,Math.min(.5,Number(project.settings?.fillOpacity)||.18));ctx.fillStyle=s.color||c.accent;ctx.fill();ctx.globalAlpha=1;
+    ctx.beginPath();
+    pts.forEach((p,i)=>i?ctx.lineTo(p.x,p.y):ctx.moveTo(p.x,p.y));
+    ctx.closePath();ctx.strokeStyle=color;ctx.lineWidth=strokeWidth;ctx.stroke();
+    ctx.globalAlpha=Math.max(.08,Math.min(.5,Number(project.settings?.fillOpacity)||.18));ctx.fillStyle=color;ctx.fill();ctx.globalAlpha=1;
+    pts.forEach(p=>{
+      ctx.fillStyle=color;ctx.beginPath();ctx.arc(p.x,p.y,Math.max(4,width*.005),0,Math.PI*2);ctx.fill();
+      if(project.settings?.showValues){
+        font(ctx,width*.0135,800,c.family);ctx.textAlign="center";ctx.fillStyle=color;
+        ctx.fillText(fmt(p.v),p.x,p.y-width*.012);ctx.textAlign="left";
+      }
+    });
   });
   if(project.settings?.showLegend!==false){
     let x=width*.18,y=height*.9;
-    series.slice(0,6).forEach(s=>{
+    series.forEach(s=>{
       ctx.fillStyle=s.color||c.accent;ctx.beginPath();ctx.arc(x,y,width*.008,0,Math.PI*2);ctx.fill();
       font(ctx,width*.016,700,c.family);ctx.fillStyle=c.text;ctx.fillText(ellipsis(ctx,s.name||"",width*.16),x+width*.015,y+6);
       x+=width*.22;
@@ -382,9 +422,18 @@ function renderQuadrant(project){
   const xa=project.settings?.xAxis||{},ya=project.settings?.yAxis||{};
   const xmin=Number(xa.min)||0,xmax=Number(xa.max)||100,ymin=Number(ya.min)||0,ymax=Number(ya.max)||100;
   const xp=v=>L+(Number(v)-xmin)/(xmax-xmin||1)*(R-L),yp=v=>B-(Number(v)-ymin)/(ymax-ymin||1)*(B-T);
+  const splitX=xp(xa.split??50),splitY=yp(ya.split??50);
   ctx.setLineDash([10,8]);ctx.strokeStyle=c.muted;ctx.globalAlpha=.65;
-  ctx.beginPath();ctx.moveTo(xp(xa.split??50),T);ctx.lineTo(xp(xa.split??50),B);ctx.moveTo(L,yp(ya.split??50));ctx.lineTo(R,yp(ya.split??50));ctx.stroke();
+  ctx.beginPath();ctx.moveTo(splitX,T);ctx.lineTo(splitX,B);ctx.moveTo(L,splitY);ctx.lineTo(R,splitY);ctx.stroke();
   ctx.setLineDash([]);ctx.globalAlpha=1;
+
+  const q=project.settings?.quadrants||{};
+  font(ctx,width*.0135,800,c.family);ctx.fillStyle=c.muted;
+  ctx.fillText(ellipsis(ctx,q.topLeft||"",width*.22),L+width*.012,T+width*.025);
+  ctx.textAlign="right";ctx.fillText(ellipsis(ctx,q.topRight||"",width*.22),R-width*.012,T+width*.025);
+  ctx.textAlign="left";ctx.fillText(ellipsis(ctx,q.bottomLeft||"",width*.22),L+width*.012,B-width*.012);
+  ctx.textAlign="right";ctx.fillText(ellipsis(ctx,q.bottomRight||"",width*.22),R-width*.012,B-width*.012);ctx.textAlign="left";
+
   const quadItems=(project.data?.items||[]).filter(i=>i.enabled!==false&&Number.isFinite(i.x)&&Number.isFinite(i.y));
   const labelLimit=Math.max(1,Math.min(40,Number(project.settings?.labelLimit)||15));
   quadItems.forEach((item,index)=>{
@@ -489,14 +538,30 @@ function renderScatter(project){
     ctx.fillText(xl,xb.x1+4,xb.y2-5);ctx.fillText(yl,yb.x1+4,yb.y2-5);reserved.push(xb,yb);
   }
 
+  if(items.length>1&&settings.showTrend){
+    const xs=items.map(i=>Number(i.x)),ys=items.map(i=>Number(i.y));
+    const mx=xs.reduce((a,b)=>a+b,0)/xs.length,my=ys.reduce((a,b)=>a+b,0)/ys.length;
+    const den=xs.reduce((a,x)=>a+(x-mx)*(x-mx),0);
+    if(den){
+      const m=xs.reduce((a,x,i)=>a+(x-mx)*(ys[i]-my),0)/den,b=my-m*mx;
+      const x1=xr.min,x2=xr.max,y1=m*x1+b,y2=m*x2+b;
+      ctx.save();ctx.beginPath();ctx.rect(L,T,R-L,B-T);ctx.clip();
+      ctx.strokeStyle=c.accent;ctx.globalAlpha=.72;ctx.lineWidth=Math.max(2,width*.0025);
+      ctx.beginPath();ctx.moveTo(xp(x1),yp(y1));ctx.lineTo(xp(x2),yp(y2));ctx.stroke();ctx.restore();ctx.globalAlpha=1;
+    }
+  }
+
+  const palette=["#6F9CFF","#35D07F","#F5B54C","#B673FF","#FF7284","#48C7D9"];
+  const cats=[...new Set(items.map(i=>i.category||""))];
   const points=items.map(i=>({x:xp(Number(i.x)),y:yp(Number(i.y))}));
   const placed=[...reserved];
   items.forEach((item,index)=>{
     const x=points[index].x,y=points[index].y;
     const key=String(item.sourceRawIndex??item.id??index);
     const highlight=settings.highlightColors?.[key]||"";
+    const categoryColor=settings.categoryColors&&item.category?palette[Math.max(0,cats.indexOf(item.category))%palette.length]:"";
     const r=Math.max(5,width*(highlight?.0135:.0095));
-    ctx.fillStyle=highlight||c.accent;ctx.beginPath();ctx.arc(x,y,r,0,Math.PI*2);ctx.fill();
+    ctx.fillStyle=highlight||categoryColor||c.accent;ctx.beginPath();ctx.arc(x,y,r,0,Math.PI*2);ctx.fill();
     if(highlight){
       ctx.strokeStyle=c.text;ctx.lineWidth=Math.max(2,width*.0028);ctx.stroke();
     }
@@ -535,43 +600,76 @@ function renderScatter(project){
 }
 function renderDot(project){
   const {canvas,ctx,c,width,height}=baseCanvas(project);
+  const s={min:0,max:100,autoRange:false,unit:"",showValues:true,showGrid:true,displayLimit:10,...project.settings};
   const y0=drawHeader(ctx,project,c,width,{kicker:"DOT CHART",top:70});
-  const items=(project.data?.items||[])
-    .filter(x=>x.enabled!==false)
-    .slice(0,Math.max(1,Math.min(20,Number(project.settings?.displayLimit)||10)));
-  const min=Number(project.settings?.min)||0,max=Number(project.settings?.max)||100;
+  const items=(project.data?.items||[]).filter(x=>x.enabled!==false)
+    .slice(0,Math.max(1,Math.min(20,Number(s.displayLimit)||10)));
+  let min=Number(s.min)||0,max=Number(s.max)||100;
+  if(s.autoRange&&items.length){
+    const vals=items.map(x=>Number(x.value)||0);
+    min=Math.min(...vals);max=Math.max(...vals);
+    const pad0=Math.max(1,(max-min)*.12);min-=pad0;max+=pad0;
+  }
+  if(max<=min)max=min+1;
   const pad=width*.075,labelW=width*.24,right=width*.12,rowH=Math.min(width*.085,(height-y0-height*.07)/Math.max(1,items.length));
   items.forEach((item,i)=>{
     const y=y0+i*rowH+rowH*.5,bx=pad+labelW,bw=width-pad-right-bx;
-    font(ctx,rowH*.24,800,c.family);ctx.fillStyle=c.text;ctx.fillText(ellipsis(ctx,item.name||"",labelW*.9),pad,y+6);
+    font(ctx,rowH*.23,800,c.family);ctx.fillStyle=c.text;ctx.fillText(ellipsis(ctx,item.name||"",labelW*.9),pad,y-2);
+    if(item.category){
+      font(ctx,rowH*.13,600,c.family);ctx.fillStyle=c.muted;ctx.fillText(ellipsis(ctx,item.category,labelW*.9),pad,y+rowH*.22);
+    }
     ctx.strokeStyle=c.border;ctx.lineWidth=3;ctx.beginPath();ctx.moveTo(bx,y);ctx.lineTo(bx+bw,y);ctx.stroke();
+    if(s.showGrid!==false){
+      ctx.save();ctx.strokeStyle=c.border;ctx.globalAlpha=.7;ctx.lineWidth=1;
+      [1,2,3].forEach(q=>{const gx=bx+bw*q/4;ctx.beginPath();ctx.moveTo(gx,y-rowH*.18);ctx.lineTo(gx,y+rowH*.18);ctx.stroke()});
+      ctx.restore();
+    }
     const pct=Math.max(0,Math.min(1,((Number(item.value)||0)-min)/(max-min||1))),x=bx+bw*pct;
     ctx.fillStyle=c.accent;ctx.beginPath();ctx.arc(x,y,rowH*.12,0,Math.PI*2);ctx.fill();
-    if(project.settings?.showValues!==false){font(ctx,rowH*.24,900,c.family);ctx.fillStyle=c.text;ctx.textAlign="right";ctx.fillText(fmt(item.value),width-pad,y+6);ctx.textAlign="left";}
+    if(s.showValues!==false){font(ctx,rowH*.24,900,c.family);ctx.fillStyle=c.text;ctx.textAlign="right";ctx.fillText(`${fmt(item.value)}${s.unit||""}`,width-pad,y+6);ctx.textAlign="left";}
   });
   return canvas;
 }
 
 function renderRange(project){
   const {canvas,ctx,c,width,height}=baseCanvas(project);
+  const s={labelA:"A",labelB:"B",unit:"",autoRange:true,min:0,max:100,showDiff:true,diffMode:"value",displayLimit:10,...project.settings};
   const y0=drawHeader(ctx,project,c,width,{kicker:"RANGE",top:70});
   const items=(project.data?.items||[])
     .filter(i=>i.enabled!==false&&Number.isFinite(i.value)&&Number.isFinite(i.value2))
-    .slice(0,Math.max(1,Math.min(20,Number(project.settings?.displayLimit)||10)));
-  let vals=items.flatMap(i=>[Number(i.value),Number(i.value2)]);
-  let min=project.settings?.autoRange!==false?Math.min(...vals,0):(Number(project.settings?.min)||0);
-  let max=project.settings?.autoRange!==false?Math.max(...vals,100):(Number(project.settings?.max)||100);
+    .slice(0,Math.max(1,Math.min(20,Number(s.displayLimit)||10)));
+  let min=Number(s.min)||0,max=Number(s.max)||100;
+  if(s.autoRange&&items.length){
+    const vals=items.flatMap(i=>[Number(i.value),Number(i.value2)]);
+    min=Math.min(...vals);max=Math.max(...vals);
+    const pad0=Math.max(1,(max-min)*.12);min-=pad0;max+=pad0;
+  }
   if(max<=min)max=min+1;
-  const pad=width*.075,labelW=width*.22,right=width*.17,rowH=Math.min(width*.09,(height-y0-height*.07)/Math.max(1,items.length));
+  const pad=width*.075,labelW=width*.22,right=width*.19,rowH=Math.min(width*.09,(height-y0-height*.07)/Math.max(1,items.length));
+
+  font(ctx,width*.014,700,c.family);ctx.fillStyle=c.muted;ctx.textAlign="right";
+  ctx.fillText(`${s.labelA||"A"}  •  ${s.labelB||"B"}`,width-pad,y0-width*.008);ctx.textAlign="left";
+
   items.forEach((item,i)=>{
     const y=y0+i*rowH+rowH*.5,bx=pad+labelW,bw=width-pad-right-bx;
-    const pa=((Number(item.value)||0)-min)/(max-min),pb=((Number(item.value2)||0)-min)/(max-min),xa=bx+bw*pa,xb=bx+bw*pb;
+    const a=Number(item.value)||0,b=Number(item.value2)||0;
+    const pa=(a-min)/(max-min),pb=(b-min)/(max-min),xa=bx+bw*pa,xb=bx+bw*pb,diff=b-a;
     font(ctx,rowH*.22,800,c.family);ctx.fillStyle=c.text;ctx.fillText(ellipsis(ctx,item.name||"",labelW*.9),pad,y+6);
     ctx.strokeStyle=c.border;ctx.lineWidth=3;ctx.beginPath();ctx.moveTo(bx,y);ctx.lineTo(bx+bw,y);ctx.stroke();
     ctx.strokeStyle=c.accent;ctx.lineWidth=6;ctx.beginPath();ctx.moveTo(xa,y);ctx.lineTo(xb,y);ctx.stroke();
     ctx.fillStyle=c.muted;ctx.beginPath();ctx.arc(xa,y,rowH*.11,0,Math.PI*2);ctx.fill();
     ctx.fillStyle=c.accent;ctx.beginPath();ctx.arc(xb,y,rowH*.11,0,Math.PI*2);ctx.fill();
-    font(ctx,rowH*.18,700,c.family);ctx.fillStyle=c.text;ctx.textAlign="right";ctx.fillText(`${fmt(item.value)} → ${fmt(item.value2)}`,width-pad,y+6);ctx.textAlign="left";
+
+    font(ctx,rowH*.16,700,c.family);ctx.fillStyle=c.muted;ctx.textAlign="right";
+    ctx.fillText(`${fmt(a)}${s.unit||""} → ${fmt(b)}${s.unit||""}`,width-pad,y-rowH*.02);
+    if(s.showDiff!==false){
+      let diffText;
+      if(s.diffMode==="percent")diffText=`${diff>=0?"+":""}${a!==0?((diff/a)*100).toFixed(1):"0.0"}%`;
+      else diffText=`${diff>=0?"+":""}${fmt(diff)}${s.unit||""}`;
+      font(ctx,rowH*.19,900,c.family);ctx.fillStyle=diff>=0?c.accent:"#ff7e88";
+      ctx.fillText(diffText,width-pad,y+rowH*.24);
+    }
+    ctx.textAlign="left";
   });
   return canvas;
 }
@@ -590,17 +688,27 @@ function renderTier(project){
     const y=y0+i*(rowH+gap),labW=width*.1;
     fillRound(ctx,pad,y,labW,rowH,rowH*.12,c.accent);
     font(ctx,rowH*.38,900,c.family);ctx.fillStyle="#fff";ctx.textAlign="center";ctx.textBaseline="middle";ctx.fillText(t.label||"",pad+labW/2,y+rowH/2);ctx.textAlign="left";ctx.textBaseline="alphabetic";
-    fillRound(ctx,pad+labW,y,width-pad*2-labW,rowH,rowH*.12,c.surface,c.border,2);
-    const arr=items.filter(it=>tierFor(it)===t.label);
-    let x=pad+labW+rowH*.12;
-    arr.forEach(it=>{
-      font(ctx,rowH*.18,800,c.family);
-      const txt=project.settings?.showScore===false?it.name:`${it.name} ${fmt(it.value)}`;
-      const w=Math.min(width*.2,ctx.measureText(txt).width+rowH*.22);
-      if(x+w>width-pad) return;
-      fillRound(ctx,x,y+rowH*.22,w,rowH*.56,rowH*.12,c.bg);
-      ctx.fillStyle=c.text;ctx.fillText(ellipsis(ctx,txt,w-rowH*.14),x+rowH*.07,y+rowH*.57);
-      x+=w+rowH*.07;
+    const areaX=pad+labW,areaW=width-pad*2-labW;
+    fillRound(ctx,areaX,y,areaW,rowH,rowH*.12,c.surface,c.border,2);
+    const arr=items.filter(it=>tierFor(it)===t.label).sort((a,b)=>(Number(b.value)||0)-(Number(a.value)||0));
+    if(!arr.length)return;
+
+    const maxRows=arr.length>24?4:arr.length>10?3:2;
+    const cols=Math.max(1,Math.ceil(arr.length/maxRows));
+    const rows=Math.ceil(arr.length/cols);
+    const innerX=areaX+rowH*.08,innerY=y+rowH*.10,innerW=areaW-rowH*.16,innerH=rowH*.80;
+    const gapX=Math.max(2,width*.0025),gapY=Math.max(2,rowH*.04);
+    const cellW=(innerW-gapX*(cols-1))/cols;
+    const cellH=(innerH-gapY*(rows-1))/rows;
+    arr.forEach((it,idx)=>{
+      const col=idx%cols,row=Math.floor(idx/cols);
+      const x=innerX+col*(cellW+gapX),yy=innerY+row*(cellH+gapY);
+      fillRound(ctx,x,yy,cellW,cellH,Math.min(cellH*.2,width*.006),c.bg);
+      const txt=project.settings?.showScore===false?String(it.name||""):`${it.name||""} ${fmt(it.value)}`;
+      const fs=Math.max(8,Math.min(rowH*.15,cellH*.42,cellW*.16));
+      font(ctx,fs,800,c.family);ctx.fillStyle=c.text;ctx.textBaseline="middle";
+      ctx.fillText(ellipsis(ctx,txt,Math.max(4,cellW-fs*.8)),x+fs*.4,yy+cellH/2);
+      ctx.textBaseline="alphabetic";
     });
   });
   return canvas;
