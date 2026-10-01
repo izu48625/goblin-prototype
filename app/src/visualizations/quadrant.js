@@ -65,6 +65,12 @@ export const quadrant={
       point.style.bottom=`${clamp(yp,0,100)}%`;
       point.innerHTML=`<span class="quad-point-dot"></span><span class="quad-point-name"></span>`;
       const dot=point.querySelector(".quad-point-dot");
+      const key=String(item.sourceRawIndex??item.id??pointIndex);
+      const highlight=project.settings?.highlightColors?.[key]||"";
+      if(highlight){
+        dot.style.background=highlight;
+        dot.classList.add("highlighted");
+      }
       if(item.imageRef){
         try{
           const url=await getImageUrl(item.imageRef);
