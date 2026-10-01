@@ -1548,10 +1548,11 @@
       cols:model?.criteria?.length??s.cols.length,
       scale:s.scale||100
     });
+    const isLive=!!s.cloudTopicId&&s.cloudVisibility!=='private';
     const vis=s.cloudVisibility==='unlisted'?'unlisted':'public';
     document.querySelectorAll('input[name="publishVisibility"]').forEach(r=>r.checked=r.value===vis);
-    $('publishExecuteBtn').textContent=s.cloudTopicId?t('publish.updateExecute'):t('publish.execute');
-    $('publishUnpublishBtn').classList.toggle('hidden',!s.cloudTopicId);
+    $('publishExecuteBtn').textContent=isLive?t('publish.updateExecute'):t('publish.execute');
+    $('publishUnpublishBtn').classList.toggle('hidden',!isLive);
     return user;
   }
 
@@ -1696,6 +1697,8 @@
 
       s.cloudVisibility='private';scheduleSave('');
       $('publishResult').classList.add('hidden');
+      $('publishUnpublishBtn').classList.add('hidden');
+      $('publishExecuteBtn').textContent=t('publish.execute');
       setPublishStatus(t('publish.unpublishSuccess'),'ok');
       renderHeader();
     }catch(e){setPublishStatus(t('publish.errorPrefix')+(e?.message||String(e)),'error')}
