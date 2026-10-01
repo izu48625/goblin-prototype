@@ -98,3 +98,12 @@ Anonymous Sign-Ins must be enabled for Community rating.
 - Top 3 / 5 / 10 / 20 display controls remain available where supported.
 - No database migration is required.
 - Active cache key: r18c8.
+
+## C9 Highlight color rendering fix
+- Scatter per-target highlight colors now use inline SVG fill styles so the editor stylesheet cannot override the selected color.
+- Quadrant highlighted markers now keep the selected color explicit on both marker fill and border.
+- Highlight color inputs listen to both input and change events for more reliable iPhone / Safari updates.
+- Screen preview and native iOS PNG export use the same project.settings.highlightColors mapping by sourceRawIndex.
+- No database migration is required.
+- Active cache key: r18c9.
+
