@@ -330,7 +330,7 @@ function sourceHighlightControls(model,highlightColors,onChange){
   grid.className="source-highlight-grid";
   model.rows.forEach(row=>{
     const key=String(row.rawIndex);
-    const line=document.createElement("label");
+    const line=document.createElement("div");
     line.className="source-highlight-row";
     const check=document.createElement("input");
     check.type="checkbox";
@@ -352,7 +352,7 @@ function sourceHighlightControls(model,highlightColors,onChange){
       else delete next[key];
       onChange(next);
     });
-    color.addEventListener("input",()=>{
+    color.addEventListener("change",()=>{
       if(!check.checked)return;
       onChange({...colors,[key]:color.value});
     });
