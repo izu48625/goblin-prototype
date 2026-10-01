@@ -199,8 +199,14 @@ function syncMetricItems(project,model,key,rawIndices){
   const fullPool=["ranking-card","bar","dot","tier-list"].includes(project.type);
   const max=fullPool?40:20;
   const fallback=fullPool?40:10;
-  const selection=selectedRows(model,rawIndices,max,fallback);
-  if(project.type!=="tier-list")project.settings.sourceItemIndices=selection.indices;
+  const useRaw=fullPool && project.type!=="tier-list" && project.settings.sourcePoolMode!=="custom"
+    ? undefined
+    : rawIndices;
+  const selection=selectedRows(model,useRaw,max,fallback);
+  if(project.type!=="tier-list"){
+    project.settings.sourceItemIndices=selection.indices;
+    if(!project.settings.sourcePoolMode)project.settings.sourcePoolMode="all";
+  }
 
   project.data.items=selection.rows.map(r=>({
     id:`src_${r.rawIndex}`,
