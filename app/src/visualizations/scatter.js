@@ -145,8 +145,10 @@ export const scatterChart={
       c.setAttribute("cx",px);c.setAttribute("cy",py);
       c.setAttribute("r",highlight?"14":"10");
       c.setAttribute("class",highlight?"scatter-point highlighted":"scatter-point");
-      if(highlight)c.setAttribute("fill",highlight);
-      else if(s.categoryColors&&item.category)c.setAttribute("fill",palette[Math.max(0,cats.indexOf(item.category))%palette.length]);
+      if(highlight){
+        c.setAttribute("fill",highlight);
+        c.style.color=highlight;
+      }else if(s.categoryColors&&item.category)c.setAttribute("fill",palette[Math.max(0,cats.indexOf(item.category))%palette.length]);
       g.appendChild(c);svg.appendChild(g);
 
       if(s.showLabels===false || index>=Math.max(1,Math.min(40,Number(s.labelLimit)||15)))return;
