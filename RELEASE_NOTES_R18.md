@@ -86,3 +86,15 @@ Anonymous Sign-Ins must be enabled for Community rating.
 - Existing axis/metric selectors remain available for Quadrant, Scatter, Range, and metric-driven visuals.
 - No database migration is required.
 - Active cache key: r18c7.
+
+
+## C8 Top 10 from all targets
+- Ranking Card, Bar Chart, and Dot Chart now use all sheet targets as the default ranking pool (up to the sheet maximum of 40).
+- The visual still shows Top 10 by default, sorted by the selected metric.
+- Users can open DATA > 集計対象 and uncheck targets to rank only a chosen subset.
+- A Select All button is available when the sheet fits the 40-target pool.
+- Existing C7 linked ranking/bar/dot projects that were auto-seeded with only the first 10 targets migrate to all targets and Top 10 on first C8 sync.
+- Manual target-pool choices are preserved after the user changes the selection.
+- Top 3 / 5 / 10 / 20 display controls remain available where supported.
+- No database migration is required.
+- Active cache key: r18c8.
