@@ -52,10 +52,14 @@
     const creatorRanking=rows.map((row,index)=>({index,name:row.name||`${ja?'対象':'Target'} ${index+1}`,value:average(Array.isArray(row.scores)?row.scores:[],criteria,weighted)})).filter(x=>x.value!==null).sort((a,b)=>b.value-a.value||a.index-b.index);
     const creatorTop=creatorRanking[0]||null;
     const updatedLabel=fmtDate(data.snapshot_updated_at||data.published_at,ja);
-    const visibilityLabel=data.visibility==='unlisted'?(ja?'URL限定':'Unlisted'):(ja?'公開作品':'Public');
-    const visibilityHelp=data.visibility==='unlisted'
-      ?(ja?'公開一覧には表示せず、URLを知っている人だけが閲覧できます。':'Hidden from public listings; anyone with the URL can view it.')
-      :(ja?'公開作品として扱われ、URLから誰でも閲覧できます。':'A public Stats Maker page that anyone with the URL can view.');
+    const visibilityLabel=data.visibility==='private'
+      ?(ja?'非公開プレビュー':'Private preview')
+      :(data.visibility==='unlisted'?(ja?'URL限定':'Unlisted'):(ja?'公開作品':'Public'));
+    const visibilityHelp=data.visibility==='private'
+      ?(ja?'現在は非公開です。公開者セッションでのみ確認できます。':'This page is private and is only visible to the publisher session.')
+      :(data.visibility==='unlisted'
+        ?(ja?'公開一覧には表示せず、URLを知っている人だけが閲覧できます。':'Hidden from public listings; anyone with the URL can view it.')
+        :(ja?'公開作品として扱われ、URLから誰でも閲覧できます。':'A public Stats Maker page that anyone with the URL can view.'));
     const metricChips=criteria.map(c=>`<span class="${weighted?'weightedMetric':''}">${esc(c.name)}${weighted?`<small>×${fmt(c.weight??1)}</small>`:''}</span>`).join('');
     const tableHead=criteria.map(c=>`<th>${esc(c.name)}</th>`).join('');
     const tableRows=rows.map(row=>{const scores=Array.isArray(row.scores)?row.scores:[];const av=average(scores,criteria,weighted);return `<tr><td>${esc(row.name)}</td>${criteria.map((_,i)=>{const n=num(scores[i]);return `<td class="${n===null?'na':'score'}">${n===null?'—':fmt(n)}</td>`}).join('')}<td class="avg">${av===null?'—':fmt(av)}</td></tr>`}).join('');
