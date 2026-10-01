@@ -139,8 +139,14 @@ export const scatterChart={
       const px=xp(item.x),py=yp(item.y);
       const g=document.createElementNS(NS,"g");g.setAttribute("class","scatter-point-group");g.dataset.index=index;
       const hit=document.createElementNS(NS,"circle");hit.setAttribute("cx",px);hit.setAttribute("cy",py);hit.setAttribute("r","22");hit.setAttribute("class","scatter-hit");g.appendChild(hit);
-      const c=document.createElementNS(NS,"circle");c.setAttribute("cx",px);c.setAttribute("cy",py);c.setAttribute("r","10");c.setAttribute("class","scatter-point");
-      if(s.categoryColors&&item.category)c.setAttribute("fill",palette[Math.max(0,cats.indexOf(item.category))%palette.length]);
+      const key=String(item.sourceRawIndex??item.id??index);
+      const highlight=s.highlightColors?.[key]||"";
+      const c=document.createElementNS(NS,"circle");
+      c.setAttribute("cx",px);c.setAttribute("cy",py);
+      c.setAttribute("r",highlight?"14":"10");
+      c.setAttribute("class",highlight?"scatter-point highlighted":"scatter-point");
+      if(highlight)c.setAttribute("fill",highlight);
+      else if(s.categoryColors&&item.category)c.setAttribute("fill",palette[Math.max(0,cats.indexOf(item.category))%palette.length]);
       g.appendChild(c);svg.appendChild(g);
 
       if(s.showLabels===false || index>=Math.max(1,Math.min(40,Number(s.labelLimit)||15)))return;
