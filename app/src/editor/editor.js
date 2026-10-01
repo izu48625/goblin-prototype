@@ -511,7 +511,10 @@ function buildLinkedDataPanel(p,model){
     sec.appendChild(sourceSubjectChecks(
       model,
       Array.isArray(p.settings.sourceItemIndices)?p.settings.sourceItemIndices:fallback,
-      indices=>mutate(x=>syncSourceProject(x,{itemIndices:indices})),
+      indices=>mutate(x=>{
+        x.settings.sourcePoolMode="custom";
+        syncSourceProject(x,{itemIndices:indices});
+      }),
       {max:40}
     ));
     frag.appendChild(sec);
