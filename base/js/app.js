@@ -1490,6 +1490,7 @@
   function publicPageUrl(topicId){
     const url=new URL('../public.html',location.href);
     url.searchParams.set('id',topicId);
+    url.searchParams.set('v','r19p1');
     return url.href;
   }
 
@@ -2030,6 +2031,15 @@
   renderAll();
   window.SM_I18N?.applyTranslations();
   scheduleSave('');
+
+  // R19 P1: returning from an owned public page can restore the matching
+  // local sheet and reopen Publish settings in this same browser session.
+  try{
+    if(sessionStorage.getItem('statsMaker:openPublish')==='1'){
+      sessionStorage.removeItem('statsMaker:openPublish');
+      setTimeout(()=>openPublishDialog(),120);
+    }
+  }catch{}
 
   // R10 bridge for source-linked visual extensions.
   window.__statsMakerGetActiveSheet = () => clone(activeSheet());
