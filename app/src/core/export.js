@@ -389,8 +389,14 @@ function renderQuadrant(project){
   const labelLimit=Math.max(1,Math.min(40,Number(project.settings?.labelLimit)||15));
   quadItems.forEach((item,index)=>{
     const x=xp(item.x),y=yp(item.y);
-    ctx.fillStyle=c.accent;ctx.beginPath();ctx.arc(x,y,width*.012,0,Math.PI*2);ctx.fill();
-    if(index<labelLimit){
+    const key=String(item.sourceRawIndex??item.id??index);
+    const highlight=project.settings?.highlightColors?.[key]||"";
+    const radius=width*(highlight?.015:.012);
+    ctx.fillStyle=highlight||c.accent;ctx.beginPath();ctx.arc(x,y,radius,0,Math.PI*2);ctx.fill();
+    if(highlight){
+      ctx.strokeStyle=c.text;ctx.lineWidth=Math.max(2,width*.0025);ctx.stroke();
+    }
+    if(index<labelLimit||highlight){
       font(ctx,width*.015,800,c.family);ctx.fillStyle=c.text;ctx.fillText(ellipsis(ctx,item.name||"",width*.16),x+width*.016,y-width*.012);
     }
   });
@@ -486,9 +492,15 @@ function renderScatter(project){
   const points=items.map(i=>({x:xp(Number(i.x)),y:yp(Number(i.y))}));
   const placed=[...reserved];
   items.forEach((item,index)=>{
-    const x=points[index].x,y=points[index].y,r=Math.max(5,width*.0095);
-    ctx.fillStyle=c.accent;ctx.beginPath();ctx.arc(x,y,r,0,Math.PI*2);ctx.fill();
-    if(settings.showLabels===false || index>=Math.max(1,Math.min(40,Number(settings.labelLimit)||15)))return;
+    const x=points[index].x,y=points[index].y;
+    const key=String(item.sourceRawIndex??item.id??index);
+    const highlight=settings.highlightColors?.[key]||"";
+    const r=Math.max(5,width*(highlight?.0135:.0095));
+    ctx.fillStyle=highlight||c.accent;ctx.beginPath();ctx.arc(x,y,r,0,Math.PI*2);ctx.fill();
+    if(highlight){
+      ctx.strokeStyle=c.text;ctx.lineWidth=Math.max(2,width*.0028);ctx.stroke();
+    }
+    if(settings.showLabels===false || (index>=Math.max(1,Math.min(40,Number(settings.labelLimit)||15)) && !highlight))return;
 
     const raw=String(item.name||"").trim();if(!raw)return;
     let size=width*(raw.length>18?.014:raw.length>12?.0155:.017);

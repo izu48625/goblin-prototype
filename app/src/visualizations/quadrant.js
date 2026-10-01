@@ -65,6 +65,12 @@ export const quadrant={
       point.style.bottom=`${clamp(yp,0,100)}%`;
       point.innerHTML=`<span class="quad-point-dot"></span><span class="quad-point-name"></span>`;
       const dot=point.querySelector(".quad-point-dot");
+      const key=String(item.sourceRawIndex??item.id??pointIndex);
+      const highlight=project.settings?.highlightColors?.[key]||"";
+      if(highlight){
+        dot.style.background=highlight;
+        dot.classList.add("highlighted");
+      }
       if(item.imageRef){
         try{
           const url=await getImageUrl(item.imageRef);
@@ -76,8 +82,8 @@ export const quadrant={
           console.warn("Quadrant image load failed",e);
         }
       }
-      point.querySelector(".quad-point-name").textContent=pointIndex<labelLimit?(item.name||""):"";
-      if(pointIndex>=labelLimit)point.classList.add("label-hidden");
+      point.querySelector(".quad-point-name").textContent=(pointIndex<labelLimit||highlight)?(item.name||""):"";
+      if(pointIndex>=labelLimit&&!highlight)point.classList.add("label-hidden");
       chart.appendChild(point);
       pointIndex++;
     }

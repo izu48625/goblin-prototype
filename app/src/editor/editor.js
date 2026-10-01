@@ -248,28 +248,120 @@ function sourceSelectField(label,options,currentValue,onChange){
   return wrap;
 }
 
-function sourceSubjectChecks(model,selected,onChange){
+function sourceSubjectChecks(model,selected,onChange,{max=6}={}){
+  const shell=document.createElement("div");
+  shell.className="source-subject-picker";
+  const selectedSet=new Set((selected||[]).map(Number));
+
+  const actions=document.createElement("div");
+  actions.className="source-picker-actions";
+  const count=document.createElement("span");
+  count.className="source-picker-count";
+  count.textContent=`${selectedSet.size}/${max}`;
+
+  const bulk=document.createElement("button");
+  bulk.type="button";
+  bulk.className="btn source-picker-btn";
+  bulk.textContent=model.rows.length<=max
+    ? (getLanguage()==="ja"?"全選択":"Select all")
+    : (getLanguage()==="ja"?`先頭${max}件`:`First ${max}`);
+  bulk.addEventListener("click",()=>{
+    onChange(model.rows.slice(0,max).map(row=>row.rawIndex));
+  });
+
+  const clear=document.createElement("button");
+  clear.type="button";
+  clear.className="btn source-picker-btn";
+  clear.textContent=getLanguage()==="ja"?"全解除":"Clear";
+  clear.addEventListener("click",()=>onChange([]));
+
+  actions.append(bulk,clear,count);
+  shell.appendChild(actions);
+
   const wrap=document.createElement("div");
   wrap.className="source-subject-grid";
-  const selectedSet=new Set((selected||[]).map(Number));
   model.rows.forEach(row=>{
     const label=document.createElement("label");
     label.className="source-check";
     const input=document.createElement("input");
     input.type="checkbox";
     input.checked=selectedSet.has(row.rawIndex);
+    input.disabled=!input.checked&&selectedSet.size>=max;
     input.addEventListener("change",()=>{
       const next=new Set(selectedSet);
-      if(input.checked)next.add(row.rawIndex);
-      else next.delete(row.rawIndex);
-      onChange([...next].slice(0,6));
+      if(input.checked){
+        if(next.size>=max)return;
+        next.add(row.rawIndex);
+      }else{
+        next.delete(row.rawIndex);
+      }
+      onChange([...next].slice(0,max));
     });
     const text=document.createElement("span");
     text.textContent=row.name;
     label.append(input,text);
     wrap.appendChild(label);
   });
-  return wrap;
+  shell.appendChild(wrap);
+  return shell;
+}
+
+function sourceHighlightControls(model,highlightColors,onChange){
+  const shell=document.createElement("div");
+  shell.className="source-highlight-picker";
+  const colors={...(highlightColors||{})};
+
+  const actions=document.createElement("div");
+  actions.className="source-picker-actions";
+  const help=document.createElement("span");
+  help.className="source-picker-help";
+  help.textContent=getLanguage()==="ja"
+    ?"色を付けたい対象を選択"
+    :"Choose targets to highlight";
+  const clear=document.createElement("button");
+  clear.type="button";
+  clear.className="btn source-picker-btn";
+  clear.textContent=getLanguage()==="ja"?"色をすべて解除":"Clear colors";
+  clear.addEventListener("click",()=>onChange({}));
+  actions.append(help,clear);
+  shell.appendChild(actions);
+
+  const grid=document.createElement("div");
+  grid.className="source-highlight-grid";
+  model.rows.forEach(row=>{
+    const key=String(row.rawIndex);
+    const line=document.createElement("div");
+    line.className="source-highlight-row";
+    const check=document.createElement("input");
+    check.type="checkbox";
+    check.checked=!!colors[key];
+
+    const name=document.createElement("span");
+    name.className="source-highlight-name";
+    name.textContent=row.name;
+
+    const color=document.createElement("input");
+    color.type="color";
+    color.className="source-highlight-color";
+    color.value=colors[key]||"#ffcc55";
+    color.disabled=!check.checked;
+
+    check.addEventListener("change",()=>{
+      const next={...colors};
+      if(check.checked)next[key]=color.value||"#ffcc55";
+      else delete next[key];
+      onChange(next);
+    });
+    color.addEventListener("change",()=>{
+      if(!check.checked)return;
+      onChange({...colors,[key]:color.value});
+    });
+
+    line.append(check,name,color);
+    grid.appendChild(line);
+  });
+  shell.appendChild(grid);
+  return shell;
 }
 
 function choiceButtons(options,currentValue,onChange,className="segmented"){
@@ -407,6 +499,23 @@ function buildLinkedDataPanel(p,model){
     frag.appendChild(sec);
   }
 
+  if(["ranking-card","bar","dot"].includes(p.type)){
+    const sec=section(getLanguage()==="ja"?"表示対象":"Visible targets");
+    const fallback=model.rows.slice(0,Math.min(10,model.rows.length)).map(row=>row.rawIndex);
+    sec.appendChild(sourceSubjectChecks(
+      model,
+      Array.isArray(p.settings.sourceItemIndices)?p.settings.sourceItemIndices:fallback,
+      indices=>mutate(x=>{
+        syncSourceProject(x,{itemIndices:indices});
+        const visible=Math.max(1,indices.length);
+        if(x.type==="ranking-card"||x.type==="bar")x.settings.topN=Math.min(20,visible);
+        if(x.type==="dot")x.settings.displayLimit=Math.min(20,visible);
+      }),
+      {max:20}
+    ));
+    frag.appendChild(sec);
+  }
+
   if(p.type==="quadrant" || p.type==="scatter"){
     const sec=section("軸");
     const grid=document.createElement("div");
@@ -433,6 +542,20 @@ function buildLinkedDataPanel(p,model){
       sec.appendChild(split);
     }
     frag.appendChild(sec);
+
+    const highlight=section(getLanguage()==="ja"?"強調表示":"Highlight targets");
+    const help=document.createElement("div");
+    help.className="source-info-note";
+    help.textContent=getLanguage()==="ja"
+      ?"見つけやすくしたい対象を選び、丸の色を個別に変更できます。"
+      :"Choose targets to make their points easier to spot and set a color for each.";
+    highlight.appendChild(help);
+    highlight.appendChild(sourceHighlightControls(
+      model,
+      p.settings.highlightColors||{},
+      colors=>mutate(x=>x.settings.highlightColors=colors)
+    ));
+    frag.appendChild(highlight);
   }
 
   if(p.type==="range"){
@@ -468,6 +591,19 @@ function buildLinkedDataPanel(p,model){
       v=>mutate(x=>x.settings.diffMode=v)
     ));
     frag.appendChild(sec);
+
+    const subjects=section(getLanguage()==="ja"?"表示対象":"Visible targets");
+    const fallback=model.rows.slice(0,Math.min(10,model.rows.length)).map(row=>row.rawIndex);
+    subjects.appendChild(sourceSubjectChecks(
+      model,
+      Array.isArray(p.settings.sourceRangeIndices)?p.settings.sourceRangeIndices:fallback,
+      indices=>mutate(x=>{
+        syncSourceProject(x,{rangeIndices:indices});
+        x.settings.displayLimit=Math.min(20,Math.max(1,indices.length));
+      }),
+      {max:20}
+    ));
+    frag.appendChild(subjects);
   }
 
   if(p.type==="radar"){
@@ -475,7 +611,8 @@ function buildLinkedDataPanel(p,model){
     sec.appendChild(sourceSubjectChecks(
       model,
       p.settings.sourceSeriesIndices||[],
-      indices=>mutate(x=>syncSourceProject(x,{seriesIndices:indices}))
+      indices=>mutate(x=>syncSourceProject(x,{seriesIndices:indices})),
+      {max:6}
     ));
     frag.appendChild(sec);
   }

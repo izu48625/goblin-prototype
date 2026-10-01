@@ -1892,3 +1892,39 @@
     max-width:160px;
   }
 }
+
+
+/* R18 C7 — explicit target selection + XY highlights */
+.source-subject-picker,.source-highlight-picker{display:grid;gap:8px}
+.source-picker-actions{display:flex;align-items:center;gap:6px;flex-wrap:wrap}
+.source-picker-btn{min-height:30px;padding:5px 9px;font-size:9px}
+.source-picker-count{margin-left:auto;color:#8198b8;font-size:9px;font-weight:900}
+.source-picker-help{color:#8198b8;font-size:9px;font-weight:850;line-height:1.5}
+.source-subject-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:6px}
+.source-check{
+  min-width:0;display:flex;align-items:center;gap:7px;padding:7px 8px;
+  border:1px solid #263d59;border-radius:8px;background:#0c192a;
+  color:#aebed2;font-size:9px;font-weight:850
+}
+.source-check span{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.source-check:has(input:checked){border-color:#4778b8;background:#102542;color:#eef5ff}
+.source-check input:disabled+span{opacity:.45}
+.source-highlight-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:6px}
+.source-highlight-row{
+  min-width:0;display:grid;grid-template-columns:auto minmax(0,1fr) 32px;gap:7px;align-items:center;
+  padding:6px 7px;border:1px solid #263d59;border-radius:8px;background:#0c192a
+}
+.source-highlight-row:has(input[type="checkbox"]:checked){border-color:#4778b8;background:#102542}
+.source-highlight-name{overflow:hidden;text-overflow:ellipsis;white-space:nowrap;color:#b8c7da;font-size:9px;font-weight:850}
+.source-highlight-color{width:30px;height:28px;border:1px solid #365273;border-radius:7px;background:#0c192a;padding:2px}
+.source-highlight-color:disabled{opacity:.3}
+.scatter-point.highlighted{stroke:var(--visual-text);stroke-width:5;filter:drop-shadow(0 0 7px currentColor)}
+.quad-point-dot.highlighted{
+  width:3.2cqw;height:3.2cqw;
+  border:.24cqw solid var(--visual-text);
+  box-shadow:0 0 0 .65cqw rgba(255,255,255,.16),0 0 1.4cqw rgba(255,255,255,.18)
+}
+@media(max-width:760px){
+  .source-subject-grid,.source-highlight-grid{grid-template-columns:1fr}
+  .source-check,.source-highlight-row{min-height:40px;font-size:10px}
+}

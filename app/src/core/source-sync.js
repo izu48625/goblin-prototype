@@ -171,6 +171,19 @@ function criterionIndex(model,value,fallback=0){
   return Math.max(0,Math.min(model.criteria.length-1,fallback));
 }
 
+function selectedRows(model,rawIndices,max=20,fallbackCount=10){
+  const valid=new Set(model.rows.map(r=>r.rawIndex));
+  const explicit=Array.isArray(rawIndices);
+  let indices=explicit
+    ? rawIndices.map(Number).filter(Number.isInteger).filter(i=>valid.has(i))
+    : model.rows.slice(0,Math.min(fallbackCount,model.rows.length)).map(r=>r.rawIndex);
+  indices=[...new Set(indices)].slice(0,max);
+  return {
+    indices,
+    rows:indices.map(i=>sourceRow(model,i)).filter(Boolean)
+  };
+}
+
 function setSourceBasics(project,model){
   project.settings.sourceLinked=true;
   project.settings.sourceSheetId=model.sheet.id;
@@ -178,12 +191,17 @@ function setSourceBasics(project,model){
   project.meta.subtitle=String(model.sheet.desc||"").trim();
 }
 
-function syncMetricItems(project,model,key){
+function syncMetricItems(project,model,key,rawIndices){
   key=normalizeMetricKey(model.sheet,key);
   const label=model.metricLabel(key);
   project.settings.sourceMetricKey=key;
 
-  project.data.items=model.rows.map(r=>({
+  const max=project.type==="tier-list"?40:20;
+  const fallback=project.type==="tier-list"?40:10;
+  const selection=selectedRows(model,rawIndices,max,fallback);
+  if(project.type!=="tier-list")project.settings.sourceItemIndices=selection.indices;
+
+  project.data.items=selection.rows.map(r=>({
     id:`src_${r.rawIndex}`,
     sourceRawIndex:r.rawIndex,
     name:r.name,
@@ -326,7 +344,7 @@ function syncXY(project,model,xValue,yValue){
   }
 }
 
-function syncRange(project,model,aValue,bValue){
+function syncRange(project,model,aValue,bValue,rawIndices){
   const ai=criterionIndex(model,aValue,0);
   let bi=criterionIndex(model,bValue,model.criteria.length>1?1:0);
   if(model.criteria.length>1 && bi===ai){
@@ -340,14 +358,17 @@ function syncRange(project,model,aValue,bValue){
   project.settings.max=model.scale;
   project.settings.autoRange=false;
   project.meta.subtitle=`${project.settings.labelA} → ${project.settings.labelB}`;
-  project.data.items=model.rows.map(r=>({
+
+  const selection=selectedRows(model,rawIndices,20,10);
+  project.settings.sourceRangeIndices=selection.indices;
+  project.data.items=selection.rows.map(r=>({
     id:`src_${r.rawIndex}`,
     sourceRawIndex:r.rawIndex,
     name:r.name,
     value:Number.isFinite(r.scores[ai])?r.scores[ai]:null,
     value2:Number.isFinite(r.scores[bi])?r.scores[bi]:null
   }));
-  project.settings.displayLimit=Math.min(20,Math.max(1,Number(project.settings.displayLimit)||10));
+  project.settings.displayLimit=Math.min(20,Math.max(1,Number(project.settings.displayLimit)||selection.indices.length||10));
 }
 
 function syncRing(project,model,rawIndex){
@@ -371,14 +392,12 @@ function syncRing(project,model,rawIndex){
 
 function syncRadar(project,model,rawIndices){
   const valid=new Set(model.rows.map(r=>r.rawIndex));
-  let indices=Array.isArray(rawIndices)
+  const explicit=Array.isArray(rawIndices);
+  let indices=explicit
     ? rawIndices.map(Number).filter(Number.isInteger).filter(i=>valid.has(i))
-    : [];
+    : model.compare.filter(i=>valid.has(i));
 
-  if(!indices.length){
-    indices=model.compare.filter(i=>valid.has(i));
-  }
-  if(!indices.length){
+  if(!explicit && !indices.length){
     indices=model.rows.slice(0,Math.min(3,model.rows.length)).map(r=>r.rawIndex);
   }
   indices=[...new Set(indices)].slice(0,6);
@@ -427,7 +446,11 @@ export function syncSourceProject(project,changes={},explicitSheet=null){
     const key=changes.metricKey
       ?? project.settings.sourceMetricKey
       ?? model.metricKey;
-    syncMetricItems(project,model,key);
+    syncMetricItems(
+      project,model,key,
+      changes.itemIndices
+        ?? project.settings.sourceItemIndices
+    );
   }else if(type==="stat-card"){
     syncStatCard(
       project,model,
@@ -453,7 +476,9 @@ export function syncSourceProject(project,changes={},explicitSheet=null){
         ?? 0,
       changes.bIndex
         ?? project.settings.sourceRangeB
-        ?? (model.criteria.length>1?1:0)
+        ?? (model.criteria.length>1?1:0),
+      changes.rangeIndices
+        ?? project.settings.sourceRangeIndices
     );
   }else if(type==="ring"){
     syncRing(
@@ -467,7 +492,6 @@ export function syncSourceProject(project,changes={},explicitSheet=null){
       project,model,
       changes.seriesIndices
         ?? project.settings.sourceSeriesIndices
-        ?? model.compare
     );
   }
   return project;
