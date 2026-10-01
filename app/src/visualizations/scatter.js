@@ -151,7 +151,7 @@ export const scatterChart={
       }else if(s.categoryColors&&item.category)c.setAttribute("fill",palette[Math.max(0,cats.indexOf(item.category))%palette.length]);
       g.appendChild(c);svg.appendChild(g);
 
-      if(s.showLabels===false || index>=Math.max(1,Math.min(40,Number(s.labelLimit)||15)))return;
+      if(s.showLabels===false || (index>=Math.max(1,Math.min(40,Number(s.labelLimit)||15)) && !highlight))return;
       const label=String(item.name||"").trim();if(!label)return;
       const fontSize=label.length>18?18:label.length>12?20:22;
       const maxW=220;
