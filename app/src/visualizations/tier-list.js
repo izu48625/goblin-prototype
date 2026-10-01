@@ -10,7 +10,7 @@ export const tierList={
     const s={mode:"auto",showScore:true,...project.settings};
     const tiers=project.data.tiers||[],items=project.data.items||[];
     root.innerHTML="";
-    const w=document.createElement("div");w.className="visual tier-visual";
+    const w=document.createElement("div");w.className=`visual tier-visual ${items.length>20?"tier-dense":""}`;
     w.innerHTML=`<div class="generic-kicker">TIER LIST</div><div class="viz-title generic-title"></div><div class="viz-subtitle generic-subtitle"></div><div class="tier-board"></div>`;
     w.querySelector(".generic-title").textContent=project.meta.title||"Tier List";
     w.querySelector(".generic-subtitle").textContent=project.meta.subtitle||"";
