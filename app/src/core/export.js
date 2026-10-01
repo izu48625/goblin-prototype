@@ -396,7 +396,7 @@ function renderQuadrant(project){
     if(highlight){
       ctx.strokeStyle=c.text;ctx.lineWidth=Math.max(2,width*.0025);ctx.stroke();
     }
-    if(index<labelLimit){
+    if(index<labelLimit||highlight){
       font(ctx,width*.015,800,c.family);ctx.fillStyle=c.text;ctx.fillText(ellipsis(ctx,item.name||"",width*.16),x+width*.016,y-width*.012);
     }
   });
@@ -500,7 +500,7 @@ function renderScatter(project){
     if(highlight){
       ctx.strokeStyle=c.text;ctx.lineWidth=Math.max(2,width*.0028);ctx.stroke();
     }
-    if(settings.showLabels===false || index>=Math.max(1,Math.min(40,Number(settings.labelLimit)||15)))return;
+    if(settings.showLabels===false || (index>=Math.max(1,Math.min(40,Number(settings.labelLimit)||15)) && !highlight))return;
 
     const raw=String(item.name||"").trim();if(!raw)return;
     let size=width*(raw.length>18?.014:raw.length>12?.0155:.017);
