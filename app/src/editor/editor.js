@@ -15,7 +15,7 @@ const id=params.get("id");
 let project=getProject(id);
 if(!project){
   alert(getLanguage()==="ja"?"Projectが見つかりません":"Project not found");
-  location.href="../index.html?extensions=1&v=r18c6";
+  location.href="../index.html?extensions=1&v=r18c9";
   throw new Error("Project not found");
 }
 
@@ -352,10 +352,14 @@ function sourceHighlightControls(model,highlightColors,onChange){
       else delete next[key];
       onChange(next);
     });
-    color.addEventListener("change",()=>{
+    const applyColor=()=>{
       if(!check.checked)return;
       onChange({...colors,[key]:color.value});
-    });
+    };
+    // iPhone/Safari can report color-picker updates through input before
+    // change, so listen to both to make the preview reliably refresh.
+    color.addEventListener("input",applyColor);
+    color.addEventListener("change",applyColor);
 
     line.append(check,name,color);
     grid.appendChild(line);
