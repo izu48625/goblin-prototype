@@ -82,8 +82,8 @@ export const quadrant={
           console.warn("Quadrant image load failed",e);
         }
       }
-      point.querySelector(".quad-point-name").textContent=pointIndex<labelLimit?(item.name||""):"";
-      if(pointIndex>=labelLimit)point.classList.add("label-hidden");
+      point.querySelector(".quad-point-name").textContent=(pointIndex<labelLimit||highlight)?(item.name||""):"";
+      if(pointIndex>=labelLimit&&!highlight)point.classList.add("label-hidden");
       chart.appendChild(point);
       pointIndex++;
     }
