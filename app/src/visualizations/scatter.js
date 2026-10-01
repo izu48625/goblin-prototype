@@ -146,8 +146,12 @@ export const scatterChart={
       c.setAttribute("r",highlight?"14":"10");
       c.setAttribute("class",highlight?"scatter-point highlighted":"scatter-point");
       if(highlight){
-        c.setAttribute("fill",highlight);
+        // Use inline CSS, not the SVG presentation attribute. The stylesheet
+        // defines .scatter-point { fill: ... }, which otherwise wins and hides
+        // the per-target highlight color.
+        c.style.fill=highlight;
         c.style.color=highlight;
+        c.style.setProperty("--point-highlight-color",highlight);
       }else if(s.categoryColors&&item.category)c.setAttribute("fill",palette[Math.max(0,cats.indexOf(item.category))%palette.length]);
       g.appendChild(c);svg.appendChild(g);
 
