@@ -67,7 +67,7 @@
     content.innerHTML=`
       <section class="hero">
         <div class="heroTopline">
-          <div class="visibilityBadge ${data.visibility==='unlisted'?'unlisted':''}">${visibilityLabel}</div>
+          <div class="visibilityBadge ${data.visibility==='private'?'private':data.visibility==='unlisted'?'unlisted':''}">${visibilityLabel}</div>
           ${updatedLabel?`<div class="updatedAt">${ja?'更新':'Updated'} ${esc(updatedLabel)}</div>`:''}
         </div>
         <h1>${esc(data.title)}</h1>
