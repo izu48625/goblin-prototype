@@ -60,7 +60,7 @@ function openExtension(type){
     if(sheet?.id)project.settings.sourceSheetId=sheet.id;
     syncSourceProject(project,{},sheet);
     saveProject(project);
-    location.href=`app/editor.html?v=r18c10&id=${encodeURIComponent(project.id)}`;
+    location.href=`app/editor.html?v=r19p1&id=${encodeURIComponent(project.id)}`;
   }catch(error){
     console.error(error);
     alert((language==="ja"?"拡張機能を開けませんでした：":"Could not open visual tool: ")+(error?.message||error));
