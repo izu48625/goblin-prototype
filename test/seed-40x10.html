@@ -1,0 +1,89 @@
+<!doctype html>
+<html lang="ja">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+  <title>Stats Maker 40×10 Test Seeder</title>
+  <style>
+    body{margin:0;background:#08111f;color:#eef5ff;font-family:system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;min-height:100vh;display:grid;place-items:center;padding:20px}
+    .card{width:min(520px,100%);background:#0f1b2e;border:1px solid #2e4665;border-radius:18px;padding:22px;box-shadow:0 24px 70px rgba(0,0,0,.42)}
+    h1{font-size:22px;margin:0 0 10px}.sub{color:#9fb2cb;font-size:14px;line-height:1.7;margin-bottom:18px}
+    button{width:100%;min-height:48px;border:0;border-radius:12px;background:#356dcc;color:#fff;font-weight:900;font-size:15px}
+    .note{margin-top:12px;color:#7890af;font-size:12px;line-height:1.6}.ok{color:#73dda8}
+  </style>
+</head>
+<body>
+  <main class="card">
+    <h1>40対象 × 10項目 テストデータ</h1>
+    <div class="sub">今あるシートは消さずに、40×10のテスト用シートを1枚追加します。Visual Toolsの最大件数チェック用です。</div>
+    <button id="seedBtn" type="button">テストシートを追加して開く</button>
+    <div id="status" class="note">同じテストシートが既にある場合は更新します。</div>
+  </main>
+<script>
+(() => {
+  'use strict';
+  const STORAGE_KEY='statsMakerV014Library';
+  const SHEET_ID='stress_40x10_v1';
+  const cols=['評価1','評価2','評価3','評価4','評価5','評価6','評価7','評価8','評価9','評価10'];
+
+  function score(r,c){
+    const base=58+((r*11+c*7+r*c*3)%39);
+    const wave=((r+c)%5)-2;
+    return Math.max(40,Math.min(100,base+wave));
+  }
+
+  function makeSheet(){
+    const rows=Array.from({length:40},(_,ri)=>({
+      name:`対象 ${String(ri+1).padStart(2,'0')}`,
+      image:'',
+      note:ri%7===0?'40×10表示テスト用':'',
+      scores:cols.map((_,ci)=>score(ri+1,ci+1))
+    }));
+    return {
+      id:SHEET_ID,
+      title:'40×10 表示テスト',
+      desc:'対象40件・評価項目10件の最大構成テストデータ',
+      cols:cols.slice(),
+      rows,
+      sortKey:null,
+      sortDesc:true,
+      rankMetric:'avg',
+      compare:[0,1,2,3,4,5],
+      compareView:'radar',
+      viewMode:'sheet',
+      fitMode:'auto',
+      fitZoom:1,
+      weighted:false,
+      weights:Array(10).fill(1),
+      scale:100,
+      search:'',
+      gradeFilter:'all',
+      rankMode:'top',
+      updatedAt:Date.now()
+    };
+  }
+
+  function seed(){
+    const status=document.getElementById('status');
+    try{
+      let lib=null;
+      try{lib=JSON.parse(localStorage.getItem(STORAGE_KEY)||'null')}catch{}
+      if(!lib||!Array.isArray(lib.sheets))lib={activeId:SHEET_ID,sheets:[]};
+      const sheet=makeSheet();
+      const idx=lib.sheets.findIndex(s=>s&&s.id===SHEET_ID);
+      if(idx>=0)lib.sheets[idx]=sheet; else lib.sheets.push(sheet);
+      lib.activeId=SHEET_ID;
+      localStorage.setItem(STORAGE_KEY,JSON.stringify(lib));
+      status.textContent='追加しました。Stats Makerを開きます…';
+      status.className='note ok';
+      setTimeout(()=>location.href='../index.html?v=r18c6&seeded=40x10',350);
+    }catch(e){
+      status.textContent='作成に失敗しました：'+(e?.message||e);
+    }
+  }
+
+  document.getElementById('seedBtn').addEventListener('click',seed);
+})();
+</script>
+</body>
+</html>
