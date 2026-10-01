@@ -248,28 +248,120 @@ function sourceSelectField(label,options,currentValue,onChange){
   return wrap;
 }
 
-function sourceSubjectChecks(model,selected,onChange){
+function sourceSubjectChecks(model,selected,onChange,{max=6}={}){
+  const shell=document.createElement("div");
+  shell.className="source-subject-picker";
+  const selectedSet=new Set((selected||[]).map(Number));
+
+  const actions=document.createElement("div");
+  actions.className="source-picker-actions";
+  const count=document.createElement("span");
+  count.className="source-picker-count";
+  count.textContent=`${selectedSet.size}/${max}`;
+
+  const bulk=document.createElement("button");
+  bulk.type="button";
+  bulk.className="btn source-picker-btn";
+  bulk.textContent=model.rows.length<=max
+    ? (getLanguage()==="ja"?"全選択":"Select all")
+    : (getLanguage()==="ja"?`先頭${max}件`:`First ${max}`);
+  bulk.addEventListener("click",()=>{
+    onChange(model.rows.slice(0,max).map(row=>row.rawIndex));
+  });
+
+  const clear=document.createElement("button");
+  clear.type="button";
+  clear.className="btn source-picker-btn";
+  clear.textContent=getLanguage()==="ja"?"全解除":"Clear";
+  clear.addEventListener("click",()=>onChange([]));
+
+  actions.append(bulk,clear,count);
+  shell.appendChild(actions);
+
   const wrap=document.createElement("div");
   wrap.className="source-subject-grid";
-  const selectedSet=new Set((selected||[]).map(Number));
   model.rows.forEach(row=>{
     const label=document.createElement("label");
     label.className="source-check";
     const input=document.createElement("input");
     input.type="checkbox";
     input.checked=selectedSet.has(row.rawIndex);
+    input.disabled=!input.checked&&selectedSet.size>=max;
     input.addEventListener("change",()=>{
       const next=new Set(selectedSet);
-      if(input.checked)next.add(row.rawIndex);
-      else next.delete(row.rawIndex);
-      onChange([...next].slice(0,6));
+      if(input.checked){
+        if(next.size>=max)return;
+        next.add(row.rawIndex);
+      }else{
+        next.delete(row.rawIndex);
+      }
+      onChange([...next].slice(0,max));
     });
     const text=document.createElement("span");
     text.textContent=row.name;
     label.append(input,text);
     wrap.appendChild(label);
   });
-  return wrap;
+  shell.appendChild(wrap);
+  return shell;
+}
+
+function sourceHighlightControls(model,highlightColors,onChange){
+  const shell=document.createElement("div");
+  shell.className="source-highlight-picker";
+  const colors={...(highlightColors||{})};
+
+  const actions=document.createElement("div");
+  actions.className="source-picker-actions";
+  const help=document.createElement("span");
+  help.className="source-picker-help";
+  help.textContent=getLanguage()==="ja"
+    ?"色を付けたい対象を選択"
+    :"Choose targets to highlight";
+  const clear=document.createElement("button");
+  clear.type="button";
+  clear.className="btn source-picker-btn";
+  clear.textContent=getLanguage()==="ja"?"色をすべて解除":"Clear colors";
+  clear.addEventListener("click",()=>onChange({}));
+  actions.append(help,clear);
+  shell.appendChild(actions);
+
+  const grid=document.createElement("div");
+  grid.className="source-highlight-grid";
+  model.rows.forEach(row=>{
+    const key=String(row.rawIndex);
+    const line=document.createElement("label");
+    line.className="source-highlight-row";
+    const check=document.createElement("input");
+    check.type="checkbox";
+    check.checked=!!colors[key];
+
+    const name=document.createElement("span");
+    name.className="source-highlight-name";
+    name.textContent=row.name;
+
+    const color=document.createElement("input");
+    color.type="color";
+    color.className="source-highlight-color";
+    color.value=colors[key]||"#ffcc55";
+    color.disabled=!check.checked;
+
+    check.addEventListener("change",()=>{
+      const next={...colors};
+      if(check.checked)next[key]=color.value||"#ffcc55";
+      else delete next[key];
+      onChange(next);
+    });
+    color.addEventListener("input",()=>{
+      if(!check.checked)return;
+      onChange({...colors,[key]:color.value});
+    });
+
+    line.append(check,name,color);
+    grid.appendChild(line);
+  });
+  shell.appendChild(grid);
+  return shell;
 }
 
 function choiceButtons(options,currentValue,onChange,className="segmented"){
