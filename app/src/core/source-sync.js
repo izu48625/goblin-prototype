@@ -240,7 +240,7 @@ function syncMetricItems(project,model,key,rawIndices){
     project.settings.showCategory=false;
     project.meta.subtitle=`${label}ランキング`;
   }else if(project.type==="bar"){
-    const currentTop=Number(project.settings.topN);
+    const currentTop=legacyAutoPool?10:Number(project.settings.topN);
     project.settings.topN=Number.isFinite(currentTop)&&currentTop>0
       ? Math.min(20,Math.max(1,currentTop))
       : 10;
