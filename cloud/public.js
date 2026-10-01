@@ -192,7 +192,7 @@
           itemId:s.item_id,
           name:itemById.get(s.item_id)?.name||'',
           count:Number(s.response_count||0),
-          value:canShowAverages?num(s.avg_overall):null
+          value:canShowAverages&&Number(s.response_count||0)>=5?num(s.avg_overall):null
         }))
         .filter(x=>x.value!==null)
         .sort((a,b)=>b.value-a.value||a.name.localeCompare(b.name,ja?'ja':'en'));
@@ -200,13 +200,13 @@
       const cMap=new Map(
         criterionSummary.map(s=>[
           `${s.item_id}|${s.criterion_id}`,
-          {...s,avg_score:canShowAverages?num(s.avg_score):null}
+          {...s,avg_score:canShowAverages&&Number(s.response_count||0)>=5?num(s.avg_score):null}
         ])
       );
 
       const metricSummary=dbCriteria.map(criterion=>{
         const rowsForMetric=criterionSummary
-          .filter(row=>row.criterion_id===criterion.id&&canShowAverages&&num(row.avg_score)!==null)
+          .filter(row=>row.criterion_id===criterion.id&&canShowAverages&&Number(row.response_count||0)>=5&&num(row.avg_score)!==null)
           .map(row=>({avg:num(row.avg_score),count:Number(row.response_count||0)}))
           .filter(row=>row.avg!==null&&row.count>0);
         const den=rowsForMetric.reduce((sum,row)=>sum+row.count,0);
@@ -229,7 +229,7 @@
       if(canShowAverages&&items.length&&dbCriteria.length){
         communityTable=`<div class="tableWrap"><table><thead><tr><th>${ja?'対象':'Target'}</th>${dbCriteria.map(c=>`<th>${esc(c.name)}</th>`).join('')}<th>${ja?'総合':'Overall'}</th></tr></thead><tbody>${items.map(item=>{
           const overall=itemSummary.find(x=>x.item_id===item.id);
-          const overallValue=num(overall?.avg_overall);
+          const overallValue=Number(overall?.response_count||0)>=5?num(overall?.avg_overall):null;
           return `<tr><td>${esc(item.name)}</td>${dbCriteria.map(c=>{
             const s=cMap.get(`${item.id}|${c.id}`);
             return `<td class="${s?.avg_score==null?'na':'score'}">${s?.avg_score==null?'—':fmt(s.avg_score)}</td>`;
