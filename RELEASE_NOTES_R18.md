@@ -72,3 +72,17 @@ Anonymous Sign-Ins must be enabled for Community rating.
   - Ring Gauge: up to all 10 metrics
 - Empty metric scores stay missing instead of becoming zero in linked metric/range visuals.
 - Active cache key: r18c6.
+
+
+## C7 Visual selection / XY highlights
+- Limited source-linked visuals now let users choose the exact target names to display instead of always taking the first items.
+- Ranking Card / Bar / Dot: named target picker, up to 20 targets.
+- Range / Dumbbell: named target picker, up to 20 targets.
+- Radar: named target picker remains capped at 6, now with bulk-select/clear controls.
+- Target picker shows Select All when all rows fit the visual limit; otherwise it offers a quick "first N" action plus individual target selection.
+- Quadrant / Scatter now include a per-target highlight picker with an individual color control for each selected point.
+- Highlighted Quadrant / Scatter points are larger, outlined, and keep their labels visible even when the normal label limit is lower.
+- PNG/native export preserves Quadrant / Scatter highlight colors and highlighted labels.
+- Existing axis/metric selectors remain available for Quadrant, Scatter, Range, and metric-driven visuals.
+- No database migration is required.
+- Active cache key: r18c7.
