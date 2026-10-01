@@ -52,5 +52,5 @@
     bind();
   }
 
-  window.__SM_R18_COMPLETE_BUILD__='R18-COMPLETE-C8';
+  window.__SM_R18_COMPLETE_BUILD__='R19-P1';
 })();

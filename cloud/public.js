@@ -5,6 +5,7 @@
   const esc=value=>String(value??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
   const num=value=>{if(value===null||value===undefined||value==='')return null;const n=Number(value);return Number.isFinite(n)?n:null};
   const fmt=value=>{const n=num(value);return n===null?'—':(Number.isInteger(n)?String(n):n.toFixed(1))};
+  const fmtDate=(value,ja)=>{if(!value)return '';const d=new Date(value);if(Number.isNaN(d.getTime()))return '';try{return new Intl.DateTimeFormat(ja?'ja-JP':'en-US',{year:'numeric',month:'short',day:'numeric'}).format(d)}catch{return d.toLocaleDateString()}};
   const average=(scores,criteria,weighted)=>{let total=0,den=0;scores.forEach((raw,i)=>{const score=num(raw);if(score===null)return;const w=weighted?Math.max(0,Number(criteria[i]?.weight??1)):1;total+=score*w;den+=w});return den?Math.round(total/den*10)/10:null};
 
   function toast(message){const old=document.querySelector('.toast');old?.remove();const el=document.createElement('div');el.className='toast';el.textContent=message;document.body.appendChild(el);setTimeout(()=>el.remove(),2200)}
@@ -37,6 +38,13 @@
     if(error)throw error;
 
     const ja=data.language_code!=='en';document.documentElement.lang=ja?'ja':'en';document.title=`${data.title} - Stats Maker`;
+    const metaDescription=document.querySelector('meta[name="description"]');
+    if(metaDescription)metaDescription.content=data.description||`${data.title} - Stats Maker`;
+    const footerOpen=document.getElementById('footerOpenApp');
+    if(footerOpen)footerOpen.textContent=ja?'Stats Makerを開く':'Open Stats Maker';
+    let currentUser=null;
+    try{currentUser=(await sb.auth.getUser()).data?.user||null}catch{}
+    const isOwner=!!currentUser&&currentUser.id===data.owner_id;
     const items=(data.topic_items||[]).sort((a,b)=>a.position-b.position);
     const dbCriteria=(data.criteria||[]).sort((a,b)=>a.position-b.position);
     const snap=(data.snapshot&&typeof data.snapshot==='object'&&!Array.isArray(data.snapshot))?data.snapshot:{};
@@ -46,48 +54,123 @@
     const weighted=typeof snap.weighted==='boolean'?snap.weighted:!!data.weighted;
 
     const creatorRanking=rows.map((row,index)=>({index,name:row.name||`${ja?'対象':'Target'} ${index+1}`,value:average(Array.isArray(row.scores)?row.scores:[],criteria,weighted)})).filter(x=>x.value!==null).sort((a,b)=>b.value-a.value||a.index-b.index);
+    const creatorTop=creatorRanking[0]||null;
+    const updatedLabel=fmtDate(data.snapshot_updated_at||data.published_at,ja);
+    const visibilityLabel=data.visibility==='private'
+      ?(ja?'非公開プレビュー':'Private preview')
+      :(data.visibility==='unlisted'?(ja?'URL限定':'Unlisted'):(ja?'公開作品':'Public'));
+    const visibilityHelp=data.visibility==='private'
+      ?(ja?'現在は非公開です。公開者セッションでのみ確認できます。':'This page is private and is only visible to the publisher session.')
+      :(data.visibility==='unlisted'
+        ?(ja?'公開一覧には表示せず、URLを知っている人だけが閲覧できます。':'Hidden from public listings; anyone with the URL can view it.')
+        :(ja?'公開作品として扱われ、URLから誰でも閲覧できます。':'A public Stats Maker page that anyone with the URL can view.'));
+    const metricChips=criteria.map(c=>`<span class="${weighted?'weightedMetric':''}">${esc(c.name)}${weighted?`<small>×${fmt(c.weight??1)}</small>`:''}</span>`).join('');
     const tableHead=criteria.map(c=>`<th>${esc(c.name)}</th>`).join('');
     const tableRows=rows.map(row=>{const scores=Array.isArray(row.scores)?row.scores:[];const av=average(scores,criteria,weighted);return `<tr><td>${esc(row.name)}</td>${criteria.map((_,i)=>{const n=num(scores[i]);return `<td class="${n===null?'na':'score'}">${n===null?'—':fmt(n)}</td>`}).join('')}<td class="avg">${av===null?'—':fmt(av)}</td></tr>`}).join('');
 
     content.innerHTML=`
       <section class="hero">
-        <div class="eyebrow">${data.visibility==='unlisted'?(ja?'URL限定公開':'Unlisted'):(ja?'公開':'Public')}</div>
+        <div class="heroTopline">
+          <div class="visibilityBadge ${data.visibility==='private'?'private':data.visibility==='unlisted'?'unlisted':''}">${visibilityLabel}</div>
+          ${updatedLabel?`<div class="updatedAt">${ja?'更新':'Updated'} ${esc(updatedLabel)}</div>`:''}
+        </div>
         <h1>${esc(data.title)}</h1>
         ${data.description?`<div class="desc">${esc(data.description)}</div>`:''}
-        <div class="meta"><span class="pill">${scale}${ja?'点満点':'-point scale'}</span><span class="pill">${rows.length}${ja?'対象':' targets'}</span><span class="pill">${criteria.length}${ja?'項目':' metrics'}</span><span class="pill">${weighted?(ja?'重み付け':'Weighted'):(ja?'均等平均':'Equal weight')}</span></div>
+        <div class="heroScope">${visibilityHelp}</div>
+
+        <div class="summaryStrip">
+          <div class="summaryStat">
+            <div class="summaryLabel">${ja?'作成者1位':'Creator #1'}</div>
+            <div class="summaryValue accent">${creatorTop?fmt(creatorTop.value):'—'}</div>
+            <div class="summarySub">${creatorTop?esc(creatorTop.name):(ja?'採点なし':'No scores')}</div>
+          </div>
+          <div class="summaryStat">
+            <div class="summaryLabel">${ja?'対象':'Targets'}</div>
+            <div class="summaryValue">${rows.length}</div>
+            <div class="summarySub">${ja?'比較対象':'rated targets'}</div>
+          </div>
+          <div class="summaryStat">
+            <div class="summaryLabel">${ja?'評価項目':'Metrics'}</div>
+            <div class="summaryValue">${criteria.length}</div>
+            <div class="summarySub">${weighted?(ja?'重み付け平均':'weighted average'):(ja?'均等平均':'equal average')}</div>
+          </div>
+          <div class="summaryStat">
+            <div class="summaryLabel">${ja?'尺度':'Scale'}</div>
+            <div class="summaryValue">${scale}</div>
+            <div class="summarySub">${ja?'点満点':'point scale'}</div>
+          </div>
+        </div>
+
         <div class="primaryActions">
           <button id="remixBtn" class="actionBtn remix">${ja?'Remixして使う':'Remix this'}</button>
-          <button id="shareBtn" class="actionBtn">${ja?'共有':'Share'}</button>
+          <button id="shareBtn" class="actionBtn ghost">${ja?'共有':'Share'}</button>
+          ${isOwner?`<button id="ownerManageBtn" class="actionBtn owner">${ja?'編集・公開設定':'Edit / Publish settings'}</button>`:''}
         </div>
+        ${isOwner?`<div class="ownerHint">${ja?'このブラウザの公開者セッションで開いています。元シートが残っていれば編集画面へ戻せます。':'You are viewing this with the publisher session. If the local source sheet still exists, it will be selected when you return.'}</div>`:''}
+
         <div class="notice">${ja?'Communityへ参加したい場合は「Remixして使う」で自分の採点シートを作成し、採点後に「Communityに参加」を押してください。':'To join Community ratings, remix this sheet, score it, then use “Join Community” from your copy.'}</div>
         ${rows.some(row=>row.hasLocalImage)?`<div class="notice">${ja?'現在、作成者のローカル画像は公開ページへアップロードされません。':'Creator-local images are not uploaded to the public page yet.'}</div>`:''}
       </section>
+
       <div class="grid">
-        <section class="card"><h2>${ja?'作成者の公開スコア':'Creator Scores'}</h2><div class="tableWrap"><table><thead><tr><th>${ja?'対象':'Target'}</th>${tableHead}<th>${ja?'平均':'Average'}</th></tr></thead><tbody>${tableRows}</tbody></table></div></section>
+        <section class="card">
+          <div class="cardTitleRow"><h2>${ja?'作成者の公開スコア':'Creator Scores'}</h2><span class="smallBadge">${rows.length} × ${criteria.length}</span></div>
+          <div class="tableWrap"><table><thead><tr><th>${ja?'対象':'Target'}</th>${tableHead}<th>${ja?'平均':'Average'}</th></tr></thead><tbody>${tableRows}</tbody></table></div>
+        </section>
         <aside>
-          <section class="card"><h2>${ja?'作成者ランキング':'Creator Ranking'}</h2><div class="ranking">${creatorRanking.length?creatorRanking.slice(0,10).map((item,i)=>`<div class="rankRow"><div class="rankNo">${i+1}</div><div class="rankName">${esc(item.name)}</div><div class="rankValue">${fmt(item.value)}</div></div>`).join(''):`<div class="emptyCommunity">${ja?'採点データがありません。':'No scored data yet.'}</div>`}</div></section>
-          <section class="card" style="margin-top:14px"><h2>${ja?'評価項目':'Metrics'}</h2><div class="criteria">${criteria.map(c=>`<span>${esc(c.name)}</span>`).join('')}</div></section>
+          <section class="card">
+            <div class="cardTitleRow"><h2>${ja?'作成者ランキング':'Creator Ranking'}</h2><span class="smallBadge">TOP ${Math.min(10,creatorRanking.length)}</span></div>
+            <div class="ranking">${creatorRanking.length?creatorRanking.slice(0,10).map((item,i)=>`<div class="rankRow"><div class="rankNo">${i+1}</div><div class="rankName">${esc(item.name)}</div><div class="rankValue">${fmt(item.value)}</div></div>`).join(''):`<div class="emptyCommunity">${ja?'採点データがありません。':'No scored data yet.'}</div>`}</div>
+          </section>
+          <section class="card" style="margin-top:14px">
+            <div class="cardTitleRow"><h2>${ja?'評価項目':'Metrics'}</h2><span class="smallBadge">${criteria.length}</span></div>
+            <div class="criteria">${metricChips}</div>
+          </section>
         </aside>
       </div>
-      <section id="communitySection" class="card communityBlock"><div class="sectionHead"><div><h2>${ja?'Community':'Community'}</h2><div class="sectionSub">${ja?'みんなの評価を集計':'Aggregated participant ratings'}</div></div></div><div id="communityContent" class="emptyCommunity">${ja?'集計中…':'Loading community…'}</div></section>`;
+
+      <section id="communitySection" class="card communityBlock">
+        <div class="sectionHead">
+          <div><h2>Community</h2><div class="sectionSub">${ja?'みんなの評価を集計':'Aggregated participant ratings'}</div></div>
+        </div>
+        <div id="communityContent" class="emptyCommunity">${ja?'集計中…':'Loading community…'}</div>
+      </section>`;
 
     document.getElementById('remixBtn').onclick=()=>{
       try{
         const sheet=window.SM_REMIX.buildSheet(data,snap,dbCriteria,items,ja?'ja':'en');
         window.SM_REMIX.saveSheet(sheet);
         toast(ja?'Remixしました。編集画面へ移動します。':'Remixed. Opening the editor…');
-        setTimeout(()=>{location.href='index.html?remixed=1&v=r18c6'},500);
+        setTimeout(()=>{location.href='index.html?remixed=1&v=r19p1'},500);
       }catch(e){toast((ja?'Remixに失敗しました：':'Remix failed: ')+(e?.message||e))}
     };
     document.getElementById('shareBtn').onclick=async()=>{
       try{
+        const url=location.href;
         if(navigator.share){
-          await navigator.share({title:data.title,text:data.description||'',url:location.href});
+          await navigator.share({title:data.title,text:data.description||'',url});
+        }else if(navigator.clipboard?.writeText){
+          await navigator.clipboard.writeText(url);
+          toast(ja?'URLをコピーしました。':'URL copied.');
         }else{
-          await navigator.clipboard.writeText(location.href);
+          const ta=document.createElement('textarea');ta.value=url;ta.style.position='fixed';ta.style.opacity='0';document.body.appendChild(ta);ta.select();document.execCommand('copy');ta.remove();
           toast(ja?'URLをコピーしました。':'URL copied.');
         }
       }catch(e){if(e?.name!=='AbortError')toast(ja?'共有できませんでした。':'Could not share.')}
+    };
+    if(isOwner&&document.getElementById('ownerManageBtn')){
+      document.getElementById('ownerManageBtn').onclick=()=>{
+        try{
+          const key='statsMakerV014Library';
+          const lib=JSON.parse(localStorage.getItem(key)||'null');
+          if(lib&&Array.isArray(lib.sheets)){
+            const source=lib.sheets.find(sheet=>String(sheet?.cloudTopicId||'')===String(data.id));
+            if(source){lib.activeId=source.id;localStorage.setItem(key,JSON.stringify(lib))}
+          }
+          sessionStorage.setItem('statsMaker:openPublish','1');
+        }catch{}
+        location.href='index.html?v=r19p1&from=public';
+      };
     };
 
     if(data.show_community){

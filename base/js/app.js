@@ -1490,6 +1490,7 @@
   function publicPageUrl(topicId){
     const url=new URL('../public.html',location.href);
     url.searchParams.set('id',topicId);
+    url.searchParams.set('v','r19p1');
     return url.href;
   }
 
@@ -1547,10 +1548,11 @@
       cols:model?.criteria?.length??s.cols.length,
       scale:s.scale||100
     });
+    const isLive=!!s.cloudTopicId&&s.cloudVisibility!=='private';
     const vis=s.cloudVisibility==='unlisted'?'unlisted':'public';
     document.querySelectorAll('input[name="publishVisibility"]').forEach(r=>r.checked=r.value===vis);
-    $('publishExecuteBtn').textContent=s.cloudTopicId?t('publish.updateExecute'):t('publish.execute');
-    $('publishUnpublishBtn').classList.toggle('hidden',!s.cloudTopicId);
+    $('publishExecuteBtn').textContent=isLive?t('publish.updateExecute'):t('publish.execute');
+    $('publishUnpublishBtn').classList.toggle('hidden',!isLive);
     return user;
   }
 
@@ -1695,6 +1697,8 @@
 
       s.cloudVisibility='private';scheduleSave('');
       $('publishResult').classList.add('hidden');
+      $('publishUnpublishBtn').classList.add('hidden');
+      $('publishExecuteBtn').textContent=t('publish.execute');
       setPublishStatus(t('publish.unpublishSuccess'),'ok');
       renderHeader();
     }catch(e){setPublishStatus(t('publish.errorPrefix')+(e?.message||String(e)),'error')}
@@ -2030,6 +2034,15 @@
   renderAll();
   window.SM_I18N?.applyTranslations();
   scheduleSave('');
+
+  // R19 P1: returning from an owned public page can restore the matching
+  // local sheet and reopen Publish settings in this same browser session.
+  try{
+    if(sessionStorage.getItem('statsMaker:openPublish')==='1'){
+      sessionStorage.removeItem('statsMaker:openPublish');
+      setTimeout(()=>openPublishDialog(),120);
+    }
+  }catch{}
 
   // R10 bridge for source-linked visual extensions.
   window.__statsMakerGetActiveSheet = () => clone(activeSheet());
