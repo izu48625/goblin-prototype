@@ -107,3 +107,15 @@ Anonymous Sign-Ins must be enabled for Community rating.
 - No database migration is required.
 - Active cache key: r18c9.
 
+## C10 Final Visual Audit
+- Finalized the formal Visual Tools limits for the 40×10 sheet model.
+- Stat Card is now consistently capped at 10 metrics across source sync, manual editing, rendering, import, and iPhone PNG export.
+- Radar is now consistently capped at 6 targets × 10 metrics across source sync, manual editing, rendering, import, and iPhone PNG export.
+- Manual Bar display count now matches the formal maximum of 20.
+- Ranking / Bar / Dot keep a ranking pool of up to 40 targets while displaying only the selected Top N / display count.
+- Tier List received a dense 40-target layout and the native iPhone PNG renderer now packs all tier items instead of silently dropping overflow items.
+- Native iPhone PNG parity was improved for Ranking, Stat Card, Bar, Radar, Quadrant, Dot, Range, Scatter, and Tier List, including display toggles, units, ranges, trend/category colors, labels, and highlight settings where applicable.
+- Editor DOM ID audit passes with no missing referenced IDs.
+- No database migration is required.
+- Active cache key: r18c10.
+

@@ -15,7 +15,7 @@ const id=params.get("id");
 let project=getProject(id);
 if(!project){
   alert(getLanguage()==="ja"?"Projectが見つかりません":"Project not found");
-  location.href="../index.html?extensions=1&v=r18c9";
+  location.href="../index.html?extensions=1&v=r18c10";
   throw new Error("Project not found");
 }
 
@@ -441,7 +441,7 @@ function buildSpreadsheetSection(p){
   }else if(p.type==="stat-card"){
     rows=p.data.stats;columns=[{key:"label",label:"Stat"},{key:"value",label:"Value",type:"number"}];
     onCell=(i,k,v)=>mutate(x=>x.data.stats[i][k]=v);
-    onAdd=()=>mutate(x=>{if(x.data.stats.length<12)x.data.stats.push({id:newStatId(),label:"NEW",value:0})});
+    onAdd=()=>mutate(x=>{if(x.data.stats.length<10)x.data.stats.push({id:newStatId(),label:"NEW",value:0})});
     onDelete=i=>mutate(x=>x.data.stats.splice(i,1));onMove=(i,d)=>mutate(x=>swapRows(x.data.stats,i,d));
   }else if(p.type==="range"){
     rows=p.data.items;columns=[{key:"name",label:"Name"},{key:"value",label:"A",type:"number"},{key:"value2",label:"B",type:"number"}];
@@ -904,14 +904,14 @@ function buildDataPanel(){
     importSection.appendChild(createDataImport({
       kind:"stats",
       onImport:(rows,mode)=>mutate(x=>{
-        const mapped=rows.slice(0,12).map(r=>({
+        const mapped=rows.slice(0,10).map(r=>({
           id:newStatId(),
           label:r.label,
           value:r.value
         }));
         x.data.stats=mode==="append"
-          ? [...x.data.stats,...mapped].slice(0,12)
-          : mapped.slice(0,12);
+          ? [...x.data.stats,...mapped].slice(0,10)
+          : mapped.slice(0,10);
       })
     }));
     frag.appendChild(importSection);
@@ -930,7 +930,7 @@ function buildDataPanel(){
     });
     stats.appendChild(list);
     const add=document.createElement("button");add.className="btn add-row-btn";add.textContent=t("editor.addStat");
-    add.disabled=p.data.stats.length>=12;
+    add.disabled=p.data.stats.length>=10;
     add.addEventListener("click",()=>mutate(x=>x.data.stats.push({id:newStatId(),label:"NEW",value:0})));
     stats.appendChild(add);
     frag.appendChild(stats);
@@ -1041,7 +1041,7 @@ function buildDataPanel(){
     }
     const grid=document.createElement("div");grid.className="inline-grid";
     grid.appendChild(field(t("editor.unit"),p.settings.unit||"",v=>mutate(x=>x.settings.unit=v)));
-    grid.appendChild(field(t("editor.topN"),p.settings.topN||10,v=>mutate(x=>x.settings.topN=Math.max(1,Math.min(30,numberValue(v)))),"number",{min:"1",max:"30"}));
+    grid.appendChild(field(t("editor.topN"),p.settings.topN||10,v=>mutate(x=>x.settings.topN=Math.max(1,Math.min(20,numberValue(v)))),"number",{min:"1",max:"20"}));
     opts.appendChild(grid);
 
     const toggles=document.createElement("div");toggles.className="option-list";
@@ -1166,7 +1166,7 @@ function buildDataPanel(){
         if(mode==="append" && x.data.axes.length===axes.length){
           x.data.series=[...x.data.series,...series].slice(0,6);
         }else{
-          x.data.axes=axes.slice(0,12);
+          x.data.axes=axes.slice(0,10);
           x.data.series=series.slice(0,6);
         }
       })
@@ -1202,9 +1202,9 @@ function buildDataPanel(){
 
     axesSection.appendChild(axesList);
     const addAxis=document.createElement("button");addAxis.className="btn add-row-btn";addAxis.textContent="+ Axis";
-    addAxis.disabled=p.data.axes.length>=12;
+    addAxis.disabled=p.data.axes.length>=10;
     addAxis.addEventListener("click",()=>mutate(x=>{
-      if(x.data.axes.length>=12)return;
+      if(x.data.axes.length>=10)return;
       x.data.axes.push({id:newAxisId(),label:`A${x.data.axes.length+1}`,max:100});
       x.data.series.forEach(s=>s.values.push(0));
     }));

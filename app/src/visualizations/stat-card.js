@@ -70,7 +70,7 @@ export const statCard={
     card.querySelector(".tier").textContent=project.data.tier?`TIER ${project.data.tier}`:"";
 
     const grid=card.querySelector(".stat-grid");
-    (project.data.stats||[]).slice(0,12).forEach(stat=>{
+    (project.data.stats||[]).slice(0,10).forEach(stat=>{
       const cell=document.createElement("div");
       cell.className="stat-cell";
       cell.innerHTML=`<div class="stat-label"></div><div class="stat-value"></div>`;

@@ -39,7 +39,7 @@ export const radarChart={
   },
 
   render(project,root){
-    const axes=(project.data.axes||[]).slice(0,12);
+    const axes=(project.data.axes||[]).slice(0,10);
     const series=(project.data.series||[]).slice(0,6);
     const settings={
       gridLevels:5,

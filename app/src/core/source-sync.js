@@ -298,7 +298,7 @@ function syncStatCard(project,model,rawIndex){
       ci
     }))
     .filter(stat=>Number.isFinite(stat.value))
-    .slice(0,12)
+    .slice(0,10)
     .map(({id,label,value})=>({id,label,value}));
   project.meta.title=row?.name||String(model.sheet.title||"Stats Maker");
   project.meta.subtitle="評価サマリー";
