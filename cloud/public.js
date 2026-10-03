@@ -8,6 +8,172 @@
   const fmtDate=(value,ja)=>{if(!value)return '';const d=new Date(value);if(Number.isNaN(d.getTime()))return '';try{return new Intl.DateTimeFormat(ja?'ja-JP':'en-US',{year:'numeric',month:'short',day:'numeric'}).format(d)}catch{return d.toLocaleDateString()}};
   const average=(scores,criteria,weighted)=>{let total=0,den=0;scores.forEach((raw,i)=>{const score=num(raw);if(score===null)return;const w=weighted?Math.max(0,Number(criteria[i]?.weight??1)):1;total+=score*w;den+=w});return den?Math.round(total/den*10)/10:null};
 
+  function socialCategoryLabel(key,ja){
+    const labels={
+      sports:['スポーツ','Sports'],
+      manga_anime:['漫画・アニメ','Manga / Anime'],
+      movie_tv:['映画・ドラマ','Movies / TV'],
+      food:['フード','Food'],
+      game:['ゲーム','Games'],
+      music:['音楽','Music'],
+      books:['本・文学','Books'],
+      travel:['旅行・場所','Travel / Places'],
+      tech:['テクノロジー','Technology'],
+      lifestyle:['ライフ・趣味','Lifestyle / Hobbies'],
+      other:['その他','Other']
+    };
+    const pair=labels[String(key||'other')]||labels.other;
+    return ja?pair[0]:pair[1];
+  }
+
+  function canvasBlob(canvas,type='image/png',quality=.95){
+    return new Promise((resolve,reject)=>{
+      canvas.toBlob(blob=>blob?resolve(blob):reject(new Error('Image encoding failed')),type,quality);
+    });
+  }
+
+  function truncateCanvasText(ctx,text,maxWidth){
+    const value=String(text||'');
+    if(ctx.measureText(value).width<=maxWidth)return value;
+    let out=value;
+    while(out.length>1&&ctx.measureText(out+'…').width>maxWidth)out=out.slice(0,-1);
+    return out+'…';
+  }
+
+  function wrapCanvasText(ctx,text,maxWidth,maxLines=2){
+    const source=String(text||'').trim();
+    if(!source)return [];
+    const chars=[...source];
+    const lines=[];
+    let current='';
+    for(const ch of chars){
+      const test=current+ch;
+      if(current&&ctx.measureText(test).width>maxWidth){
+        lines.push(current);
+        current=ch;
+        if(lines.length===maxLines)break;
+      }else current=test;
+    }
+    if(lines.length<maxLines&&current)lines.push(current);
+    if(lines.length===maxLines){
+      lines[maxLines-1]=truncateCanvasText(ctx,lines[maxLines-1],maxWidth);
+    }
+    return lines.slice(0,maxLines);
+  }
+
+  function roundRectPath(ctx,x,y,w,h,r){
+    const radius=Math.min(r,w/2,h/2);
+    ctx.beginPath();
+    ctx.moveTo(x+radius,y);
+    ctx.arcTo(x+w,y,x+w,y+h,radius);
+    ctx.arcTo(x+w,y+h,x,y+h,radius);
+    ctx.arcTo(x,y+h,x,y,radius);
+    ctx.arcTo(x,y,x+w,y,radius);
+    ctx.closePath();
+  }
+
+  async function buildPublicShareCard({title,description,category,ranking,targets,metrics,scale,ja}){
+    const width=1200,height=630;
+    const canvas=document.createElement('canvas');
+    canvas.width=width;canvas.height=height;
+    const ctx=canvas.getContext('2d');
+    if(!ctx)throw new Error('Canvas unavailable');
+
+    const bg=ctx.createLinearGradient(0,0,width,height);
+    bg.addColorStop(0,'#07101f');
+    bg.addColorStop(.56,'#0c1b30');
+    bg.addColorStop(1,'#15284a');
+    ctx.fillStyle=bg;ctx.fillRect(0,0,width,height);
+
+    const glow=ctx.createRadialGradient(980,90,0,980,90,420);
+    glow.addColorStop(0,'rgba(111,156,255,.28)');
+    glow.addColorStop(1,'rgba(111,156,255,0)');
+    ctx.fillStyle=glow;ctx.fillRect(0,0,width,height);
+
+    ctx.fillStyle='#7da3ff';
+    ctx.font='900 24px -apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif';
+    ctx.fillText('STATS MAKER',72,70);
+
+    ctx.fillStyle='#6ddaa2';
+    ctx.font='900 18px -apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif';
+    ctx.fillText(String(category||'').toUpperCase(),72,108);
+
+    ctx.fillStyle='#f3f7ff';
+    ctx.font='900 54px -apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif';
+    const titleLines=wrapCanvasText(ctx,title,680,2);
+    titleLines.forEach((line,i)=>ctx.fillText(line,72,170+i*66));
+
+    if(description){
+      ctx.fillStyle='#9fb1c9';
+      ctx.font='600 22px -apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif';
+      const descLines=wrapCanvasText(ctx,description,680,2);
+      descLines.forEach((line,i)=>ctx.fillText(line,72,306+i*32));
+    }
+
+    const cardX=790,cardY=70,cardW=338,cardH=408;
+    roundRectPath(ctx,cardX,cardY,cardW,cardH,26);
+    ctx.fillStyle='rgba(8,19,34,.9)';ctx.fill();
+    ctx.strokeStyle='#36577d';ctx.lineWidth=2;ctx.stroke();
+
+    ctx.fillStyle='#879dbc';
+    ctx.font='900 15px -apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif';
+    ctx.fillText(ja?'総合ランキング TOP 3':'OVERALL TOP 3',cardX+28,cardY+40);
+
+    const top=(ranking||[]).slice(0,3);
+    top.forEach((item,i)=>{
+      const y=cardY+88+i*94;
+      ctx.fillStyle=i===0?'#8fb2ff':'#b8c7da';
+      ctx.font='900 22px -apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif';
+      ctx.fillText(String(i+1),cardX+28,y);
+
+      ctx.fillStyle='#edf4ff';
+      ctx.font='800 20px -apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif';
+      ctx.fillText(truncateCanvasText(ctx,item.name,190),cardX+65,y);
+
+      ctx.fillStyle='#8fb2ff';
+      ctx.font='900 28px -apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif';
+      ctx.textAlign='right';
+      ctx.fillText(fmt(item.value),cardX+cardW-28,y);
+      ctx.textAlign='left';
+
+      const pct=Math.max(0,Math.min(1,Number(item.value||0)/Number(scale||100)));
+      roundRectPath(ctx,cardX+65,y+18,cardW-121,9,5);
+      ctx.fillStyle='#1d324f';ctx.fill();
+      roundRectPath(ctx,cardX+65,y+18,(cardW-121)*pct,9,5);
+      ctx.fillStyle='#6f9cff';ctx.fill();
+    });
+
+    if(!top.length){
+      ctx.fillStyle='#7186a3';
+      ctx.font='700 20px -apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif';
+      ctx.fillText(ja?'まだ採点がありません':'No scores yet',cardX+28,cardY+105);
+    }
+
+    const metaY=530;
+    const meta=[
+      [ja?'対象':'TARGETS',String(targets)],
+      [ja?'評価項目':'METRICS',String(metrics)],
+      [ja?'尺度':'SCALE',String(scale)]
+    ];
+    meta.forEach((entry,i)=>{
+      const x=72+i*210;
+      ctx.fillStyle='#6f86a4';
+      ctx.font='900 14px -apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif';
+      ctx.fillText(entry[0],x,metaY);
+      ctx.fillStyle='#e6eefb';
+      ctx.font='900 30px -apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif';
+      ctx.fillText(entry[1],x,metaY+38);
+    });
+
+    ctx.textAlign='right';
+    ctx.fillStyle='#7088a6';
+    ctx.font='700 16px -apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif';
+    ctx.fillText('Created with Stats Maker',1128,588);
+    ctx.textAlign='left';
+
+    return canvas;
+  }
+
   function toast(message){const old=document.querySelector('.toast');old?.remove();const el=document.createElement('div');el.className='toast';el.textContent=message;document.body.appendChild(el);setTimeout(()=>el.remove(),2200)}
 
   async function getOwnSubmitted(sb,topicId,items,criteria,weighted){
@@ -71,6 +237,7 @@
     const rows=(Array.isArray(snap.rows)&&snap.rows.length)?snap.rows:items.map(i=>({name:i.name,note:'',scores:Array(criteria.length).fill(null)}));
     const scale=Number(snap.scale||data.score_scale||100)===10?10:100;
     const weighted=typeof snap.weighted==='boolean'?snap.weighted:!!data.weighted;
+    const publicCategory=socialCategoryLabel(snap?.metadata?.category||'other',ja);
 
     const creatorRanking=rows.map((row,index)=>({index,name:row.name||`${ja?'対象':'Target'} ${index+1}`,value:average(Array.isArray(row.scores)?row.scores:[],criteria,weighted)})).filter(x=>x.value!==null).sort((a,b)=>b.value-a.value||a.index-b.index);
     const creatorTop=creatorRanking[0]||null;
@@ -101,7 +268,7 @@
             <div class="lineageMain">
               <span class="lineageLabel">${lineageRelation==='version'?(ja?'前バージョン':'Previous version'):lineageRelation==='remix'?(ja?'Remix元':'Remix source'):(ja?'派生元':'Source')}</span>
               ${sourceTopic
-                ?`<a class="lineageSource" href="public.html?id=${encodeURIComponent(sourceTopic.id)}&v=r22p3">${esc(sourceTopic.title)}</a>`
+                ?`<a class="lineageSource" href="public.html?id=${encodeURIComponent(sourceTopic.id)}&v=r23p1">${esc(sourceTopic.title)}</a>`
                 :`<span class="lineageSource unavailable">${ja?'派生元は現在参照できません':'Source is currently unavailable'}</span>`}
             </div>
             <div class="lineageBadge">${lineageRelation==='version'?'VERSION':lineageRelation==='remix'?'REMIX':'SOURCE'}</div>
@@ -133,7 +300,8 @@
 
         <div class="primaryActions">
           <button id="remixBtn" class="actionBtn remix">${ja?'Remixして使う':'Remix this'}<span class="actionCount">${remixCount}</span></button>
-          <button id="shareBtn" class="actionBtn ghost">${ja?'共有':'Share'}</button>
+          <button id="shareBtn" class="actionBtn ghost">${ja?'URL共有':'Share URL'}</button>
+          <button id="shareImageBtn" class="actionBtn shareImage">${ja?'画像で共有':'Share Image'}</button>
           ${isOwner?`<button id="ownerManageBtn" class="actionBtn owner">${ja?'編集・公開設定':'Edit / Publish settings'}</button>`:''}
         </div>
         ${isOwner?`<div class="ownerHint">${ja?'このブラウザの公開者セッションで開いています。元シートが残っていれば編集画面へ戻せます。':'You are viewing this with the publisher session. If the local source sheet still exists, it will be selected when you return.'}</div>`:''}
@@ -174,7 +342,7 @@
         const sheet=window.SM_REMIX.buildSheet(data,snap,dbCriteria,items,ja?'ja':'en');
         window.SM_REMIX.saveSheet(sheet);
         toast(ja?'Remixしました。編集画面へ移動します。':'Remixed. Opening the editor…');
-        setTimeout(()=>{location.href='index.html?remixed=1&v=r22p3'},500);
+        setTimeout(()=>{location.href='index.html?remixed=1&v=r23p1'},500);
       }catch(e){toast((ja?'Remixに失敗しました：':'Remix failed: ')+(e?.message||e))}
     };
     document.getElementById('shareBtn').onclick=async()=>{
@@ -191,6 +359,61 @@
         }
       }catch(e){if(e?.name!=='AbortError')toast(ja?'共有できませんでした。':'Could not share.')}
     };
+
+    document.getElementById('shareImageBtn').onclick=async()=>{
+      const button=document.getElementById('shareImageBtn');
+      const original=button.textContent;
+      try{
+        button.disabled=true;
+        button.textContent=ja?'画像を作成中…':'Creating image…';
+        const canvas=await buildPublicShareCard({
+          title:data.title,
+          description:data.description||'',
+          category:publicCategory,
+          ranking:creatorRanking,
+          targets:rows.length,
+          metrics:criteria.length,
+          scale,
+          ja
+        });
+        const blob=await canvasBlob(canvas,'image/png',.96);
+        const safe=String(data.title||'stats-maker').replace(/[\\/:*?"<>|]+/g,'_').slice(0,60)||'stats-maker';
+        const file=new File([blob],safe+'-share.png',{type:'image/png'});
+        const url=location.href;
+
+        let shared=false;
+        if(navigator.share&&navigator.canShare?.({files:[file]})){
+          try{
+            await navigator.share({
+              files:[file],
+              title:data.title,
+              text:`${data.description||''}${data.description?'\n':''}${url}`
+            });
+            shared=true;
+            toast(ja?'共有画像を作成しました。':'Share image created.');
+          }catch(e){
+            if(e?.name==='AbortError')throw e;
+            console.warn('[Stats Maker] Native image share failed; falling back to save.',e);
+          }
+        }
+        if(!shared){
+          const objectUrl=URL.createObjectURL(blob);
+          const a=document.createElement('a');
+          a.href=objectUrl;a.download=file.name;a.rel='noopener';
+          document.body.appendChild(a);a.click();a.remove();
+          setTimeout(()=>URL.revokeObjectURL(objectUrl),1500);
+          toast(ja?'共有画像を保存しました。':'Share image saved.');
+        }
+      }catch(e){
+        if(e?.name!=='AbortError'){
+          console.error('[Stats Maker] Share image failed',e);
+          toast(ja?'共有画像を作成できませんでした。':'Could not create share image.');
+        }
+      }finally{
+        button.disabled=false;
+        button.textContent=original;
+      }
+    };
     if(isOwner&&document.getElementById('ownerManageBtn')){
       document.getElementById('ownerManageBtn').onclick=()=>{
         try{
@@ -202,7 +425,7 @@
           }
           sessionStorage.setItem('statsMaker:openPublish','1');
         }catch{}
-        location.href='index.html?v=r22p3&from=public';
+        location.href='index.html?v=r23p1&from=public';
       };
     };
 

@@ -170,6 +170,51 @@
     return {targets:rows.length,metrics:criteria.length};
   }
 
+  function creatorPreview(topic){
+    const snap=snapshotOf(topic);
+    const rows=Array.isArray(snap.rows)?snap.rows:[];
+    const criteria=Array.isArray(snap.criteria)?snap.criteria:[];
+    const weighted=typeof snap.weighted==='boolean'?snap.weighted:!!topic.weighted;
+    const scale=Number(snap.scale||topic.score_scale||100)===10?10:100;
+    const values=rows.map((row,index)=>{
+      const scores=Array.isArray(row?.scores)?row.scores:[];
+      let total=0,den=0;
+      criteria.forEach((criterion,i)=>{
+        const raw=scores[i];
+        const score=raw===null||raw===undefined||raw===''?null:Number(raw);
+        if(score===null||!Number.isFinite(score))return;
+        const weight=weighted?Math.max(0,Number(criterion?.weight??1)):1;
+        total+=score*weight;den+=weight;
+      });
+      const value=den?Math.round(total/den*10)/10:null;
+      return {index,name:String(row?.name||'').trim()||`Target ${index+1}`,value};
+    }).filter(item=>item.value!==null)
+      .sort((a,b)=>b.value-a.value||a.index-b.index)
+      .slice(0,3);
+    return {scale,items:values};
+  }
+
+  function creatorPreviewHtml(topic){
+    const preview=creatorPreview(topic);
+    if(!preview.items.length){
+      return `<div class="workVisual emptyVisual"><span>STATS MAKER</span><b>NO SCORE DATA</b></div>`;
+    }
+    return `<div class="workVisual">
+      <div class="visualTop"><span>STATS MAKER</span><span>TOP 3</span></div>
+      <div class="visualRows">${preview.items.map((item,index)=>{
+        const pct=Math.max(0,Math.min(100,Number(item.value||0)/preview.scale*100));
+        return `<div class="visualRow">
+          <div class="visualRank">${index+1}</div>
+          <div class="visualMain">
+            <div class="visualName">${esc(item.name)}</div>
+            <div class="visualTrack"><i style="width:${pct}%"></i></div>
+          </div>
+          <div class="visualValue">${Number.isInteger(item.value)?item.value:item.value.toFixed(1)}</div>
+        </div>`;
+      }).join('')}</div>
+    </div>`;
+  }
+
   function sortWorks(list){
     const newest=(a,b)=>new Date(b.published_at||b.snapshot_updated_at||0)-new Date(a.published_at||a.snapshot_updated_at||0);
     const out=[...list];
@@ -240,11 +285,12 @@
           ?`<span class="metaChip lineageChip">${copy.lineageVersion}</span>`
           :'';
 
-      return `<a class="workCard" href="public.html?id=${encodeURIComponent(topic.id)}&v=r22p3">
+      return `<a class="workCard" href="public.html?id=${encodeURIComponent(topic.id)}&v=r23p1">
         <div class="cardTop">
           <div class="visibility">${copy.public}</div>
           <div class="languageBadge">${lang}</div>
         </div>
+        ${creatorPreviewHtml(topic)}
         <div class="workTitle">${esc(topic.title||'Untitled')}</div>
         <div class="workDesc">${esc(description)}</div>
         <div class="cardMeta">
