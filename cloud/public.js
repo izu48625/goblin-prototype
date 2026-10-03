@@ -72,12 +72,35 @@
     ctx.closePath();
   }
 
-  async function buildPublicShareCard({title,description,category,ranking,targets,metrics,scale,ja}){
-    const width=1200,height=630;
+  function shareCanvasSize(aspect){
+    if(aspect==='square')return {width:1080,height:1080,label:'1:1'};
+    if(aspect==='portrait')return {width:1080,height:1350,label:'4:5'};
+    return {width:1200,height:675,label:'16:9'};
+  }
+
+  function shareTitleFont(width,title,portrait){
+    const length=[...String(title||'')].length;
+    const base=portrait?width*.064:width*.049;
+    if(length>48)return base*.72;
+    if(length>32)return base*.82;
+    if(length>20)return base*.9;
+    return base;
+  }
+
+  async function buildPublicShareCard({
+    title,description,category,creatorRanking,communityRanking,participant,
+    targets,metrics,scale,ja,aspect='landscape',template='creator'
+  }){
+    const {width,height}=shareCanvasSize(aspect);
     const canvas=document.createElement('canvas');
     canvas.width=width;canvas.height=height;
     const ctx=canvas.getContext('2d');
     if(!ctx)throw new Error('Canvas unavailable');
+
+    const portrait=height>width*1.08;
+    const square=Math.abs(height-width)<40;
+    const pad=Math.round(width*.06);
+    const innerW=width-pad*2;
 
     const bg=ctx.createLinearGradient(0,0,width,height);
     bg.addColorStop(0,'#07101f');
@@ -85,95 +108,155 @@
     bg.addColorStop(1,'#15284a');
     ctx.fillStyle=bg;ctx.fillRect(0,0,width,height);
 
-    const glow=ctx.createRadialGradient(980,90,0,980,90,420);
-    glow.addColorStop(0,'rgba(111,156,255,.28)');
+    const glow=ctx.createRadialGradient(width*.82,height*.08,0,width*.82,height*.08,width*.42);
+    glow.addColorStop(0,'rgba(111,156,255,.3)');
     glow.addColorStop(1,'rgba(111,156,255,0)');
     ctx.fillStyle=glow;ctx.fillRect(0,0,width,height);
 
     ctx.fillStyle='#7da3ff';
-    ctx.font='900 24px -apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif';
-    ctx.fillText('STATS MAKER',72,70);
+    ctx.font=`900 ${Math.round(width*.021)}px -apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif`;
+    ctx.fillText('STATS MAKER',pad,Math.round(height*.085));
 
     ctx.fillStyle='#6ddaa2';
-    ctx.font='900 18px -apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif';
-    ctx.fillText(String(category||'').toUpperCase(),72,108);
+    ctx.font=`900 ${Math.round(width*.015)}px -apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif`;
+    ctx.fillText(String(category||'').toUpperCase(),pad,Math.round(height*.13));
 
+    const titleFont=shareTitleFont(width,title,portrait);
     ctx.fillStyle='#f3f7ff';
-    ctx.font='900 54px -apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif';
-    const titleLines=wrapCanvasText(ctx,title,680,2);
-    titleLines.forEach((line,i)=>ctx.fillText(line,72,170+i*66));
+    ctx.font=`900 ${Math.round(titleFont)}px -apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif`;
+    const titleMaxW=portrait||square?innerW:Math.round(width*.57);
+    const titleLines=wrapCanvasText(ctx,title,titleMaxW,portrait?3:2);
+    const titleStart=Math.round(height*.205);
+    const titleLineH=Math.round(titleFont*1.16);
+    titleLines.forEach((line,i)=>ctx.fillText(line,pad,titleStart+i*titleLineH));
 
+    const titleBottom=titleStart+(Math.max(1,titleLines.length)-1)*titleLineH;
+    let descBottom=titleBottom;
     if(description){
+      const descFont=Math.round(width*(portrait?.021:.018));
       ctx.fillStyle='#9fb1c9';
-      ctx.font='600 22px -apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif';
-      const descLines=wrapCanvasText(ctx,description,680,2);
-      descLines.forEach((line,i)=>ctx.fillText(line,72,306+i*32));
+      ctx.font=`600 ${descFont}px -apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif`;
+      const descMax=portrait||square?innerW:Math.round(width*.57);
+      const descLines=wrapCanvasText(ctx,description,descMax,portrait?3:2);
+      const descStart=titleBottom+Math.round(height*.055);
+      const descLineH=Math.round(descFont*1.4);
+      descLines.forEach((line,i)=>ctx.fillText(line,pad,descStart+i*descLineH));
+      descBottom=descStart+(Math.max(1,descLines.length)-1)*descLineH;
     }
 
-    const cardX=790,cardY=70,cardW=338,cardH=408;
-    roundRectPath(ctx,cardX,cardY,cardW,cardH,26);
-    ctx.fillStyle='rgba(8,19,34,.9)';ctx.fill();
-    ctx.strokeStyle='#36577d';ctx.lineWidth=2;ctx.stroke();
-
-    ctx.fillStyle='#879dbc';
-    ctx.font='900 15px -apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif';
-    ctx.fillText(ja?'総合ランキング TOP 3':'OVERALL TOP 3',cardX+28,cardY+40);
-
-    const top=(ranking||[]).slice(0,3);
-    top.forEach((item,i)=>{
-      const y=cardY+88+i*94;
-      ctx.fillStyle=i===0?'#8fb2ff':'#b8c7da';
-      ctx.font='900 22px -apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif';
-      ctx.fillText(String(i+1),cardX+28,y);
-
-      ctx.fillStyle='#edf4ff';
-      ctx.font='800 20px -apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif';
-      ctx.fillText(truncateCanvasText(ctx,item.name,190),cardX+65,y);
-
-      ctx.fillStyle='#8fb2ff';
-      ctx.font='900 28px -apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif';
-      ctx.textAlign='right';
-      ctx.fillText(fmt(item.value),cardX+cardW-28,y);
-      ctx.textAlign='left';
-
-      const pct=Math.max(0,Math.min(1,Number(item.value||0)/Number(scale||100)));
-      roundRectPath(ctx,cardX+65,y+18,cardW-121,9,5);
-      ctx.fillStyle='#1d324f';ctx.fill();
-      roundRectPath(ctx,cardX+65,y+18,(cardW-121)*pct,9,5);
-      ctx.fillStyle='#6f9cff';ctx.fill();
-    });
-
-    if(!top.length){
-      ctx.fillStyle='#7186a3';
-      ctx.font='700 20px -apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif';
-      ctx.fillText(ja?'まだ採点がありません':'No scores yet',cardX+28,cardY+105);
-    }
-
-    const metaY=530;
     const meta=[
       [ja?'対象':'TARGETS',String(targets)],
       [ja?'評価項目':'METRICS',String(metrics)],
-      [ja?'尺度':'SCALE',String(scale)]
+      [ja?'尺度':'SCALE',String(scale)],
+      [ja?'参加者':'PARTICIPANTS',String(participant??0)]
     ];
-    meta.forEach((entry,i)=>{
-      const x=72+i*210;
-      ctx.fillStyle='#6f86a4';
-      ctx.font='900 14px -apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif';
-      ctx.fillText(entry[0],x,metaY);
-      ctx.fillStyle='#e6eefb';
-      ctx.font='900 30px -apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif';
-      ctx.fillText(entry[1],x,metaY+38);
-    });
+
+    const drawMetaGrid=(x,y,w,cols=2)=>{
+      const rowsCount=Math.ceil(meta.length/cols);
+      const gap=Math.round(width*.012);
+      const cellW=(w-gap*(cols-1))/cols;
+      const cellH=Math.round((portrait?height*.085:height*.105));
+      meta.forEach((entry,i)=>{
+        const col=i%cols,row=Math.floor(i/cols);
+        const cx=x+col*(cellW+gap),cy=y+row*(cellH+gap);
+        roundRectPath(ctx,cx,cy,cellW,cellH,Math.round(width*.012));
+        ctx.fillStyle='rgba(8,19,34,.78)';ctx.fill();
+        ctx.strokeStyle='#294768';ctx.lineWidth=Math.max(1,width*.0015);ctx.stroke();
+        ctx.fillStyle='#7087a6';
+        ctx.font=`900 ${Math.round(width*.011)}px -apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif`;
+        ctx.fillText(entry[0],cx+cellW*.08,cy+cellH*.34);
+        ctx.fillStyle='#edf4ff';
+        ctx.font=`900 ${Math.round(width*.026)}px -apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif`;
+        ctx.fillText(entry[1],cx+cellW*.08,cy+cellH*.74);
+      });
+      return y+rowsCount*cellH+(rowsCount-1)*gap;
+    };
+
+    const drawRanking=(x,y,w,h,ranking,label)=>{
+      roundRectPath(ctx,x,y,w,h,Math.round(width*.022));
+      ctx.fillStyle='rgba(8,19,34,.91)';ctx.fill();
+      ctx.strokeStyle='#36577d';ctx.lineWidth=Math.max(2,width*.0018);ctx.stroke();
+
+      ctx.fillStyle='#879dbc';
+      ctx.font=`900 ${Math.round(width*.013)}px -apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif`;
+      ctx.fillText(label,x+w*.07,y+h*.09);
+
+      const top=(ranking||[]).slice(0,3);
+      if(!top.length){
+        ctx.fillStyle='#7186a3';
+        ctx.font=`700 ${Math.round(width*.018)}px -apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif`;
+        ctx.fillText(ja?'まだ表示できるランキングがありません':'No ranking available yet',x+w*.07,y+h*.26);
+        return;
+      }
+      const rowH=h*.245;
+      top.forEach((item,i)=>{
+        const ry=y+h*.2+i*rowH;
+        ctx.fillStyle=i===0?'#8fb2ff':'#b8c7da';
+        ctx.font=`900 ${Math.round(width*.019)}px -apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif`;
+        ctx.fillText(String(i+1),x+w*.07,ry);
+
+        ctx.fillStyle='#edf4ff';
+        ctx.font=`800 ${Math.round(width*.017)}px -apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif`;
+        ctx.fillText(truncateCanvasText(ctx,item.name,w*.57),x+w*.16,ry);
+
+        ctx.fillStyle='#8fb2ff';
+        ctx.font=`900 ${Math.round(width*.022)}px -apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif`;
+        ctx.textAlign='right';
+        ctx.fillText(fmt(item.value),x+w*.92,ry);
+        ctx.textAlign='left';
+
+        const pct=Math.max(0,Math.min(1,Number(item.value||0)/Number(scale||100)));
+        roundRectPath(ctx,x+w*.16,ry+h*.035,w*.69,Math.max(7,width*.007),999);
+        ctx.fillStyle='#1d324f';ctx.fill();
+        roundRectPath(ctx,x+w*.16,ry+h*.035,w*.69*pct,Math.max(7,width*.007),999);
+        ctx.fillStyle='#6f9cff';ctx.fill();
+      });
+    };
+
+    if(template==='overview'){
+      const panelY=Math.max(descBottom+Math.round(height*.07),Math.round(height*.43));
+      const metaBottom=drawMetaGrid(pad,panelY,innerW,portrait?2:4);
+      const noteY=metaBottom+Math.round(height*.055);
+      ctx.fillStyle='#94a9c4';
+      ctx.font=`700 ${Math.round(width*.019)}px -apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif`;
+      const overviewText=ja
+        ?`全${targets}対象を${metrics}項目・${scale}点満点で比較`
+        :`${targets} targets compared across ${metrics} metrics on a ${scale}-point scale`;
+      wrapCanvasText(ctx,overviewText,innerW,2).forEach((line,i)=>ctx.fillText(line,pad,noteY+i*Math.round(width*.027)));
+    }else if(portrait||square){
+      const panelY=Math.max(descBottom+Math.round(height*.055),Math.round(height*(square?.43:.38)));
+      const panelH=Math.round(height*(square?.36:.39));
+      drawRanking(
+        pad,panelY,innerW,panelH,
+        template==='community'?communityRanking:creatorRanking,
+        template==='community'
+          ?(ja?'COMMUNITY 総合 TOP 3':'COMMUNITY OVERALL TOP 3')
+          :(ja?'作成者 総合 TOP 3':'CREATOR OVERALL TOP 3')
+      );
+      if(portrait){
+        drawMetaGrid(pad,panelY+panelH+Math.round(height*.035),innerW,2);
+      }
+    }else{
+      const panelX=Math.round(width*.655),panelY=Math.round(height*.105);
+      const panelW=width-pad-panelX,panelH=Math.round(height*.62);
+      drawRanking(
+        panelX,panelY,panelW,panelH,
+        template==='community'?communityRanking:creatorRanking,
+        template==='community'
+          ?(ja?'COMMUNITY 総合 TOP 3':'COMMUNITY OVERALL TOP 3')
+          :(ja?'作成者 総合 TOP 3':'CREATOR OVERALL TOP 3')
+      );
+      drawMetaGrid(pad,Math.round(height*.715),Math.round(width*.56),4);
+    }
 
     ctx.textAlign='right';
     ctx.fillStyle='#7088a6';
-    ctx.font='700 16px -apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif';
-    ctx.fillText('Created with Stats Maker',1128,588);
+    ctx.font=`700 ${Math.round(width*.013)}px -apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif`;
+    ctx.fillText('Created with Stats Maker',width-pad,height-Math.round(height*.055));
     ctx.textAlign='left';
 
     return canvas;
   }
-
   function toast(message){const old=document.querySelector('.toast');old?.remove();const el=document.createElement('div');el.className='toast';el.textContent=message;document.body.appendChild(el);setTimeout(()=>el.remove(),2200)}
 
   async function getOwnSubmitted(sb,topicId,items,criteria,weighted){
@@ -241,6 +324,9 @@
 
     const creatorRanking=rows.map((row,index)=>({index,name:row.name||`${ja?'対象':'Target'} ${index+1}`,value:average(Array.isArray(row.scores)?row.scores:[],criteria,weighted)})).filter(x=>x.value!==null).sort((a,b)=>b.value-a.value||a.index-b.index);
     const creatorTop=creatorRanking[0]||null;
+    let shareParticipant=0;
+    let shareCommunityRanking=[];
+    let shareCommunityUnlocked=false;
     const updatedLabel=fmtDate(data.snapshot_updated_at||data.published_at,ja);
     const visibilityLabel=data.visibility==='private'
       ?(ja?'非公開プレビュー':'Private preview')
@@ -335,7 +421,40 @@
           <div><h2>Community</h2><div class="sectionSub">${ja?'みんなの評価を集計':'Aggregated participant ratings'}</div></div>
         </div>
         <div id="communityContent" class="emptyCommunity">${ja?'集計中…':'Loading community…'}</div>
-      </section>`;
+      </section>
+
+      <div id="shareImageBackdrop" class="shareImageBackdrop hidden" role="dialog" aria-modal="true">
+        <div class="shareImageDialog">
+          <div class="shareImageHead">
+            <div>
+              <div class="eyebrow">SHARE IMAGE</div>
+              <h2>${ja?'共有画像を作成':'Create Share Image'}</h2>
+            </div>
+            <button id="shareImageCloseBtn" class="shareImageClose" type="button" aria-label="Close">×</button>
+          </div>
+
+          <div class="shareOptionGroup">
+            <div class="shareOptionLabel">${ja?'比率':'Aspect ratio'}</div>
+            <div class="shareOptionGrid shareAspectGrid">
+              <button class="shareChoice active" data-share-aspect="landscape" type="button"><b>16:9</b><span>X / Web</span></button>
+              <button class="shareChoice" data-share-aspect="square" type="button"><b>1:1</b><span>Square</span></button>
+              <button class="shareChoice" data-share-aspect="portrait" type="button"><b>4:5</b><span>Instagram</span></button>
+            </div>
+          </div>
+
+          <div class="shareOptionGroup">
+            <div class="shareOptionLabel">${ja?'内容':'Template'}</div>
+            <div class="shareOptionGrid">
+              <button class="shareChoice active" data-share-template="creator" type="button"><b>${ja?'作成者 TOP3':'Creator TOP3'}</b><span>${ja?'自分の総合ランキング':'Creator overall ranking'}</span></button>
+              <button id="shareCommunityChoice" class="shareChoice" data-share-template="community" type="button"><b>Community TOP3</b><span id="shareCommunityChoiceSub">${ja?'5人以上で利用可能':'Available at 5+ participants'}</span></button>
+              <button class="shareChoice" data-share-template="overview" type="button"><b>${ja?'概要カード':'Overview'}</b><span>${ja?'対象数・項目数・尺度・参加者':'Targets, metrics, scale, participants'}</span></button>
+            </div>
+          </div>
+
+          <div id="shareImageSelectionNote" class="shareImageSelectionNote"></div>
+          <button id="shareImageCreateBtn" class="actionBtn shareImage shareImageCreateBtn" type="button">${ja?'作成して共有':'Create & Share'}</button>
+        </div>
+      </div>`;
 
     document.getElementById('remixBtn').onclick=()=>{
       try{
@@ -360,8 +479,63 @@
       }catch(e){if(e?.name!=='AbortError')toast(ja?'共有できませんでした。':'Could not share.')}
     };
 
-    document.getElementById('shareImageBtn').onclick=async()=>{
-      const button=document.getElementById('shareImageBtn');
+    const shareState={aspect:'landscape',template:'creator'};
+
+    const syncShareDialog=()=>{
+      document.querySelectorAll('[data-share-aspect]').forEach(button=>{
+        button.classList.toggle('active',button.dataset.shareAspect===shareState.aspect);
+      });
+      document.querySelectorAll('[data-share-template]').forEach(button=>{
+        button.classList.toggle('active',button.dataset.shareTemplate===shareState.template);
+      });
+      const communityChoice=document.getElementById('shareCommunityChoice');
+      const communitySub=document.getElementById('shareCommunityChoiceSub');
+      if(communityChoice){
+        communityChoice.disabled=!shareCommunityUnlocked;
+        if(communitySub)communitySub.textContent=shareCommunityUnlocked
+          ?(ja?`${shareParticipant}人のCommunity平均を使用`:`Uses ${shareParticipant} Community participants`)
+          :(ja?'5人以上で利用可能':'Available at 5+ participants');
+      }
+      if(!shareCommunityUnlocked&&shareState.template==='community')shareState.template='creator';
+      const size=shareCanvasSize(shareState.aspect);
+      const templateLabel=shareState.template==='community'
+        ?'Community TOP3'
+        :shareState.template==='overview'
+          ?(ja?'概要カード':'Overview')
+          :(ja?'作成者 TOP3':'Creator TOP3');
+      const note=document.getElementById('shareImageSelectionNote');
+      if(note)note.textContent=`${size.label} · ${size.width}×${size.height}px · ${templateLabel}`;
+    };
+
+    const openShareDialog=()=>{
+      document.getElementById('shareImageBackdrop')?.classList.remove('hidden');
+      syncShareDialog();
+    };
+    const closeShareDialog=()=>document.getElementById('shareImageBackdrop')?.classList.add('hidden');
+
+    document.getElementById('shareImageBtn').onclick=openShareDialog;
+    document.getElementById('shareImageCloseBtn').onclick=closeShareDialog;
+    document.getElementById('shareImageBackdrop').onclick=e=>{
+      if(e.target===document.getElementById('shareImageBackdrop'))closeShareDialog();
+    };
+
+    document.querySelectorAll('[data-share-aspect]').forEach(button=>{
+      button.onclick=()=>{
+        shareState.aspect=button.dataset.shareAspect||'landscape';
+        syncShareDialog();
+      };
+    });
+    document.querySelectorAll('[data-share-template]').forEach(button=>{
+      button.onclick=()=>{
+        const requested=button.dataset.shareTemplate||'creator';
+        if(requested==='community'&&!shareCommunityUnlocked)return;
+        shareState.template=requested;
+        syncShareDialog();
+      };
+    });
+
+    document.getElementById('shareImageCreateBtn').onclick=async()=>{
+      const button=document.getElementById('shareImageCreateBtn');
       const original=button.textContent;
       try{
         button.disabled=true;
@@ -370,15 +544,20 @@
           title:data.title,
           description:data.description||'',
           category:publicCategory,
-          ranking:creatorRanking,
+          creatorRanking,
+          communityRanking:shareCommunityRanking,
+          participant:shareParticipant,
           targets:rows.length,
           metrics:criteria.length,
           scale,
-          ja
+          ja,
+          aspect:shareState.aspect,
+          template:shareState.template
         });
         const blob=await canvasBlob(canvas,'image/png',.96);
         const safe=String(data.title||'stats-maker').replace(/[\\/:*?"<>|]+/g,'_').slice(0,60)||'stats-maker';
-        const file=new File([blob],safe+'-share.png',{type:'image/png'});
+        const size=shareCanvasSize(shareState.aspect);
+        const file=new File([blob],`${safe}-${size.label.replace(':','x')}.png`,{type:'image/png'});
         const url=location.href;
 
         let shared=false;
@@ -390,6 +569,7 @@
               text:`${data.description||''}${data.description?'\n':''}${url}`
             });
             shared=true;
+            closeShareDialog();
             toast(ja?'共有画像を作成しました。':'Share image created.');
           }catch(e){
             if(e?.name==='AbortError')throw e;
@@ -402,6 +582,7 @@
           a.href=objectUrl;a.download=file.name;a.rel='noopener';
           document.body.appendChild(a);a.click();a.remove();
           setTimeout(()=>URL.revokeObjectURL(objectUrl),1500);
+          closeShareDialog();
           toast(ja?'共有画像を保存しました。':'Share image saved.');
         }
       }catch(e){
@@ -452,6 +633,10 @@
         }))
         .filter(x=>x.value!==null)
         .sort((a,b)=>b.value-a.value||a.name.localeCompare(b.name,ja?'ja':'en'));
+      shareParticipant=participant;
+      shareCommunityUnlocked=canShowAverages&&communityRanking.length>0;
+      shareCommunityRanking=communityRanking;
+      syncShareDialog();
 
       const cMap=new Map(
         criterionSummary.map(s=>[
@@ -549,6 +734,10 @@
           :''}
         ${ownHtml}`;
     }else{
+      shareParticipant=0;
+      shareCommunityRanking=[];
+      shareCommunityUnlocked=false;
+      syncShareDialog();
       document.getElementById('communityContent').textContent=ja?'この公開ページではCommunity集計が非表示です。':'Community results are hidden for this page.';
     }
 
