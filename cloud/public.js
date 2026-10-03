@@ -48,14 +48,6 @@
         if(source&&source.visibility!=='private')sourceTopic=source;
       }
     }catch{}
-    try{
-      const {count}=await sb.from('topics')
-        .select('id',{count:'exact',head:true})
-        .eq('source_topic_id',data.id)
-        .in('visibility',['public','unlisted']);
-      remixCount=Number(count||0);
-    }catch{}
-
     const ja=data.language_code!=='en';document.documentElement.lang=ja?'ja':'en';document.title=`${data.title} - Stats Maker`;
     const metaDescription=document.querySelector('meta[name="description"]');
     if(metaDescription)metaDescription.content=data.description||`${data.title} - Stats Maker`;
@@ -67,6 +59,14 @@
     const items=(data.topic_items||[]).sort((a,b)=>a.position-b.position);
     const dbCriteria=(data.criteria||[]).sort((a,b)=>a.position-b.position);
     const snap=(data.snapshot&&typeof data.snapshot==='object'&&!Array.isArray(data.snapshot))?data.snapshot:{};
+    const lineageRelation=String(snap?.lineage?.relation||'').toLowerCase()||(data.source_topic_id?'derived':'');
+    try{
+      const {data:children}=await sb.from('topics')
+        .select('id,snapshot,visibility')
+        .eq('source_topic_id',data.id)
+        .in('visibility',['public','unlisted']);
+      remixCount=(children||[]).filter(child=>String(child?.snapshot?.lineage?.relation||'').toLowerCase()==='remix').length;
+    }catch{}
     const criteria=(Array.isArray(snap.criteria)&&snap.criteria.length)?snap.criteria:dbCriteria.map(c=>({name:c.name,weight:Number(c.weight??1)}));
     const rows=(Array.isArray(snap.rows)&&snap.rows.length)?snap.rows:items.map(i=>({name:i.name,note:'',scores:Array(criteria.length).fill(null)}));
     const scale=Number(snap.scale||data.score_scale||100)===10?10:100;
@@ -99,12 +99,12 @@
         ${data.source_topic_id?`
           <div class="lineageBar">
             <div class="lineageMain">
-              <span class="lineageLabel">${ja?'Remix元':'Remix source'}</span>
+              <span class="lineageLabel">${lineageRelation==='version'?(ja?'前バージョン':'Previous version'):lineageRelation==='remix'?(ja?'Remix元':'Remix source'):(ja?'派生元':'Source')}</span>
               ${sourceTopic
                 ?`<a class="lineageSource" href="public.html?id=${encodeURIComponent(sourceTopic.id)}&v=r21p1">${esc(sourceTopic.title)}</a>`
-                :`<span class="lineageSource unavailable">${ja?'元作品は現在参照できません':'Source is currently unavailable'}</span>`}
+                :`<span class="lineageSource unavailable">${ja?'派生元は現在参照できません':'Source is currently unavailable'}</span>`}
             </div>
-            <div class="lineageBadge">REMIX</div>
+            <div class="lineageBadge">${lineageRelation==='version'?'VERSION':lineageRelation==='remix'?'REMIX':'SOURCE'}</div>
           </div>`
         :''}
 
