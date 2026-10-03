@@ -30,7 +30,7 @@
       title:'みんなのStatsを見つける',
       subtitle:'公開された評価シートを検索して、結果を見たりRemixしたりできます。',
       privacy:'Public作品のみ掲載。URL限定（Unlisted）はここには表示されません。',
-      search:'タイトル・説明・対象・評価項目を検索',
+      search:'タイトル・説明・対象・評価項目を部分一致で検索',
       allTab:'公開作品',communityTab:'Community作品',
       newest:'新着',popular:'人気',community:'Community',remix:'Remix',
       works:'公開作品',communityWorks:'Community作品',
@@ -50,7 +50,7 @@
       title:'Discover public Stats',
       subtitle:'Search public rating sheets, explore results, and Remix them.',
       privacy:'Only Public works appear here. Unlisted works are never listed.',
-      search:'Search title, description, targets, or metrics',
+      search:'Partial-match search across title, description, targets, or metrics',
       allTab:'Public works',communityTab:'Community works',
       newest:'Newest',popular:'Popular',community:'Community',remix:'Remix',
       works:'Public works',communityWorks:'Community works',
@@ -141,7 +141,7 @@
     return String(value??'')
       .normalize('NFKC')
       .toLowerCase()
-      .replace(/[・･／/,_-]+/g,' ')
+      .replace(/[・･／\\/,_-]+/g,' ')
       .replace(/\s+/g,' ')
       .trim();
   }
