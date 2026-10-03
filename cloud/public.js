@@ -141,7 +141,7 @@
         const sheet=window.SM_REMIX.buildSheet(data,snap,dbCriteria,items,ja?'ja':'en');
         window.SM_REMIX.saveSheet(sheet);
         toast(ja?'Remixしました。編集画面へ移動します。':'Remixed. Opening the editor…');
-        setTimeout(()=>{location.href='index.html?remixed=1&v=r20p1'},500);
+        setTimeout(()=>{location.href='index.html?remixed=1&v=r20p2'},500);
       }catch(e){toast((ja?'Remixに失敗しました：':'Remix failed: ')+(e?.message||e))}
     };
     document.getElementById('shareBtn').onclick=async()=>{
@@ -169,7 +169,7 @@
           }
           sessionStorage.setItem('statsMaker:openPublish','1');
         }catch{}
-        location.href='index.html?v=r20p1&from=public';
+        location.href='index.html?v=r20p2&from=public';
       };
     };
 
