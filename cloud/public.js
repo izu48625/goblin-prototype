@@ -381,10 +381,22 @@
         const file=new File([blob],safe+'-share.png',{type:'image/png'});
         const url=location.href;
 
+        let shared=false;
         if(navigator.share&&navigator.canShare?.({files:[file]})){
-          await navigator.share({files:[file],title:data.title,text:data.description||'',url});
-          toast(ja?'共有画像を作成しました。':'Share image created.');
-        }else{
+          try{
+            await navigator.share({
+              files:[file],
+              title:data.title,
+              text:`${data.description||''}${data.description?'\n':''}${url}`
+            });
+            shared=true;
+            toast(ja?'共有画像を作成しました。':'Share image created.');
+          }catch(e){
+            if(e?.name==='AbortError')throw e;
+            console.warn('[Stats Maker] Native image share failed; falling back to save.',e);
+          }
+        }
+        if(!shared){
           const objectUrl=URL.createObjectURL(blob);
           const a=document.createElement('a');
           a.href=objectUrl;a.download=file.name;a.rel='noopener';
