@@ -25,6 +25,26 @@
       <div class="privacyNote">Public作品のみ掲載。URL限定（Unlisted）はここには表示されません。</div>
     </section>
 
+    <nav class="browseTabs" aria-label="Browse mode">
+      <button class="browseTab active" data-view="all" type="button">公開作品</button>
+      <button class="browseTab" data-view="community" type="button">Community作品</button>
+    </nav>
+
+    <div class="categoryRail" aria-label="カテゴリ">
+      <button class="categoryBtn active" data-category="all" type="button">すべて</button>
+      <button class="categoryBtn" data-category="sports" type="button">スポーツ</button>
+      <button class="categoryBtn" data-category="manga_anime" type="button">漫画・アニメ</button>
+      <button class="categoryBtn" data-category="movie_tv" type="button">映画・ドラマ</button>
+      <button class="categoryBtn" data-category="food" type="button">フード</button>
+      <button class="categoryBtn" data-category="game" type="button">ゲーム</button>
+      <button class="categoryBtn" data-category="music" type="button">音楽</button>
+      <button class="categoryBtn" data-category="books" type="button">本・文学</button>
+      <button class="categoryBtn" data-category="travel" type="button">旅行・場所</button>
+      <button class="categoryBtn" data-category="tech" type="button">テクノロジー</button>
+      <button class="categoryBtn" data-category="lifestyle" type="button">ライフ・趣味</button>
+      <button class="categoryBtn" data-category="other" type="button">その他</button>
+    </div>
+
     <section class="controls">
       <label class="searchBox">
         <span>⌕</span>
@@ -40,7 +60,7 @@
 
     <div class="resultHead">
       <div>
-        <div class="sectionTitle">公開作品</div>
+        <div id="sectionTitle" class="sectionTitle">公開作品</div>
         <div id="resultMeta" class="resultMeta">読み込み中…</div>
       </div>
       <button id="refreshBtn" class="refreshBtn" type="button">更新</button>
