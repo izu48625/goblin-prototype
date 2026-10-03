@@ -45,6 +45,7 @@
     .panel{background:linear-gradient(180deg,rgba(17,29,49,.97),rgba(13,23,40,.97));border:1px solid var(--line);border-radius:var(--radius);box-shadow:var(--shadow)}
     .btn{min-height:40px;border:1px solid var(--line2);border-radius:10px;padding:0 12px;background:#132139;color:var(--text);font-weight:800;font-size:12px;white-space:nowrap}
     .btn:hover{border-color:#4c6687}
+    .discoverBtn{display:inline-flex;align-items:center;justify-content:center;text-decoration:none;border-color:#3b5f87;background:#0d2139;color:#b9d1f3}
     .btn.primary{background:linear-gradient(180deg,#668fff,#4f79e6);border-color:#6f98ff}
     .btn.ghost{background:transparent}
     .btn.danger{color:#ff9aa7}
