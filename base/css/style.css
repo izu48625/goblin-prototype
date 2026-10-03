@@ -1278,3 +1278,31 @@ html[lang="en"] .rankModeBtn{
   .editorCommunityHero{grid-template-columns:76px 1fr}
 }
 
+/* R21 P1: Remix lineage and action guidance */
+.remixContextPanel{
+  width:min(1520px,calc(100% - 20px));
+  margin:0 auto 9px;
+  padding:11px 12px;
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:14px;
+  border-color:#5b4d84;
+  background:linear-gradient(180deg,rgba(35,27,57,.98),rgba(18,21,39,.98));
+}
+.remixContextCopy{min-width:0;flex:1}
+.remixContextTitle{font-size:10px;font-weight:900;color:#a996da}
+.remixSourceTitle{margin-top:2px;color:#f0eaff;font-size:14px;font-weight:1000;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.remixContextHelp{margin-top:5px;color:#a9a0c5;font-size:9px;line-height:1.5}
+.remixChoiceGrid{display:grid;grid-template-columns:1fr 1fr;gap:7px;margin-top:9px}
+.remixChoice{padding:8px 9px;border:1px solid #473b67;border-radius:9px;background:#121426}
+.remixChoice b{display:block;color:#d9d0ef;font-size:9px}
+.remixChoice span{display:block;margin-top:3px;color:#8f86a7;font-size:8px;line-height:1.45}
+.remixContextActions{display:flex;flex-direction:column;gap:7px;min-width:170px}
+.remixContextActions .btn{width:100%}
+@media(max-width:760px){
+  .remixContextPanel{width:calc(100% - 12px);flex-direction:column;align-items:stretch;padding:10px}
+  .remixChoiceGrid{grid-template-columns:1fr}
+  .remixContextActions{min-width:0;display:grid;grid-template-columns:1fr 1fr}
+}
+
