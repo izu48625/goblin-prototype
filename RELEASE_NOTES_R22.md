@@ -80,3 +80,15 @@ Publishing now supports one category per work:
 
 ### Build
 - Active cache key: `r22p2`.
+
+## P3 Partial search
+
+- Discover search now uses normalized partial matching instead of requiring the query to appear as one exact phrase.
+- Full-width / half-width forms are normalized with NFKC.
+- Search remains case-insensitive.
+- Common separators such as ・ / , _ - are normalized to spaces.
+- Multiple space-separated search terms use AND matching:
+  - each term may match any part of the searchable work text,
+  - terms may be found across title, description, target names, metric names, or category.
+- Example: `ワンピ 映画` can match a work whose searchable content contains both partial terms even when they are not adjacent.
+- Active cache key: `r22p3`.

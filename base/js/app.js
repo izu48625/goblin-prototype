@@ -1513,7 +1513,7 @@
   function publicPageUrl(topicId){
     const url=new URL('../public.html',location.href);
     url.searchParams.set('id',topicId);
-    url.searchParams.set('v','r22p2');
+    url.searchParams.set('v','r22p3');
     return url.href;
   }
 

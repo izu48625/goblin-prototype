@@ -30,7 +30,7 @@
       title:'みんなのStatsを見つける',
       subtitle:'公開された評価シートを検索して、結果を見たりRemixしたりできます。',
       privacy:'Public作品のみ掲載。URL限定（Unlisted）はここには表示されません。',
-      search:'タイトル・説明・対象・評価項目を検索',
+      search:'タイトル・説明・対象・評価項目を部分一致で検索',
       allTab:'公開作品',communityTab:'Community作品',
       newest:'新着',popular:'人気',community:'Community',remix:'Remix',
       works:'公開作品',communityWorks:'Community作品',
@@ -50,7 +50,7 @@
       title:'Discover public Stats',
       subtitle:'Search public rating sheets, explore results, and Remix them.',
       privacy:'Only Public works appear here. Unlisted works are never listed.',
-      search:'Search title, description, targets, or metrics',
+      search:'Partial-match search across title, description, targets, or metrics',
       allTab:'Public works',communityTab:'Community works',
       newest:'Newest',popular:'Popular',community:'Community',remix:'Remix',
       works:'Public works',communityWorks:'Community works',
@@ -137,16 +137,30 @@
     return topic?.show_community===true&&topic?.allow_ratings===true;
   }
 
+  function normalizeSearchText(value){
+    return String(value??'')
+      .normalize('NFKC')
+      .toLowerCase()
+      .replace(/[・･／\\/,_-]+/g,' ')
+      .replace(/\s+/g,' ')
+      .trim();
+  }
+
+  function searchTerms(value){
+    const normalized=normalizeSearchText(value);
+    return normalized?normalized.split(' ').filter(Boolean):[];
+  }
+
   function searchableText(topic){
     const snap=snapshotOf(topic);
     const rows=Array.isArray(snap.rows)?snap.rows:[];
     const criteria=Array.isArray(snap.criteria)?snap.criteria:[];
-    return [
+    return normalizeSearchText([
       topic.title,topic.description,
       categoryLabels[categoryOf(topic)],
       ...rows.map(row=>row?.name),
       ...criteria.map(item=>item?.name)
-    ].filter(Boolean).join(' ').toLowerCase();
+    ].filter(Boolean).join(' '));
   }
 
   function topicStats(topic){
@@ -176,7 +190,7 @@
   }
 
   function filteredWorks(){
-    const q=state.query.trim().toLowerCase();
+    const terms=searchTerms(state.query);
     let filtered=state.works;
 
     if(state.view==='community'){
@@ -187,8 +201,11 @@
       filtered=filtered.filter(topic=>categoryOf(topic)===state.category);
     }
 
-    if(q){
-      filtered=filtered.filter(topic=>searchableText(topic).includes(q));
+    if(terms.length){
+      filtered=filtered.filter(topic=>{
+        const haystack=searchableText(topic);
+        return terms.every(term=>haystack.includes(term));
+      });
     }
 
     return sortWorks(filtered);
@@ -223,7 +240,7 @@
           ?`<span class="metaChip lineageChip">${copy.lineageVersion}</span>`
           :'';
 
-      return `<a class="workCard" href="public.html?id=${encodeURIComponent(topic.id)}&v=r22p2">
+      return `<a class="workCard" href="public.html?id=${encodeURIComponent(topic.id)}&v=r22p3">
         <div class="cardTop">
           <div class="visibility">${copy.public}</div>
           <div class="languageBadge">${lang}</div>
