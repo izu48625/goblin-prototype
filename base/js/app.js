@@ -1498,6 +1498,9 @@
 
   function renderSidebar(){renderRanking();renderCompare();renderSummary()}
 
+  const PUBLISH_CATEGORIES=new Set(['sports','manga_anime','movie_tv','food','game','music','books','travel','tech','lifestyle','other']);
+  const normalizePublishCategory=value=>PUBLISH_CATEGORIES.has(String(value||''))?String(value):'other';
+
   const publishState={user:null,url:''};
 
   function setPublishStatus(message='',type=''){
@@ -1707,6 +1710,7 @@
     const isLive=!!s.cloudTopicId&&s.cloudVisibility!=='private';
     const vis=s.cloudVisibility==='unlisted'?'unlisted':'public';
     document.querySelectorAll('input[name="publishVisibility"]').forEach(r=>r.checked=r.value===vis);
+    if($('publishCategory'))$('publishCategory').value=normalizePublishCategory(s.publishCategory||model?.metadata?.category||'other');
     $('publishExecuteBtn').textContent=isLive?t('publish.updateExecute'):t('publish.execute');
     $('publishUnpublishBtn').classList.toggle('hidden',!isLive);
     return user;
@@ -1806,7 +1810,9 @@
     try{
       const sb=window.SM_SUPABASE?.client;if(!sb)throw new Error('Supabase client is not ready');
       const user=await ensurePublishUser();if(!user)throw new Error(t('publish.guestStartFailed'));
-      const s=activeSheet(),model=buildPublishModel(s),visibility=document.querySelector('input[name="publishVisibility"]:checked')?.value||'public';setPublishStatus(t('publish.busy'));
+      const s=activeSheet(),visibility=document.querySelector('input[name="publishVisibility"]:checked')?.value||'public';
+      s.publishCategory=normalizePublishCategory($('publishCategory')?.value||s.publishCategory||'other');
+      const model=buildPublishModel(s);setPublishStatus(t('publish.busy'));
       const now=new Date().toISOString();
       const basePayload={owner_id:user.id,title:model.title,description:model.description,language_code:model.language,score_scale:model.scale,weighted:model.weighted,visibility,allow_ratings:true,show_community:true,snapshot_version:model.version,snapshot:model,snapshot_updated_at:now,published_at:now};
       let topicId=s.cloudTopicId||'',updating=false,versioned=false;
