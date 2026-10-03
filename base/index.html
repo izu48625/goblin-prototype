@@ -227,6 +227,41 @@
         <div id="statusText" class="status" data-i18n="status.initial">編集内容はブラウザへ自動保存されます。</div>
         <div class="imageNote" data-i18n="summary.imageNote">画像は端末から選択後、約160pxに自動縮小してこのブラウザ内に保存します。大量の高解像度画像を保存する用途ではありません。</div>
       </section>
+
+      <section id="editorCommunityPanel" class="sidePanel panel editorCommunityPanel hidden">
+        <div class="sectionTop editorCommunityHead">
+          <div>
+            <div class="eyebrow">COMMUNITY</div>
+            <div class="sectionTitle" data-i18n="community.statusTitle">現在のCommunity</div>
+          </div>
+          <button id="editorCommunityRefreshBtn" class="viewTab editorCommunityRefreshBtn" type="button" data-i18n="community.refresh">更新</button>
+        </div>
+
+        <div id="editorCommunityStatus" class="editorCommunityStatus" data-i18n="community.loading">Community情報を読み込み中…</div>
+
+        <div id="editorCommunityBody" class="hidden">
+          <div class="editorCommunityHero">
+            <div class="editorCommunityCountBox">
+              <div id="editorCommunityParticipantCount" class="editorCommunityCount">0</div>
+              <div class="editorCommunityCountLabel" data-i18n="community.participants">参加者</div>
+            </div>
+            <div id="editorCommunityGate" class="editorCommunityGate"></div>
+          </div>
+
+          <div id="editorCommunityUnlocked" class="hidden">
+            <div class="editorCommunityBlock">
+              <div class="editorCommunityBlockTitle" data-i18n="community.rankingTitle">Community総合ランキング</div>
+              <div id="editorCommunityRanking" class="editorCommunityRanking"></div>
+            </div>
+            <div class="editorCommunityBlock">
+              <div class="editorCommunityBlockTitle" data-i18n="community.metricsTitle">項目別Community平均</div>
+              <div id="editorCommunityMetrics" class="editorCommunityMetrics"></div>
+            </div>
+          </div>
+
+          <button id="editorCommunityOpenBtn" class="btn editorCommunityOpenBtn" type="button" data-i18n="community.openPublic">公開ページで詳しく見る</button>
+        </div>
+      </section>
     </aside>
   </div>
 </main>
