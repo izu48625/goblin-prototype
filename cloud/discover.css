@@ -131,3 +131,15 @@ button,input{font:inherit}
 .emptyVisual span{font-size:7px;font-weight:950;letter-spacing:.11em}
 .emptyVisual b{font-size:11px;color:#8399b5}
 
+/* R23 P2: category-specific thumbnail atmosphere */
+.visualCategory-sports{background:radial-gradient(circle at 88% 0%,rgba(72,178,151,.24),transparent 46%),linear-gradient(145deg,#102535,#091525 76%)}
+.visualCategory-manga_anime{background:radial-gradient(circle at 88% 0%,rgba(173,108,220,.25),transparent 46%),linear-gradient(145deg,#241938,#091525 76%)}
+.visualCategory-movie_tv{background:radial-gradient(circle at 88% 0%,rgba(207,118,87,.22),transparent 46%),linear-gradient(145deg,#2b1d25,#091525 76%)}
+.visualCategory-food{background:radial-gradient(circle at 88% 0%,rgba(214,161,72,.24),transparent 46%),linear-gradient(145deg,#2a2516,#091525 76%)}
+.visualCategory-game{background:radial-gradient(circle at 88% 0%,rgba(96,126,235,.28),transparent 46%),linear-gradient(145deg,#151e42,#091525 76%)}
+.visualCategory-music{background:radial-gradient(circle at 88% 0%,rgba(204,91,161,.24),transparent 46%),linear-gradient(145deg,#2a1730,#091525 76%)}
+.visualCategory-books{background:radial-gradient(circle at 88% 0%,rgba(161,126,82,.23),transparent 46%),linear-gradient(145deg,#282017,#091525 76%)}
+.visualCategory-travel{background:radial-gradient(circle at 88% 0%,rgba(72,153,213,.24),transparent 46%),linear-gradient(145deg,#102439,#091525 76%)}
+.visualCategory-tech{background:radial-gradient(circle at 88% 0%,rgba(75,189,207,.24),transparent 46%),linear-gradient(145deg,#102830,#091525 76%)}
+.visualCategory-lifestyle{background:radial-gradient(circle at 88% 0%,rgba(106,173,122,.22),transparent 46%),linear-gradient(145deg,#172b22,#091525 76%)}
+
