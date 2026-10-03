@@ -31,5 +31,44 @@
 - Dynamic per-work OGP is intentionally deferred to a later R23 step using an edge/server rendering layer or generated per-work HTML.
 
 ### Build
-- Active cache key: `r23p1`.
+- P1 cache key: `r23p1`.
+- No Supabase migration required.
+
+## P2 Share Templates
+
+### Aspect ratios
+Public share images can now be generated in:
+- 16:9 — 1200×675
+- 1:1 — 1080×1080
+- 4:5 — 1080×1350
+
+### Templates
+Users can choose:
+- Creator TOP3
+- Community TOP3
+- Overview card
+
+Community TOP3 is enabled only when the existing R20 privacy threshold is satisfied and an eligible Community ranking is available.
+
+### Shared metadata
+All layouts include Stats Maker branding and category context.
+The share system now also incorporates:
+- target count
+- metric count
+- score scale
+- Community participant count
+
+Square, landscape, and portrait layouts are independently arranged to avoid overlap.
+
+### Mobile / Safari
+- “Share Image” now opens a bottom-sheet style chooser on small screens.
+- Native file sharing remains the preferred path on iPhone/Safari.
+- PNG download remains the fallback when file sharing is unavailable.
+- Long titles use responsive font sizing and multi-line truncation.
+
+### Discover polish
+- Visual thumbnails now receive category-specific atmosphere styling so cards are easier to distinguish at a glance.
+
+### Build
+- Active cache key: `r23p2`.
 - No Supabase migration required.
