@@ -38,3 +38,17 @@ Run once in Supabase SQL Editor:
 
 ### Build
 - Active cache key: `r20p1`.
+
+## P2 Editor Community Status
+
+- Published sheets now show current Community information directly inside the editor sidebar, below the sheet summary/stats area.
+- Shows participant count at all times.
+- Below 5 participants, averages and rankings remain hidden and the panel shows how many more participants are needed.
+- At 5+ participants, shows:
+  - Community Overall Ranking (Top 5)
+  - Community Metric Averages
+- Includes manual Refresh and “View details on public page”.
+- Returning to the editor reuses a short cache and refreshes stale Community data.
+- Unpublished/private sheets do not show the panel.
+- No additional database migration is required beyond R20 P1.
+- Active cache key: `r20p2`.
