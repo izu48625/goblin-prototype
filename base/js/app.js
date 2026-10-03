@@ -520,6 +520,25 @@
     $('sheetSelect').value=library.activeId;
   }
 
+  function renderRemixContext(){
+    const panel=$('remixContextPanel');
+    if(!panel)return;
+    const s=activeSheet();
+    const hasSource=!!s?.sourceTopicId;
+    panel.classList.toggle('hidden',!hasSource);
+    if(!hasSource)return;
+    $('remixSourceTitle').textContent=s.sourceTopicTitle||s.sourceTopicId;
+  }
+
+  function openRemixSource(){
+    const s=activeSheet();
+    if(s?.sourceTopicId)window.open(publicPageUrl(s.sourceTopicId),'_blank','noopener');
+  }
+
+  function publishRemixOwnVersion(){
+    openPublishDialog();
+  }
+
   function communityEligibility(sheet=activeSheet()){
     const source=sheet?.sourceCommunity;
     if(!sheet?.sourceTopicId || !source){
@@ -616,7 +635,8 @@
       const wasUpdate=!!s.sourceCommunitySubmittedAt;
       s.sourceCommunitySubmittedAt=Date.now();
       scheduleSave('');
-      renderCommunityParticipation();
+      renderRemixContext();
+    renderCommunityParticipation();
       setCommunityStatus(wasUpdate?t('community.updateSuccess'):t('community.success'),'ok');
     }catch(error){
       console.error(error);
@@ -1788,7 +1808,7 @@
       const user=await ensurePublishUser();if(!user)throw new Error(t('publish.guestStartFailed'));
       const s=activeSheet(),model=buildPublishModel(s),visibility=document.querySelector('input[name="publishVisibility"]:checked')?.value||'public';setPublishStatus(t('publish.busy'));
       const now=new Date().toISOString();
-      const basePayload={owner_id:user.id,title:model.title,description:model.description,language_code:model.language,score_scale:model.scale,weighted:model.weighted,visibility,allow_ratings:true,show_community:true,snapshot_version:model.version,snapshot:model,snapshot_updated_at:now,published_at:now};
+      const basePayload={owner_id:user.id,title:model.title,description:model.description,language_code:model.language,score_scale:model.scale,weighted:model.weighted,visibility,allow_ratings:true,show_community:true,source_topic_id:s.sourceTopicId||null,snapshot_version:model.version,snapshot:model,snapshot_updated_at:now,published_at:now};
       let topicId=s.cloudTopicId||'',updating=false,versioned=false;
 
       if(topicId){
@@ -2067,6 +2087,8 @@
   $('publishCopyBtn').addEventListener('click',copyPublishUrl);
   $('publishOpenBtn').addEventListener('click',openPublishedPage);
   $('communityJoinBtn').addEventListener('click',submitCommunityRating);
+  $('remixOpenSourceBtn').addEventListener('click',openRemixSource);
+  $('remixPublishOwnBtn').addEventListener('click',publishRemixOwnVersion);
   $('editorCommunityRefreshBtn').addEventListener('click',()=>refreshEditorCommunitySummary(true));
   $('editorCommunityOpenBtn').addEventListener('click',openEditorCommunityPublicPage);
 
