@@ -137,16 +137,30 @@
     return topic?.show_community===true&&topic?.allow_ratings===true;
   }
 
+  function normalizeSearchText(value){
+    return String(value??'')
+      .normalize('NFKC')
+      .toLowerCase()
+      .replace(/[・･／/,_-]+/g,' ')
+      .replace(/\s+/g,' ')
+      .trim();
+  }
+
+  function searchTerms(value){
+    const normalized=normalizeSearchText(value);
+    return normalized?normalized.split(' ').filter(Boolean):[];
+  }
+
   function searchableText(topic){
     const snap=snapshotOf(topic);
     const rows=Array.isArray(snap.rows)?snap.rows:[];
     const criteria=Array.isArray(snap.criteria)?snap.criteria:[];
-    return [
+    return normalizeSearchText([
       topic.title,topic.description,
       categoryLabels[categoryOf(topic)],
       ...rows.map(row=>row?.name),
       ...criteria.map(item=>item?.name)
-    ].filter(Boolean).join(' ').toLowerCase();
+    ].filter(Boolean).join(' '));
   }
 
   function topicStats(topic){
@@ -176,7 +190,7 @@
   }
 
   function filteredWorks(){
-    const q=state.query.trim().toLowerCase();
+    const terms=searchTerms(state.query);
     let filtered=state.works;
 
     if(state.view==='community'){
@@ -187,8 +201,11 @@
       filtered=filtered.filter(topic=>categoryOf(topic)===state.category);
     }
 
-    if(q){
-      filtered=filtered.filter(topic=>searchableText(topic).includes(q));
+    if(terms.length){
+      filtered=filtered.filter(topic=>{
+        const haystack=searchableText(topic);
+        return terms.every(term=>haystack.includes(term));
+      });
     }
 
     return sortWorks(filtered);
