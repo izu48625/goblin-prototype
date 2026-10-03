@@ -5,9 +5,9 @@
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
   <meta name="theme-color" content="#07101f">
   <title>Stats Maker V1.0-A2.1</title>
-  <link rel="stylesheet" href="css/style.css?v=r20p1">
+  <link rel="stylesheet" href="css/style.css?v=r20p2">
 </head>
-<body data-build="R20-P1">
+<body data-build="R20-P2">
 <div id="viewOnlyBanner" class="viewOnlyBanner hidden">
   <div class="viewOnlyText"><span data-i18n="viewOnly.mode">閲覧モード</span>
     <span class="viewOnlySub" data-i18n="viewOnly.subtitle">編集操作を隠して結果だけを見ています</span>
@@ -227,6 +227,41 @@
         <div id="statusText" class="status" data-i18n="status.initial">編集内容はブラウザへ自動保存されます。</div>
         <div class="imageNote" data-i18n="summary.imageNote">画像は端末から選択後、約160pxに自動縮小してこのブラウザ内に保存します。大量の高解像度画像を保存する用途ではありません。</div>
       </section>
+
+      <section id="editorCommunityPanel" class="sidePanel panel editorCommunityPanel hidden">
+        <div class="sectionTop editorCommunityHead">
+          <div>
+            <div class="eyebrow">COMMUNITY</div>
+            <div class="sectionTitle" data-i18n="community.statusTitle">現在のCommunity</div>
+          </div>
+          <button id="editorCommunityRefreshBtn" class="viewTab editorCommunityRefreshBtn" type="button" data-i18n="community.refresh">更新</button>
+        </div>
+
+        <div id="editorCommunityStatus" class="editorCommunityStatus" data-i18n="community.loading">Community情報を読み込み中…</div>
+
+        <div id="editorCommunityBody" class="hidden">
+          <div class="editorCommunityHero">
+            <div class="editorCommunityCountBox">
+              <div id="editorCommunityParticipantCount" class="editorCommunityCount">0</div>
+              <div class="editorCommunityCountLabel" data-i18n="community.participants">参加者</div>
+            </div>
+            <div id="editorCommunityGate" class="editorCommunityGate"></div>
+          </div>
+
+          <div id="editorCommunityUnlocked" class="hidden">
+            <div class="editorCommunityBlock">
+              <div class="editorCommunityBlockTitle" data-i18n="community.rankingTitle">Community総合ランキング</div>
+              <div id="editorCommunityRanking" class="editorCommunityRanking"></div>
+            </div>
+            <div class="editorCommunityBlock">
+              <div class="editorCommunityBlockTitle" data-i18n="community.metricsTitle">項目別Community平均</div>
+              <div id="editorCommunityMetrics" class="editorCommunityMetrics"></div>
+            </div>
+          </div>
+
+          <button id="editorCommunityOpenBtn" class="btn editorCommunityOpenBtn" type="button" data-i18n="community.openPublic">公開ページで詳しく見る</button>
+        </div>
+      </section>
     </aside>
   </div>
 </main>
@@ -364,11 +399,11 @@
 </div>
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-<script src="../cloud/supabase.js?v=r20p1"></script>
-<script src="../cloud/publish-model.js?v=r20p1"></script>
-<script src="js/i18n.js?v=r20p1"></script>
-<script src="js/app.js?v=r20p1"></script>
-<script src="js/publish-guard.js?v=r20p1"></script>
+<script src="../cloud/supabase.js?v=r20p2"></script>
+<script src="../cloud/publish-model.js?v=r20p2"></script>
+<script src="js/i18n.js?v=r20p2"></script>
+<script src="js/app.js?v=r20p2"></script>
+<script src="js/publish-guard.js?v=r20p2"></script>
 <script>
 window.addEventListener("statsmaker:languagechange",event=>{
   try{

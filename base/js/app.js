@@ -1490,8 +1490,144 @@
   function publicPageUrl(topicId){
     const url=new URL('../public.html',location.href);
     url.searchParams.set('id',topicId);
-    url.searchParams.set('v','r20p1');
+    url.searchParams.set('v','r20p2');
     return url.href;
+  }
+
+
+  const editorCommunityCache=new Map();
+  let editorCommunityRequestId=0;
+
+  function liveCommunityTopicId(sheet=activeSheet()){
+    return sheet?.cloudTopicId&&sheet.cloudVisibility!=='private'?sheet.cloudTopicId:'';
+  }
+
+  function renderEditorCommunityPayload(payload){
+    const panel=$('editorCommunityPanel');
+    const status=$('editorCommunityStatus');
+    const body=$('editorCommunityBody');
+    if(!panel||!status||!body)return;
+
+    const participant=Number(payload?.participant||0);
+    const unlocked=participant>=5;
+    $('editorCommunityParticipantCount').textContent=String(participant);
+    $('editorCommunityGate').innerHTML=unlocked
+      ? `<b>${esc(t('community.unlockedHelp'))}</b><span>${esc(t('community.participants'))}: ${participant}</span>`
+      : `<b>${esc(t('community.lockedTitle'))}</b><span>${esc(t('community.lockedHelp',{count:Math.max(0,5-participant)}))}</span>`;
+
+    $('editorCommunityUnlocked').classList.toggle('hidden',!unlocked);
+    if(unlocked){
+      const ranking=Array.isArray(payload?.ranking)?payload.ranking:[];
+      $('editorCommunityRanking').innerHTML=ranking.length
+        ? ranking.slice(0,5).map((item,index)=>`
+            <div class="editorCommunityRankRow">
+              <div class="editorCommunityRankNo">${index+1}</div>
+              <div class="editorCommunityRankName">${esc(item.name)}</div>
+              <div class="editorCommunityRankValue">${fmt(item.value)}</div>
+            </div>`).join('')
+        : `<div class="editorCommunityEmpty">${esc(t('community.noEligibleAverage'))}</div>`;
+
+      const metrics=Array.isArray(payload?.metrics)?payload.metrics:[];
+      $('editorCommunityMetrics').innerHTML=metrics.length
+        ? metrics.map(metric=>`
+            <div class="editorCommunityMetric">
+              <span class="editorCommunityMetricName">${esc(metric.name)}</span>
+              <span class="editorCommunityMetricValue">${metric.value===null?'—':fmt(metric.value)}</span>
+            </div>`).join('')
+        : `<div class="editorCommunityEmpty">${esc(t('community.noRatings'))}</div>`;
+    }
+
+    status.textContent='';
+    body.classList.remove('hidden');
+  }
+
+  async function refreshEditorCommunitySummary(force=false){
+    const panel=$('editorCommunityPanel');
+    if(!panel)return;
+
+    const topicId=liveCommunityTopicId();
+    if(!topicId){
+      editorCommunityRequestId++;
+      panel.classList.add('hidden');
+      return;
+    }
+
+    panel.classList.remove('hidden');
+    const cached=editorCommunityCache.get(topicId);
+    if(cached&&!force&&Date.now()-cached.loadedAt<30000){
+      renderEditorCommunityPayload(cached);
+      return;
+    }
+
+    const requestId=++editorCommunityRequestId;
+    const status=$('editorCommunityStatus');
+    const body=$('editorCommunityBody');
+    status.textContent=t('community.loading');
+    if(!cached)body.classList.add('hidden');
+
+    try{
+      const sb=window.SM_SUPABASE?.client;
+      if(!sb)throw new Error('Supabase client is not ready');
+
+      const countRes=await sb.rpc('get_topic_participant_count',{p_topic_id:topicId});
+      if(countRes.error)throw countRes.error;
+      const participant=Number(countRes.data||0);
+      let ranking=[];
+      let metrics=[];
+
+      if(participant>=5){
+        const [itemRes,criterionRes,itemsRes,criteriaRes]=await Promise.all([
+          sb.rpc('get_community_item_summary',{p_topic_id:topicId}),
+          sb.rpc('get_community_criterion_summary',{p_topic_id:topicId}),
+          sb.from('topic_items').select('id,name,position').eq('topic_id',topicId).order('position'),
+          sb.from('criteria').select('id,name,position').eq('topic_id',topicId).order('position')
+        ]);
+        if(itemRes.error||criterionRes.error||itemsRes.error||criteriaRes.error){
+          throw(itemRes.error||criterionRes.error||itemsRes.error||criteriaRes.error);
+        }
+
+        const items=itemsRes.data||[];
+        const criteria=criteriaRes.data||[];
+        const itemName=new Map(items.map(item=>[item.id,item.name||'']));
+        ranking=(itemRes.data||[])
+          .map(row=>({
+            name:itemName.get(row.item_id)||'',
+            count:Number(row.response_count||0),
+            value:Number(row.response_count||0)>=5&&row.avg_overall!==null?Number(row.avg_overall):null
+          }))
+          .filter(row=>row.value!==null&&Number.isFinite(row.value))
+          .sort((a,b)=>b.value-a.value||a.name.localeCompare(b.name))
+          .slice(0,5);
+
+        const criterionRows=criterionRes.data||[];
+        metrics=criteria.map(criterion=>{
+          const eligible=criterionRows
+            .filter(row=>row.criterion_id===criterion.id&&Number(row.response_count||0)>=5&&row.avg_score!==null)
+            .map(row=>({avg:Number(row.avg_score),count:Number(row.response_count||0)}))
+            .filter(row=>Number.isFinite(row.avg)&&row.count>0);
+          const denominator=eligible.reduce((sum,row)=>sum+row.count,0);
+          const value=denominator
+            ? eligible.reduce((sum,row)=>sum+row.avg*row.count,0)/denominator
+            : null;
+          return {name:criterion.name||'',value};
+        });
+      }
+
+      const payload={participant,ranking,metrics,loadedAt:Date.now()};
+      editorCommunityCache.set(topicId,payload);
+      if(requestId!==editorCommunityRequestId||liveCommunityTopicId()!==topicId)return;
+      renderEditorCommunityPayload(payload);
+    }catch(error){
+      console.error('[Stats Maker] Community summary load failed',error);
+      if(requestId!==editorCommunityRequestId)return;
+      status.textContent=t('community.loadError');
+      if(cached)renderEditorCommunityPayload(cached);
+    }
+  }
+
+  function openEditorCommunityPublicPage(){
+    const topicId=liveCommunityTopicId();
+    if(topicId)window.open(publicPageUrl(topicId),'_blank','noopener');
   }
 
   function isPermanentUser(user){return !!user&&!user.is_anonymous}
@@ -1679,7 +1815,7 @@
         const {data:insertData,error:insertError}=await sb.from('topics').insert(basePayload).select('id').single();if(insertError)throw insertError;topicId=insertData.id;await insertPublishedStructure(sb,topicId,model);
       }
 
-      s.cloudTopicId=topicId;s.cloudVisibility=visibility;s.cloudPublishedAt=now;scheduleSave('');publishState.url=publicPageUrl(topicId);$('publishUrlInput').value=publishState.url;$('publishResult').classList.remove('hidden');$('publishUnpublishBtn').classList.remove('hidden');$('publishExecuteBtn').textContent=t('publish.updateExecute');setPublishStatus(versioned?t('publish.versionedSuccess'):(updating?t('publish.updateSuccess'):t('publish.success')),'ok');renderHeader();
+      s.cloudTopicId=topicId;s.cloudVisibility=visibility;s.cloudPublishedAt=now;scheduleSave('');publishState.url=publicPageUrl(topicId);$('publishUrlInput').value=publishState.url;$('publishResult').classList.remove('hidden');$('publishUnpublishBtn').classList.remove('hidden');$('publishExecuteBtn').textContent=t('publish.updateExecute');setPublishStatus(versioned?t('publish.versionedSuccess'):(updating?t('publish.updateSuccess'):t('publish.success')),'ok');renderHeader();refreshEditorCommunitySummary(true);
     }catch(e){setPublishStatus(t('publish.errorPrefix')+(e?.message||String(e))+migrationHint(e),'error')}
   }
 
@@ -1701,6 +1837,7 @@
       $('publishExecuteBtn').textContent=t('publish.execute');
       setPublishStatus(t('publish.unpublishSuccess'),'ok');
       renderHeader();
+      refreshEditorCommunitySummary(true);
     }catch(e){setPublishStatus(t('publish.errorPrefix')+(e?.message||String(e)),'error')}
   }
 
@@ -1725,6 +1862,7 @@
     renderColumnManager();
     syncColumnManagerVisibility();
     renderSidebar();
+    refreshEditorCommunitySummary(false);
     $('filterCount').textContent=t('count.filtered',{visible:filteredRows().length,total:s.rows.length});
     renderViewMode();
   }
@@ -1929,6 +2067,8 @@
   $('publishCopyBtn').addEventListener('click',copyPublishUrl);
   $('publishOpenBtn').addEventListener('click',openPublishedPage);
   $('communityJoinBtn').addEventListener('click',submitCommunityRating);
+  $('editorCommunityRefreshBtn').addEventListener('click',()=>refreshEditorCommunitySummary(true));
+  $('editorCommunityOpenBtn').addEventListener('click',openEditorCommunityPublicPage);
 
   $('newSheetBtn').addEventListener('click',createNewSheet);
   $('duplicateBtn').addEventListener('click',duplicateSheet);
@@ -2023,6 +2163,11 @@
   window.addEventListener('resize',()=>{
     clearTimeout(window.__smv03Resize);
     window.__smv03Resize=setTimeout(()=>{if(activeSheet().compareView==='radar')drawRadar();if(activeSheet().viewMode==='fit')applyFitScale();},100);
+  });
+
+  // R20 P2: refresh Community status when returning from a public page/tab.
+  window.addEventListener('focus',()=>{
+    if(liveCommunityTopicId())refreshEditorCommunitySummary(false);
   });
 
   window.addEventListener('statsmaker:languagechange',()=>{
