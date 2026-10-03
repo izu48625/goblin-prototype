@@ -196,10 +196,11 @@
 
   function creatorPreviewHtml(topic){
     const preview=creatorPreview(topic);
+    const category=categoryOf(topic);
     if(!preview.items.length){
-      return `<div class="workVisual emptyVisual"><span>STATS MAKER</span><b>NO SCORE DATA</b></div>`;
+      return `<div class="workVisual visualCategory-${category} emptyVisual"><span>STATS MAKER</span><b>NO SCORE DATA</b></div>`;
     }
-    return `<div class="workVisual">
+    return `<div class="workVisual visualCategory-${category}">
       <div class="visualTop"><span>STATS MAKER</span><span>TOP 3</span></div>
       <div class="visualRows">${preview.items.map((item,index)=>{
         const pct=Math.max(0,Math.min(100,Number(item.value||0)/preview.scale*100));
@@ -285,7 +286,7 @@
           ?`<span class="metaChip lineageChip">${copy.lineageVersion}</span>`
           :'';
 
-      return `<a class="workCard" href="public.html?id=${encodeURIComponent(topic.id)}&v=r23p1">
+      return `<a class="workCard" href="public.html?id=${encodeURIComponent(topic.id)}&v=r23p2">
         <div class="cardTop">
           <div class="visibility">${copy.public}</div>
           <div class="languageBadge">${lang}</div>
