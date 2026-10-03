@@ -285,7 +285,7 @@
           ?`<span class="metaChip lineageChip">${copy.lineageVersion}</span>`
           :'';
 
-      return `<a class="workCard" href="public.html?id=${encodeURIComponent(topic.id)}&v=r22p3">
+      return `<a class="workCard" href="public.html?id=${encodeURIComponent(topic.id)}&v=r23p1">
         <div class="cardTop">
           <div class="visibility">${copy.public}</div>
           <div class="languageBadge">${lang}</div>
