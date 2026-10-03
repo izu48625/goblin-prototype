@@ -119,3 +119,16 @@ a{color:inherit}
   .footerLinks{width:100%;justify-content:space-between}
 }
 
+/* ===== R23 P1 Social sharing ===== */
+.actionBtn.shareImage{
+  background:linear-gradient(180deg,#2d5da3,#21477f);
+  border-color:#527fbd;
+  color:#eef5ff;
+}
+.actionBtn.shareImage:disabled{opacity:.65;cursor:wait}
+@media(max-width:520px){
+  .primaryActions{grid-template-columns:1fr 1fr}
+  .primaryActions .actionBtn.remix{grid-column:span 2}
+  .primaryActions .actionBtn.owner{grid-column:span 2}
+}
+
