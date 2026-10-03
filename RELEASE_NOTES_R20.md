@@ -52,3 +52,11 @@ Run once in Supabase SQL Editor:
 - Unpublished/private sheets do not show the panel.
 - No additional database migration is required beyond R20 P1.
 - Active cache key: `r20p2`.
+
+## P3 Mobile launcher clearance
+
+- On screens up to 600px, the main Stats Maker iframe now reserves a dedicated bottom rail for the fixed Visual Tools launcher.
+- Prevents the launcher from covering the Community panel or any other content at the bottom of the editor.
+- Keeps iOS safe-area spacing for Safari/home-indicator layouts.
+- No database migration required.
+- Root build/cache key: `r20p3`.
