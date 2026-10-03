@@ -225,7 +225,7 @@
       wrapCanvasText(ctx,overviewText,innerW,2).forEach((line,i)=>ctx.fillText(line,pad,noteY+i*Math.round(width*.027)));
     }else if(portrait||square){
       const panelY=Math.max(descBottom+Math.round(height*.055),Math.round(height*(square?.43:.38)));
-      const panelH=Math.round(height*(square?.36:.39));
+      const panelH=Math.round(height*(square?.32:.39));
       drawRanking(
         pad,panelY,innerW,panelH,
         template==='community'?communityRanking:creatorRanking,
@@ -235,6 +235,8 @@
       );
       if(portrait){
         drawMetaGrid(pad,panelY+panelH+Math.round(height*.035),innerW,2);
+      }else if(square){
+        drawMetaGrid(pad,panelY+panelH+Math.round(height*.025),innerW,4);
       }
     }else{
       const panelX=Math.round(width*.655),panelY=Math.round(height*.105);
