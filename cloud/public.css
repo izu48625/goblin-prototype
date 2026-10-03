@@ -91,3 +91,20 @@ a{color:inherit}
   .metricSummaryValue{font-size:19px}
 }
 
+/* ===== R21 P1 Remix lineage ===== */
+.lineageBar{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-top:10px;padding:10px 11px;border:1px solid #493d68;border-radius:10px;background:rgba(31,24,51,.58)}
+.lineageMain{min-width:0;display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+.lineageLabel{color:#9d8fc7;font-size:8px;font-weight:950;letter-spacing:.09em;text-transform:uppercase}
+.lineageSource{min-width:0;max-width:100%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;color:#d9cff1;font-size:10px;font-weight:950;text-decoration:none}
+.lineageSource:hover{text-decoration:underline}
+.lineageSource.unavailable{color:#766f89;font-weight:800}
+.lineageBadge{flex:none;padding:5px 7px;border:1px solid #654f91;border-radius:999px;color:#bca8e7;font-size:8px;font-weight:950}
+.actionCount{display:inline-grid;place-items:center;min-width:22px;height:20px;padding:0 6px;border-radius:999px;background:rgba(255,255,255,.12);font-size:8px;font-weight:950}
+.remixNotice{display:flex;flex-direction:column;gap:4px;border-color:#4b3e68;background:#151124;color:#ad9fc8}
+.remixNotice b{color:#e2d8f5;font-size:10px}
+.remixNotice span{font-size:9px;line-height:1.55}
+@media(max-width:520px){
+  .lineageBar{align-items:flex-start}
+  .lineageMain{display:grid;gap:4px}
+}
+

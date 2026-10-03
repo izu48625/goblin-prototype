@@ -37,6 +37,17 @@
       .eq('id',id).single();
     if(error)throw error;
 
+    let sourceTopic=null;
+    let remixCount=0;
+    try{
+      if(data.source_topic_id){
+        const {data:source}=await sb.from('topics')
+          .select('id,title,visibility')
+          .eq('id',data.source_topic_id)
+          .maybeSingle();
+        if(source&&source.visibility!=='private')sourceTopic=source;
+      }
+    }catch{}
     const ja=data.language_code!=='en';document.documentElement.lang=ja?'ja':'en';document.title=`${data.title} - Stats Maker`;
     const metaDescription=document.querySelector('meta[name="description"]');
     if(metaDescription)metaDescription.content=data.description||`${data.title} - Stats Maker`;
@@ -48,6 +59,14 @@
     const items=(data.topic_items||[]).sort((a,b)=>a.position-b.position);
     const dbCriteria=(data.criteria||[]).sort((a,b)=>a.position-b.position);
     const snap=(data.snapshot&&typeof data.snapshot==='object'&&!Array.isArray(data.snapshot))?data.snapshot:{};
+    const lineageRelation=String(snap?.lineage?.relation||'').toLowerCase()||(data.source_topic_id?'derived':'');
+    try{
+      const {data:children}=await sb.from('topics')
+        .select('id,snapshot,visibility')
+        .eq('source_topic_id',data.id)
+        .in('visibility',['public','unlisted']);
+      remixCount=(children||[]).filter(child=>String(child?.snapshot?.lineage?.relation||'').toLowerCase()==='remix').length;
+    }catch{}
     const criteria=(Array.isArray(snap.criteria)&&snap.criteria.length)?snap.criteria:dbCriteria.map(c=>({name:c.name,weight:Number(c.weight??1)}));
     const rows=(Array.isArray(snap.rows)&&snap.rows.length)?snap.rows:items.map(i=>({name:i.name,note:'',scores:Array(criteria.length).fill(null)}));
     const scale=Number(snap.scale||data.score_scale||100)===10?10:100;
@@ -77,6 +96,17 @@
         <h1>${esc(data.title)}</h1>
         ${data.description?`<div class="desc">${esc(data.description)}</div>`:''}
         <div class="heroScope">${visibilityHelp}</div>
+        ${data.source_topic_id?`
+          <div class="lineageBar">
+            <div class="lineageMain">
+              <span class="lineageLabel">${lineageRelation==='version'?(ja?'前バージョン':'Previous version'):lineageRelation==='remix'?(ja?'Remix元':'Remix source'):(ja?'派生元':'Source')}</span>
+              ${sourceTopic
+                ?`<a class="lineageSource" href="public.html?id=${encodeURIComponent(sourceTopic.id)}&v=r21p1">${esc(sourceTopic.title)}</a>`
+                :`<span class="lineageSource unavailable">${ja?'派生元は現在参照できません':'Source is currently unavailable'}</span>`}
+            </div>
+            <div class="lineageBadge">${lineageRelation==='version'?'VERSION':lineageRelation==='remix'?'REMIX':'SOURCE'}</div>
+          </div>`
+        :''}
 
         <div class="summaryStrip">
           <div class="summaryStat">
@@ -102,13 +132,16 @@
         </div>
 
         <div class="primaryActions">
-          <button id="remixBtn" class="actionBtn remix">${ja?'Remixして使う':'Remix this'}</button>
+          <button id="remixBtn" class="actionBtn remix">${ja?'Remixして使う':'Remix this'}<span class="actionCount">${remixCount}</span></button>
           <button id="shareBtn" class="actionBtn ghost">${ja?'共有':'Share'}</button>
           ${isOwner?`<button id="ownerManageBtn" class="actionBtn owner">${ja?'編集・公開設定':'Edit / Publish settings'}</button>`:''}
         </div>
         ${isOwner?`<div class="ownerHint">${ja?'このブラウザの公開者セッションで開いています。元シートが残っていれば編集画面へ戻せます。':'You are viewing this with the publisher session. If the local source sheet still exists, it will be selected when you return.'}</div>`:''}
 
-        <div class="notice">${ja?'Communityへ参加したい場合は「Remixして使う」で自分の採点シートを作成し、採点後に「Communityに参加」を押してください。':'To join Community ratings, remix this sheet, score it, then use “Join Community” from your copy.'}</div>
+        <div class="notice remixNotice">
+          <b>${ja?'Remixでは構成だけをコピーし、作成者の点数はコピーしません。':'Remix copies the structure, not the creator’s scores.'}</b>
+          <span>${ja?'採点後は「元作品のCommunityに参加」か、「自分版として公開」かを選べます。Community参加はこの作品の集計へ評価を送り、自分版公開はRemix関係を残した別作品になります。':'After scoring, choose either “Join the source Community” or “Publish as your own version.” Community submission contributes to this work; publishing creates a separate linked work.'}</span>
+        </div>
         ${rows.some(row=>row.hasLocalImage)?`<div class="notice">${ja?'現在、作成者のローカル画像は公開ページへアップロードされません。':'Creator-local images are not uploaded to the public page yet.'}</div>`:''}
       </section>
 
@@ -141,7 +174,7 @@
         const sheet=window.SM_REMIX.buildSheet(data,snap,dbCriteria,items,ja?'ja':'en');
         window.SM_REMIX.saveSheet(sheet);
         toast(ja?'Remixしました。編集画面へ移動します。':'Remixed. Opening the editor…');
-        setTimeout(()=>{location.href='index.html?remixed=1&v=r20p2'},500);
+        setTimeout(()=>{location.href='index.html?remixed=1&v=r21p1'},500);
       }catch(e){toast((ja?'Remixに失敗しました：':'Remix failed: ')+(e?.message||e))}
     };
     document.getElementById('shareBtn').onclick=async()=>{
@@ -169,7 +202,7 @@
           }
           sessionStorage.setItem('statsMaker:openPublish','1');
         }catch{}
-        location.href='index.html?v=r20p2&from=public';
+        location.href='index.html?v=r21p1&from=public';
       };
     };
 

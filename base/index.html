@@ -5,9 +5,9 @@
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
   <meta name="theme-color" content="#07101f">
   <title>Stats Maker V1.0-A2.1</title>
-  <link rel="stylesheet" href="css/style.css?v=r20p2">
+  <link rel="stylesheet" href="css/style.css?v=r21p1">
 </head>
-<body data-build="R20-P2">
+<body data-build="R21-P1">
 <div id="viewOnlyBanner" class="viewOnlyBanner hidden">
   <div class="viewOnlyText"><span data-i18n="viewOnly.mode">閲覧モード</span>
     <span class="viewOnlySub" data-i18n="viewOnly.subtitle">編集操作を隠して結果だけを見ています</span>
@@ -49,6 +49,29 @@
       <button id="deleteSheetBtn" class="btn danger" type="button" data-i18n="action.delete">削除</button>
     </div>
   </header>
+
+  <section id="remixContextPanel" class="remixContextPanel panel hidden">
+    <div class="remixContextCopy">
+      <div class="eyebrow">REMIX</div>
+      <div class="remixContextTitle" data-i18n="remix.contextTitle">Remix元</div>
+      <div id="remixSourceTitle" class="remixSourceTitle">—</div>
+      <div class="remixContextHelp" data-i18n="remix.contextHelp">このシートは公開作品の構成を引き継いだ自分用コピーです。点数は引き継がれていません。</div>
+      <div class="remixChoiceGrid">
+        <div class="remixChoice">
+          <b data-i18n="remix.communityChoiceTitle">元作品のCommunityに参加</b>
+          <span data-i18n="remix.communityChoiceHelp">元作品と構成が同じ間だけ、あなたの評価を元作品のCommunityへ送れます。</span>
+        </div>
+        <div class="remixChoice">
+          <b data-i18n="remix.publishChoiceTitle">自分版として公開</b>
+          <span data-i18n="remix.publishChoiceHelp">自分の点数・説明を別の公開作品として公開します。元作品とのRemix関係は残ります。</span>
+        </div>
+      </div>
+    </div>
+    <div class="remixContextActions">
+      <button id="remixOpenSourceBtn" class="btn" type="button" data-i18n="remix.openSource">元作品を見る</button>
+      <button id="remixPublishOwnBtn" class="btn publishBtn" type="button" data-i18n="remix.publishOwn">自分版を公開</button>
+    </div>
+  </section>
 
   <section id="communityJoinPanel" class="communityJoinPanel panel hidden">
     <div class="communityJoinCopy">
@@ -399,11 +422,11 @@
 </div>
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-<script src="../cloud/supabase.js?v=r20p2"></script>
-<script src="../cloud/publish-model.js?v=r20p2"></script>
-<script src="js/i18n.js?v=r20p2"></script>
-<script src="js/app.js?v=r20p2"></script>
-<script src="js/publish-guard.js?v=r20p2"></script>
+<script src="../cloud/supabase.js?v=r21p1"></script>
+<script src="../cloud/publish-model.js?v=r21p1"></script>
+<script src="js/i18n.js?v=r21p1"></script>
+<script src="js/app.js?v=r21p1"></script>
+<script src="js/publish-guard.js?v=r21p1"></script>
 <script>
 window.addEventListener("statsmaker:languagechange",event=>{
   try{

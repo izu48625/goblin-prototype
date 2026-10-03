@@ -60,7 +60,12 @@
       scale:sheet.scale===10?10:100,
       weighted:!!sheet.weighted,
       criteria,
-      rows
+      rows,
+      lineage:sheet.sourceTopicId?{
+        relation:'remix',
+        sourceTopicId:String(sheet.sourceTopicId),
+        sourceTopicTitle:String(sheet.sourceTopicTitle||'')
+      }:null
     };
   }
 
