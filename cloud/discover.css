@@ -1,0 +1,93 @@
+:root{
+  color-scheme:dark;
+  --bg:#07101f;
+  --panel:#0d192a;
+  --panel2:#101f34;
+  --line:#293f5d;
+  --line2:#355274;
+  --text:#edf4ff;
+  --muted:#8ea2bc;
+  --accent:#6f9cff;
+  --good:#6ddaa2;
+  --purple:#a88ae0;
+}
+*{box-sizing:border-box}
+html,body{margin:0;min-height:100%;background:var(--bg);color:var(--text);font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",system-ui,sans-serif}
+body{min-height:100vh}
+a{color:inherit}
+button,input{font:inherit}
+.hidden{display:none!important}
+
+.wrap{width:min(1180px,calc(100% - 28px));margin:0 auto;padding:16px 0 max(54px,env(safe-area-inset-bottom))}
+.top{position:sticky;top:0;z-index:20;display:flex;align-items:center;justify-content:space-between;gap:10px;padding:9px 0 12px;background:linear-gradient(180deg,rgba(7,16,31,.98),rgba(7,16,31,.9) 78%,rgba(7,16,31,0));backdrop-filter:blur(10px)}
+.brand{display:flex;align-items:center;gap:9px;text-decoration:none;color:#c9d6e8;font-size:11px;font-weight:950;letter-spacing:.09em}
+.mark{width:32px;height:32px;border-radius:9px;background:#234879;display:grid;place-items:center;color:white}
+.createLink{padding:9px 12px;border:1px solid #3a5e86;border-radius:9px;background:#10223a;color:#cae0ff;font-size:10px;font-weight:950;text-decoration:none}
+
+.hero{position:relative;overflow:hidden;padding:clamp(22px,5vw,42px);border:1px solid var(--line);border-radius:18px;background:
+  radial-gradient(circle at 88% 4%,rgba(111,156,255,.2),transparent 36%),
+  radial-gradient(circle at 10% 100%,rgba(130,95,200,.12),transparent 34%),
+  linear-gradient(145deg,#101f34,#0b1728 72%)}
+.eyebrow{font-size:10px;font-weight:950;color:var(--good);letter-spacing:.12em;margin-bottom:8px}
+.hero h1{margin:0;font-size:clamp(27px,5vw,46px);line-height:1.08}
+.hero p{margin:10px 0 0;color:var(--muted);font-size:12px;line-height:1.65}
+.privacyNote{margin-top:15px;padding:9px 11px;border-left:3px solid #426b9d;border-radius:0 9px 9px 0;background:rgba(5,14,25,.38);color:#8da5c5;font-size:9px;line-height:1.55}
+
+.controls{display:grid;grid-template-columns:minmax(240px,1fr) auto;gap:10px;align-items:center;margin-top:14px}
+.searchBox{display:flex;align-items:center;gap:8px;min-height:44px;padding:0 12px;border:1px solid #2e4969;border-radius:11px;background:#0b1728}
+.searchBox span{color:#7890ae;font-size:17px}
+.searchBox input{width:100%;border:0;outline:0;background:transparent;color:#f2f6fd;font-size:12px}
+.searchBox input::placeholder{color:#647994}
+.sortTabs{display:flex;gap:5px;flex-wrap:wrap;justify-content:flex-end}
+.sortBtn,.refreshBtn,.moreBtn{border:1px solid #2f4968;border-radius:9px;background:#0f1f34;color:#8fa5c3;font-weight:900;cursor:pointer}
+.sortBtn{min-height:40px;padding:0 11px;font-size:9px}
+.sortBtn.active{border-color:#547dba;background:#18345a;color:#e2ecff}
+.refreshBtn{min-height:34px;padding:0 10px;font-size:9px}
+
+.resultHead{display:flex;align-items:end;justify-content:space-between;gap:12px;margin:18px 2px 9px}
+.sectionTitle{font-size:14px;font-weight:1000}
+.resultMeta{margin-top:4px;color:#7086a3;font-size:9px}
+
+.discoverGrid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:11px}
+.workCard{position:relative;min-width:0;display:flex;flex-direction:column;padding:14px;border:1px solid #293f5d;border-radius:14px;background:linear-gradient(180deg,#0e1c2f,#0a1627);text-decoration:none;transition:transform .15s ease,border-color .15s ease,background .15s ease}
+.workCard:hover{transform:translateY(-2px);border-color:#456b99;background:linear-gradient(180deg,#11243d,#0b1829)}
+.workCard:active{transform:scale(.99)}
+.cardTop{display:flex;align-items:center;justify-content:space-between;gap:8px}
+.visibility{display:inline-flex;align-items:center;gap:5px;color:#75d5a5;font-size:8px;font-weight:950;letter-spacing:.08em;text-transform:uppercase}
+.visibility:before{content:"";width:6px;height:6px;border-radius:50%;background:#6ddaa2;box-shadow:0 0 0 4px rgba(109,218,162,.08)}
+.languageBadge{padding:4px 6px;border:1px solid #2b4564;border-radius:999px;color:#728aa9;font-size:7px;font-weight:900}
+.workTitle{margin-top:10px;font-size:16px;font-weight:1000;line-height:1.25;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+.workDesc{min-height:34px;margin-top:6px;color:#8499b5;font-size:9px;line-height:1.55;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+.cardMeta{display:flex;gap:5px;flex-wrap:wrap;margin-top:10px}
+.metaChip{padding:5px 7px;border:1px solid #263e5b;border-radius:7px;background:#0a1626;color:#7f96b4;font-size:8px;font-weight:850}
+.lineageChip{border-color:#493f69;color:#a996d1;background:#151226}
+.cardStats{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:6px;margin-top:12px}
+.stat{min-width:0;padding:8px;border:1px solid #263e5b;border-radius:9px;background:#091524}
+.statValue{font-size:16px;font-weight:1000;color:#dbe7f7;line-height:1}
+.statValue.accent{color:#8fb2ff}
+.statValue.purple{color:#b6a1e6}
+.statLabel{margin-top:4px;color:#657c99;font-size:7px;font-weight:900;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.cardFoot{display:flex;align-items:center;justify-content:space-between;gap:8px;margin-top:auto;padding-top:12px;color:#697f9c;font-size:8px}
+.openLabel{color:#8eb2e7;font-weight:950}
+
+.status{padding:48px 12px;text-align:center;color:#7f94b0;font-size:11px;line-height:1.7}
+.empty{grid-column:1/-1;padding:50px 16px;border:1px dashed #304967;border-radius:14px;color:#758ba8;text-align:center;font-size:11px;line-height:1.7}
+.moreBtn{display:block;min-width:150px;min-height:42px;margin:16px auto 0;padding:0 18px;color:#a8bdd9}
+.footer{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-top:22px;padding:15px 2px;color:#657b97;font-size:9px}
+.footer a{color:#8faee2;font-weight:900;text-decoration:none}
+
+@media(max-width:900px){
+  .discoverGrid{grid-template-columns:repeat(2,minmax(0,1fr))}
+}
+@media(max-width:720px){
+  .wrap{width:calc(100% - 16px)}
+  .controls{grid-template-columns:1fr}
+  .sortTabs{justify-content:flex-start;overflow:auto;flex-wrap:nowrap;padding-bottom:2px}
+  .sortBtn{flex:none}
+}
+@media(max-width:520px){
+  .discoverGrid{grid-template-columns:1fr}
+  .hero{padding:22px 16px}
+  .workCard{padding:13px}
+  .footer{flex-direction:column;align-items:flex-start}
+}

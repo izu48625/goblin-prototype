@@ -108,3 +108,14 @@ a{color:inherit}
   .lineageMain{display:grid;gap:4px}
 }
 
+/* ===== R22 P1 Discover navigation ===== */
+.topRight{display:flex;align-items:center;gap:7px}
+.discoverLink{display:inline-flex;align-items:center;justify-content:center;min-height:30px;padding:0 9px;border:1px solid #345577;border-radius:999px;background:#0b192a;color:#9fb9dc;font-size:8px;font-weight:950;letter-spacing:.08em;text-decoration:none}
+.discoverLink:hover{border-color:#5278a8;color:#d7e6fb}
+.footerLinks{display:flex;align-items:center;gap:12px}
+@media(max-width:520px){
+  .topRight{gap:5px}
+  .discoverLink{padding:0 7px}
+  .footerLinks{width:100%;justify-content:space-between}
+}
+
