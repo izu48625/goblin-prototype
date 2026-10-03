@@ -43,3 +43,40 @@
 
 ### Build
 - Active cache key: `r22p1`.
+
+## P2 Community browser + categories
+
+### Community works tab
+- Discover now has two top-level browsing modes:
+  - Public works
+  - Community works
+- Community works only includes Public topics with both ratings and Community enabled.
+- Existing search and sorting remain available inside both modes.
+
+### Categories
+Publishing now supports one category per work:
+- Sports
+- Manga / Anime
+- Movies / TV
+- Food
+- Games
+- Music
+- Books
+- Travel / Places
+- Technology
+- Lifestyle / Hobbies
+- Other
+
+- Categories are stored in the existing publish snapshot JSON, so no new database column is required.
+- Existing published works without category metadata fall back to Other.
+- Discover shows the category on each card and supports category filtering.
+- Category filtering is available in both Public and Community browsing.
+
+### Privacy / listing behavior
+- Discover remains strictly Public-only.
+- Unlisted works are never included in either tab.
+- Community participant counts use the existing R20 aggregate RPC.
+- No new Supabase migration required.
+
+### Build
+- Active cache key: `r22p2`.
