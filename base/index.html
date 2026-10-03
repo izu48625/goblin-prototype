@@ -5,9 +5,9 @@
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
   <meta name="theme-color" content="#07101f">
   <title>Stats Maker V1.0-A2.1</title>
-  <link rel="stylesheet" href="css/style.css?v=r22p1">
+  <link rel="stylesheet" href="css/style.css?v=r22p2">
 </head>
-<body data-build="R22-P1">
+<body data-build="R22-P2">
 <div id="viewOnlyBanner" class="viewOnlyBanner hidden">
   <div class="viewOnlyText"><span data-i18n="viewOnly.mode">閲覧モード</span>
     <span class="viewOnlySub" data-i18n="viewOnly.subtitle">編集操作を隠して結果だけを見ています</span>
@@ -43,7 +43,7 @@
     </div>
 
     <div class="topActions editOnly">
-      <a id="discoverBtn" class="btn discoverBtn" href="../discover.html?v=r22p1" target="_top" data-i18n="action.discover">Discover</a>
+      <a id="discoverBtn" class="btn discoverBtn" href="../discover.html?v=r22p2" target="_top" data-i18n="action.discover">Discover</a>
       <button id="publishBtn" class="btn publishBtn" type="button" data-i18n="publish.button" onclick="document.getElementById('publishDialogBackdrop')?.classList.remove('hidden');document.getElementById('publishResult')?.classList.add('hidden');">公開する</button>
       <button id="newSheetBtn" class="btn primary" type="button" data-i18n="action.new">＋ 新規</button>
       <button id="duplicateBtn" class="btn" type="button" data-i18n="action.duplicate">複製</button>
@@ -404,6 +404,23 @@
           <span><b data-i18n="publish.unlisted">URL限定</b><small data-i18n="publish.unlistedHelp">URLを知っている人だけ閲覧できます。</small></span>
         </label>
       </div>
+      <div class="publishSettingBlock">
+        <div class="publishSettingTitle" data-i18n="publish.category">カテゴリ</div>
+        <select id="publishCategory" class="publishCategorySelect" aria-label="カテゴリ" data-i18n-aria="publish.category">
+          <option value="sports" data-i18n="category.sports">スポーツ</option>
+          <option value="manga_anime" data-i18n="category.mangaAnime">漫画・アニメ</option>
+          <option value="movie_tv" data-i18n="category.movieTv">映画・ドラマ</option>
+          <option value="food" data-i18n="category.food">フード</option>
+          <option value="game" data-i18n="category.game">ゲーム</option>
+          <option value="music" data-i18n="category.music">音楽</option>
+          <option value="books" data-i18n="category.books">本・文学</option>
+          <option value="travel" data-i18n="category.travel">旅行・場所</option>
+          <option value="tech" data-i18n="category.tech">テクノロジー</option>
+          <option value="lifestyle" data-i18n="category.lifestyle">ライフ・趣味</option>
+          <option value="other" data-i18n="category.other" selected>その他</option>
+        </select>
+        <div class="publishSettingHelp" data-i18n="publish.categoryHelp">Discover / Community作品一覧で使う分類です。</div>
+      </div>
       <div class="publishWarning" data-i18n="publish.imageWarning">現在、対象画像はまだクラウドへ送りません。名前・評価項目・点数・平均は公開ページへ反映されます。</div>
       <div class="publishFooter">
         <button id="publishUnpublishBtn" class="btn danger hidden" type="button" data-i18n="publish.unpublish">非公開に戻す</button>
@@ -423,11 +440,11 @@
 </div>
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-<script src="../cloud/supabase.js?v=r22p1"></script>
-<script src="../cloud/publish-model.js?v=r22p1"></script>
-<script src="js/i18n.js?v=r22p1"></script>
-<script src="js/app.js?v=r22p1"></script>
-<script src="js/publish-guard.js?v=r22p1"></script>
+<script src="../cloud/supabase.js?v=r22p2"></script>
+<script src="../cloud/publish-model.js?v=r22p2"></script>
+<script src="js/i18n.js?v=r22p2"></script>
+<script src="js/app.js?v=r22p2"></script>
+<script src="js/publish-guard.js?v=r22p2"></script>
 <script>
 window.addEventListener("statsmaker:languagechange",event=>{
   try{

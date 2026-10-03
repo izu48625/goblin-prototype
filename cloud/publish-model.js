@@ -59,6 +59,9 @@
       language:locale==='en'?'en':'ja',
       scale:sheet.scale===10?10:100,
       weighted:!!sheet.weighted,
+      metadata:{
+        category:String(sheet.publishCategory||'other')
+      },
       criteria,
       rows,
       lineage:sheet.sourceTopicId?{

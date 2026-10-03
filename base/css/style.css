@@ -1307,3 +1307,5 @@ html[lang="en"] .rankModeBtn{
   .remixContextActions{min-width:0;display:grid;grid-template-columns:1fr 1fr}
 }
 
+.publishCategorySelect{width:100%;min-height:41px;border:1px solid #314762;border-radius:9px;background:#0a1525;color:#eff5ff;padding:0 10px;font:inherit;font-size:11px}
+.publishSettingHelp{margin-top:6px;color:#71849f;font-size:9px;line-height:1.5}

@@ -6,23 +6,42 @@
   const status=document.getElementById('status');
   const searchInput=document.getElementById('searchInput');
   const resultMeta=document.getElementById('resultMeta');
+  const sectionTitle=document.getElementById('sectionTitle');
   const moreBtn=document.getElementById('moreBtn');
   const refreshBtn=document.getElementById('refreshBtn');
 
   const locale=localStorage.getItem('statsMaker.locale')==='en'?'en':'ja';
+  const categories=['all','sports','manga_anime','movie_tv','food','game','music','books','travel','tech','lifestyle','other'];
+  const categoryLabels={
+    ja:{
+      all:'すべて',sports:'スポーツ',manga_anime:'漫画・アニメ',movie_tv:'映画・ドラマ',
+      food:'フード',game:'ゲーム',music:'音楽',books:'本・文学',travel:'旅行・場所',
+      tech:'テクノロジー',lifestyle:'ライフ・趣味',other:'その他'
+    },
+    en:{
+      all:'All',sports:'Sports',manga_anime:'Manga / Anime',movie_tv:'Movies / TV',
+      food:'Food',game:'Games',music:'Music',books:'Books',travel:'Travel / Places',
+      tech:'Technology',lifestyle:'Lifestyle / Hobbies',other:'Other'
+    }
+  }[locale];
+
   const copy={
     ja:{
       title:'みんなのStatsを見つける',
       subtitle:'公開された評価シートを検索して、結果を見たりRemixしたりできます。',
       privacy:'Public作品のみ掲載。URL限定（Unlisted）はここには表示されません。',
       search:'タイトル・説明・対象・評価項目を検索',
+      allTab:'公開作品',communityTab:'Community作品',
       newest:'新着',popular:'人気',community:'Community',remix:'Remix',
-      works:'公開作品',loading:'公開作品を読み込んでいます…',refresh:'更新',
+      works:'公開作品',communityWorks:'Community作品',
+      loading:'公開作品を読み込んでいます…',refresh:'更新',
       participants:'参加者',remixes:'Remix',targets:'対象',metrics:'項目',
-      public:'PUBLIC',open:'見る →',more:'さらに表示',
+      public:'PUBLIC',communityBadge:'COMMUNITY',open:'見る →',communityOpen:'Communityを見る →',more:'さらに表示',
       empty:'条件に合う公開作品がありません。',
+      communityEmpty:'条件に合うCommunity作品がありません。',
       error:'公開作品を読み込めませんでした。',
       result:n=>`${n}件のPublic作品`,
+      communityResult:n=>`${n}件のCommunity作品`,
       updated:'更新',
       create:'＋ 作る',footer:'自分のStatsを作る',
       lineageRemix:'REMIX',lineageVersion:'VERSION'
@@ -32,13 +51,17 @@
       subtitle:'Search public rating sheets, explore results, and Remix them.',
       privacy:'Only Public works appear here. Unlisted works are never listed.',
       search:'Search title, description, targets, or metrics',
+      allTab:'Public works',communityTab:'Community works',
       newest:'Newest',popular:'Popular',community:'Community',remix:'Remix',
-      works:'Public works',loading:'Loading public works…',refresh:'Refresh',
+      works:'Public works',communityWorks:'Community works',
+      loading:'Loading public works…',refresh:'Refresh',
       participants:'Participants',remixes:'Remix',targets:'Targets',metrics:'Metrics',
-      public:'PUBLIC',open:'Open →',more:'Show more',
+      public:'PUBLIC',communityBadge:'COMMUNITY',open:'Open →',communityOpen:'Open Community →',more:'Show more',
       empty:'No public works match these filters.',
+      communityEmpty:'No Community works match these filters.',
       error:'Could not load public works.',
       result:n=>`${n} Public work${n===1?'':'s'}`,
+      communityResult:n=>`${n} Community work${n===1?'':'s'}`,
       updated:'Updated',
       create:'＋ Create',footer:'Create your own Stats',
       lineageRemix:'REMIX',lineageVersion:'VERSION'
@@ -47,6 +70,8 @@
 
   const state={
     works:[],
+    view:'all',
+    category:'all',
     sort:'newest',
     query:'',
     visible:12,
@@ -59,16 +84,24 @@
 
   function setCopy(){
     document.documentElement.lang=locale;
-    document.title=(locale==='ja'?'Discover - Stats Maker':'Discover - Stats Maker');
+    document.title='Discover - Stats Maker';
     document.querySelector('.hero h1').textContent=copy.title;
     document.querySelector('.hero p').textContent=copy.subtitle;
     document.querySelector('.privacyNote').textContent=copy.privacy;
     searchInput.placeholder=copy.search;
+
+    document.querySelector('[data-view="all"]').textContent=copy.allTab;
+    document.querySelector('[data-view="community"]').textContent=copy.communityTab;
+
+    document.querySelectorAll('.categoryBtn').forEach(button=>{
+      const key=button.dataset.category;
+      button.textContent=categoryLabels[key]||categoryLabels.other;
+    });
+
     document.querySelector('[data-sort="newest"]').textContent=copy.newest;
     document.querySelector('[data-sort="popular"]').textContent=copy.popular;
     document.querySelector('[data-sort="community"]').textContent=copy.community;
     document.querySelector('[data-sort="remix"]').textContent=copy.remix;
-    document.querySelector('.sectionTitle').textContent=copy.works;
     refreshBtn.textContent=copy.refresh;
     moreBtn.textContent=copy.more;
     document.querySelector('.createLink').textContent=copy.create;
@@ -95,12 +128,22 @@
     return String(snapshotOf(topic)?.lineage?.relation||'').toLowerCase();
   }
 
+  function categoryOf(topic){
+    const raw=String(snapshotOf(topic)?.metadata?.category||'other');
+    return categories.includes(raw)&&raw!=='all'?raw:'other';
+  }
+
+  function isCommunityWork(topic){
+    return topic?.show_community===true&&topic?.allow_ratings===true;
+  }
+
   function searchableText(topic){
     const snap=snapshotOf(topic);
     const rows=Array.isArray(snap.rows)?snap.rows:[];
     const criteria=Array.isArray(snap.criteria)?snap.criteria:[];
     return [
       topic.title,topic.description,
+      categoryLabels[categoryOf(topic)],
       ...rows.map(row=>row?.name),
       ...criteria.map(item=>item?.name)
     ].filter(Boolean).join(' ').toLowerCase();
@@ -134,19 +177,32 @@
 
   function filteredWorks(){
     const q=state.query.trim().toLowerCase();
-    const filtered=q
-      ?state.works.filter(topic=>searchableText(topic).includes(q))
-      :state.works;
+    let filtered=state.works;
+
+    if(state.view==='community'){
+      filtered=filtered.filter(isCommunityWork);
+    }
+
+    if(state.category!=='all'){
+      filtered=filtered.filter(topic=>categoryOf(topic)===state.category);
+    }
+
+    if(q){
+      filtered=filtered.filter(topic=>searchableText(topic).includes(q));
+    }
+
     return sortWorks(filtered);
   }
 
   function render(){
     const list=filteredWorks();
-    resultMeta.textContent=copy.result(list.length);
+    const communityView=state.view==='community';
+    sectionTitle.textContent=communityView?copy.communityWorks:copy.works;
+    resultMeta.textContent=communityView?copy.communityResult(list.length):copy.result(list.length);
 
     const visible=list.slice(0,state.visible);
     if(!visible.length){
-      grid.innerHTML=`<div class="empty">${esc(copy.empty)}</div>`;
+      grid.innerHTML=`<div class="empty">${esc(communityView?copy.communityEmpty:copy.empty)}</div>`;
       grid.classList.remove('hidden');
       status.classList.add('hidden');
       moreBtn.classList.add('hidden');
@@ -156,16 +212,18 @@
     grid.innerHTML=visible.map(topic=>{
       const stats=topicStats(topic);
       const relation=relationOf(topic);
+      const category=categoryOf(topic);
       const updated=fmtDate(topic.snapshot_updated_at||topic.published_at);
       const description=topic.description||'';
       const lang=topic.language_code==='en'?'EN':'JA';
+      const community=isCommunityWork(topic);
       const lineage=relation==='remix'
         ?`<span class="metaChip lineageChip">${copy.lineageRemix}</span>`
         :relation==='version'
           ?`<span class="metaChip lineageChip">${copy.lineageVersion}</span>`
           :'';
 
-      return `<a class="workCard" href="public.html?id=${encodeURIComponent(topic.id)}&v=r22p1">
+      return `<a class="workCard" href="public.html?id=${encodeURIComponent(topic.id)}&v=r22p2">
         <div class="cardTop">
           <div class="visibility">${copy.public}</div>
           <div class="languageBadge">${lang}</div>
@@ -173,6 +231,8 @@
         <div class="workTitle">${esc(topic.title||'Untitled')}</div>
         <div class="workDesc">${esc(description)}</div>
         <div class="cardMeta">
+          <span class="metaChip categoryChip">${esc(categoryLabels[category]||categoryLabels.other)}</span>
+          ${community?`<span class="metaChip communityOnlyBadge">${copy.communityBadge}</span>`:''}
           <span class="metaChip">${stats.targets||'—'} ${copy.targets}</span>
           <span class="metaChip">${stats.metrics||'—'} ${copy.metrics}</span>
           <span class="metaChip">${Number(topic.score_scale||100)} pt</span>
@@ -194,7 +254,7 @@
         </div>
         <div class="cardFoot">
           <span>${updated?`${copy.updated} ${esc(updated)}`:''}</span>
-          <span class="openLabel">${copy.open}</span>
+          <span class="openLabel">${communityView&&community?copy.communityOpen:copy.open}</span>
         </div>
       </a>`;
     }).join('');
@@ -235,7 +295,7 @@
 
       const [{data:topics,error:topicError},{data:lineageRows,error:lineageError}]=await Promise.all([
         sb.from('topics')
-          .select('id,title,description,language_code,score_scale,weighted,published_at,snapshot_updated_at,snapshot,source_topic_id,show_community')
+          .select('id,title,description,language_code,score_scale,weighted,published_at,snapshot_updated_at,snapshot,source_topic_id,show_community,allow_ratings')
           .eq('visibility','public')
           .order('published_at',{ascending:false})
           .limit(60),
@@ -249,7 +309,7 @@
       if(topicError)throw topicError;
       if(lineageError)console.warn('[Stats Maker] Discover lineage query failed',lineageError);
 
-      // Discover is intentionally Public-only. Never merge Unlisted rows into this collection.
+      // Discover remains strictly Public-only. Unlisted rows never enter state.works.
       const publicTopics=(topics||[]).filter(topic=>topic&&topic.id);
       const remixCounts=new Map();
       (lineageRows||[]).forEach(child=>{
@@ -282,6 +342,25 @@
     state.query=searchInput.value;
     state.visible=12;
     render();
+  });
+
+  document.querySelectorAll('.browseTab').forEach(button=>{
+    button.addEventListener('click',()=>{
+      state.view=button.dataset.view==='community'?'community':'all';
+      state.visible=12;
+      document.querySelectorAll('.browseTab').forEach(btn=>btn.classList.toggle('active',btn===button));
+      render();
+    });
+  });
+
+  document.querySelectorAll('.categoryBtn').forEach(button=>{
+    button.addEventListener('click',()=>{
+      const requested=button.dataset.category||'all';
+      state.category=categories.includes(requested)?requested:'all';
+      state.visible=12;
+      document.querySelectorAll('.categoryBtn').forEach(btn=>btn.classList.toggle('active',btn===button));
+      render();
+    });
   });
 
   document.querySelectorAll('.sortBtn').forEach(button=>{

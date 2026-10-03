@@ -6,16 +6,16 @@
   <meta name="theme-color" content="#07101f">
   <meta name="description" content="Stats Makerで公開された評価シートを探す">
   <title>Discover - Stats Maker</title>
-  <link rel="stylesheet" href="cloud/discover.css?v=r22p1">
+  <link rel="stylesheet" href="cloud/discover.css?v=r22p2">
 </head>
-<body data-build="R22-P1">
+<body data-build="R22-P2">
   <div class="wrap">
     <header class="top">
-      <a class="brand" href="index.html?v=r22p1" aria-label="Stats Maker">
+      <a class="brand" href="index.html?v=r22p2" aria-label="Stats Maker">
         <div class="mark">S</div>
         <span>STATS MAKER</span>
       </a>
-      <a class="createLink" href="index.html?v=r22p1">＋ 作る</a>
+      <a class="createLink" href="index.html?v=r22p2">＋ 作る</a>
     </header>
 
     <section class="hero">
@@ -24,6 +24,26 @@
       <p>公開された評価シートを検索して、結果を見たりRemixしたりできます。</p>
       <div class="privacyNote">Public作品のみ掲載。URL限定（Unlisted）はここには表示されません。</div>
     </section>
+
+    <nav class="browseTabs" aria-label="Browse mode">
+      <button class="browseTab active" data-view="all" type="button">公開作品</button>
+      <button class="browseTab" data-view="community" type="button">Community作品</button>
+    </nav>
+
+    <div class="categoryRail" aria-label="カテゴリ">
+      <button class="categoryBtn active" data-category="all" type="button">すべて</button>
+      <button class="categoryBtn" data-category="sports" type="button">スポーツ</button>
+      <button class="categoryBtn" data-category="manga_anime" type="button">漫画・アニメ</button>
+      <button class="categoryBtn" data-category="movie_tv" type="button">映画・ドラマ</button>
+      <button class="categoryBtn" data-category="food" type="button">フード</button>
+      <button class="categoryBtn" data-category="game" type="button">ゲーム</button>
+      <button class="categoryBtn" data-category="music" type="button">音楽</button>
+      <button class="categoryBtn" data-category="books" type="button">本・文学</button>
+      <button class="categoryBtn" data-category="travel" type="button">旅行・場所</button>
+      <button class="categoryBtn" data-category="tech" type="button">テクノロジー</button>
+      <button class="categoryBtn" data-category="lifestyle" type="button">ライフ・趣味</button>
+      <button class="categoryBtn" data-category="other" type="button">その他</button>
+    </div>
 
     <section class="controls">
       <label class="searchBox">
@@ -40,7 +60,7 @@
 
     <div class="resultHead">
       <div>
-        <div class="sectionTitle">公開作品</div>
+        <div id="sectionTitle" class="sectionTitle">公開作品</div>
         <div id="resultMeta" class="resultMeta">読み込み中…</div>
       </div>
       <button id="refreshBtn" class="refreshBtn" type="button">更新</button>
@@ -52,12 +72,12 @@
 
     <footer class="footer">
       <span>Stats Maker Discover</span>
-      <a href="index.html?v=r22p1">自分のStatsを作る</a>
+      <a href="index.html?v=r22p2">自分のStatsを作る</a>
     </footer>
   </div>
 
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-  <script src="cloud/supabase.js?v=r22p1"></script>
-  <script src="cloud/discover.js?v=r22p1"></script>
+  <script src="cloud/supabase.js?v=r22p2"></script>
+  <script src="cloud/discover.js?v=r22p2"></script>
 </body>
 </html>
