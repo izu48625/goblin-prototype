@@ -1808,14 +1808,14 @@
       const user=await ensurePublishUser();if(!user)throw new Error(t('publish.guestStartFailed'));
       const s=activeSheet(),model=buildPublishModel(s),visibility=document.querySelector('input[name="publishVisibility"]:checked')?.value||'public';setPublishStatus(t('publish.busy'));
       const now=new Date().toISOString();
-      const basePayload={owner_id:user.id,title:model.title,description:model.description,language_code:model.language,score_scale:model.scale,weighted:model.weighted,visibility,allow_ratings:true,show_community:true,source_topic_id:s.sourceTopicId||null,snapshot_version:model.version,snapshot:model,snapshot_updated_at:now,published_at:now};
+      const basePayload={owner_id:user.id,title:model.title,description:model.description,language_code:model.language,score_scale:model.scale,weighted:model.weighted,visibility,allow_ratings:true,show_community:true,snapshot_version:model.version,snapshot:model,snapshot_updated_at:now,published_at:now};
       let topicId=s.cloudTopicId||'',updating=false,versioned=false;
 
       if(topicId){
         updating=true;
         const [{data:hasSubs,error:subErr},{data:current,error:currentErr},{data:items,error:itemErr},{data:criteria,error:critErr}]=await Promise.all([
           sb.rpc('topic_has_submissions',{p_topic_id:topicId}),
-          sb.from('topics').select('id,score_scale,weighted').eq('id',topicId).eq('owner_id',user.id).single(),
+          sb.from('topics').select('id,title,score_scale,weighted').eq('id',topicId).eq('owner_id',user.id).single(),
           sb.from('topic_items').select('id,name,position').eq('topic_id',topicId).order('position'),
           sb.from('criteria').select('id,name,weight,position').eq('topic_id',topicId).order('position')
         ]);
@@ -1824,7 +1824,8 @@
 
         if(hasSubs&&!same){
           const oldTopicId=topicId;
-          const {data:newTopic,error:newErr}=await sb.from('topics').insert({...basePayload,source_topic_id:oldTopicId}).select('id').single();
+          const versionSnapshot={...model,lineage:{relation:'version',sourceTopicId:oldTopicId,sourceTopicTitle:String(current?.title||'')}};
+          const {data:newTopic,error:newErr}=await sb.from('topics').insert({...basePayload,source_topic_id:oldTopicId,snapshot:versionSnapshot}).select('id').single();
           if(newErr)throw newErr;topicId=newTopic.id;await insertPublishedStructure(sb,topicId,model);versioned=true;updating=false;
         }else{
           const {data:updateData,error:updateError}=await sb.from('topics').update(basePayload).eq('id',topicId).eq('owner_id',user.id).select('id').single();
@@ -1832,7 +1833,8 @@
           if(!hasSubs){await clearPublishedStructure(sb,topicId);await insertPublishedStructure(sb,topicId,model)}
         }
       }else{
-        const {data:insertData,error:insertError}=await sb.from('topics').insert(basePayload).select('id').single();if(insertError)throw insertError;topicId=insertData.id;await insertPublishedStructure(sb,topicId,model);
+        const insertPayload=s.sourceTopicId?{...basePayload,source_topic_id:s.sourceTopicId}:basePayload;
+        const {data:insertData,error:insertError}=await sb.from('topics').insert(insertPayload).select('id').single();if(insertError)throw insertError;topicId=insertData.id;await insertPublishedStructure(sb,topicId,model);
       }
 
       s.cloudTopicId=topicId;s.cloudVisibility=visibility;s.cloudPublishedAt=now;scheduleSave('');publishState.url=publicPageUrl(topicId);$('publishUrlInput').value=publishState.url;$('publishResult').classList.remove('hidden');$('publishUnpublishBtn').classList.remove('hidden');$('publishExecuteBtn').textContent=t('publish.updateExecute');setPublishStatus(versioned?t('publish.versionedSuccess'):(updating?t('publish.updateSuccess'):t('publish.success')),'ok');renderHeader();refreshEditorCommunitySummary(true);
