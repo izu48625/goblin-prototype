@@ -213,3 +213,39 @@ Square, landscape, and portrait layouts are independently arranged to avoid over
 - Existing GitHub Pages public pages remain the canonical destination.
 - Active cache key: `r23p3b`.
 - No database migration required.
+
+## P3 Final — True per-work OGP
+
+### Production share route
+- Production Vercel origin: `https://stats-maker-ogp.vercel.app`.
+- URL Share uses `/p/:id`.
+- Social crawlers receive work-specific title, description, URL, image, and Twitter large-card metadata.
+- Human visitors are sent to the existing GitHub Pages public work.
+- Public and Unlisted works are supported; Private works are not rendered.
+
+### Dynamic OG image
+- `/api/og?id=...` returns a native 1200×630 PNG.
+- Final renderer uses Node 22 + Sharp SVG→PNG rather than `@vercel/og`.
+- Includes Stats Maker branding, category, work title, description, target count, metric count, score scale, and creator Overall TOP 3.
+- Community aggregate values are not queried.
+
+### Production validation
+- Added a live OGP smoke test against a real Public Supabase work.
+- The test waits for the exact Vercel deployment commit before validating production.
+- Verified:
+  - share route
+  - work-specific Open Graph metadata
+  - Twitter large-card metadata
+  - GitHub Pages public destination
+  - PNG response
+  - exact 1200×630 dimensions
+- Production smoke test PASS on the Sharp renderer.
+
+### Security / cleanup
+- Diagnostic stack-trace output was removed from the public OG endpoint after debugging.
+- Only the Supabase publishable key is used.
+- No database migration required.
+
+### Hosting
+- GitHub Pages remains the main Stats Maker application.
+- Vercel remains a thin OGP/share layer only.
