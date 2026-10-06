@@ -149,6 +149,21 @@
     }
   }
 
+  function authRedirectError(){
+    const url=new URL(location.href);
+    const hash=new URLSearchParams(url.hash.replace(/^#/,''));
+    const message=url.searchParams.get('error_description')
+      ||hash.get('error_description')
+      ||url.searchParams.get('error')
+      ||hash.get('error')
+      ||'';
+    if(!message)return '';
+    ['error','error_code','error_description'].forEach(key=>url.searchParams.delete(key));
+    url.hash='';
+    history.replaceState(null,'',url.href);
+    return message;
+  }
+
   function pendingAuth(){
     try{
       const raw=localStorage.getItem(PENDING_AUTH_KEY);
@@ -377,9 +392,16 @@
 
   async function refresh(){
     try{
+      const redirectError=authRedirectError();
+      if(redirectError){
+        clearPendingAuth();
+        setStatus(c().authError+redirectError,'error');
+      }else if(!pendingAuth()){
+        setStatus('');
+      }
       await loadAuthSettings();
       await loadUser();
-      await handlePendingAuth();
+      if(!redirectError)await handlePendingAuth();
       await loadWorks();
     }catch(error){
       console.error('[Stats Maker] My Page refresh failed',error);
