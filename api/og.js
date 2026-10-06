@@ -2,6 +2,10 @@ import React from 'react';
 import {ImageResponse} from '@vercel/og';
 import {fetchTopic,safeTopicId,topicCardData} from '../server/og-data.js';
 
+export const config={
+  runtime:'edge'
+};
+
 const h=React.createElement;
 
 function text(value){return String(value??'')}
@@ -44,8 +48,7 @@ function rankRow(item,index,scale){
 }
 
 export default async function handler(req){
-  const base=`https://${req.headers?.host||'stats-maker.invalid'}`;
-  const url=new URL(req.url||'/',base);
+  const url=new URL(req.url||'https://stats-maker-ogp.vercel.app/api/og');
   const id=safeTopicId(url.searchParams.get('id'));
 
   let topic=null;
