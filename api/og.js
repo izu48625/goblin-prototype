@@ -101,14 +101,11 @@ function renderSvg(card){
 }
 
 module.exports=async function handler(request,response){
-  let debug=false;
   try{
     const {fetchTopic,safeTopicId,topicCardData}=await import('../server/og-data.mjs');
     const proto=String(request.headers?.['x-forwarded-proto']||'https').split(',')[0].trim();
     const host=String(request.headers?.host||request.headers?.['x-forwarded-host']||'stats-maker-ogp.vercel.app').split(',')[0].trim();
     const url=new URL(request.url||'/api/og',`${proto}://${host}`);
-    debug=url.searchParams.get('debug')==='1';
-
     const id=safeTopicId(url.searchParams.get('id'));
     const topic=id?await fetchTopic(id):null;
     const card=topic?topicCardData(topic):{
@@ -134,9 +131,8 @@ module.exports=async function handler(request,response){
     response.end(png);
   }catch(error){
     console.error('[Stats Maker OGP] sharp renderer failed',error);
-    const message=String(error?.stack||error?.message||error||'Unknown OG error').slice(0,4000);
     response.statusCode=500;
     response.setHeader('Content-Type','text/plain; charset=utf-8');
-    response.end(debug?message:'Failed to generate Stats Maker OG image');
+    response.end('Failed to generate Stats Maker OG image');
   }
 };
