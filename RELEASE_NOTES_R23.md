@@ -133,3 +133,32 @@ Square, landscape, and portrait layouts are independently arranged to avoid over
 ### Build
 - Active cache key: `r23ux3`.
 - No database migration required.
+
+## UX4 Editable Fit View
+
+### Direct editing in Fit View
+- Fit View is no longer read-only.
+- Target names can be edited directly.
+- Metric names can be edited directly.
+- Score cells can be edited directly with numeric input.
+- 10-point sheets retain decimal input support.
+
+### Live behavior
+- Score changes update the current row average immediately.
+- Heat coloring updates while typing.
+- Committed edits synchronize to:
+  - normal table
+  - overview
+  - ranking / compare / summary
+  - Community eligibility state
+- Score values are clamped to the active scale on commit.
+- Enter advances to the next score cell when available.
+
+### iPhone / Safari
+- Fit inputs use a 16px computed font on mobile before parent scaling to avoid Safari focus zoom.
+- Focused cells receive a clear highlight.
+- Native number spinners are hidden for a cleaner compact grid.
+
+### Build
+- Active cache key: `r23ux4`.
+- No database migration required.
