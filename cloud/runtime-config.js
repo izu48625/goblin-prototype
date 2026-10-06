@@ -1,7 +1,7 @@
 (() => {
   'use strict';
   window.SM_RUNTIME=Object.assign({},window.SM_RUNTIME,{
-    // Set after the Vercel OGP project is deployed, e.g. https://stats-maker-og.vercel.app
+    // Production Vercel origin for per-work social preview URLs.
     ogShareOrigin:'https://stats-maker-ogp.vercel.app'
   });
 })();
