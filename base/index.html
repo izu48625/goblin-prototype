@@ -5,9 +5,9 @@
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
   <meta name="theme-color" content="#07101f">
   <title>Stats Maker V1.0-A2.1</title>
-  <link rel="stylesheet" href="css/style.css?v=r23p2">
+  <link rel="stylesheet" href="css/style.css?v=r23ux1">
 </head>
-<body data-build="R23-P2">
+<body data-build="R23-UX1">
 <div id="viewOnlyBanner" class="viewOnlyBanner hidden">
   <div class="viewOnlyText"><span data-i18n="viewOnly.mode">閲覧モード</span>
     <span class="viewOnlySub" data-i18n="viewOnly.subtitle">編集操作を隠して結果だけを見ています</span>
@@ -43,11 +43,16 @@
     </div>
 
     <div class="topActions editOnly">
-      <a id="discoverBtn" class="btn discoverBtn" href="../discover.html?v=r23p2" target="_top" data-i18n="action.discover">Discover</a>
+      <a id="discoverBtn" class="btn discoverBtn" href="../discover.html?v=r23ux1" target="_top" data-i18n="action.discover">Discover</a>
       <button id="publishBtn" class="btn publishBtn" type="button" data-i18n="publish.button" onclick="document.getElementById('publishDialogBackdrop')?.classList.remove('hidden');document.getElementById('publishResult')?.classList.add('hidden');">公開する</button>
       <button id="newSheetBtn" class="btn primary" type="button" data-i18n="action.new">＋ 新規</button>
-      <button id="duplicateBtn" class="btn" type="button" data-i18n="action.duplicate">複製</button>
-      <button id="deleteSheetBtn" class="btn danger" type="button" data-i18n="action.delete">削除</button>
+      <button id="mobileHeaderMoreBtn" class="btn mobileHeaderMoreBtn mobileOnly" type="button" aria-expanded="false" aria-controls="mobileHeaderMoreMenu">•••</button>
+      <div id="mobileHeaderMoreMenu" class="mobileHeaderMoreMenu mobileOnly hidden">
+        <button id="mobileDuplicateBtn" class="mobileHeaderMenuBtn" type="button" data-i18n="action.duplicate">複製</button>
+        <button id="mobileDeleteBtn" class="mobileHeaderMenuBtn danger" type="button" data-i18n="action.delete">削除</button>
+      </div>
+      <button id="duplicateBtn" class="btn desktopHeaderAction" type="button" data-i18n="action.duplicate">複製</button>
+      <button id="deleteSheetBtn" class="btn danger desktopHeaderAction" type="button" data-i18n="action.delete">削除</button>
     </div>
   </header>
 
@@ -79,6 +84,10 @@
       <div class="eyebrow">COMMUNITY</div>
       <div class="communityJoinTitle" data-i18n="community.joinTitle">Communityに参加</div>
       <div id="communityJoinNotice" class="communityJoinNotice" data-i18n="community.joinNotice">元の公開作品と対象・評価項目・点数尺度が同じ場合のみ、Communityへ評価を投稿できます。対象や評価項目を追加・削除した場合は参加できません。同じ参加者の再投稿は新しい1票を増やさず、既存評価の更新になります。</div>
+      <details class="communityJoinMobileDetails mobileOnly">
+        <summary data-i18n="community.conditions">参加条件</summary>
+        <div data-i18n="community.joinNotice">元の公開作品と対象・評価項目・点数尺度が同じ場合のみ、Communityへ評価を投稿できます。対象や評価項目を追加・削除した場合は参加できません。同じ参加者の再投稿は新しい1票を増やさず、既存評価の更新になります。</div>
+      </details>
       <div id="communityJoinReason" class="communityJoinReason hidden"></div>
     </div>
     <div class="communityJoinActions">
@@ -440,11 +449,11 @@
 </div>
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-<script src="../cloud/supabase.js?v=r23p2"></script>
-<script src="../cloud/publish-model.js?v=r23p2"></script>
-<script src="js/i18n.js?v=r23p2"></script>
-<script src="js/app.js?v=r23p2"></script>
-<script src="js/publish-guard.js?v=r23p2"></script>
+<script src="../cloud/supabase.js?v=r23ux1"></script>
+<script src="../cloud/publish-model.js?v=r23ux1"></script>
+<script src="js/i18n.js?v=r23ux1"></script>
+<script src="js/app.js?v=r23ux1"></script>
+<script src="js/publish-guard.js?v=r23ux1"></script>
 <script>
 window.addEventListener("statsmaker:languagechange",event=>{
   try{

@@ -1309,3 +1309,188 @@ html[lang="en"] .rankModeBtn{
 
 .publishCategorySelect{width:100%;min-height:41px;border:1px solid #314762;border-radius:9px;background:#0a1525;color:#eff5ff;padding:0 10px;font:inherit;font-size:11px}
 .publishSettingHelp{margin-top:6px;color:#71849f;font-size:9px;line-height:1.5}
+
+/* =========================================================
+   R23 P3 MOBILE EDITOR CLEANUP
+   ========================================================= */
+.mobileHeaderMoreMenu{position:absolute}
+.mobileHeaderMenuBtn{
+  width:100%;
+  min-height:38px;
+  border:0;
+  border-radius:8px;
+  background:transparent;
+  color:#dce7f6;
+  padding:0 10px;
+  text-align:left;
+  font:850 10px/1 inherit;
+}
+.mobileHeaderMenuBtn:hover{background:#172842}
+.mobileHeaderMenuBtn.danger{color:#ff9aa7}
+.communityJoinMobileDetails{display:none}
+
+@media(max-width:760px){
+  .app{padding:6px 5px max(12px,env(safe-area-inset-bottom))}
+  .topbar{
+    gap:6px;
+    padding:8px;
+    margin-bottom:6px;
+    border-radius:13px;
+  }
+  .titleArea{gap:6px}
+  .fieldLabel{font-size:8px;margin-bottom:3px}
+  .titleInput{height:36px;padding:0 9px;font-size:15px}
+  .descInput{height:29px;padding:0 9px;margin-top:4px;font-size:10px}
+  .sheetSelect{height:36px;padding:0 8px;font-size:11px}
+
+  .topActions{
+    position:relative;
+    display:grid;
+    grid-template-columns:repeat(4,minmax(0,1fr));
+    gap:5px;
+    width:100%;
+  }
+  .topActions .btn{
+    width:100%;
+    min-width:0;
+    min-height:38px;
+    padding:0 5px;
+    font-size:10px;
+    border-radius:9px;
+  }
+  .desktopHeaderAction{display:none!important}
+  .mobileHeaderMoreBtn{
+    display:flex!important;
+    align-items:center;
+    justify-content:center;
+    letter-spacing:.12em;
+    font-size:15px!important;
+    line-height:1;
+  }
+  .mobileHeaderMoreMenu{
+    display:grid!important;
+    gap:3px;
+    right:0;
+    top:43px;
+    z-index:95;
+    width:150px;
+    padding:6px;
+    border:1px solid #36516f;
+    border-radius:11px;
+    background:#0d1a2d;
+    box-shadow:0 18px 45px rgba(0,0,0,.42);
+  }
+  .mobileHeaderMoreMenu.hidden{display:none!important}
+
+  .communityJoinPanel{
+    width:calc(100% - 10px);
+    margin:0 auto 6px;
+    padding:9px 10px;
+    gap:7px;
+    border-radius:13px;
+  }
+  .communityJoinPanel .eyebrow{font-size:7px}
+  .communityJoinTitle{font-size:12px;margin-top:1px}
+  .communityJoinNotice{display:none}
+  .communityJoinMobileDetails{
+    display:block!important;
+    margin-top:5px;
+    color:#8fa4c0;
+    font-size:9px;
+  }
+  .communityJoinMobileDetails summary{
+    width:max-content;
+    cursor:pointer;
+    color:#91b4e5;
+    font-size:9px;
+    font-weight:900;
+    list-style:none;
+  }
+  .communityJoinMobileDetails summary::-webkit-details-marker{display:none}
+  .communityJoinMobileDetails summary:after{content:" ＋";color:#6f8bad}
+  .communityJoinMobileDetails[open] summary:after{content:" −"}
+  .communityJoinMobileDetails>div{
+    margin-top:6px;
+    padding:7px 8px;
+    border:1px solid #2c4563;
+    border-radius:8px;
+    background:#0b1829;
+    line-height:1.5;
+  }
+  .communityJoinActions{gap:4px}
+  .communityJoinActions .btn{min-height:40px;font-size:11px}
+  .communityJoinStatus{min-height:0;font-size:8px}
+  .communityJoinStatus:empty{display:none}
+
+  .workspace{gap:6px}
+  .sheetPanel{border-radius:13px}
+  .sheetToolbar{
+    padding:6px;
+    gap:5px;
+  }
+  .compactTools{gap:5px}
+  .modeStrip{gap:3px}
+  .viewModeBtn{
+    min-height:34px;
+    padding:0 3px;
+    font-size:9px;
+    border-radius:8px;
+  }
+  .coreActions{
+    width:100%;
+    flex-wrap:nowrap;
+    overflow-x:auto;
+    gap:4px;
+    padding:0 0 2px;
+    overscroll-behavior-x:contain;
+    -webkit-overflow-scrolling:touch;
+    scrollbar-width:none;
+  }
+  .coreActions::-webkit-scrollbar{display:none}
+  .coreActions .btn.small{
+    flex:0 0 auto;
+    min-height:33px;
+    padding:0 10px;
+    font-size:9px;
+    border-radius:8px;
+  }
+  #addRowBtn,#addColBtn{
+    border-color:#3d6089;
+    background:#11243b;
+    color:#c6dcf7;
+  }
+
+  .filterBar{
+    display:grid;
+    grid-template-columns:minmax(0,1fr) 94px auto;
+    gap:5px;
+    padding:6px;
+    flex-wrap:nowrap;
+  }
+  .searchInput{
+    width:100%;
+    min-width:0;
+    height:31px;
+    font-size:9px;
+  }
+  .filterSelect{
+    width:94px;
+    min-width:0;
+    height:31px;
+    font-size:9px;
+    padding:0 7px;
+  }
+  .filterCount{
+    white-space:nowrap;
+    font-size:9px;
+  }
+
+  .settingsDrawer{padding:6px;gap:5px}
+  .columnManage{padding:5px}
+}
+
+@media(max-width:390px){
+  .topActions .btn{font-size:9px}
+  .coreActions .btn.small{padding:0 9px}
+}
+
