@@ -225,9 +225,9 @@
 
   async function loadUser(){
     if(!sb)throw new Error('Supabase client is not ready');
-    const {data,error}=await sb.auth.getUser();
+    const {data,error}=await sb.auth.getSession();
     if(error)throw error;
-    state.user=data?.user||null;
+    state.user=data?.session?.user||null;
     renderAccount();
   }
 
