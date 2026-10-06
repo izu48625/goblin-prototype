@@ -401,6 +401,7 @@
       const {data:sessionData,error:sessionError}=await sb.auth.getSession();
       if(sessionError)throw sessionError;
       const user=sessionData?.session?.user||null;
+      savePendingAuth(provider,user);
       if(user){
         const {data,error}=await sb.auth.linkIdentity({
           provider,
@@ -408,7 +409,6 @@
         });
         if(error)throw error;
         if(data?.url){
-          savePendingAuth(provider,user);
           location.assign(data.url);
           return;
         }
@@ -419,7 +419,6 @@
         });
         if(error)throw error;
         if(data?.url){
-          savePendingAuth(provider,null);
           location.assign(data.url);
           return;
         }
