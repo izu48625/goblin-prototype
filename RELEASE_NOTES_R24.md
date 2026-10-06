@@ -41,3 +41,39 @@ The GitHub Pages My Page URL must be allowed as an Auth redirect URL.
 
 ### Build
 - Active application cache key: `r24p1`.
+
+
+## P2 — OAuth Readiness & Ownership QA
+
+### Provider readiness
+- My Page now reads Supabase's public Auth settings endpoint at runtime.
+- Google and Apple are shown as enabled / not configured instead of failing only after a tap.
+- Provider buttons are disabled when the corresponding provider is known to be unavailable.
+
+### Guest ownership continuity
+- OAuth linking stores the pre-auth anonymous user ID before leaving Stats Maker.
+- After the OAuth return, My Page verifies:
+  - the same Supabase user ID is still active;
+  - the selected provider is actually linked;
+  - the account is no longer anonymous.
+- A successful check confirms that existing `owner_id` data remains attached to the same user.
+- If the user ID changes, My Page displays an explicit ownership safety warning and does not assume any guest work was transferred.
+
+### Anonymous sign-out safety
+- Sign Out is hidden for anonymous users.
+- This prevents an unrecoverable guest session from being discarded before it has a permanent identity.
+
+### Identity source
+- Linked identities are refreshed with `auth.getUserIdentities()` instead of relying only on the session's cached user object.
+
+### OAuth return handling
+- Provider linking uses the production My Page URL as `redirectTo`.
+- Auth state refresh is deferred outside the auth callback before making more Supabase calls.
+- Pending OAuth state expires automatically.
+
+### Setup
+- Added `R24_AUTH_SETUP.md` with the exact Stats Maker, My Page, Supabase callback, Google origin, Google redirect, and Apple web OAuth values.
+- Provider secrets remain outside GitHub and browser code.
+
+### Build
+- Active application cache key: `r24p2`.
