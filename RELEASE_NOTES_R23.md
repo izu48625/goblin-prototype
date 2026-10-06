@@ -72,3 +72,35 @@ Square, landscape, and portrait layouts are independently arranged to avoid over
 ### Build
 - Active cache key: `r23p2`.
 - No Supabase migration required.
+
+## UX1 Mobile editor cleanup
+
+### Mobile header
+- Reduced the top action row to:
+  - Discover
+  - Publish
+  - New
+  - overflow menu
+- Duplicate and Delete moved into the overflow menu on mobile.
+- Desktop keeps the existing direct buttons.
+- Tightened title, description, saved-sheet controls, spacing, and header padding.
+
+### Community join
+- The long eligibility explanation is no longer always expanded on mobile.
+- Added a compact “Conditions / 参加条件” disclosure.
+- Join CTA remains immediately visible.
+- Desktop keeps the full explanation.
+
+### Sheet controls
+- View-mode tabs are shorter and visually quieter.
+- Add Row / Add Metric / Metric Management / Scoring / More use a single horizontally scrollable tool rail on mobile.
+- Search + grade filter + result count stay on one compact row.
+
+### Visual Tools launcher
+- Replaced the large full-width mobile launcher with a compact right-aligned pill.
+- Reduced the reserved footer rail from 82px to 56px plus safe-area space.
+- Mobile subtitle is hidden while the main label and plus icon remain visible.
+
+### Build
+- Active cache key: `r23ux1`.
+- No database migration required.
