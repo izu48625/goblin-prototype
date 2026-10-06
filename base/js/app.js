@@ -2103,6 +2103,37 @@
   $('newSheetBtn').addEventListener('click',createNewSheet);
   $('duplicateBtn').addEventListener('click',duplicateSheet);
   $('deleteSheetBtn').addEventListener('click',deleteActiveSheet);
+
+  const mobileHeaderMoreBtn=$('mobileHeaderMoreBtn');
+  const mobileHeaderMoreMenu=$('mobileHeaderMoreMenu');
+  const closeMobileHeaderMore=()=>{
+    if(!mobileHeaderMoreMenu||!mobileHeaderMoreBtn)return;
+    mobileHeaderMoreMenu.classList.add('hidden');
+    mobileHeaderMoreBtn.setAttribute('aria-expanded','false');
+  };
+  if(mobileHeaderMoreBtn&&mobileHeaderMoreMenu){
+    mobileHeaderMoreBtn.addEventListener('click',e=>{
+      e.stopPropagation();
+      const opening=mobileHeaderMoreMenu.classList.contains('hidden');
+      mobileHeaderMoreMenu.classList.toggle('hidden',!opening);
+      mobileHeaderMoreBtn.setAttribute('aria-expanded',opening?'true':'false');
+    });
+    $('mobileDuplicateBtn')?.addEventListener('click',()=>{
+      closeMobileHeaderMore();
+      duplicateSheet();
+    });
+    $('mobileDeleteBtn')?.addEventListener('click',()=>{
+      closeMobileHeaderMore();
+      deleteActiveSheet();
+    });
+    document.addEventListener('click',e=>{
+      if(!mobileHeaderMoreMenu.classList.contains('hidden')
+        && !mobileHeaderMoreMenu.contains(e.target)
+        && e.target!==mobileHeaderMoreBtn){
+        closeMobileHeaderMore();
+      }
+    });
+  }
   $('addRowBtn').addEventListener('click',addRow);
   $('addRowWideBtn').addEventListener('click',addRow);
   $('addColBtn').addEventListener('click',addColumn);
