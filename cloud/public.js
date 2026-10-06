@@ -261,6 +261,11 @@
   }
   function toast(message){const old=document.querySelector('.toast');old?.remove();const el=document.createElement('div');el.className='toast';el.textContent=message;document.body.appendChild(el);setTimeout(()=>el.remove(),2200)}
 
+  function ogShareUrl(topicId){
+    const origin=String(window.SM_RUNTIME?.ogShareOrigin||'').trim().replace(/\/+$/,'');
+    return origin&&topicId?`${origin}/p/${encodeURIComponent(topicId)}`:location.href;
+  }
+
   async function getOwnSubmitted(sb,topicId,items,criteria,weighted){
     try{
       const {data:sessionData}=await sb.auth.getSession();
@@ -468,7 +473,7 @@
     };
     document.getElementById('shareBtn').onclick=async()=>{
       try{
-        const url=location.href;
+        const url=ogShareUrl(id);
         if(navigator.share){
           await navigator.share({title:data.title,text:data.description||'',url});
         }else if(navigator.clipboard?.writeText){
@@ -560,7 +565,7 @@
         const safe=String(data.title||'stats-maker').replace(/[\\/:*?"<>|]+/g,'_').slice(0,60)||'stats-maker';
         const size=shareCanvasSize(shareState.aspect);
         const file=new File([blob],`${safe}-${size.label.replace(':','x')}.png`,{type:'image/png'});
-        const url=location.href;
+        const url=ogShareUrl(id);
 
         let shared=false;
         if(navigator.share&&navigator.canShare?.({files:[file]})){
