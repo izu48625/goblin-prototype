@@ -3,10 +3,10 @@
   "private": true,
   "type": "module",
   "engines": {
-    "node": ">=22"
+    "node": "22.x"
   },
   "dependencies": {
-    "@vercel/og": "latest",
-    "react": "latest"
+    "@vercel/og": "1.0.3",
+    "react": "18.3.1"
   }
 }
