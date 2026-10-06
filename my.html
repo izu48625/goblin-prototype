@@ -1,0 +1,106 @@
+<!doctype html>
+<html lang="ja">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+  <meta name="theme-color" content="#07101f">
+  <title>My Page - Stats Maker</title>
+  <link rel="stylesheet" href="cloud/my.css?v=r24p1">
+</head>
+<body>
+  <header class="topbar">
+    <a class="brand" href="index.html?v=r24p1" aria-label="Stats Makerへ戻る">
+      <span class="brandMark">S</span>
+      <span>
+        <b>STATS MAKER</b>
+        <small id="brandSub">My Page</small>
+      </span>
+    </a>
+    <div class="headActions">
+      <div class="langSwitch" aria-label="Language">
+        <button type="button" data-lang="ja">JA</button>
+        <button type="button" data-lang="en">EN</button>
+      </div>
+      <a id="backBtn" class="btn ghost" href="index.html?v=r24p1">編集へ戻る</a>
+    </div>
+  </header>
+
+  <main class="page">
+    <section class="hero">
+      <div>
+        <div class="eyebrow">R24 · ACCOUNT</div>
+        <h1 id="pageTitle">My Page</h1>
+        <p id="pageLead">アカウント状態と、自分が公開した作品をまとめて管理します。</p>
+      </div>
+      <button id="refreshBtn" class="btn" type="button">更新</button>
+    </section>
+
+    <section class="accountCard panel">
+      <div class="accountIdentity">
+        <div id="avatar" class="avatar">G</div>
+        <div class="accountCopy">
+          <div id="accountState" class="accountState">確認中…</div>
+          <div id="accountDetail" class="accountDetail">Supabaseセッションを確認しています。</div>
+          <div id="identityList" class="identityList"></div>
+        </div>
+      </div>
+
+      <div id="guestWarning" class="notice warning hidden">
+        この端末のゲストIDで公開作品を管理しています。ブラウザデータを消す前にGoogleまたはAppleへ連携すると、同じ所有者IDを維持できます。
+      </div>
+      <div id="signedOutNotice" class="notice hidden">
+        ログインしなくてもStats Makerの作成・編集は使えます。My Pageのクラウド作品管理だけログインが必要です。
+      </div>
+
+      <div class="providerActions">
+        <button id="googleBtn" class="providerBtn" type="button">
+          <span class="providerIcon">G</span><span id="googleLabel">Googleで保護</span>
+        </button>
+        <button id="appleBtn" class="providerBtn" type="button">
+          <span class="providerIcon apple">●</span><span id="appleLabel">Appleで保護</span>
+        </button>
+        <button id="signOutBtn" class="btn danger hidden" type="button">ログアウト</button>
+      </div>
+      <div id="authStatus" class="status"></div>
+      <div id="providerHelp" class="providerHelp">
+        Google / Apple連携にはSupabase側で各ProviderとManual Linkingの有効化が必要です。
+      </div>
+    </section>
+
+    <section class="summaryGrid" aria-label="Work summary">
+      <div class="summaryCard"><b id="countAll">0</b><span id="countAllLabel">全作品</span></div>
+      <div class="summaryCard"><b id="countPublic">0</b><span>Public</span></div>
+      <div class="summaryCard"><b id="countUnlisted">0</b><span>Unlisted</span></div>
+      <div class="summaryCard"><b id="countPrivate">0</b><span>Private</span></div>
+    </section>
+
+    <section class="worksSection panel">
+      <div class="sectionHead">
+        <div>
+          <div class="eyebrow">CLOUD WORKS</div>
+          <h2 id="worksTitle">自分の公開作品</h2>
+        </div>
+        <div class="filterRow">
+          <button class="filterBtn active" type="button" data-filter="all">All</button>
+          <button class="filterBtn" type="button" data-filter="public">Public</button>
+          <button class="filterBtn" type="button" data-filter="unlisted">Unlisted</button>
+          <button class="filterBtn" type="button" data-filter="private">Private</button>
+        </div>
+      </div>
+
+      <div id="worksStatus" class="worksStatus">読み込み中…</div>
+      <div id="worksGrid" class="worksGrid hidden"></div>
+      <div id="emptyState" class="emptyState hidden">
+        <b id="emptyTitle">まだ作品がありません</b>
+        <span id="emptyHelp">Stats Makerから作品を公開すると、ここで管理できます。</span>
+        <a id="emptyBackBtn" class="btn primary" href="index.html?v=r24p1">Stats Makerを開く</a>
+      </div>
+    </section>
+  </main>
+
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="cloud/runtime-config.js?v=r24p1"></script>
+  <script src="cloud/supabase.js?v=r24p1"></script>
+  <script src="cloud/my.js?v=r24p1"></script>
+</body>
+</html>
