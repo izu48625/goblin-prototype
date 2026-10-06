@@ -69,7 +69,9 @@ The GitHub Pages My Page URL must be allowed as an Auth redirect URL.
 ### OAuth return handling
 - Provider linking uses the production My Page URL as `redirectTo`.
 - Auth state refresh is deferred outside the auth callback before making more Supabase calls.
-- Pending OAuth state expires automatically.
+- Pending OAuth state is persisted before the browser redirect and expires automatically.
+- OAuth callback errors are surfaced in My Page and never treated as a successful ownership transfer.
+- Legacy hidden email/password actions can no longer sign an anonymous owner out; account conversion is routed through My Page.
 
 ### Setup
 - Added `R24_AUTH_SETUP.md` with the exact Stats Maker, My Page, Supabase callback, Google origin, Google redirect, and Apple web OAuth values.
