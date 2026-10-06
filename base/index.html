@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
   <meta name="theme-color" content="#07101f">
   <title>Stats Maker V1.0-A2.1</title>
-  <link rel="stylesheet" href="css/style.css?v=r23p3b">
+  <link rel="stylesheet" href="css/style.css?v=r24p1">
 </head>
 <body data-build="R23-P3B">
 <div id="viewOnlyBanner" class="viewOnlyBanner hidden">
@@ -45,11 +45,13 @@
     </div>
 
     <div class="topActions editOnly">
-      <a id="discoverBtn" class="btn discoverBtn" href="../discover.html?v=r23p3b" target="_top" data-i18n="action.discover">Discover</a>
+      <a id="myPageBtn" class="btn discoverBtn desktopHeaderAction" href="../my.html?v=r24p1" target="_top">My Page</a>
+      <a id="discoverBtn" class="btn discoverBtn" href="../discover.html?v=r24p1" target="_top" data-i18n="action.discover">Discover</a>
       <button id="publishBtn" class="btn publishBtn" type="button" data-i18n="publish.button" onclick="document.getElementById('publishDialogBackdrop')?.classList.remove('hidden');document.getElementById('publishResult')?.classList.add('hidden');">公開する</button>
       <button id="newSheetBtn" class="btn primary" type="button" data-i18n="action.new">＋ 新規</button>
       <button id="mobileHeaderMoreBtn" class="btn mobileHeaderMoreBtn mobileOnly" type="button" aria-expanded="false" aria-controls="mobileHeaderMoreMenu">•••</button>
       <div id="mobileHeaderMoreMenu" class="mobileHeaderMoreMenu mobileOnly hidden">
+        <a id="mobileMyPageBtn" class="mobileHeaderMenuBtn" href="../my.html?v=r24p1" target="_top" style="display:flex;align-items:center;text-decoration:none">My Page</a>
         <button id="mobileDuplicateBtn" class="mobileHeaderMenuBtn" type="button" data-i18n="action.duplicate">複製</button>
         <button id="mobileDeleteBtn" class="mobileHeaderMenuBtn danger" type="button" data-i18n="action.delete">削除</button>
       </div>
@@ -451,11 +453,11 @@
 </div>
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-<script src="../cloud/supabase.js?v=r23p3b"></script>
-<script src="../cloud/publish-model.js?v=r23p3b"></script>
-<script src="js/i18n.js?v=r23p3b"></script>
-<script src="js/app.js?v=r23p3b"></script>
-<script src="js/publish-guard.js?v=r23p3b"></script>
+<script src="../cloud/supabase.js?v=r24p1"></script>
+<script src="../cloud/publish-model.js?v=r24p1"></script>
+<script src="js/i18n.js?v=r24p1"></script>
+<script src="js/app.js?v=r24p1"></script>
+<script src="js/publish-guard.js?v=r24p1"></script>
 <script>
 window.addEventListener("statsmaker:languagechange",event=>{
   try{
