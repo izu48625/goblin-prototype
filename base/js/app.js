@@ -1353,18 +1353,162 @@
   function renderFitTable(){
     const s=activeSheet();
     let h=`<thead><tr><th>#</th><th class="fitName">${esc(t('table.target'))}</th>`;
-    s.cols.forEach(c=>h+=`<th>${esc(c)}</th>`);
+    s.cols.forEach((name,ci)=>{
+      const label=name||t('fallback.metric',{n:ci+1});
+      h+=`<th class="fitMetricHead"><input class="fitMetricInput" data-fit-col-name="${ci}" value="${esc(name)}" aria-label="${esc(t('aria.editMetric',{name:label}))}" autocomplete="off" spellcheck="false"></th>`;
+    });
     h+=`<th>${esc(t('table.average'))}</th></tr></thead><tbody>`;
-    filteredRows().forEach(({row,index:ri})=>{
+
+    filteredRows().forEach(({row,index:ri},displayIndex)=>{
       const a=avg(row);
-      h+=`<tr><td>${ri+1}</td><td class="fitName"><div class="fitNameInner"><span class="fitThumb">${row.image?`<img src="${row.image}" alt="">`:'—'}</span><span>${esc(row.name.trim()||t('fallback.target',{n:ri+1}))}</span></div></td>`;
-      row.scores.slice(0,s.cols.length).forEach(v=>{
-        h+=`<td class="${heatClass(v)}">${fmt(v)}</td>`;
+      h+=`<tr>
+        <td>${displayIndex+1}</td>
+        <td class="fitName">
+          <div class="fitNameInner">
+            <span class="fitThumb">${row.image?`<img src="${row.image}" alt="">`:'—'}</span>
+            <input class="fitNameInput" data-fit-row-name="${ri}" value="${esc(row.name)}" placeholder="${esc(t('table.targetName'))}" autocomplete="off">
+          </div>
+        </td>`;
+
+      s.cols.forEach((_,ci)=>{
+        const v=row.scores[ci];
+        h+=`<td class="fitScoreCell ${heatClass(v)}">
+          <input class="fitScoreInput" data-fit-score-row="${ri}" data-fit-score-col="${ci}" type="number" inputmode="decimal" min="0" max="${s.scale||100}" step="${(s.scale||100)===10?'0.1':'1'}" value="${v==null?'':v}" placeholder="–">
+        </td>`;
       });
-      h+=`<td class="${heatClass(a)}"><strong>${fmt(a)}</strong></td></tr>`;
+
+      h+=`<td class="fitAverageCell ${heatClass(a)}" data-fit-average="${ri}"><strong>${fmt(a)}</strong></td></tr>`;
     });
     h+='</tbody>';
     $('fitTable').innerHTML=h;
+
+    const refreshFitAverage=ri=>{
+      const row=s.rows[ri];
+      if(!row)return;
+      const value=avg(row);
+      const cell=$('fitTable').querySelector(`[data-fit-average="${ri}"]`);
+      if(!cell)return;
+      cell.className=`fitAverageCell ${heatClass(value)}`;
+      const strong=cell.querySelector('strong');
+      if(strong)strong.textContent=fmt(value);
+    };
+
+    const syncFitEdits=({columns=false}={})=>{
+      renderTable();
+      renderOverview();
+      renderSidebar();
+      if(columns)renderColumnManager();
+      renderCommunityParticipation();
+    };
+
+    $('fitTable').querySelectorAll('[data-fit-row-name]').forEach(el=>{
+      el.addEventListener('input',e=>{
+        const ri=+e.currentTarget.dataset.fitRowName;
+        if(!s.rows[ri])return;
+        s.rows[ri].name=e.currentTarget.value;
+        scheduleSave('');
+      });
+      el.addEventListener('change',()=>{
+        syncFitEdits();
+        scheduleSave('');
+      });
+      el.addEventListener('keydown',e=>{
+        if(e.key==='Enter'){
+          e.preventDefault();
+          e.currentTarget.blur();
+        }
+      });
+    });
+
+    $('fitTable').querySelectorAll('[data-fit-col-name]').forEach(el=>{
+      const ci=+el.dataset.fitColName;
+      const fallback=t('fallback.metric',{n:ci+1});
+
+      el.addEventListener('focus',e=>{
+        e.currentTarget.dataset.original=s.cols[ci]||fallback;
+      });
+
+      el.addEventListener('input',e=>{
+        s.cols[ci]=e.currentTarget.value;
+        scheduleSave('');
+      });
+
+      el.addEventListener('keydown',e=>{
+        if(e.key==='Enter'){
+          e.preventDefault();
+          e.currentTarget.blur();
+          return;
+        }
+        if(e.key==='Escape'){
+          e.preventDefault();
+          const original=e.currentTarget.dataset.original||fallback;
+          s.cols[ci]=original;
+          e.currentTarget.value=original;
+          e.currentTarget.dataset.cancelled='1';
+          e.currentTarget.blur();
+        }
+      });
+
+      el.addEventListener('blur',e=>{
+        const original=e.currentTarget.dataset.original||fallback;
+        const value=e.currentTarget.value.trim();
+        const finalName=value||original||fallback;
+        s.cols[ci]=finalName;
+        e.currentTarget.value=finalName;
+        syncFitEdits({columns:true});
+        if(e.currentTarget.dataset.cancelled==='1'){
+          delete e.currentTarget.dataset.cancelled;
+          scheduleSave('');
+        }else{
+          scheduleSave(t('metric.saved'));
+        }
+      });
+    });
+
+    const fitScoreInputs=()=>[...$('fitTable').querySelectorAll('.fitScoreInput')];
+    $('fitTable').querySelectorAll('[data-fit-score-row]').forEach(el=>{
+      el.addEventListener('input',e=>{
+        const ri=+e.currentTarget.dataset.fitScoreRow;
+        const ci=+e.currentTarget.dataset.fitScoreCol;
+        if(!s.rows[ri])return;
+        const value=clampScore(e.currentTarget.value);
+        s.rows[ri].scores[ci]=value;
+        const cell=e.currentTarget.closest('.fitScoreCell');
+        if(cell)cell.className=`fitScoreCell ${heatClass(value)}`;
+        refreshFitAverage(ri);
+        scheduleSave('');
+      });
+
+      el.addEventListener('change',()=>{
+        syncFitEdits();
+        scheduleSave('');
+      });
+
+      el.addEventListener('keydown',e=>{
+        if(e.key!=='Enter')return;
+        e.preventDefault();
+        const inputs=fitScoreInputs();
+        const index=inputs.indexOf(e.currentTarget);
+        const next=inputs[index+1];
+        if(next){
+          e.currentTarget.blur();
+          requestAnimationFrame(()=>{
+            next.focus({preventScroll:true});
+            next.select?.();
+            next.scrollIntoView({block:'nearest',inline:'nearest'});
+          });
+        }else{
+          e.currentTarget.blur();
+        }
+      });
+
+      el.addEventListener('focus',e=>{
+        requestAnimationFrame(()=>{
+          e.currentTarget.select?.();
+          e.currentTarget.scrollIntoView({block:'nearest',inline:'nearest'});
+        });
+      });
+    });
   }
 
   function getFitBaseSize(){
