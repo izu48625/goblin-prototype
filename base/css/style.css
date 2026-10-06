@@ -1494,3 +1494,52 @@ html[lang="en"] .rankModeBtn{
   .coreActions .btn.small{padding:0 9px}
 }
 
+/* =========================================================
+   R23 UX3 HOME LANGUAGE SWITCH
+   ========================================================= */
+.homeLangSwitch{
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  gap:5px;
+  min-height:36px;
+  padding:3px 5px;
+  border:1px solid var(--line2);
+  border-radius:10px;
+  background:#0f1d31;
+  justify-self:end;
+}
+.homeLangSwitch .langIcon{font-size:12px}
+.homeLangSwitch .langBtn{
+  min-width:34px;
+  height:28px;
+  border:0;
+  border-radius:7px;
+  background:transparent;
+  color:#8094ad;
+  font-size:9px;
+  font-weight:950;
+}
+.homeLangSwitch .langBtn.active{background:#315da2;color:#fff}
+.homeLangSwitch .langDivider{width:1px;height:16px;background:#314864}
+
+@media(max-width:760px){
+  .topbar{
+    grid-template-columns:minmax(0,1fr) auto;
+    align-items:end;
+  }
+  .titleArea{grid-column:1/-1}
+  .homeLangSwitch{
+    grid-column:2;
+    grid-row:2;
+    align-self:end;
+    margin-bottom:43px;
+    min-height:32px;
+    padding:2px 4px;
+    z-index:2;
+  }
+  .homeLangSwitch .langIcon{display:none}
+  .homeLangSwitch .langBtn{min-width:31px;height:26px;font-size:8px}
+  .topActions{grid-column:1/-1}
+}
+
