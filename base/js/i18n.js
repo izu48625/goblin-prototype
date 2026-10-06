@@ -27,7 +27,7 @@
       'publish.password':'パスワード（6文字以上）',
       'publish.signup':'新規登録',
       'publish.signin':'ログイン',
-      'publish.futureAuth':'Google / Appleログインは後続工程で追加予定',
+      'publish.futureAuth':'Google / Apple連携とクラウド作品管理は My Page から行えます。',
       'publish.signedIn':'ログイン中',
       'publish.signout':'ログアウト',
       'publish.visibility':'公開範囲',
