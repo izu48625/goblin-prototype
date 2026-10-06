@@ -204,3 +204,12 @@ Square, landscape, and portrait layouts are independently arranged to avoid over
 
 ### Build
 - Active cache key: `r23p3a`.
+
+## P3B OGP production activation
+
+- Production OGP origin activated: `https://stats-maker-ogp.vercel.app`.
+- Public URL sharing now uses `/p/:id` on the Vercel OGP layer.
+- Native share-image text also attaches the OGP share URL.
+- Existing GitHub Pages public pages remain the canonical destination.
+- Active cache key: `r23p3b`.
+- No database migration required.
