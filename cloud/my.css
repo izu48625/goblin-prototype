@@ -65,3 +65,18 @@ a{color:inherit}
 @media(max-width:390px){
   .brand small{display:none}.summaryCard span{font-size:6.5px}.providerActions{grid-template-columns:1fr}
 }
+
+
+/* R24 P2 — Auth readiness / ownership continuity */
+.authHealth{margin-top:12px;padding-top:11px;border-top:1px solid rgba(54,87,125,.45)}
+.authHealthTitle{font-size:9px;font-weight:950;letter-spacing:.12em;text-transform:uppercase;color:#7189aa}
+.authHealthGrid{display:flex;gap:6px;flex-wrap:wrap;margin-top:7px}
+.healthChip{padding:5px 8px;border:1px solid #334c69;border-radius:999px;background:#0b192b;color:#8fa6c3;font-size:8px;font-weight:900}
+.healthChip.ok{border-color:#2b6a51;background:#0d2a20;color:#86e0ae}
+.healthChip.bad{border-color:#704144;background:#2a1519;color:#ffabb5}
+.healthChip.warn{border-color:#68572a;background:#251e0e;color:#e0c478}
+.dangerNotice{border-color:#793e47!important;background:#2a1318!important;color:#ffb0b8!important;font-weight:800}
+@media(max-width:720px){
+  .authHealthGrid{display:grid;grid-template-columns:1fr 1fr}
+  .healthChip:last-child{grid-column:1/-1}
+}
