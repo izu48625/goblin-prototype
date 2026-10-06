@@ -1534,3 +1534,74 @@ html[lang="en"] .rankModeBtn{
   .homeLangSwitch{min-height:23px}
   .homeLangSwitch .langBtn{min-width:27px;height:19px;font-size:8px}
 }
+
+/* =========================================================
+   R23 UX4 EDITABLE FIT VIEW
+   ========================================================= */
+.fitMetricHead{min-width:86px;padding:0!important}
+.fitMetricInput,
+.fitNameInput,
+.fitScoreInput{
+  box-sizing:border-box;
+  border:1px solid transparent;
+  border-radius:5px;
+  outline:0;
+  background:transparent;
+  color:#e6eefb;
+  font:850 11px/1.2 inherit;
+  transition:border-color .12s ease,background .12s ease,box-shadow .12s ease;
+}
+.fitMetricInput{
+  width:84px;
+  height:28px;
+  padding:0 5px;
+  text-align:center;
+  font-weight:950;
+}
+.fitNameInput{
+  width:112px;
+  min-width:0;
+  height:28px;
+  padding:0 4px;
+  text-align:left;
+}
+.fitScoreCell{padding:0 3px!important}
+.fitScoreInput{
+  width:54px;
+  height:28px;
+  padding:0 3px;
+  text-align:center;
+  font-weight:950;
+  appearance:textfield;
+  -moz-appearance:textfield;
+}
+.fitScoreInput::-webkit-inner-spin-button,
+.fitScoreInput::-webkit-outer-spin-button{appearance:none;margin:0}
+.fitMetricInput:hover,
+.fitNameInput:hover,
+.fitScoreInput:hover{
+  border-color:rgba(111,152,255,.28);
+  background:rgba(19,36,61,.5);
+}
+.fitMetricInput:focus,
+.fitNameInput:focus,
+.fitScoreInput:focus{
+  border-color:#6f98ff;
+  background:#0b1b30;
+  box-shadow:0 0 0 2px rgba(111,152,255,.18);
+  color:#fff;
+}
+.fitAverageCell{font-weight:950}
+
+@media(max-width:760px){
+  /* 16px computed font prevents iOS Safari from auto-zooming focused inputs.
+     The entire Fit canvas is visually scaled down by its parent transform. */
+  .fitMetricInput,
+  .fitNameInput,
+  .fitScoreInput{font-size:16px}
+  .fitMetricInput{width:88px;height:30px}
+  .fitNameInput{width:116px;height:30px}
+  .fitScoreInput{width:58px;height:30px}
+  .fitTable td.fitScoreCell{padding:0 2px!important}
+}
+
