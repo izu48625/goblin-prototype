@@ -111,3 +111,25 @@ Square, landscape, and portrait layouts are independently arranged to avoid over
 - Kept the newer compact height and reduced footer reserve from UX1.
 - Other mobile editor cleanup from UX1 remains unchanged.
 - Active root cache key: `r23ux2`.
+
+## UX3 Language & Discover density
+
+### Visual Tools launcher
+- Full-width mobile launcher remains.
+- Launcher label is centered across the button rather than left aligned.
+- Plus icon stays at the left edge without shifting the label.
+
+### Language
+- Removed JA / EN controls from the Visual Tools sheet.
+- Moved JA / EN switching to the home editor beside Saved Sheets.
+- Home language changes are sent to the outer launcher so Visual Tools labels stay synchronized.
+
+### Discover density
+- Public work cards now prioritize title, description, category and update date.
+- Creator TOP3, participant count, Remix count, target count, metric count and scale are collapsed under “スタッツを見る / Show stats”.
+- Stats expand only for the selected post.
+- Mobile card spacing, hero, category rail, search controls and sort controls are tightened so more posts fit on screen.
+
+### Build
+- Active cache key: `r23ux3`.
+- No database migration required.
