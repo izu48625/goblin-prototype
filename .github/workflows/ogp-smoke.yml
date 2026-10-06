@@ -113,7 +113,7 @@ jobs:
           TOPIC_ID: ${{ steps.topic.outputs.id }}
         run: |
           set -euo pipefail
-          OG_URL="https://stats-maker-ogp.vercel.app/api/og?id=$TOPIC_ID&debug=1"
+          OG_URL="https://stats-maker-ogp.vercel.app/api/og?id=$TOPIC_ID"
           CODE="$(curl -sS -D /tmp/og.headers "$OG_URL" -o /tmp/og.png -w '%{http_code}' || true)"
           if [ "$CODE" != "200" ]; then
             echo "::error::OG image endpoint returned HTTP $CODE"
