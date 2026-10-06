@@ -1,7 +1,6 @@
 {
   "name": "stats-maker-ogp",
   "private": true,
-  "type": "module",
   "engines": {
     "node": "22.x"
   },
