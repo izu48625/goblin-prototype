@@ -14,5 +14,5 @@
     SUPABASE_PUBLISHABLE_KEY,
     {auth:{persistSession:true,autoRefreshToken:true,detectSessionInUrl:true}}
   );
-  window.SM_SUPABASE={ready:true,client};
+  window.SM_SUPABASE={ready:true,client,url:SUPABASE_URL,publishableKey:SUPABASE_PUBLISHABLE_KEY};
 })();
