@@ -24,7 +24,7 @@ button{font:inherit}
 #extLauncher:hover{transform:translateY(-2px)}
 #extLauncher:active{transform:scale(.985)}
 .launchIcon{width:42px;height:42px;flex:none;border-radius:12px;display:grid;place-items:center;background:rgba(255,255,255,.15);font-size:28px}
-.launchCopy{text-align:left;min-width:0}
+.launchCopy{flex:1;text-align:center;min-width:0}
 .launchTitle{display:block;font-size:16px;font-weight:950}
 .launchSub{display:block;margin-top:2px;color:#dce8ff;font-size:10px;font-weight:800}
 
@@ -58,10 +58,12 @@ button{font:inherit}
     width:auto;min-height:44px;
     border-radius:999px;
     padding:6px 10px;
-    gap:8px;
+    gap:0;
+    justify-content:center;
     box-shadow:0 12px 32px rgba(36,79,184,.42),0 0 0 3px rgba(95,141,255,.09)
   }
-  .launchIcon{width:30px;height:30px;border-radius:999px;font-size:21px}
+  .launchIcon{position:absolute;left:10px;width:30px;height:30px;border-radius:999px;font-size:21px}
+  .launchCopy{width:100%;text-align:center}
   .launchTitle{font-size:13px}
   .launchSub{display:none}
   #extSheet{padding-left:12px;padding-right:12px}
@@ -73,8 +75,8 @@ button{font:inherit}
 @media(max-width:390px){.extGrid{grid-template-columns:1fr}}
 </style>
 </head>
-<body data-build="R23-UX2">
-<div id="basicRoot"><iframe id="basicFrame" src="base/index.html?v=r23ux2" title="Stats Maker"></iframe></div>
+<body data-build="R23-UX3">
+<div id="basicRoot"><iframe id="basicFrame" src="base/index.html?v=r23ux3" title="Stats Maker"></iframe></div>
 
 <button id="extLauncher" type="button">
   <span class="launchIcon">＋</span>
@@ -93,10 +95,6 @@ button{font:inherit}
         <p id="pickerDesc">基本表の対象・画像・評価項目・点数をそのまま使います。</p>
       </div>
       <div class="extActions">
-        <div class="langSwitch">
-          <button id="langJa" type="button">JA</button>
-          <button id="langEn" type="button">EN</button>
-        </div>
         <button id="extClose" type="button">×</button>
       </div>
     </div>
@@ -104,6 +102,6 @@ button{font:inherit}
   </section>
 </div>
 
-<script type="module" src="app/src/launcher.js?v=r23ux2"></script>
+<script type="module" src="app/src/launcher.js?v=r23ux3"></script>
 </body>
 </html>

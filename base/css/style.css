@@ -1494,3 +1494,43 @@ html[lang="en"] .rankModeBtn{
   .coreActions .btn.small{padding:0 9px}
 }
 
+/* =========================================================
+   R23 UX3 HOME LANGUAGE SWITCH
+   ========================================================= */
+.savedSheetHead{
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:7px;
+  margin-bottom:3px;
+}
+.savedSheetHead .fieldLabel{margin-bottom:0}
+.homeLangSwitch{
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  gap:2px;
+  min-height:24px;
+  padding:2px;
+  border:1px solid var(--line2);
+  border-radius:8px;
+  background:#0f1d31;
+}
+.homeLangSwitch .langBtn{
+  min-width:28px;
+  height:20px;
+  border:0;
+  border-radius:5px;
+  background:transparent;
+  color:#8094ad;
+  font-size:8px;
+  font-weight:950;
+}
+.homeLangSwitch .langBtn.active{background:#315da2;color:#fff}
+.homeLangSwitch .langDivider{width:1px;height:12px;background:#314864}
+
+@media(max-width:760px){
+  .savedSheetHead{margin-bottom:3px}
+  .homeLangSwitch{min-height:23px}
+  .homeLangSwitch .langBtn{min-width:27px;height:19px;font-size:8px}
+}

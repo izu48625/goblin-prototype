@@ -143,3 +143,65 @@ button,input{font:inherit}
 .visualCategory-tech{background:radial-gradient(circle at 88% 0%,rgba(75,189,207,.24),transparent 46%),linear-gradient(145deg,#102830,#091525 76%)}
 .visualCategory-lifestyle{background:radial-gradient(circle at 88% 0%,rgba(106,173,122,.22),transparent 46%),linear-gradient(145deg,#172b22,#091525 76%)}
 
+/* R23 UX3: dense Discover cards with collapsible stats */
+.workMainLink{display:block;text-decoration:none;color:inherit}
+.workMainLink:hover .workTitle{color:#dce9ff}
+.compactMeta{margin-top:7px}
+.compactFoot{margin-top:8px;padding-top:7px;border-top:1px solid rgba(41,63,93,.62)}
+.openLabel{text-decoration:none}
+
+.statsDisclosure{
+  margin-top:8px;
+  border-top:1px solid #263d59;
+}
+.statsDisclosure summary{
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:8px;
+  min-height:34px;
+  padding:7px 2px 0;
+  color:#8fa9cb;
+  font-size:8px;
+  font-weight:950;
+  cursor:pointer;
+  list-style:none;
+  user-select:none;
+}
+.statsDisclosure summary::-webkit-details-marker{display:none}
+.statsDisclosureChevron{font-size:13px;line-height:1;transition:transform .15s ease}
+.statsDisclosure[open] .statsDisclosureChevron{transform:rotate(180deg)}
+.statsDisclosureBody{padding-top:2px}
+.statsDisclosureBody .workVisual{margin-top:7px}
+.statsMeta{margin-top:8px}
+
+@media(max-width:520px){
+  .wrap{width:calc(100% - 12px)}
+  .hero{padding:15px 13px;border-radius:14px}
+  .eyebrow{font-size:8px;margin-bottom:5px}
+  .hero h1{font-size:22px}
+  .hero p{margin-top:6px;font-size:10px;line-height:1.5}
+  .privacyNote{margin-top:8px;padding:7px 8px;font-size:8px}
+
+  .browseTabs{margin-top:8px;padding:4px}
+  .browseTab{min-height:36px}
+  .categoryRail{margin-top:7px}
+  .categoryBtn{min-height:29px;padding:0 9px}
+  .controls{gap:6px;margin-top:8px}
+  .searchBox{min-height:38px;padding:0 10px}
+  .sortBtn{min-height:34px;padding:0 9px}
+  .resultHead{margin:12px 2px 7px}
+
+  .discoverGrid{gap:7px}
+  .workCard{padding:10px 11px;border-radius:12px}
+  .cardTop{min-height:18px}
+  .workTitle{margin-top:6px;font-size:14px;line-height:1.2;-webkit-line-clamp:1}
+  .workDesc{min-height:0;margin-top:4px;font-size:8px;line-height:1.4;-webkit-line-clamp:1}
+  .compactMeta{margin-top:6px}
+  .metaChip{padding:4px 6px;font-size:7px}
+  .compactFoot{margin-top:7px;padding-top:6px}
+  .statsDisclosure{margin-top:6px}
+  .statsDisclosure summary{min-height:30px;padding-top:5px}
+  .statsDisclosureBody .workVisual{min-height:102px}
+}
+

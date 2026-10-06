@@ -36,7 +36,7 @@
       works:'公開作品',communityWorks:'Community作品',
       loading:'公開作品を読み込んでいます…',refresh:'更新',
       participants:'参加者',remixes:'Remix',targets:'対象',metrics:'項目',
-      public:'PUBLIC',communityBadge:'COMMUNITY',open:'見る →',communityOpen:'Communityを見る →',more:'さらに表示',
+      public:'PUBLIC',communityBadge:'COMMUNITY',open:'見る →',communityOpen:'Communityを見る →',statsOpen:'スタッツを見る',statsClose:'スタッツを閉じる',more:'さらに表示',
       empty:'条件に合う公開作品がありません。',
       communityEmpty:'条件に合うCommunity作品がありません。',
       error:'公開作品を読み込めませんでした。',
@@ -56,7 +56,7 @@
       works:'Public works',communityWorks:'Community works',
       loading:'Loading public works…',refresh:'Refresh',
       participants:'Participants',remixes:'Remix',targets:'Targets',metrics:'Metrics',
-      public:'PUBLIC',communityBadge:'COMMUNITY',open:'Open →',communityOpen:'Open Community →',more:'Show more',
+      public:'PUBLIC',communityBadge:'COMMUNITY',open:'Open →',communityOpen:'Open Community →',statsOpen:'Show stats',statsClose:'Hide stats',more:'Show more',
       empty:'No public works match these filters.',
       communityEmpty:'No Community works match these filters.',
       error:'Could not load public works.',
@@ -280,47 +280,64 @@
       const description=topic.description||'';
       const lang=topic.language_code==='en'?'EN':'JA';
       const community=isCommunityWork(topic);
+      const href=`public.html?id=${encodeURIComponent(topic.id)}&v=r23ux3`;
       const lineage=relation==='remix'
         ?`<span class="metaChip lineageChip">${copy.lineageRemix}</span>`
         :relation==='version'
           ?`<span class="metaChip lineageChip">${copy.lineageVersion}</span>`
           :'';
 
-      return `<a class="workCard" href="public.html?id=${encodeURIComponent(topic.id)}&v=r23ux1">
+      return `<article class="workCard">
         <div class="cardTop">
           <div class="visibility">${copy.public}</div>
           <div class="languageBadge">${lang}</div>
         </div>
-        ${creatorPreviewHtml(topic)}
-        <div class="workTitle">${esc(topic.title||'Untitled')}</div>
-        <div class="workDesc">${esc(description)}</div>
-        <div class="cardMeta">
+
+        <a class="workMainLink" href="${href}">
+          <div class="workTitle">${esc(topic.title||'Untitled')}</div>
+          <div class="workDesc">${esc(description)}</div>
+        </a>
+
+        <div class="cardMeta compactMeta">
           <span class="metaChip categoryChip">${esc(categoryLabels[category]||categoryLabels.other)}</span>
           ${community?`<span class="metaChip communityOnlyBadge">${copy.communityBadge}</span>`:''}
-          <span class="metaChip">${stats.targets||'—'} ${copy.targets}</span>
-          <span class="metaChip">${stats.metrics||'—'} ${copy.metrics}</span>
-          <span class="metaChip">${Number(topic.score_scale||100)} pt</span>
           ${lineage}
         </div>
-        <div class="cardStats">
-          <div class="stat">
-            <div class="statValue accent">${topic.participants}</div>
-            <div class="statLabel">${copy.participants}</div>
-          </div>
-          <div class="stat">
-            <div class="statValue purple">${topic.remixCount}</div>
-            <div class="statLabel">${copy.remixes}</div>
-          </div>
-          <div class="stat">
-            <div class="statValue">${stats.targets||'—'}</div>
-            <div class="statLabel">${copy.targets}</div>
-          </div>
-        </div>
-        <div class="cardFoot">
+
+        <div class="cardFoot compactFoot">
           <span>${updated?`${copy.updated} ${esc(updated)}`:''}</span>
-          <span class="openLabel">${communityView&&community?copy.communityOpen:copy.open}</span>
+          <a class="openLabel" href="${href}">${communityView&&community?copy.communityOpen:copy.open}</a>
         </div>
-      </a>`;
+
+        <details class="statsDisclosure">
+          <summary>
+            <span class="statsDisclosureLabel">${copy.statsOpen}</span>
+            <span class="statsDisclosureChevron">⌄</span>
+          </summary>
+          <div class="statsDisclosureBody">
+            ${creatorPreviewHtml(topic)}
+            <div class="cardMeta statsMeta">
+              <span class="metaChip">${stats.targets||'—'} ${copy.targets}</span>
+              <span class="metaChip">${stats.metrics||'—'} ${copy.metrics}</span>
+              <span class="metaChip">${Number(topic.score_scale||100)} pt</span>
+            </div>
+            <div class="cardStats">
+              <div class="stat">
+                <div class="statValue accent">${topic.participants}</div>
+                <div class="statLabel">${copy.participants}</div>
+              </div>
+              <div class="stat">
+                <div class="statValue purple">${topic.remixCount}</div>
+                <div class="statLabel">${copy.remixes}</div>
+              </div>
+              <div class="stat">
+                <div class="statValue">${stats.targets||'—'}</div>
+                <div class="statLabel">${copy.targets}</div>
+              </div>
+            </div>
+          </div>
+        </details>
+      </article>`;
     }).join('');
 
     grid.classList.remove('hidden');

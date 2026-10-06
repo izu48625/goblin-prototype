@@ -32,7 +32,6 @@ function setLanguage(next){
 function renderLanguage(){
   const u=UI[language];
   $("launcherTitle").textContent=u.launcherTitle;$("launcherSub").textContent=u.launcherSub;$("pickerTitle").textContent=u.pickerTitle;$("pickerDesc").textContent=u.pickerDesc;
-  $("langJa").classList.toggle("active",language==="ja");$("langEn").classList.toggle("active",language==="en");
   const host=$("extGroups");host.innerHTML="";
   ["popular","compare","ranking","number"].forEach(group=>{
     const items=EXTENSIONS.filter(x=>x[0]===group);if(!items.length)return;
@@ -60,7 +59,7 @@ function openExtension(type){
     if(sheet?.id)project.settings.sourceSheetId=sheet.id;
     syncSourceProject(project,{},sheet);
     saveProject(project);
-    location.href=`app/editor.html?v=r23ux1&id=${encodeURIComponent(project.id)}`;
+    location.href=`app/editor.html?v=r23ux3&id=${encodeURIComponent(project.id)}`;
   }catch(error){
     console.error(error);
     alert((language==="ja"?"拡張機能を開けませんでした：":"Could not open visual tool: ")+(error?.message||error));
@@ -69,8 +68,13 @@ function openExtension(type){
 $("extLauncher").addEventListener("click",()=>backdrop.classList.remove("hidden"));
 $("extClose").addEventListener("click",()=>backdrop.classList.add("hidden"));
 backdrop.addEventListener("click",event=>{if(event.target===backdrop)backdrop.classList.add("hidden")});
-$("langJa").addEventListener("click",()=>setLanguage("ja"));$("langEn").addEventListener("click",()=>setLanguage("en"));
-frame.addEventListener("load",()=>{try{frame.contentWindow?.SM_I18N?.setLanguage(language)}catch{}});
+frame.addEventListener("load",()=>{
+  try{
+    frame.contentWindow?.SM_I18N?.setLanguage(language);
+    const homeLanguage=frame.contentWindow?.SM_I18N?.getLanguage?.();
+    if(homeLanguage){language=homeLanguage==="en"?"en":"ja";renderLanguage()}
+  }catch{}
+});
 window.addEventListener("message",event=>{if(event.data?.type!=="statsmaker:languagechange")return;language=event.data.locale==="en"?"en":"ja";localStorage.setItem("statsMakerV2Language",language);renderLanguage()});
 renderLanguage();
 if(new URLSearchParams(location.search).get("extensions")==="1")requestAnimationFrame(()=>backdrop.classList.remove("hidden"));
