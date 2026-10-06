@@ -1669,7 +1669,7 @@
   function publicPageUrl(topicId){
     const url=new URL('../public.html',location.href);
     url.searchParams.set('id',topicId);
-    url.searchParams.set('v','r23p3a');
+    url.searchParams.set('v','r23p3b');
     return url.href;
   }
 
