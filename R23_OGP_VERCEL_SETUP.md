@@ -1,28 +1,37 @@
-# Stats Maker R23 P3 — Vercel OGP Setup
+# Stats Maker R23 P3 — Vercel OGP
 
-## Goal
-Keep the main Stats Maker app on GitHub Pages while using Vercel only for dynamic social previews.
+## Production architecture
 
-Shared URL flow:
+Stats Maker itself remains on GitHub Pages.
+
+Vercel is used only for the per-work social-preview layer:
 
 ```
-https://<vercel-domain>/p/<topic-id>
+Stats Maker public work
+        ↓ URL Share
+https://stats-maker-ogp.vercel.app/p/<topic-id>
         ↓
-Vercel Function reads the public / unlisted topic from Supabase
+server-rendered work-specific OGP metadata
         ↓
-Returns per-work og:title / og:description / og:image
-        ↓
-Human browser is redirected to:
-https://izu48625.github.io/goblin-prototype/public.html?id=<topic-id>
+human browser → GitHub Pages public.html?id=<topic-id>
+social crawler → /api/og?id=<topic-id>
 ```
 
-OG image endpoint:
+## Production endpoints
+
+Share entry:
 
 ```
-https://<vercel-domain>/api/og?id=<topic-id>
+https://stats-maker-ogp.vercel.app/p/<topic-id>
 ```
 
-The image is generated as a 1200×630 PNG with:
+Dynamic OG PNG:
+
+```
+https://stats-maker-ogp.vercel.app/api/og?id=<topic-id>
+```
+
+The PNG is exactly 1200×630 and includes:
 - Stats Maker branding
 - category
 - work title
@@ -32,67 +41,36 @@ The image is generated as a 1200×630 PNG with:
 - score scale
 - creator Overall TOP 3
 
-## Files
-- `api/share.js` — crawler-facing HTML / OG metadata
-- `api/og.js` — dynamic 1200×630 PNG
-- `server/og-data.js` — Supabase read + ranking calculation
-- `vercel.json` — `/p/:id` rewrite
-- `package.json` — `@vercel/og` + React
-- `robots.txt` — allows OG image crawling
-- `cloud/runtime-config.js` — GitHub Pages → Vercel share origin switch
+## Final implementation
 
-## Vercel project
-Deploy this repository root as a Vercel project.
+- `api/share.mjs` — crawler-facing HTML and work-specific OGP metadata
+- `api/og.js` — Node function that builds an SVG and renders it to PNG with Sharp
+- `server/og-data.mjs` — Supabase read and creator ranking calculation
+- `vercel.json` — rewrites `/p/:id` to the share function
+- `package.json` — Node 22 + `sharp`
+- `cloud/runtime-config.js` — production Vercel share origin
+- `.github/workflows/ogp-smoke.yml` — live production regression test
 
-No application migration is required. GitHub Pages remains the canonical app.
-
-Optional environment variables:
-- `SUPABASE_URL`
-- `SUPABASE_PUBLISHABLE_KEY`
-- `STATS_MAKER_APP_ORIGIN`
-
-The checked-in defaults use the existing public Supabase URL / publishable key and the GitHub Pages app origin. Do not use a Supabase service-role key.
-
-## Activate URL sharing
-After the Vercel project has a stable production URL, update:
-
-`cloud/runtime-config.js`
-
-From:
-
-```js
-ogShareOrigin:''
-```
-
-To:
-
-```js
-ogShareOrigin:'https://<vercel-domain>'
-```
-
-Until this value is set, the existing GitHub Pages URL sharing remains unchanged.
-
-## Verification
-Use a real Public or Unlisted topic ID.
-
-1. Open:
-   `https://<vercel-domain>/api/og?id=<topic-id>`
-   - Expected: 1200×630 PNG.
-
-2. View source:
-   `https://<vercel-domain>/p/<topic-id>`
-   - Expected:
-     - work-specific `og:title`
-     - work-specific `og:description`
-     - absolute `og:image`
-     - `twitter:card=summary_large_image`
-
-3. Open the share URL in a normal browser.
-   - Expected: redirect to the existing GitHub Pages public work.
-
-4. Test the URL in Vercel Open Graph preview and target social platforms.
+The earlier `@vercel/og` renderer was removed after production diagnostics found a Vercel bundling/runtime failure involving its Node `fs` dependency. The final renderer uses Sharp instead.
 
 ## Privacy
-- Private topics are not intentionally exposed.
-- The OGP reader requests only Public / Unlisted topics.
-- Community averages are not queried or rendered, so the R20 five-participant privacy threshold is not involved.
+
+- Only Public / Unlisted topics can be read by the OGP layer.
+- Private topics are not rendered.
+- Community aggregate data is never queried for OGP images.
+- The R20 Community five-participant privacy threshold is therefore not bypassed.
+- Only the Supabase publishable key is used. Never use a service-role key.
+
+## Automatic verification
+
+On relevant pushes to `main`, GitHub Actions:
+
+1. waits for the exact commit's Vercel deployment to finish;
+2. fetches a real Public Stats Maker work from Supabase;
+3. checks work-specific `og:title`, `og:description`, `og:image` and Twitter large-card metadata;
+4. checks the GitHub Pages public-work destination;
+5. downloads the production OG image;
+6. verifies it is a PNG;
+7. verifies dimensions are exactly 1200×630.
+
+R23 P3 is considered production-ready only when this workflow passes.
