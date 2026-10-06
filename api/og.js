@@ -5,10 +5,12 @@ import {fetchTopic,safeTopicId,topicCardData} from '../server/og-data.js';
 const h=React.createElement;
 
 export default async function handler(request){
+  let debug=false;
   try{
     const proto=String(request.headers?.['x-forwarded-proto']||'https').split(',')[0].trim();
     const host=String(request.headers?.host||request.headers?.['x-forwarded-host']||'stats-maker-ogp.vercel.app').split(',')[0].trim();
     const url=new URL(request.url||'/api/og',`${proto}://${host}`);
+    debug=url.searchParams.get('debug')==='1';
     const id=safeTopicId(url.searchParams.get('id'));
     const topic=id?await fetchTopic(id):null;
     const card=topic?topicCardData(topic):{
@@ -233,6 +235,10 @@ export default async function handler(request){
     });
   }catch(error){
     console.error('[Stats Maker OGP] image generation failed',error);
-    return new Response('Failed to generate Stats Maker OG image',{status:500});
+    const message=String(error?.stack||error?.message||error||'Unknown OG error').slice(0,2000);
+    return new Response(debug?message:'Failed to generate Stats Maker OG image',{
+      status:500,
+      headers:{'content-type':'text/plain; charset=utf-8'}
+    });
   }
 }
