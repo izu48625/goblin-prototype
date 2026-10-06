@@ -104,3 +104,10 @@ Square, landscape, and portrait layouts are independently arranged to avoid over
 ### Build
 - Active cache key: `r23ux1`.
 - No database migration required.
+
+## UX2 Full-width mobile launcher
+
+- Restored the mobile Visual Tools launcher to full width.
+- Kept the newer compact height and reduced footer reserve from UX1.
+- Other mobile editor cleanup from UX1 remains unchanged.
+- Active root cache key: `r23ux2`.
