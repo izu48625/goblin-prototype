@@ -1,14 +1,12 @@
-import {fetchTopic,safeTopicId,topicCardData} from '../server/og-data.js';
+const React=require('react');
+const {ImageResponse}=require('@vercel/og');
 
-export default async function handler(request,response){
+const h=React.createElement;
+
+module.exports=async function handler(request,response){
   let debug=false;
   try{
-    const [{ImageResponse},reactModule]=await Promise.all([
-      import('@vercel/og'),
-      import('react')
-    ]);
-    const React=reactModule.default||reactModule;
-    const h=React.createElement;
+    const {fetchTopic,safeTopicId,topicCardData}=await import('../server/og-data.mjs');
 
     const proto=String(request.headers?.['x-forwarded-proto']||'https').split(',')[0].trim();
     const host=String(request.headers?.host||request.headers?.['x-forwarded-host']||'stats-maker-ogp.vercel.app').split(',')[0].trim();
