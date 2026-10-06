@@ -6,7 +6,9 @@ const h=React.createElement;
 
 export default async function handler(request){
   try{
-    const url=new URL(request.url||'https://stats-maker-ogp.vercel.app/api/og');
+    const proto=String(request.headers?.['x-forwarded-proto']||'https').split(',')[0].trim();
+    const host=String(request.headers?.host||request.headers?.['x-forwarded-host']||'stats-maker-ogp.vercel.app').split(',')[0].trim();
+    const url=new URL(request.url||'/api/og',`${proto}://${host}`);
     const id=safeTopicId(url.searchParams.get('id'));
     const topic=id?await fetchTopic(id):null;
     const card=topic?topicCardData(topic):{
