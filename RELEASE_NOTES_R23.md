@@ -162,3 +162,11 @@ Square, landscape, and portrait layouts are independently arranged to avoid over
 ### Build
 - Active cache key: `r23ux4`.
 - No database migration required.
+
+## UX5 Table view default
+
+- Saved sheets now always open in the normal Table view when Stats Maker launches.
+- Previous Fit / Overview choice no longer becomes the next-launch default.
+- Users can still switch freely to Overview or Fit View during the current session.
+- Editable Fit View from UX4 remains fully available.
+- Active cache key: `r23ux5`.
