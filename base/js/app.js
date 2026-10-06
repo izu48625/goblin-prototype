@@ -91,7 +91,9 @@
     });
     if(!Array.isArray(s.compare))s.compare=[];
     if(!['radar','bar'].includes(s.compareView))s.compareView='radar';
-    if(!['sheet','overview','fit'].includes(s.viewMode))s.viewMode='sheet';
+    // Always start each saved sheet in the normal table view on app launch.
+    // View switching still works normally during the current session.
+    s.viewMode='sheet';
     if(typeof s.weighted!=='boolean')s.weighted=false;
     if(typeof s.search!=='string')s.search='';
     if(typeof s.gradeFilter!=='string')s.gradeFilter='all';
