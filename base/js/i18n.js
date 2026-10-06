@@ -586,6 +586,7 @@
     localStorage.setItem(STORAGE_KEY,locale);
     applyTranslations();
     window.dispatchEvent(new CustomEvent('statsmaker:languagechange',{detail:{locale}}));
+    try{window.parent?.postMessage({type:'statsmaker:languagechange',locale},'*')}catch{}
   }
 
   function getLanguage(){return locale}
