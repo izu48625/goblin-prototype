@@ -1,0 +1,127 @@
+name: OGP Smoke Test
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - "api/**"
+      - "server/**"
+      - "cloud/runtime-config.js"
+      - "cloud/public.js"
+      - "public.html"
+      - "vercel.json"
+      - "package.json"
+      - ".github/workflows/ogp-smoke.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  smoke:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - name: Find latest public work
+        id: topic
+        shell: bash
+        env:
+          SUPABASE_URL: https://ibpdxbeltdwkquowjeay.supabase.co
+          SUPABASE_PUBLISHABLE_KEY: sb_publishable_6abnwW_1p-U_Y_DefUXfFQ_Dz_Y2vsD
+        run: |
+          set -euo pipefail
+          API="$SUPABASE_URL/rest/v1/topics?select=id,title&visibility=eq.public&order=published_at.desc&limit=1"
+          JSON="$(curl -fsS "$API"             -H "apikey: $SUPABASE_PUBLISHABLE_KEY"             -H "Authorization: Bearer $SUPABASE_PUBLISHABLE_KEY")"
+          echo "Supabase response: $JSON"
+          ID="$(printf '%s' "$JSON" | jq -r '.[0].id // empty')"
+          TITLE="$(printf '%s' "$JSON" | jq -r '.[0].title // empty')"
+          if [ -z "$ID" ]; then
+            echo "::error::No Public Stats Maker work was returned by Supabase."
+            exit 1
+          fi
+          echo "id=$ID" >> "$GITHUB_OUTPUT"
+          echo "title=$TITLE" >> "$GITHUB_OUTPUT"
+          echo "Testing public work: $TITLE ($ID)"
+
+      - name: Wait for Vercel production deployment
+        shell: bash
+        env:
+          TOPIC_ID: ${{ steps.topic.outputs.id }}
+        run: |
+          set -euo pipefail
+          SHARE_URL="https://stats-maker-ogp.vercel.app/p/$TOPIC_ID"
+          for attempt in $(seq 1 20); do
+            CODE="$(curl -sS -o /tmp/share.html -w '%{http_code}' "$SHARE_URL" || true)"
+            if [ "$CODE" = "200" ] && grep -q 'property="og:title"' /tmp/share.html; then
+              echo "Vercel OGP route is ready on attempt $attempt."
+              exit 0
+            fi
+            echo "Attempt $attempt: HTTP $CODE; waiting 6s for deployment propagation..."
+            sleep 6
+          done
+          echo "::error::Vercel OGP route did not become ready."
+          cat /tmp/share.html || true
+          exit 1
+
+      - name: Validate server-rendered OGP metadata
+        shell: bash
+        env:
+          TOPIC_ID: ${{ steps.topic.outputs.id }}
+          TOPIC_TITLE: ${{ steps.topic.outputs.title }}
+        run: |
+          set -euo pipefail
+          SHARE_URL="https://stats-maker-ogp.vercel.app/p/$TOPIC_ID"
+          curl -fsS "$SHARE_URL" -o /tmp/share.html
+
+          grep -q 'property="og:title"' /tmp/share.html
+          grep -q 'property="og:description"' /tmp/share.html
+          grep -q 'property="og:image"' /tmp/share.html
+          grep -q 'name="twitter:card" content="summary_large_image"' /tmp/share.html
+          grep -q "https://izu48625.github.io/goblin-prototype/public.html?id=$TOPIC_ID" /tmp/share.html
+          grep -q "https://stats-maker-ogp.vercel.app/api/og?id=$TOPIC_ID" /tmp/share.html
+
+          echo "Metadata PASS for: $TOPIC_TITLE"
+          echo "Share URL: $SHARE_URL"
+
+      - name: Validate 1200x630 PNG
+        shell: bash
+        env:
+          TOPIC_ID: ${{ steps.topic.outputs.id }}
+        run: |
+          set -euo pipefail
+          OG_URL="https://stats-maker-ogp.vercel.app/api/og?id=$TOPIC_ID"
+          curl -fsS -D /tmp/og.headers "$OG_URL" -o /tmp/og.png
+          grep -Eiq '^content-type: image/png' /tmp/og.headers
+
+          python3 - <<'PY'
+          import struct
+          p="/tmp/og.png"
+          with open(p,"rb") as f:
+              sig=f.read(24)
+          if sig[:8] != b"\x89PNG\r\n\x1a\n":
+              raise SystemExit("Not a PNG")
+          width,height=struct.unpack(">II",sig[16:24])
+          print(f"OG image dimensions: {width}x{height}")
+          if (width,height)!=(1200,630):
+              raise SystemExit(f"Unexpected OG size: {width}x{height}")
+          PY
+
+          echo "OG image PASS: $OG_URL"
+
+      - name: Summary
+        shell: bash
+        env:
+          TOPIC_ID: ${{ steps.topic.outputs.id }}
+          TOPIC_TITLE: ${{ steps.topic.outputs.title }}
+        run: |
+          {
+            echo "## Stats Maker OGP Smoke Test"
+            echo ""
+            echo "- Public work: **$TOPIC_TITLE**"
+            echo "- Topic ID: `$TOPIC_ID`"
+            echo "- Share route: PASS"
+            echo "- Work-specific OG metadata: PASS"
+            echo "- Twitter large card metadata: PASS"
+            echo "- GitHub Pages canonical destination: PASS"
+            echo "- OG PNG: PASS (1200×630)"
+          } >> "$GITHUB_STEP_SUMMARY"
