@@ -22,6 +22,30 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 5
     steps:
+      - name: Wait for Vercel deployment of this commit
+        shell: bash
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -euo pipefail
+          API="https://api.github.com/repos/${GITHUB_REPOSITORY}/commits/${GITHUB_SHA}/status"
+          for attempt in $(seq 1 30); do
+            JSON="$(curl -fsS "$API"               -H "Authorization: Bearer $GH_TOKEN"               -H "Accept: application/vnd.github+json")"
+            STATE="$(printf '%s' "$JSON" | jq -r '[.statuses[]? | select(.context=="Vercel")][0].state // "pending"')"
+            DESC="$(printf '%s' "$JSON" | jq -r '[.statuses[]? | select(.context=="Vercel")][0].description // ""')"
+            echo "Vercel attempt $attempt: $STATE $DESC"
+            if [ "$STATE" = "success" ]; then
+              exit 0
+            fi
+            if [ "$STATE" = "failure" ] || [ "$STATE" = "error" ]; then
+              echo "::error::Vercel deployment failed for $GITHUB_SHA: $DESC"
+              exit 1
+            fi
+            sleep 6
+          done
+          echo "::error::Timed out waiting for Vercel deployment of $GITHUB_SHA."
+          exit 1
+
       - name: Find latest public work
         id: topic
         shell: bash
@@ -89,8 +113,17 @@ jobs:
           TOPIC_ID: ${{ steps.topic.outputs.id }}
         run: |
           set -euo pipefail
-          OG_URL="https://stats-maker-ogp.vercel.app/api/og?id=$TOPIC_ID"
-          curl -fsS -D /tmp/og.headers "$OG_URL" -o /tmp/og.png
+          OG_URL="https://stats-maker-ogp.vercel.app/api/og?id=$TOPIC_ID&debug=1"
+          CODE="$(curl -sS -D /tmp/og.headers "$OG_URL" -o /tmp/og.png -w '%{http_code}' || true)"
+          if [ "$CODE" != "200" ]; then
+            echo "::error::OG image endpoint returned HTTP $CODE"
+            echo "--- response headers ---"
+            cat /tmp/og.headers || true
+            echo "--- response body ---"
+            head -c 4000 /tmp/og.png || true
+            echo
+            exit 1
+          fi
           grep -Eiq '^content-type: image/png' /tmp/og.headers
 
           python3 - <<'PY'
