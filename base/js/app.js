@@ -1669,7 +1669,7 @@
   function publicPageUrl(topicId){
     const url=new URL('../public.html',location.href);
     url.searchParams.set('id',topicId);
-    url.searchParams.set('v','r23p3b');
+    url.searchParams.set('v','r24p2');
     return url.href;
   }
 
@@ -1907,7 +1907,7 @@
       if(!email||password.length<6)throw new Error(t('publish.authRequired'));
       const sb=window.SM_SUPABASE.client;
       const current=(await sb.auth.getUser()).data.user;
-      if(current?.is_anonymous)await sb.auth.signOut();
+      if(current?.is_anonymous)throw new Error(t('publish.accountViaMyPage'));
       const {data,error}=await sb.auth.signUp({email,password});
       if(error)throw error;
       if(data.session){setPublishStatus(t('publish.signupSuccess'),'ok');await refreshPublishAuth()}
@@ -1921,7 +1921,7 @@
       if(!email||!password)throw new Error(t('publish.authRequired'));
       const sb=window.SM_SUPABASE.client;
       const current=(await sb.auth.getUser()).data.user;
-      if(current?.is_anonymous)await sb.auth.signOut();
+      if(current?.is_anonymous)throw new Error(t('publish.accountViaMyPage'));
       const {error}=await sb.auth.signInWithPassword({email,password});
       if(error)throw error;
       setPublishStatus(t('publish.signinSuccess'),'ok');
@@ -1931,6 +1931,8 @@
 
   async function publishSignOut(){
     try{
+      const current=(await window.SM_SUPABASE.client.auth.getUser()).data.user;
+      if(current?.is_anonymous)throw new Error(t('publish.accountViaMyPage'));
       await window.SM_SUPABASE.client.auth.signOut();
       publishState.user=null;
       setPublishStatus(t('publish.signoutSuccess'));
