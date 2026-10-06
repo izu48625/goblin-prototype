@@ -170,3 +170,37 @@ Square, landscape, and portrait layouts are independently arranged to avoid over
 - Users can still switch freely to Overview or Fit View during the current session.
 - Editable Fit View from UX4 remains fully available.
 - Active cache key: `r23ux5`.
+
+## P3A Dynamic OGP infrastructure
+
+### Server-rendered share entry
+- Added a Vercel-only `/p/:id` route.
+- The route reads the matching Public / Unlisted topic from Supabase on the server.
+- It returns work-specific:
+  - `og:title`
+  - `og:description`
+  - `og:url`
+  - `og:image`
+  - Twitter large-card metadata.
+- Human browsers are redirected back to the existing GitHub Pages public work.
+
+### Dynamic OG image
+- Added `/api/og?id=...`.
+- Generates a native 1200×630 PNG with `@vercel/og`.
+- Includes category, title, description, target count, metric count, score scale, and creator Overall TOP 3.
+- Community averages are not included, so the Community privacy threshold is never bypassed.
+- CDN cache headers are included.
+
+### Safe activation
+- Added `cloud/runtime-config.js`.
+- `ogShareOrigin` is intentionally blank until the production Vercel domain is known.
+- Public URL sharing falls back to the existing GitHub Pages URL while blank.
+- Once the Vercel domain is configured, URL Share and the URL attached to native image shares use `/p/:id`.
+
+### Hosting
+- Main app remains on GitHub Pages.
+- Vercel is used only for the dynamic OGP/share-entry layer.
+- No Supabase migration required.
+
+### Build
+- Active cache key: `r23p3a`.

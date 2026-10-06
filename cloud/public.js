@@ -261,6 +261,11 @@
   }
   function toast(message){const old=document.querySelector('.toast');old?.remove();const el=document.createElement('div');el.className='toast';el.textContent=message;document.body.appendChild(el);setTimeout(()=>el.remove(),2200)}
 
+  function ogShareUrl(topicId){
+    const origin=String(window.SM_RUNTIME?.ogShareOrigin||'').trim().replace(/\/+$/,'');
+    return origin&&topicId?`${origin}/p/${encodeURIComponent(topicId)}`:location.href;
+  }
+
   async function getOwnSubmitted(sb,topicId,items,criteria,weighted){
     try{
       const {data:sessionData}=await sb.auth.getSession();
@@ -356,7 +361,7 @@
             <div class="lineageMain">
               <span class="lineageLabel">${lineageRelation==='version'?(ja?'前バージョン':'Previous version'):lineageRelation==='remix'?(ja?'Remix元':'Remix source'):(ja?'派生元':'Source')}</span>
               ${sourceTopic
-                ?`<a class="lineageSource" href="public.html?id=${encodeURIComponent(sourceTopic.id)}&v=r23ux5">${esc(sourceTopic.title)}</a>`
+                ?`<a class="lineageSource" href="public.html?id=${encodeURIComponent(sourceTopic.id)}&v=r23p3a">${esc(sourceTopic.title)}</a>`
                 :`<span class="lineageSource unavailable">${ja?'派生元は現在参照できません':'Source is currently unavailable'}</span>`}
             </div>
             <div class="lineageBadge">${lineageRelation==='version'?'VERSION':lineageRelation==='remix'?'REMIX':'SOURCE'}</div>
@@ -463,12 +468,12 @@
         const sheet=window.SM_REMIX.buildSheet(data,snap,dbCriteria,items,ja?'ja':'en');
         window.SM_REMIX.saveSheet(sheet);
         toast(ja?'Remixしました。編集画面へ移動します。':'Remixed. Opening the editor…');
-        setTimeout(()=>{location.href='index.html?remixed=1&v=r23ux5'},500);
+        setTimeout(()=>{location.href='index.html?remixed=1&v=r23p3a'},500);
       }catch(e){toast((ja?'Remixに失敗しました：':'Remix failed: ')+(e?.message||e))}
     };
     document.getElementById('shareBtn').onclick=async()=>{
       try{
-        const url=location.href;
+        const url=ogShareUrl(id);
         if(navigator.share){
           await navigator.share({title:data.title,text:data.description||'',url});
         }else if(navigator.clipboard?.writeText){
@@ -560,7 +565,7 @@
         const safe=String(data.title||'stats-maker').replace(/[\\/:*?"<>|]+/g,'_').slice(0,60)||'stats-maker';
         const size=shareCanvasSize(shareState.aspect);
         const file=new File([blob],`${safe}-${size.label.replace(':','x')}.png`,{type:'image/png'});
-        const url=location.href;
+        const url=ogShareUrl(id);
 
         let shared=false;
         if(navigator.share&&navigator.canShare?.({files:[file]})){
@@ -608,7 +613,7 @@
           }
           sessionStorage.setItem('statsMaker:openPublish','1');
         }catch{}
-        location.href='index.html?v=r23ux5&from=public';
+        location.href='index.html?v=r23p3a&from=public';
       };
     };
 
