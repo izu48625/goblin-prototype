@@ -103,5 +103,5 @@ export function topicCardData(topic){
 }
 
 export function publicPageUrl(topicId){
-  return `${APP_ORIGIN}/public.html?id=${encodeURIComponent(topicId)}&v=r23p3a`;
+  return `${APP_ORIGIN}/public.html?id=${encodeURIComponent(topicId)}&v=r23p3b`;
 }
