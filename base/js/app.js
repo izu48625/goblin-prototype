@@ -1479,7 +1479,17 @@
         scheduleSave('');
       });
 
-      el.addEventListener('change',()=>{
+      el.addEventListener('change',e=>{
+        const ri=+e.currentTarget.dataset.fitScoreRow;
+        const ci=+e.currentTarget.dataset.fitScoreCol;
+        if(s.rows[ri]){
+          const value=clampScore(e.currentTarget.value);
+          s.rows[ri].scores[ci]=value;
+          e.currentTarget.value=value==null?'':value;
+          const cell=e.currentTarget.closest('.fitScoreCell');
+          if(cell)cell.className=`fitScoreCell ${heatClass(value)}`;
+          refreshFitAverage(ri);
+        }
         syncFitEdits();
         scheduleSave('');
       });
