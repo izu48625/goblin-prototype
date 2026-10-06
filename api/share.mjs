@@ -1,4 +1,4 @@
-import {escapeHtml,fetchTopic,publicPageUrl,safeTopicId,topicCardData} from '../server/og-data.js';
+import {escapeHtml,fetchTopic,publicPageUrl,safeTopicId,topicCardData} from '../server/og-data.mjs';
 
 function requestOrigin(req){
   const proto=String(req.headers?.['x-forwarded-proto']||'https').split(',')[0].trim();
