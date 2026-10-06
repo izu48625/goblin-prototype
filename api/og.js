@@ -66,7 +66,7 @@ export default async function handler(req){
     style:{
       display:'flex',width:'100%',height:'100%',padding:'58px 64px',
       background:'linear-gradient(135deg,#07101f 0%,#0c1b30 58%,#15284a 100%)',
-      color:'#edf4ff',fontFamily:'Arial, sans-serif'
+      color:'#edf4ff',boxSizing:'border-box'
     }
   },
     h('div',{style:{display:'flex',flexDirection:'column',width:650,height:'100%'}},
@@ -92,7 +92,7 @@ export default async function handler(req){
     h('div',{
       style:{
         display:'flex',flexDirection:'column',marginLeft:54,width:368,height:'100%',
-        padding:'28px 30px',border:'1px solid #36577d',borderRadius:24,background:'#081322'
+        padding:'28px 30px',border:'1px solid #36577d',borderRadius:24,background:'#081322',boxSizing:'border-box'
       }
     },
       h('div',{style:{fontSize:15,fontWeight:900,letterSpacing:1.5,color:'#879dbc'}},card.language==='en'?'CREATOR OVERALL TOP 3':'作成者 総合 TOP 3'),
