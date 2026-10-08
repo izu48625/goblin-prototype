@@ -1,0 +1,19 @@
+{
+  "$schema": "node_modules/wrangler/config-schema.json",
+  "name": "stats-maker",
+  "main": "./worker/index.js",
+  "compatibility_date": "2026-10-08",
+  "assets": {
+    "directory": "./dist",
+    "binding": "ASSETS",
+    "not_found_handling": "404-page",
+    "run_worker_first": [
+      "/p/*",
+      "/api/og*",
+      "/api/health"
+    ]
+  },
+  "observability": {
+    "enabled": true
+  }
+}
