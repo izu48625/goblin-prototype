@@ -1,0 +1,72 @@
+name: Cloudflare Preflight
+
+on:
+  pull_request:
+    paths:
+      - "index.html"
+      - "base/**"
+      - "app/**"
+      - "cloud/**"
+      - "css/**"
+      - "js/**"
+      - "discover.html"
+      - "public.html"
+      - "rate.html"
+      - "my.html"
+      - "worker/**"
+      - "scripts/build-cloudflare.mjs"
+      - "wrangler.jsonc"
+      - "package.json"
+      - ".github/workflows/cloudflare-preflight.yml"
+  push:
+    branches: [main]
+    paths:
+      - "index.html"
+      - "base/**"
+      - "app/**"
+      - "cloud/**"
+      - "css/**"
+      - "js/**"
+      - "discover.html"
+      - "public.html"
+      - "rate.html"
+      - "my.html"
+      - "worker/**"
+      - "scripts/build-cloudflare.mjs"
+      - "wrangler.jsonc"
+      - "package.json"
+      - ".github/workflows/cloudflare-preflight.yml"
+
+permissions:
+  contents: read
+
+jobs:
+  preflight:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+      - name: Syntax check
+        run: |
+          node --check worker/index.js
+          node --check scripts/build-cloudflare.mjs
+      - name: Build static bundle
+        run: npm run build:cloudflare
+      - name: Verify required assets
+        run: |
+          test -f dist/index.html
+          test -f dist/base/index.html
+          test -f dist/app/editor.html
+          test -f dist/discover.html
+          test -f dist/public.html
+          test -f dist/rate.html
+          test -f dist/cloud/supabase.js
+          test -f dist/cloud/runtime-config.js
+      - name: Verify no private server files are published
+        run: |
+          test ! -e dist/server
+          test ! -e dist/api
+          test ! -e dist/.github
+          test ! -e dist/R18_SUPABASE_MIGRATION.sql
