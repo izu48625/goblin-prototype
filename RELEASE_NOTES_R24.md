@@ -79,3 +79,34 @@ The GitHub Pages My Page URL must be allowed as an Auth redirect URL.
 
 ### Build
 - Active application cache key: `r24p2`.
+
+
+## P3 — Anonymous-first Release Cleanup
+
+### Product direction
+- Formal release no longer requires a visible account or login.
+- Core flow is now: create → publish / share → join Community → compare with Community.
+- Google / Apple identity linking is parked as an optional future backup / multi-device feature.
+
+### Editor / publish UI
+- Removed desktop and mobile My Page entry points from the editor.
+- Removed the legacy email/password sign-up, sign-in and sign-out UI from the publish dialog.
+- Publish now enters the settings screen directly and silently creates an anonymous Supabase identity only when cloud identity is needed.
+- Existing permanent sessions remain compatible, but no account UI is exposed.
+- Publish copy now explains that the anonymous ID is browser-local and that clearing browser data may remove update ownership.
+
+### Community
+- Community participation remains fully available without account registration.
+- The rating page silently starts an anonymous session when needed.
+- The existing database uniqueness rule on `rating_sets(topic_id, user_id)` remains the source of truth for one participant per work.
+- Re-submission from the same anonymous identity updates the existing rating rather than adding another vote.
+- Creator/community comparison remains unchanged.
+
+### Parked account surface
+- `my.html` is no longer linked from the product and is marked `noindex,nofollow`.
+- R24 P1/P2 account code is preserved for a possible future optional sync / recovery feature.
+- Google / Apple OAuth configuration is not required for the anonymous-first release.
+
+### Build
+- Active application cache key: `r24p3`.
+- No database migration is required.

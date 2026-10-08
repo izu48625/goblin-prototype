@@ -627,7 +627,7 @@
       setCommunityStatus(t('community.saving'));
       const sb=window.SM_SUPABASE?.client;
       if(!sb)throw new Error('Supabase client is not ready');
-      await ensurePublishUser();
+      await ensureCloudIdentity();
       const {data,error}=await sb.rpc('save_my_topic_rating',{
         p_topic_id:s.sourceTopicId,
         p_scores:payload,
@@ -1657,7 +1657,7 @@
   const PUBLISH_CATEGORIES=new Set(['sports','manga_anime','movie_tv','food','game','music','books','travel','tech','lifestyle','other']);
   const normalizePublishCategory=value=>PUBLISH_CATEGORIES.has(String(value||''))?String(value):'other';
 
-  const publishState={user:null,url:''};
+  const publishState={url:''};
 
   function setPublishStatus(message='',type=''){
     const el=$('publishStatus');
@@ -1669,7 +1669,7 @@
   function publicPageUrl(topicId){
     const url=new URL('../public.html',location.href);
     url.searchParams.set('id',topicId);
-    url.searchParams.set('v','r24p2');
+    url.searchParams.set('v','r24p3');
     return url.href;
   }
 
@@ -1809,9 +1809,7 @@
     if(topicId)window.open(publicPageUrl(topicId),'_blank','noopener');
   }
 
-  function isPermanentUser(user){return !!user&&!user.is_anonymous}
-
-  async function ensurePublishUser(){
+  async function ensureCloudIdentity(){
     const sb=window.SM_SUPABASE?.client;
     if(!sb)throw new Error('Supabase client is not ready');
     const {data:sessionData,error:sessionError}=await sb.auth.getSession();
@@ -1841,22 +1839,17 @@
       return null;
     }
     let user=null;
-    try{user=await ensurePublishUser()}
+    try{user=await ensureCloudIdentity()}
     catch(error){
-      publishState.user=null;
-      $('publishAuthPane')?.classList.add('hidden');
-      $('publishSettingsPane')?.classList.remove('hidden');
       setPublishStatus(t('publish.errorPrefix')+(error?.message||String(error)),'error');
       return null;
     }
-    publishState.user=user;
-    $('publishAuthPane')?.classList.add('hidden');
+
     $('publishSettingsPane')?.classList.remove('hidden');
 
     const s=activeSheet();
     let model=null;
     try{model=buildPublishModel(s)}catch{}
-    if($('publishUserText')) $('publishUserText').textContent=user?.is_anonymous?t('publish.guestLabel'):(user?.email||`${user?.id?.slice(0,8)||''}…`);
     $('publishPreviewTitle').textContent=s.title.trim()||t('fallback.untitledSheet');
     $('publishPreviewMeta').textContent=t('publish.meta',{
       rows:model?.rows?.length??s.rows.filter(r=>r.name.trim()).length,
@@ -1901,45 +1894,6 @@
     refresh:refreshPublishAuth
   };
 
-  async function publishSignUp(){
-    try{
-      const email=$('publishEmail').value.trim(),password=$('publishPassword').value;
-      if(!email||password.length<6)throw new Error(t('publish.authRequired'));
-      const sb=window.SM_SUPABASE.client;
-      const current=(await sb.auth.getUser()).data.user;
-      if(current?.is_anonymous)throw new Error(t('publish.accountViaMyPage'));
-      const {data,error}=await sb.auth.signUp({email,password});
-      if(error)throw error;
-      if(data.session){setPublishStatus(t('publish.signupSuccess'),'ok');await refreshPublishAuth()}
-      else setPublishStatus(t('publish.signupConfirm'));
-    }catch(e){setPublishStatus(t('publish.authErrorPrefix')+(e?.message||String(e)),'error')}
-  }
-
-  async function publishSignIn(){
-    try{
-      const email=$('publishEmail').value.trim(),password=$('publishPassword').value;
-      if(!email||!password)throw new Error(t('publish.authRequired'));
-      const sb=window.SM_SUPABASE.client;
-      const current=(await sb.auth.getUser()).data.user;
-      if(current?.is_anonymous)throw new Error(t('publish.accountViaMyPage'));
-      const {error}=await sb.auth.signInWithPassword({email,password});
-      if(error)throw error;
-      setPublishStatus(t('publish.signinSuccess'),'ok');
-      await refreshPublishAuth();
-    }catch(e){setPublishStatus(t('publish.authErrorPrefix')+(e?.message||String(e)),'error')}
-  }
-
-  async function publishSignOut(){
-    try{
-      const current=(await window.SM_SUPABASE.client.auth.getUser()).data.user;
-      if(current?.is_anonymous)throw new Error(t('publish.accountViaMyPage'));
-      await window.SM_SUPABASE.client.auth.signOut();
-      publishState.user=null;
-      setPublishStatus(t('publish.signoutSuccess'));
-      await refreshPublishAuth();
-    }catch(e){setPublishStatus(t('publish.authErrorPrefix')+(e?.message||String(e)),'error')}
-  }
-
   async function clearPublishedStructure(sb,topicId){
     const {error:itemError}=await sb.from('topic_items').delete().eq('topic_id',topicId);
     if(itemError)throw itemError;
@@ -1967,7 +1921,7 @@
   async function executePublish(){
     try{
       const sb=window.SM_SUPABASE?.client;if(!sb)throw new Error('Supabase client is not ready');
-      const user=await ensurePublishUser();if(!user)throw new Error(t('publish.guestStartFailed'));
+      const user=await ensureCloudIdentity();if(!user)throw new Error(t('publish.guestStartFailed'));
       const s=activeSheet(),visibility=document.querySelector('input[name="publishVisibility"]:checked')?.value||'public';
       s.publishCategory=normalizePublishCategory($('publishCategory')?.value||s.publishCategory||'other');
       const model=buildPublishModel(s);setPublishStatus(t('publish.busy'));
@@ -2009,7 +1963,7 @@
     try{
       const sb=window.SM_SUPABASE?.client;
       if(!sb)throw new Error('Supabase client is not ready');
-      const user=await ensurePublishUser();
+      const user=await ensureCloudIdentity();
       const s=activeSheet();
       if(!user||!s.cloudTopicId)throw new Error(t('publish.authRequired'));
 
@@ -2245,9 +2199,6 @@
   $('publishBtn').addEventListener('click',openPublishDialog);
   $('publishCloseBtn').addEventListener('click',closePublishDialog);
   $('publishDialogBackdrop').addEventListener('click',e=>{if(e.target===$('publishDialogBackdrop'))closePublishDialog()});
-  $('publishSignUpBtn').addEventListener('click',publishSignUp);
-  $('publishSignInBtn').addEventListener('click',publishSignIn);
-  $('publishSignOutBtn').addEventListener('click',publishSignOut);
   $('publishExecuteBtn').addEventListener('click',executePublish);
   $('publishUnpublishBtn').addEventListener('click',unpublishTopic);
   $('publishCopyBtn').addEventListener('click',copyPublishUrl);
