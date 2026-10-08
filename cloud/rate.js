@@ -55,7 +55,7 @@
   try{
     const id=new URLSearchParams(location.search).get('id');if(!id)throw new Error('Topic ID is missing.');const sb=window.SM_SUPABASE?.client;if(!sb)throw new Error('Supabase is not ready.');
     const {data,error}=await sb.from('topics').select('id,title,description,language_code,score_scale,weighted,allow_ratings,visibility,topic_items(id,name,position),criteria(id,name,weight,position)').eq('id',id).single();if(error)throw error;if(!data.allow_ratings)throw new Error('This topic is not accepting ratings.');
-    state.topic=data;state.ja=data.language_code!=='en';state.items=(data.topic_items||[]).sort((a,b)=>a.position-b.position);state.criteria=(data.criteria||[]).sort((a,b)=>a.position-b.position);document.documentElement.lang=state.ja?'ja':'en';document.title=`${data.title} - ${state.ja?'採点':'Rate'}`;document.getElementById('backLink').href=`public.html?id=${encodeURIComponent(id)}&v=r24p3`;document.getElementById('backLink').textContent=state.ja?'← 公開ページへ':'← Public page';
+    state.topic=data;state.ja=data.language_code!=='en';state.items=(data.topic_items||[]).sort((a,b)=>a.position-b.position);state.criteria=(data.criteria||[]).sort((a,b)=>a.position-b.position);document.documentElement.lang=state.ja?'ja':'en';document.title=`${data.title} - ${state.ja?'採点':'Rate'}`;document.getElementById('backLink').href=`public.html?id=${encodeURIComponent(id)}&v=r24p4`;document.getElementById('backLink').textContent=state.ja?'← 公開ページへ':'← Public page';
     state.user=await ensureParticipant(sb);await loadOwn(sb,id);render();status.classList.add('hidden');content.classList.remove('hidden');
   }catch(e){console.error(e);status.textContent=(e?.message||String(e));}
 })();

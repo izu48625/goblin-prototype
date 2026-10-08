@@ -6,5 +6,13 @@
   },
   "dependencies": {
     "sharp": "0.35.5"
+  },
+  "scripts": {
+    "build:cloudflare": "node scripts/build-cloudflare.mjs",
+    "dev:cloudflare": "npm run build:cloudflare && wrangler dev",
+    "deploy:cloudflare": "npm run build:cloudflare && wrangler deploy"
+  },
+  "devDependencies": {
+    "wrangler": "4.148.0"
   }
 }
