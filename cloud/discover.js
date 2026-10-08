@@ -280,7 +280,7 @@
       const description=topic.description||'';
       const lang=topic.language_code==='en'?'EN':'JA';
       const community=isCommunityWork(topic);
-      const href=`public.html?id=${encodeURIComponent(topic.id)}&v=r24p3`;
+      const href=`public.html?id=${encodeURIComponent(topic.id)}&v=r24p4`;
       const lineage=relation==='remix'
         ?`<span class="metaChip lineageChip">${copy.lineageRemix}</span>`
         :relation==='version'
