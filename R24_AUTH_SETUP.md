@@ -1,5 +1,8 @@
 # Stats Maker R24 P2 — Supabase Auth Setup
 
+> **R24 P3 status:** Deferred for the formal anonymous-first release. Google / Apple OAuth is optional future functionality for account recovery / multi-device sync and is not required to publish or participate in Community.
+
+
 ## Production URLs
 
 Stats Maker:
