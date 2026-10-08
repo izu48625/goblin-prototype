@@ -110,3 +110,31 @@ The GitHub Pages My Page URL must be allowed as an Auth redirect URL.
 ### Build
 - Active application cache key: `r24p3`.
 - No database migration is required.
+
+
+## P4 — Cloudflare Stage 1
+
+### Hosting
+- Added Cloudflare Workers + Static Assets deployment configuration.
+- Added a deterministic production bundle builder that copies only public app files to `dist/`.
+- Added Workers Builds npm scripts and pinned Wrangler.
+- GitHub remains the source of truth.
+
+### Share URLs
+- Cloudflare deployments use same-origin `/p/<topic-id>` share URLs.
+- Added a Worker share route with work-specific OG/Twitter metadata.
+- Added `/api/health` for deployment QA.
+
+### OGP transition
+- Stage 1 proxies `/api/og` to the existing proven Vercel Sharp renderer.
+- The Vercel hostname is hidden from new Cloudflare share URLs.
+- Stage 2 will replace the renderer with a Cloudflare-native implementation before monetization.
+
+### Safety
+- GitHub Pages remains live as rollback during migration.
+- Supabase remains unchanged.
+- No secret/service-role key is added.
+- No database migration required.
+
+### Build
+- Active cache key: `r24p4`.
