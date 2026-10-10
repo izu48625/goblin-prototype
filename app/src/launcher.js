@@ -20,6 +20,7 @@ const UI={
 };
 const $=id=>document.getElementById(id);
 const frame=$("basicFrame"),backdrop=$("extBackdrop");
+let freshHomeHandled=false;
 let language=localStorage.getItem("statsMakerV2Language")||localStorage.getItem("statsMaker.locale")||((navigator.language||"ja").toLowerCase().startsWith("ja")?"ja":"en");
 
 function setLanguage(next){
@@ -59,7 +60,7 @@ function openExtension(type){
     if(sheet?.id)project.settings.sourceSheetId=sheet.id;
     syncSourceProject(project,{},sheet);
     saveProject(project);
-    location.href=`app/editor.html?v=r25p2&id=${encodeURIComponent(project.id)}`;
+    location.href=`app/editor.html?v=r25p3&id=${encodeURIComponent(project.id)}`;
   }catch(error){
     console.error(error);
     alert((language==="ja"?"拡張機能を開けませんでした：":"Could not open visual tool: ")+(error?.message||error));
@@ -73,7 +74,19 @@ frame.addEventListener("load",()=>{
     frame.contentWindow?.SM_I18N?.setLanguage(language);
     const homeLanguage=frame.contentWindow?.SM_I18N?.getLanguage?.();
     if(homeLanguage){language=homeLanguage==="en"?"en":"ja";renderLanguage()}
-  }catch{}
+
+    const params=new URLSearchParams(location.search);
+    if(!freshHomeHandled&&params.get("fresh")==="1"){
+      const createFresh=frame.contentWindow?.__statsMakerCreateFreshSheet;
+      if(typeof createFresh==="function"){
+        freshHomeHandled=true;
+        createFresh();
+        params.delete("fresh");
+        const query=params.toString();
+        history.replaceState(null,"",location.pathname+(query?"?"+query:""));
+      }
+    }
+  }catch(error){console.error("Home initialization failed",error)}
 });
 window.addEventListener("message",event=>{if(event.data?.type!=="statsmaker:languagechange")return;language=event.data.locale==="en"?"en":"ja";localStorage.setItem("statsMakerV2Language",language);renderLanguage()});
 renderLanguage();
