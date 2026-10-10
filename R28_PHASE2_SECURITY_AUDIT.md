@@ -28,3 +28,13 @@ Supabase reports multiple `SECURITY DEFINER` functions callable by `anon` or `au
 4. Recovery: verify original local sheets, JSON backup/restore, rollback plan and production QA.
 
 No new paid services, automatic production data edits, or forced security cutover.
+
+## Applied-migration results (2026-10-10, UTC 13:27)
+- Migration `20261010132709_r28_p2_client_least_privilege` applied successfully via Supabase migration runner.
+- Verified all `anon` and `authenticated` `TRUNCATE`, `TRIGGER`, `REFERENCES` table privileges are **false** on all five tables.
+- Original SELECT/INSERT/UPDATE/DELETE ACLs remain unchanged, and service_role privileges were not edited.
+- `set_updated_at()` has `search_path=pg_catalog`; installed triggers were not changed.
+- Data before/after: topics 9/9, rating sets 6/6, scores 190/190, criteria 59/59, items 52/52.
+- Legacy browser rating RPC inaccessible to `anon`/`authenticated`. Privileged gateway service_role EXECUTE true, authenticated EXECUTE false.
+- Supabase still reports public/authenticated SECURITY DEFINER callability warnings; these are **not all exploitable or safe to revoke indiscriminately** and require dedicated function-by-function testing. Also private write-budget RLS/no-policy alert is expected for server-only table.
+- GitHub production smoke: 13/13 passed on R28 PNG release before DB grant cleanup; full live iPhone save/publish regression remains supervised and outstanding.
