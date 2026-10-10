@@ -302,9 +302,11 @@
         if(!row||typeof row!=='object'||Array.isArray(row)||
            (row.name!==undefined&&typeof row.name!=='string')||
            (row.image!==undefined&&typeof row.image!=='string')||
-           !Array.isArray(row.scores)||row.scores.length>MAX_COLS||
-           !row.scores.every(value=>value===null||value===''||
-             (typeof value==='number'&&Number.isFinite(value))))
+           (row.scores!==undefined&&(!Array.isArray(row.scores)||
+             row.scores.length>MAX_COLS||
+             !row.scores.every(value=>value===null||value===''||
+               (typeof value==='number'&&Number.isFinite(value))||
+               (typeof value==='string'&&value.trim()!==''&&Number.isFinite(Number(value)))))))
           throw new Error('invalid score');
       }
     }
