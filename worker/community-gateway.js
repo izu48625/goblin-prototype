@@ -69,7 +69,10 @@ export async function communityGateway(request,env){
   let body;
   try{
     const raw=await request.text();
-    if(raw.length>100000)return reject(413,'payload_too_large');
+    // Content-Length can be absent or dishonest. Enforce the actual UTF-8
+    // byte size, not UTF-16 JS string length (which undercounts emoji/CJK).
+    if(new TextEncoder().encode(raw).byteLength>100000)
+      return reject(413,'payload_too_large');
     body=JSON.parse(raw);
   }catch{return reject(400,'invalid_json')}
   const topic=body?.p_topic_id;
@@ -136,5 +139,15 @@ export async function communityGateway(request,env){
       return reject(429,'rate_limited');
     return json({error:'rating_rejected',message:'Rating could not be saved. Please retry.'},rpcResp.status>=500?503:400);
   }
+  // A 2xx response is not proof of persistence when an upstream returns
+  // malformed JSON or an unexpected shape. Do not show false "Saved" success.
+  const saved=Array.isArray(result)&&result.length===1?result[0]:null;
+  if(!saved || typeof saved.rating_set_id!=='string'
+      || !/^[0-9a-f]{8}-[0-9a-f]{4}-[1-8][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(saved.rating_set_id)
+      || !['draft','submitted'].includes(saved.rating_status)
+      || !(saved.submitted_at===null
+        || (typeof saved.submitted_at==='string'
+          && Number.isFinite(Date.parse(saved.submitted_at)))))
+    return reject(503,'invalid_rating_response');
   return json({data:result});
 }
