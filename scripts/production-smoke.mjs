@@ -48,15 +48,15 @@ async function httpSmoke(){
   const security=await securityResponse.json();
   assert(security?.turnstileConfigured===true,
     'Production Turnstile SITE_KEY or SECRET runtime variable is missing.');
-  assert(security.communityGatewayEnabled===false,
-    'Turnstile Community gateway was enabled before the bypass-proof DB cutover.');
-  assert(security.siteKey===null,
-    'Turnstile sitekey should not be exposed while the gateway is disabled.');
+  assert(security.communityGatewayEnabled===true,
+    'Turnstile Community staged gateway must remain enabled during R26 P4 supervised cutover.');
+  assert(typeof security.siteKey==='string' && security.siteKey.length>6,
+    'The enabled Community gateway must expose only the public Turnstile site key.');
   assert(security.trustedGatewayConfigured===true,
     'SUPABASE_SERVICE_ROLE_KEY is not configured as a valid legacy service_role JWT in Cloudflare Production.');
   assert((securityResponse.headers.get('cache-control')||'').includes('no-store'),
     'Turnstile config must not be cached.');
-  console.log('Turnstile keys detected; Community gateway intentionally disabled.');
+  console.log('Turnstile keys and privileged gateway ready; staged Community gateway enabled.');
 
   const home=await (await fetchOk(BASE_URL+'/')).text();
   assert(home.includes('id="basicFrame"'),'Home shell is missing basicFrame');
