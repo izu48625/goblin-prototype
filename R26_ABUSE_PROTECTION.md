@@ -193,6 +193,35 @@ changing any existing vote data, requiring paid products, or enabling a login UI
   Publishing requires an independent atomic write gateway and cutover. Do not
   claim that all public write paths are closed after Community P4.
 
+### P4 security-review checkpoint (2026-10-10; PR #63 still OPEN)
+
+- Reviewed production `public.save_my_topic_rating`: a `SECURITY DEFINER`
+  function owned by `postgres`, using `auth.uid()` for the vote identity and
+  `private.consume_write_budget('rating',60,3600)` for its transactional quota.
+  The database's current `auth.uid()` reads the transaction-local
+  `request.jwt.claim.sub` setting, matching P4's forwarding mechanism.
+- The legacy RPC is currently executable by `authenticated`, but not directly
+  by `service_role`. The **new** wrapper is a `SECURITY DEFINER` function
+  intended to be created as `postgres`; as the old RPC owner it can call the
+  old RPC. This arrangement is **not yet integration-tested on production**.
+- The new wrapper now compares `auth.uid()` with the verified `p_user_id`
+  after setting the transaction-local claim and raises a permission error
+  instead of writing if the identity was not forwarded correctly.
+- The Worker now measures **UTF-8 bytes**, rejects malformed successful RPC
+  responses, and never forwards upstream secrets/errors to the browser. Mock
+  tests cover these failure paths.
+- GitHub Actions Preflight succeeds on the amended PR, including gateway and
+  browser tests and static asset build. Cloudflare's separate Workers Builds
+  check continues to fail; inspect its dashboard build log before merging.
+  GitHub's check-run output currently has the build ID but not the failure
+  reason. Do not assume the Cloudflare failure is harmless.
+- Production P4 SQL remains **unapplied**. All five pre-existing submitted
+  Community ratings were present at this checkpoint. No database writes were
+  performed by this review. The old direct RPC remains enabled until a
+  successful supervised real-device gateway submission and prepared rollback.
+- **Do not merge or enable stage 1** while the Cloudflare check is unexplained,
+  or apply the CUTOVER before the Worker-to-DB integration has been proven.
+
 ## Staging rollback
 
 Remove `TURNSTILE_COMMUNITY_STAGE` (or set it to `0`) in the
