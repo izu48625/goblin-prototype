@@ -76,7 +76,7 @@
       // Local/GitHub Pages previews retain the legacy RPC path.
       // On the official domain only a successful, explicit disabled response
       // may use the old route. Network/404/malformed config must never downgrade.
-      if(!/^(?:www\\.)?statsmaker\\.app$/.test(window.location.hostname))
+      if(!['statsmaker.app','www.statsmaker.app'].includes(window.location.hostname))
         return client.rpc('save_my_topic_rating',params);
       const cfg=await config();
       if(!cfg.communityGatewayEnabled)return client.rpc('save_my_topic_rating',params);
