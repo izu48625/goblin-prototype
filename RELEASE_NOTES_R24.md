@@ -142,3 +142,7 @@ The GitHub Pages My Page URL must be allowed as an Auth redirect URL.
 ### Worker name sync
 - Cloudflare production Worker name is `stats-maker-web`.
 - `wrangler.jsonc` is aligned with the Worker created in Cloudflare Dashboard.
+
+### Cloudflare Git connection activated
+- Connected the production Worker `stats-maker-web` to `izu48625/goblin-prototype` on branch `main`.
+- Subsequent pushes to `main` trigger Cloudflare Workers Builds automatically.
