@@ -55,6 +55,11 @@ jobs:
           node --check worker/index.js
           node --check scripts/build-cloudflare.mjs
           node --check scripts/production-smoke.mjs
+          node --check base/js/app.js
+          node --check cloud/public.js
+          node --check cloud/discover.js
+          node --check cloud/rate.js
+          node --check app/src/launcher.js
       - name: Build static bundle
         run: npm run build:cloudflare
       - name: Verify required assets
