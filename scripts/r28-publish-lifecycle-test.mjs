@@ -34,6 +34,18 @@ try{
   await home.locator('#publishExecuteBtn').click();
   await home.locator('#publishResult:not(.hidden)').waitFor({timeout:20000});
   await home.locator('#publishStatus.ok').waitFor({timeout:20000});
+  // Publish returns before the normal local-first auto-save timer flushes.
+  // Wait for the real Home library, rather than racing the 220ms timer.
+  await home.locator('body').evaluate(async()=>{
+    for(let i=0;i<40;i++){
+      try{
+        const library=JSON.parse(localStorage.getItem('statsMakerV014Library')||'null');
+        if(library?.sheets?.some(x=>x.cloudTopicId==='22222222-2222-4222-8222-222222222222'))return;
+      }catch{}
+      await new Promise(resolve=>setTimeout(resolve,100));
+    }
+    throw new Error('Published topic did not reach local-first storage');
+  });
   let state=await home.locator('body').evaluate(()=>({
     db:window.__qaPublishDb,
     library:JSON.parse(localStorage.getItem('statsMakerV014Library')||'null')
