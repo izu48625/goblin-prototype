@@ -127,6 +127,7 @@ async function browserEditorHome(){
     const buttons=frame.locator('.topActions > :not(.hidden):visible');
     assert(await buttons.count()>=5,'Editor top bar should include HOME plus existing actions');
     await frame.locator('#editorHomeBtn').click();
+    await page.waitForTimeout(700);
     assert(await frame.locator('#titleInput').inputValue()==='','Editor HOME should clear current title');
     assert(await frame.locator('#descInput').inputValue()==='','Editor HOME should clear current description');
     assert(await frame.locator('#remixContextPanel').isHidden(),'Editor HOME should leave Remix context');
