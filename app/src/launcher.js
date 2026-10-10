@@ -1,6 +1,6 @@
 import {createProject} from "./core/project.js";
 import {saveProject} from "./core/store.js";
-import {syncSourceProject} from "./core/source-sync.js";
+import {syncSourceProject} from "./core/source-sync.js?v=r29source1";
 
 const EXTENSIONS=[
   ["popular","ranking-card","Ranking Card","総合平均または評価項目でランキング","Rank by overall average or any metric"],
