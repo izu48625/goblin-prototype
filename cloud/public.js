@@ -2,6 +2,12 @@
   'use strict';
   const status=document.getElementById('status');
   const content=document.getElementById('content');
+
+  // Safari/Chrome may restore the public page from BFCache after a Community
+  // rating. Reload only on a persisted restore so participant counts are fresh.
+  window.addEventListener('pageshow',event=>{
+    if(event.persisted)location.reload();
+  });
   const esc=value=>String(value??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
   const num=value=>{if(value===null||value===undefined||value==='')return null;const n=Number(value);return Number.isFinite(n)?n:null};
   const fmt=value=>{const n=num(value);return n===null?'—':(Number.isInteger(n)?String(n):n.toFixed(1))};
@@ -361,7 +367,7 @@
             <div class="lineageMain">
               <span class="lineageLabel">${lineageRelation==='version'?(ja?'前バージョン':'Previous version'):lineageRelation==='remix'?(ja?'Remix元':'Remix source'):(ja?'派生元':'Source')}</span>
               ${sourceTopic
-                ?`<a class="lineageSource" href="public.html?id=${encodeURIComponent(sourceTopic.id)}&v=r25p2">${esc(sourceTopic.title)}</a>`
+                ?`<a class="lineageSource" href="public.html?id=${encodeURIComponent(sourceTopic.id)}&v=r25p3">${esc(sourceTopic.title)}</a>`
                 :`<span class="lineageSource unavailable">${ja?'派生元は現在参照できません':'Source is currently unavailable'}</span>`}
             </div>
             <div class="lineageBadge">${lineageRelation==='version'?'VERSION':lineageRelation==='remix'?'REMIX':'SOURCE'}</div>
@@ -468,7 +474,7 @@
         const sheet=window.SM_REMIX.buildSheet(data,snap,dbCriteria,items,ja?'ja':'en');
         window.SM_REMIX.saveSheet(sheet);
         toast(ja?'Remixしました。編集画面へ移動します。':'Remixed. Opening the editor…');
-        setTimeout(()=>{location.href='index.html?remixed=1&v=r25p2'},500);
+        setTimeout(()=>{location.href='index.html?remixed=1&v=r25p3'},500);
       }catch(e){toast((ja?'Remixに失敗しました：':'Remix failed: ')+(e?.message||e))}
     };
     document.getElementById('shareBtn').onclick=async()=>{
@@ -613,7 +619,7 @@
           }
           sessionStorage.setItem('statsMaker:openPublish','1');
         }catch{}
-        location.href='index.html?v=r25p2&from=public';
+        location.href='index.html?v=r25p3&from=public';
       };
     };
 
