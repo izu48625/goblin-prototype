@@ -5,8 +5,14 @@
   let configPromise;
   let scriptPromise;
   const config=()=>configPromise||(configPromise=fetch('/api/security/config',{cache:'no-store'})
-    .then(r=>r.ok?r.json():{communityGatewayEnabled:false})
-    .catch(()=>({communityGatewayEnabled:false})));
+    .then(async r=>{
+      if(!r.ok)throw new Error('Security settings are temporarily unavailable. Please retry.');
+      const value=await r.json();
+      if(!value||typeof value.communityGatewayEnabled!=='boolean')
+        throw new Error('Security settings could not be verified. Please retry.');
+      return value;
+    })
+    .catch(error=>{configPromise=null;throw error;}));
 
   function loadScript(){
     if(window.turnstile?.render)return Promise.resolve();
@@ -67,6 +73,11 @@
 
   async function save(client,params){
     try{
+      // Local/GitHub Pages previews retain the legacy RPC path.
+      // On the official domain only a successful, explicit disabled response
+      // may use the old route. Network/404/malformed config must never downgrade.
+      if(!/^(?:www\\.)?statsmaker\\.app$/.test(window.location.hostname))
+        return client.rpc('save_my_topic_rating',params);
       const cfg=await config();
       if(!cfg.communityGatewayEnabled)return client.rpc('save_my_topic_rating',params);
       if(typeof cfg.siteKey!=='string'||cfg.siteKey.length<7)throw new Error('Security setup is incomplete.');
