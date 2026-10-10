@@ -55,6 +55,11 @@ async function httpSmoke(){
 
   const rate=await (await fetchOk(BASE_URL+'/rate.html?id='+encodeURIComponent(PUBLIC_TOPIC_ID))).text();
   assert(rate.includes('cloud/rate.js'),'Rate shell is missing cloud/rate.js');
+  assert(rate.includes('fresh=1'),'Rate page is missing fresh Home navigation');
+
+  const rateJs=await (await fetchOk(BASE_URL+'/cloud/rate.js')).text();
+  assert(rateJs.includes('participantPill'),'Rate UI is missing participant-count feedback');
+  assert(rateJs.includes('get_topic_participant_count'),'Rate UI is missing participant-count refresh');
 
   const share=await (await fetchOk(BASE_URL+'/p/'+encodeURIComponent(PUBLIC_TOPIC_ID))).text();
   assert(share.includes('property="og:title"'),'Share page is missing og:title');
@@ -107,6 +112,37 @@ async function browserDiscover(){
     await page.goto(BASE_URL+'/discover.html',{waitUntil:'networkidle',timeout:60000});
     await page.locator('#grid:not(.hidden)').waitFor({timeout:30000});
     assert(await page.locator('.workCard').count()>0,'Discover returned no public work cards');
+    assert((await page.locator('#homeLink').getAttribute('href')||'').includes('fresh=1'),'Discover Home does not request a fresh sheet');
+  });
+}
+
+async function browserFreshHome(){
+  await withBrowser('Browser fresh Home',async page=>{
+    await page.goto(BASE_URL+'/',{waitUntil:'networkidle',timeout:60000});
+    const frame=page.frameLocator('#basicFrame');
+    await frame.locator('#titleInput').waitFor({state:'visible',timeout:30000});
+    await frame.locator('#titleInput').fill('SMOKE KEEP SHEET');
+    await frame.locator('#descInput').fill('must survive fresh Home');
+    await page.waitForTimeout(700);
+
+    await page.goto(BASE_URL+'/public.html?id='+encodeURIComponent(PUBLIC_TOPIC_ID),{waitUntil:'networkidle',timeout:60000});
+    await page.locator('#content:not(.hidden)').waitFor({timeout:30000});
+    assert((await page.locator('#homeLink').getAttribute('href')||'').includes('fresh=1'),'Public Home does not request a fresh sheet');
+    await page.locator('#homeLink').click();
+
+    const freshFrame=page.frameLocator('#basicFrame');
+    await freshFrame.locator('#titleInput').waitFor({state:'visible',timeout:30000});
+    await page.waitForTimeout(500);
+    assert(await freshFrame.locator('#titleInput').inputValue()==='','Home should open a fresh blank title');
+    assert(await freshFrame.locator('#descInput').inputValue()==='','Home should open a fresh blank description');
+
+    const library=await page.evaluate(()=>{
+      try{return JSON.parse(localStorage.getItem('statsMakerV014Library')||'null')}catch{return null}
+    });
+    assert(library&&Array.isArray(library.sheets),'Fresh Home lost the local library');
+    assert(library.sheets.some(sheet=>sheet.title==='SMOKE KEEP SHEET'),'Fresh Home must preserve existing sheets');
+    const active=library.sheets.find(sheet=>sheet.id===library.activeId);
+    assert(active&&active.title==='','Fresh Home active sheet should be blank');
   });
 }
 
@@ -166,6 +202,7 @@ async function browserCommunityPanel(){
 if(mode==='http')await httpSmoke();
 else if(mode==='browser-home')await browserHome();
 else if(mode==='browser-discover')await browserDiscover();
+else if(mode==='browser-fresh-home')await browserFreshHome();
 else if(mode==='browser-public')await browserPublic();
 else if(mode==='browser-remix-redirect')await browserRemixRedirect();
 else if(mode==='browser-remix-storage')await browserRemixStorage();
