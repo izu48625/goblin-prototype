@@ -526,12 +526,37 @@ async function browserGlobalLanguage(){
     await page.waitForFunction(()=>document.querySelector('#pageLead')?.textContent.includes('アカウント'),
       {timeout:30000});
     assert(await page.locator('.globalLocaleBar').count()===1,'My Page shared locale bar missing');
-    await page.goto(BASE_URL+'/app/editor.html?id=not-a-project',
+    const projectId=await page.evaluate(async()=>{
+      const [{createProject},{saveProject}]=await Promise.all([
+        import('/app/src/core/project.js'),import('/app/src/core/store.js')
+      ]);
+      const p=createProject('bar');
+      p.meta.title='SAFE LOCALE GRAPH';
+      saveProject(p);
+      return p.id;
+    });
+    await page.goto(BASE_URL+'/app/editor.html?id='+encodeURIComponent(projectId),
       {waitUntil:'domcontentloaded',timeout:60000});
+    await page.locator('#projectTitleInput').waitFor({state:'visible',timeout:30000});
+    assert(await page.locator('#projectTitleInput').inputValue()==='SAFE LOCALE GRAPH',
+      'Visual editor failed to load saved chart');
     assert(await page.locator('.globalLocaleBar').count()===1,
       'Visual editor shared locale bar missing');
     assert(await page.evaluate(()=>localStorage.getItem('statsMaker.locale'))==='ja',
       'Visual editor did not retain the global locale');
+    await page.locator('.globalLocaleBar [data-global-lang="en"]').click();
+    await page.waitForFunction(()=>document.documentElement.lang==='en');
+    assert(await page.locator('#projectTitleInput').inputValue()==='SAFE LOCALE GRAPH',
+      'Visual editor language toggle erased chart title');
+    assert(await page.locator('#langBtn').isHidden(),
+      'Old graph editor language toggle was not consolidated');
+    assert(await page.evaluate(()=>localStorage.getItem('statsMakerV2Language'))==='en',
+      'Visual editor did not sync older V2 language preference');
+    const saved=await page.evaluate(id=>{
+      const p=JSON.parse(localStorage.getItem('statsMakerV2Projects')||'[]');
+      return p.find(x=>x.id===id)?.meta.title;
+    },projectId);
+    assert(saved==='SAFE LOCALE GRAPH','Visual editor language toggle changed saved project');
   });
 }
 
