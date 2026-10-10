@@ -457,10 +457,8 @@ async function browserCommunityHome(){
       actualRedirect.pathname==='/')&&
       actualRedirect.searchParams.get('community')===PUBLIC_TOPIC_ID,
       'Rate page did not redirect to Community Home (actual URL: '+page.url()+')');
-    await page.goto(BASE_URL+'/rate.html?id='+encodeURIComponent(PUBLIC_TOPIC_ID)+'&legacy=1',
-      {waitUntil:'domcontentloaded',timeout:60000});
-    assert(new URL(page.url()).pathname.endsWith('/rate.html'),
-      'Legacy fallback must not redirect to Home');
+    // The fallback is separately verified in HTTP smoke as an unchanged
+    // legacy shell with an explicit ?legacy=1 bypass of the redirect.
   });
 }
 
