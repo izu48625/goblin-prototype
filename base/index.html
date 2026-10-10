@@ -7,6 +7,7 @@
   <title>Stats Maker</title>
   <link rel="stylesheet" href="css/style.css?v=r27r1">
   <link rel="stylesheet" href="css/community-mode.css?v=r27h1">
+  <link rel="stylesheet" href="../cloud/global-locale.css?v=r27lang1">
 </head>
 <body data-build="R25-P4">
 <div id="viewOnlyBanner" class="viewOnlyBanner hidden">
@@ -35,11 +36,7 @@
       <div>
         <div class="savedSheetHead">
           <div class="fieldLabel" data-i18n="field.savedSheets">保存シート</div>
-          <div class="homeLangSwitch" aria-label="Language">
-            <button class="langBtn" data-lang="ja" type="button" aria-label="日本語">JA</button>
-            <span class="langDivider" aria-hidden="true"></span>
-            <button class="langBtn" data-lang="en" type="button" aria-label="English">EN</button>
-          </div>
+
         </div>
         <select id="sheetSelect" class="sheetSelect" aria-label="保存シート" data-i18n-aria="field.savedSheets"></select>
       </div>
@@ -441,5 +438,6 @@ window.addEventListener("statsmaker:languagechange",event=>{
   }catch{}
 });
 </script>
+<script src="../cloud/global-locale.js?v=r27lang1"></script>
 </body>
 </html>
