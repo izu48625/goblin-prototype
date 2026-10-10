@@ -54,7 +54,7 @@
     try{
       const c=collect();if(submit&&c.completeItems<1)throw new Error(state.ja?'最低1つの対象について、全項目を入力してください。':'Complete every metric for at least one target.');
       draftBtn.disabled=submitBtn.disabled=true;msg(state.ja?'保存中…':'Saving…');
-      const {data,error}=await window.SM_SUPABASE.client.rpc('save_my_topic_rating',{p_topic_id:state.topic.id,p_scores:c.payload,p_submit:submit});
+      const {data,error}=await window.SM_COMMUNITY_GATEWAY.save(window.SM_SUPABASE.client,{p_topic_id:state.topic.id,p_scores:c.payload,p_submit:submit});
       if(error)throw error;const row=Array.isArray(data)?data[0]:data;
       state.ratingSet={id:row?.rating_set_id,status:row?.rating_status||state.ratingSet?.status||'draft',submitted_at:row?.submitted_at||null};
       if(submit){

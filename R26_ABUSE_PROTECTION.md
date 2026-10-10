@@ -48,7 +48,57 @@ submit/update its own Community rating. SQL inspection alone is not an
 authenticated, user-level end-to-end mutation test. Never artificially inflate
 public Community counts for QA.
 
-## P3 — Turnstile and write gateway (pending)
+## P3 — Turnstile and write gateway (code staged; not yet enforced)
+
+**R26 P3 staging** provides an optional, default-off Worker
+`POST /api/guard/community` and `GET /api/security/config`, plus a
+browser-side dynamic Turnstile challenge for Community and Remix votes.
+It does not activate automatically or break the existing anonymous flow.
+
+Implemented checks before saving a rating:
+- Only `https://statsmaker.app` accepted as the browser origin.
+- Incoming JSON limited to 100 KB; max 400 scores.
+- Valid authenticated Supabase anonymous-user JWT verified by Auth API.
+- Per-IP Worker throttle at 30 requests/minute.
+- Cloudflare Siteverify response must be successful, have the exact
+  `statsmaker.app` hostname and `community_submit` action, and be fresh.
+- Verified submissions preserve the user's JWT (no service-role key) and
+  forward only the rating payload to the existing DB RPC.
+- No secret key is ever embedded in a browser file.
+- Tests simulate wrong origins, malformed requests, blocked rate limits,
+  bad sessions, invalid/expired/wrong-host challenges, and successful writes.
+
+### What the user must configure before staging can be enabled
+
+1. Cloudflare Dashboard → Turnstile → Add widget:
+   name `Stats Maker Community`, domain `statsmaker.app`,
+   widget type Managed. This is available on the free tier.
+2. Cloudflare Dashboard → Workers & Pages → `stats-maker-web`
+   → Settings → Variables and Secrets.
+3. Add environment variable `TURNSTILE_SITE_KEY` = widget's public sitekey.
+4. Add **secret** `TURNSTILE_SECRET` = Turnstile secret; never paste it
+   into chat, GitHub, or browser code.
+5. After P3 QA, enable Worker environment variable
+   `TURNSTILE_COMMUNITY_STAGE` = `1` to show challenges on normal
+   Community submissions. Disabled by default; activate only after testing
+   and explicit approval.
+
+### Important: the gateway alone is NOT a bypass-proof security boundary
+
+The existing Supabase `save_my_topic_rating` RPC is still callable directly
+by anonymous-authenticated browser clients, so a malicious user can bypass
+Turnstile. This staging version cannot claim to prevent automated Community
+submissions. **Do not call P3 complete** until the direct write route is
+closed through a separate service-only DB function / trusted gateway cutover
+and tested with an anonymous browser session. Publishing likewise still
+uses direct multi-table Supabase writes and requires its own atomic,
+verified server-side flow.
+
+The Turnstile token lasts five minutes and is single-use. The browser does
+not permanently store it; each fresh verified submission needs a new token.
+One-off previews and GitHub Pages continue to use the old RPC path.
+
+### Remaining rollout plan
 
 1. Create a Turnstile widget restricted to `statsmaker.app`. Keep the
    sitekey public; set the secret as a **Cloudflare Worker secret**.
@@ -63,6 +113,13 @@ public Community counts for QA.
    widget after each submission. Support anonymous users without sign-up.
 6. Verify rollback behavior; do not enable compulsory Turnstile until the
    full write path works and is tested.
+
+## Staging rollback
+
+Remove `TURNSTILE_COMMUNITY_STAGE` (or set it to `0`) in the
+Cloudflare Worker environment to immediately return to the original
+Community RPC flow. A refresh re-fetches gateway configuration.
+This is possible without removing any user ratings.
 
 ## Rollback
 
