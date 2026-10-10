@@ -39,7 +39,7 @@ const header={'CF-Connecting-IP':'192.0.2.18'};
 try{
   const health=await worker.fetch(new Request('https://statsmaker.app/api/health'),env);
   assert.equal(health.status,200);
-  assert.equal((await health.json()).release,'r26p3');
+  assert.equal((await health.json()).release,'r26p4-prep');
 
   const allowed=await worker.fetch(new Request('https://statsmaker.app/api/og?id=test', {headers:header}),env);
   assert.equal(allowed.status,200);
