@@ -1,0 +1,29 @@
+name: Publish Lifecycle QA (No Production Writes)
+
+on:
+  pull_request:
+    paths:
+      - "scripts/r28-publish-lifecycle-test.mjs"
+      - ".github/workflows/publish-lifecycle-qa.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  publish-mock:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    env:
+      BASE_URL: https://statsmaker.app
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+      - name: Install headless browser
+        run: |
+          npm install --no-save playwright@1.56.1
+          npx playwright install --with-deps chromium
+      - name: Test publish/update/private without any real DB writes
+        run: node scripts/r28-publish-lifecycle-test.mjs
