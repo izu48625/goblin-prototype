@@ -38,6 +38,11 @@ try{
     if(/project not found|cannot read properties|not defined|syntaxerror/i.test(err.message))
       runtimeErrors.push(err.message);
   });
+  const dialogs=[];
+  const consoleErrors=[];
+  page.on('dialog',async dialog=>{dialogs.push(dialog.message());await dialog.dismiss()});
+  page.on('console',msg=>{if(msg.type()==='error')consoleErrors.push(msg.text())});
+
   let browserProjects=[];
   for(const [index,[type,name]] of TEMPLATE_TYPES.entries()){
     await page.goto(BASE_URL+'/index.html?extensions=1&qaR29='+index,
@@ -50,8 +55,21 @@ try{
     assert.equal((await cards.nth(index).locator('b').innerText()).trim(),name,
       'Launcher template order changed at '+index);
     await cards.nth(index).click();
-    await page.waitForURL(url=>url.pathname.endsWith('/app/editor.html'),
-      {timeout:30000});
+    try{
+      // External image/CDN resources can keep the "load" event pending even
+      // after the editor navigation has already committed successfully.
+      await page.waitForURL(url=>url.pathname.endsWith('/app/editor.html'),
+        {waitUntil:'domcontentloaded',timeout:15000});
+    }catch(error){
+      const ui=await page.locator('body').evaluate(el=>({
+        url:location.href,
+        cardCount:document.querySelectorAll('#extGroups .extCard').length,
+        backdrop:document.querySelector('#extBackdrop')?.className
+      }));
+      throw new Error('R29 extension navigation failed at '+name+': '+
+        JSON.stringify({ui,dialogs,consoleErrors:consoleErrors.slice(-8),
+          runtimeErrors:runtimeErrors.slice(-8),error:error.message}));
+    }
     const projectId=new URL(page.url()).searchParams.get('id');
     assert(projectId,'Launcher failed to attach a unique project ID for '+type);
     await page.locator('#projectTitleInput').waitFor({state:'visible',timeout:30000});
