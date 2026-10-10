@@ -133,6 +133,66 @@ One-off previews and GitHub Pages continue to use the old RPC path.
 6. Verify rollback behavior; do not enable compulsory Turnstile until the
    full write path works and is tested.
 
+## P4 — Service-role-only Community authorization (safe staged implementation)
+
+**Goal:** A verified Turnstile challenge is not useful if a browser can still
+call the old Supabase RPC. P4 prepares an authoritative write boundary without
+changing any existing vote data, requiring paid products, or enabling a login UI.
+
+### Files, migration steps, and safety conditions
+
+1. `R26_P4_PREPARE_GATEWAY.sql` adds
+   `public.gateway_save_my_topic_rating(p_user_id,p_topic_id,p_scores,p_submit)`.
+   Only the Supabase `service_role` may execute it; public/anon/authenticated
+   execution is explicitly revoked. **Do not revoke the old RPC yet.**
+2. GitHub/Cloudflare deploys the P4 Worker code. When both Turnstile keys exist
+   and the third, privileged Worker-only secret `SUPABASE_SERVICE_ROLE_KEY`
+   is configured with the *legacy service_role JWT*, the gateway can safely
+   forward a verified authenticated user's identity to this trusted RPC.
+   An `sb_secret_...` API key is not interchangeable with the legacy JWT in
+   this Bearer-based implementation. It is a **Secret**, not a Variable; never
+   commit, upload, paste into chat, or put it in frontend files. The Worker
+   locally sanity-checks the JWT role, then Supabase verifies its signature.
+   Until configured, `communityGatewayEnabled` stays false.
+3. **With the P4 prepare migration installed and privileged secret present,**
+   set `TURNSTILE_COMMUNITY_STAGE=1` for a short **supervised** real-device
+   end-to-end test: anonymous login → Turnstile → new trusted RPC → save and
+   update only the existing user's draft/rating. Confirm rate limits, existing
+   participant counts and no duplicate votes. This **staged test is not yet
+   bypass-proof** because old direct RPC remains temporarily open.
+4. Only after successful live QA, apply `R26_P4_CUTOVER.sql` to revoke
+   `public.save_my_topic_rating` EXECUTE from PUBLIC, anon, and authenticated.
+   Confirm `has_function_privilege` is false for direct browser users, true
+   for the service-only wrapper, and repeat a real Community save via Worker.
+   After cutover no user can bypass Turnstile through direct Supabase RPC.
+   Existing ratings are not rewritten or deleted.
+5. Roll back on a production issue: set `TURNSTILE_COMMUNITY_STAGE=0`, then
+   apply `R26_P4_ROLLBACK.sql` to restore authenticated EXECUTE on the legacy
+   RPC. Do not disable the stage after the revoke without restoring the RPC:
+   otherwise Community writes will fail.
+
+### Trusted gateway constraints
+
+- Browser supplies only rating fields and a one-time Turnstile token.
+- The user's bearer token is checked against Supabase Auth `/auth/v1/user`.
+  The resulting verified `user.id`, not any browser-supplied `p_user_id`,
+  is forwarded to the wrapper.
+- The privileged key goes only from the Cloudflare Worker to Supabase.
+  It is never sent to the browser, in status responses, or in logs.
+- The DB wrapper requires verified `auth.role()='service_role'` before setting
+  the validated user's transaction-local `auth.uid()`. The existing P2
+  transactional function performs rating validation, actor quotas, and
+  duplicate-vote prevention unchanged.
+- API config returns booleans `turnstileConfigured` and
+  `trustedGatewayConfigured` but no secrets.
+- Wrong challenge/hostname/action, expired token, invalid JWT, disabled
+  gateway, missing/wrong-role privileged secret and malformed payload are
+  rejected. Mock tests assert no database request on a rejected challenge.
+- **The Publish flow is still direct Supabase table writes**, protected by
+  owner RLS and P2 topic creation/update quotas but not yet by Turnstile.
+  Publishing requires an independent atomic write gateway and cutover. Do not
+  claim that all public write paths are closed after Community P4.
+
 ## Staging rollback
 
 Remove `TURNSTILE_COMMUNITY_STAGE` (or set it to `0`) in the
