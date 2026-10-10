@@ -70,3 +70,6 @@ jobs:
 
       - name: Browser iPhone native PNG for all visual templates (no-write)
         run: node scripts/production-smoke.mjs browser-iphone-png
+
+      - name: Browser Publish URL-limited, update, unpublish (fully mocked)
+        run: node scripts/r28-publish-lifecycle-test.mjs

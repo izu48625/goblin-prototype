@@ -22,6 +22,7 @@ on:
       - "scripts/r27-community-visual-test.mjs"
       - "scripts/r27-community-home-test.mjs"
       - "scripts/r27-remix-copy-test.mjs"
+      - "scripts/r28-publish-lifecycle-test.mjs"
       - ".github/workflows/production-smoke.yml"
       - "wrangler.jsonc"
       - "package.json"
@@ -81,6 +82,7 @@ jobs:
           node --check scripts/r27-community-visual-test.mjs
           node --check cloud/remix.js
           node --check scripts/r27-remix-copy-test.mjs
+          node --check scripts/r28-publish-lifecycle-test.mjs
           node --check app/src/launcher.js
       - name: R26 edge guard test
         run: node scripts/r26-edge-test.mjs
