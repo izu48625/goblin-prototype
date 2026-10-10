@@ -24,6 +24,13 @@
     if(lang===current()){paint();return;}
     localStorage.setItem(KEY,lang);
     localStorage.setItem(LEGACY,lang);
+    // Once the visitor explicitly changes languages, it overrides an old
+    // per-page ?lang=... parameter (My Page previously prioritized it).
+    const u=new URL(location.href);
+    if(u.searchParams.has('lang')){
+      u.searchParams.delete('lang');
+      history.replaceState(history.state,'',u.pathname+u.search+u.hash);
+    }
     const announce=()=>window.dispatchEvent(new CustomEvent('statsmaker:site-languagechange',{detail:{locale:lang}}));
     if(window.SM_I18N?.setLanguage){window.SM_I18N.setLanguage(lang);paint();announce();return;}
     if(window.SM_APP_SET_LANGUAGE){window.SM_APP_SET_LANGUAGE(lang);paint();announce();return;}
