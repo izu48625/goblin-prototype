@@ -631,6 +631,7 @@
     if(publishBtn){
       publishBtn.textContent=s.cloudTopicId?t('publish.buttonUpdate'):t('publish.button');
     }
+    renderRemixContext();
     renderCommunityParticipation();
   }
 
@@ -1643,7 +1644,7 @@
   function publicPageUrl(topicId){
     const url=new URL('../public.html',location.href);
     url.searchParams.set('id',topicId);
-    url.searchParams.set('v','r25p1');
+    url.searchParams.set('v','r25p2');
     return url.href;
   }
 

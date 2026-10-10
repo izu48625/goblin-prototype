@@ -31,3 +31,11 @@ Added a GitHub Actions production smoke workflow that waits for the matching Clo
 - Community participation action is present after Remix
 
 The browser smoke is read-only with respect to Community data; it does not submit a production rating.
+
+
+## P2 — Remix Context Fix
+
+- Fixed the Remix source-context panel not rendering on the editor's initial load after a Remix.
+- `renderRemixContext()` now runs with the normal header render path, alongside Community participation state.
+- Remix save/redirect/localStorage behavior was already working; this fixes the missing initial UI context.
+- Active release/cache key: `r25p2`.
