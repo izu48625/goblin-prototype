@@ -3,8 +3,13 @@
   const KEY='statsMaker.locale', LEGACY='statsMakerV2Language';
   const normalize=value=>String(value||'').toLowerCase().startsWith('en')?'en':'ja';
   const current=()=>normalize(localStorage.getItem(KEY)||localStorage.getItem(LEGACY)||navigator.language||'ja');
-  const isEmbeddedBase=/\/base\/index\.html$/.test(location.pathname)&&window.parent!==window;
-  if(isEmbeddedBase)return; // The parent Home has the shared bar above its iframe.
+  // Browser/CDN rewrites may expose an embedded Home as /base/ instead of
+  // /base/index.html. Check the frame relationship, never the URL spelling.
+  // All embedded views borrow the parent's single fixed language/Home bar.
+  if(window.parent!==window){
+    document.documentElement.classList.add('embeddedSiteFrame');
+    return;
+  }
   let bar;
   function paint(){
     if(!bar)return;
@@ -17,6 +22,11 @@
     });
     const label=bar.querySelector('.globalLocaleLabel');
     label.textContent=lang==='ja'?'表示言語':'Language';
+    const home=bar.querySelector('.globalHomeBtn');
+    if(home){
+      home.title=lang==='ja'?'ホームへ':'Home';
+      home.setAttribute('aria-label',lang==='ja'?'ホームを開く':'Open Home');
+    }
     bar.setAttribute('aria-label',lang==='ja'?'表示言語を切り替える':'Choose display language');
   }
   function set(next){
@@ -39,14 +49,32 @@
     // No scoring or public-data writes happen on a display-language change.
     location.reload();
   }
+  const homePath=()=>location.pathname.startsWith('/app/')?'../index.html?fresh=1':'index.html?fresh=1';
+  function openHome(event){
+    event.preventDefault();
+    const frame=document.getElementById('basicFrame');
+    const community=new URLSearchParams(location.search).has('community');
+    if(frame&&!community){
+      try{
+        const nativeHome=frame.contentWindow?.document?.getElementById('editorHomeBtn');
+        if(nativeHome){nativeHome.click();return;}
+      }catch(error){console.warn('Embedded HOME unavailable',error);}
+    }
+    if(community&&!confirm(current()==='ja'
+      ?'未投稿の評価は保存されません。ホームへ戻りますか？'
+      :'Unsubmitted scores will not be saved. Return Home?'))return;
+    location.assign(new URL(homePath(),location.href).href);
+  }
   function mount(){
     if(document.querySelector('.globalLocaleBar'))return;
     document.body.classList.add('hasGlobalLocaleBar');
     bar=document.createElement('div');
     bar.className='globalLocaleBar';
     bar.setAttribute('role','group');
-    bar.innerHTML='<span class="globalLocaleLabel">表示言語</span><div class="globalLocaleSwitch"><button type="button" data-global-lang="ja" aria-label="日本語">JA</button><button type="button" data-global-lang="en" aria-label="English">EN</button></div>';
+    bar.innerHTML='<a class="globalHomeBtn" href="index.html?fresh=1" aria-label="ホームを開く">HOME</a><div class="globalLocaleControls"><span class="globalLocaleLabel">表示言語</span><div class="globalLocaleSwitch"><button type="button" data-global-lang="ja" aria-label="日本語">JA</button><button type="button" data-global-lang="en" aria-label="English">EN</button></div></div>';
     document.body.prepend(bar);
+    bar.querySelector('.globalHomeBtn').href=new URL(homePath(),location.href).href;
+    bar.querySelector('.globalHomeBtn').addEventListener('click',openHome);
     bar.querySelectorAll('[data-global-lang]').forEach(btn=>btn.addEventListener('click',()=>set(btn.dataset.globalLang)));
     paint();
   }
