@@ -27,122 +27,13 @@ jobs:
         with:
           node-version: "22"
 
-      - name: Wait for matching Cloudflare release
-        shell: bash
-        run: |
-          EXPECTED_RELEASE="$(node -e "const s=require('fs').readFileSync('worker/index.js','utf8');const m=s.match(/release:'([^']+)'/);if(!m)process.exit(2);process.stdout.write(m[1])")"
-          echo "Waiting for production release: $EXPECTED_RELEASE"
-          for i in $(seq 1 36); do
-            BODY="$(curl -fsS --max-time 15 "$BASE_URL/api/health" 2>/dev/null || true)"
-            if BODY="$BODY" EXPECTED_RELEASE="$EXPECTED_RELEASE" python - <<'PY'
-import json, os, sys
-try:
-    data=json.loads(os.environ.get("BODY",""))
-except Exception:
-    sys.exit(1)
-ok=(data.get("ok") is True
-    and data.get("hosting")=="cloudflare-workers"
-    and data.get("release")==os.environ["EXPECTED_RELEASE"])
-sys.exit(0 if ok else 1)
-PY
-            then
-              echo "Production is on $EXPECTED_RELEASE"
-              exit 0
-            fi
-            echo "Attempt $i/36: production not updated yet"
-            sleep 10
-          done
-          echo "Timed out waiting for Cloudflare production release"
-          exit 1
-
-      - name: HTTP routes and OGP
-        shell: bash
-        run: |
-          curl -fsS --retry 3 "$BASE_URL/" -o /tmp/home.html
-          grep -q 'id="basicFrame"' /tmp/home.html
-
-          curl -fsS --retry 3 "$BASE_URL/discover.html" -o /tmp/discover.html
-          grep -q 'cloud/discover.js' /tmp/discover.html
-
-          curl -fsS --retry 3 "$BASE_URL/public.html?id=$PUBLIC_TOPIC_ID" -o /tmp/public.html
-          grep -q 'cloud/public.js' /tmp/public.html
-
-          curl -fsS --retry 3 "$BASE_URL/rate.html?id=$PUBLIC_TOPIC_ID" -o /tmp/rate.html
-          grep -q 'cloud/rate.js' /tmp/rate.html
-
-          curl -fsS --retry 3 "$BASE_URL/p/$PUBLIC_TOPIC_ID" -o /tmp/share.html
-          grep -q 'property="og:title"' /tmp/share.html
-          grep -q "https://statsmaker.app/public.html?id=$PUBLIC_TOPIC_ID" /tmp/share.html
-          grep -q "https://statsmaker.app/api/og?id=$PUBLIC_TOPIC_ID" /tmp/share.html
-
-          curl -fsS --retry 3 -D /tmp/og.headers "$BASE_URL/api/og?id=$PUBLIC_TOPIC_ID" -o /tmp/og.png
-          grep -qi '^content-type: image/png' /tmp/og.headers
-
-          python - <<'PY'
-import struct
-p='/tmp/og.png'
-with open(p,'rb') as f:
-    sig=f.read(24)
-if sig[:8] != b'\x89PNG\r\n\x1a\n':
-    raise SystemExit('OGP response is not PNG')
-width,height=struct.unpack('>II',sig[16:24])
-if (width,height)!=(1200,630):
-    raise SystemExit(f'Unexpected OGP size: {width}x{height}')
-print('OGP PNG:',width,height)
-PY
+      - name: HTTP production smoke
+        run: node scripts/production-smoke.mjs http
 
       - name: Install Playwright
         run: |
           npm install --no-save playwright@1.56.1
           npx playwright install --with-deps chromium
 
-      - name: Browser smoke
-        run: |
-          node <<'NODE'
-          const {chromium}=require('playwright');
-
-          const base=process.env.BASE_URL;
-          const topic=process.env.PUBLIC_TOPIC_ID;
-          const assert=(condition,message)=>{if(!condition)throw new Error(message)};
-
-          (async()=>{
-            const browser=await chromium.launch({headless:true});
-            const context=await browser.newContext({
-              locale:'ja-JP',
-              viewport:{width:390,height:844}
-            });
-            const page=await context.newPage();
-
-            await page.goto(base+'/',{waitUntil:'networkidle',timeout:60000});
-            const frame=page.frameLocator('#basicFrame');
-            await frame.locator('#titleInput').waitFor({state:'visible',timeout:30000});
-            assert(await frame.locator('#titleInput').inputValue()==='','Fresh browser should start with a blank title');
-            assert(await frame.locator('#descInput').inputValue()==='','Fresh browser should start with a blank description');
-            assert(await frame.locator('#myPageBtn').count()===0,'My Page must not be exposed in editor');
-            assert(await frame.locator('#publishSignInBtn').count()===0,'Login UI must not be exposed');
-
-            await page.goto(base+'/discover.html',{waitUntil:'networkidle',timeout:60000});
-            await page.locator('#grid:not(.hidden)').waitFor({timeout:30000});
-            assert(await page.locator('.workCard').count()>0,'Discover returned no public work cards');
-
-            await page.goto(base+'/public.html?id='+encodeURIComponent(topic),{waitUntil:'networkidle',timeout:60000});
-            await page.locator('#content:not(.hidden)').waitFor({timeout:30000});
-            assert((await page.locator('h1').first().innerText()).trim().length>0,'Public work title missing');
-            await page.locator('#communityContent').waitFor({state:'visible',timeout:30000});
-            const communityText=await page.locator('#communityContent').innerText();
-            assert(!communityText.includes('集計中'), 'Community summary did not finish loading');
-
-            await page.locator('#remixBtn').click();
-            await page.waitForURL(/index\.html\?remixed=1/, {timeout:30000});
-            const remixFrame=page.frameLocator('#basicFrame');
-            await remixFrame.locator('#remixContextPanel:not(.hidden)').waitFor({timeout:30000});
-            await remixFrame.locator('#communityJoinPanel:not(.hidden)').waitFor({timeout:30000});
-            assert(await remixFrame.locator('#communityJoinBtn').count()===1,'Community join action missing after Remix');
-
-            await browser.close();
-            console.log('Browser smoke PASS');
-          })().catch(error=>{
-            console.error(error);
-            process.exit(1);
-          });
-          NODE
+      - name: Browser production smoke
+        run: node scripts/production-smoke.mjs browser
