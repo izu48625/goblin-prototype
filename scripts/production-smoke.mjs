@@ -213,7 +213,12 @@ async function browserDiscover(){
     await page.goto(BASE_URL+'/discover.html',{waitUntil:'networkidle',timeout:60000});
     await page.locator('#grid:not(.hidden)').waitFor({timeout:30000});
     assert(await page.locator('.workCard').count()>0,'Discover returned no public work cards');
-    assert((await page.locator('#homeLink').getAttribute('href')||'').includes('fresh=1'),'Discover Home does not request a fresh sheet');
+    assert(await page.locator('#homeLink').count()===0,
+      'Discover still renders an extra HOME beneath the global bar');
+    assert(await page.locator('.globalHomeBtn').count()===1,
+      'Discover must have one global HOME');
+    assert((await page.locator('.globalHomeBtn').getAttribute('href')||'').includes('fresh=1'),
+      'Global HOME must open a fresh sheet');
   });
 }
 
@@ -256,8 +261,11 @@ async function browserFreshHome(){
 
     await page.goto(BASE_URL+'/public.html?id='+encodeURIComponent(PUBLIC_TOPIC_ID),{waitUntil:'networkidle',timeout:60000});
     await page.locator('#content:not(.hidden)').waitFor({timeout:30000});
-    assert((await page.locator('#homeLink').getAttribute('href')||'').includes('fresh=1'),'Public Home does not request a fresh sheet');
-    await page.locator('#homeLink').click();
+    assert(await page.locator('#homeLink').count()===0,
+      'Public work still renders redundant HOME');
+    assert(await page.locator('.globalHomeBtn').count()===1,
+      'Public work needs exactly one global HOME');
+    await page.locator('.globalHomeBtn').click();
 
     const freshFrame=page.frameLocator('#basicFrame');
     await freshFrame.locator('#titleInput').waitFor({state:'visible',timeout:30000});
@@ -281,6 +289,10 @@ async function browserPublic(){
     await page.locator('#content:not(.hidden)').waitFor({timeout:30000});
     assert((await page.locator('h1').first().innerText()).trim().length>0,'Public work title missing');
     await page.locator('#communityContent').waitFor({state:'visible',timeout:30000});
+    assert(await page.locator('#homeLink').count()===0,
+      'Public page rendered a second HOME');
+    assert(await page.locator('.globalHomeBtn').isVisible(),
+      'Public page global HOME not visible');
     const communityText=await page.locator('#communityContent').innerText();
     assert(!communityText.includes('集計中'),'Community summary did not finish loading');
     const newRating=page.locator('#communityRateLink');
