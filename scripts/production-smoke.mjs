@@ -52,8 +52,8 @@ async function httpSmoke(){
     'Turnstile Community gateway was enabled before the bypass-proof DB cutover.');
   assert(security.siteKey===null,
     'Turnstile sitekey should not be exposed while the gateway is disabled.');
-  assert(typeof security.trustedGatewayConfigured==='boolean',
-    'Privileged Community gateway readiness field is missing.');
+  assert(security.trustedGatewayConfigured===true,
+    'SUPABASE_SERVICE_ROLE_KEY is not configured as a valid legacy service_role JWT in Cloudflare Production.');
   assert((securityResponse.headers.get('cache-control')||'').includes('no-store'),
     'Turnstile config must not be cached.');
   console.log('Turnstile keys detected; Community gateway intentionally disabled.');
