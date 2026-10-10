@@ -14,15 +14,21 @@ const json=(body,status=200,extra={})=>Response.json(body,{status,headers:{
 }});
 const reject=(status,code)=>json({error:code},status);
 
-export function gatewayEnabled(env){
-  return env.TURNSTILE_COMMUNITY_STAGE==='1'
-    && typeof env.TURNSTILE_SITE_KEY==='string' && env.TURNSTILE_SITE_KEY.length>6
+function credentialsConfigured(env){
+  return typeof env.TURNSTILE_SITE_KEY==='string' && env.TURNSTILE_SITE_KEY.length>6
     && typeof env.TURNSTILE_SECRET==='string' && env.TURNSTILE_SECRET.length>6;
 }
 
+export function gatewayEnabled(env){
+  return env.TURNSTILE_COMMUNITY_STAGE==='1' && credentialsConfigured(env);
+}
+
 export function securityConfig(env){
+  const configured=credentialsConfigured(env);
   const enabled=gatewayEnabled(env);
-  return json({communityGatewayEnabled:enabled,siteKey:enabled?env.TURNSTILE_SITE_KEY:null});
+  // Read-only readiness flag. Never return the secret or the sitekey before cutover.
+  return json({communityGatewayEnabled:enabled,siteKey:enabled?env.TURNSTILE_SITE_KEY:null,
+    turnstileConfigured:configured});
 }
 
 export async function communityGateway(request,env){
