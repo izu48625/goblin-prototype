@@ -610,6 +610,55 @@ async function browserGlobalLanguage(){
   });
 }
 
+// iPhone Safari uses a native Canvas-only PNG path. Exercise the same
+// exportPreview branch for EVERY project template without downloading,
+// publishing, or creating real user files in Supabase.
+async function browserIphonePng(){
+  const {chromium}=await import('playwright');
+  const browser=await chromium.launch({headless:true});
+  try{
+    const context=await browser.newContext({
+      viewport:{width:390,height:844},
+      locale:'ja-JP',
+      userAgent:'Mozilla/5.0 (iPhone; CPU iPhone OS 18_0 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/18.0 Mobile/15E148 Safari/604.1'
+    });
+    const page=await context.newPage();
+    await page.goto(BASE_URL+'/index.html',{waitUntil:'domcontentloaded',timeout:60000});
+    const outcome=await page.evaluate(async()=>{
+      const [{createProject},{exportPreview,isIOS}]=await Promise.all([
+        import('/app/src/core/project.js'),
+        import('/app/src/core/export.js')
+      ]);
+      if(!isIOS())throw new Error('PNG QA did not enter iPhone native export branch');
+      const types=['ranking-card','stat-card','bar','radar','quadrant','dot',
+        'range','scatter','tier-list','ring','heatmap','waffle','stat-board'];
+      const results=[];
+      for(const type of types){
+        const project=createProject(type);
+        project.canvas.width=480;project.canvas.height=640;
+        const result=await exportPreview(null,project,'png');
+        const bytes=new Uint8Array(await result.blob.arrayBuffer());
+        const signature=[137,80,78,71,13,10,26,10];
+        if(!signature.every((b,i)=>bytes[i]===b))
+          throw new Error(type+' did not return PNG header');
+        if(result.method!=='preview'||result.mime!=='image/png'||!result.file.name.endsWith('.png'))
+          throw new Error(type+' did not expose iPhone PNG preview/share');
+        if(result.blob.size<1000)throw new Error(type+' PNG unexpectedly small');
+        const bitmap=await createImageBitmap(result.blob);
+        if(bitmap.width!==480||bitmap.height!==640)
+          throw new Error(type+' PNG dimensions incorrect: '+bitmap.width+'x'+bitmap.height);
+        bitmap.close();
+        results.push({type,size:result.blob.size});
+      }
+      return results;
+    });
+    assert(outcome.length===13,'iPhone native PNG did not cover all visualization types');
+    console.log('Browser iPhone native PNG PASS: '+JSON.stringify(outcome));
+  }finally{
+    await browser.close();
+  }
+}
+
 if(mode==='http')await httpSmoke();
 else if(mode==='browser-home')await browserHome();
 else if(mode==='browser-global-language')await browserGlobalLanguage();
@@ -622,4 +671,5 @@ else if(mode==='browser-remix-storage')await browserRemixStorage();
 else if(mode==='browser-remix-context')await browserRemixContext();
 else if(mode==='browser-community-panel')await browserCommunityPanel();
 else if(mode==='browser-community-home')await browserCommunityHome();
+else if(mode==='browser-iphone-png')await browserIphonePng();
 else throw new Error('Unknown smoke mode: '+mode);

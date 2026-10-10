@@ -67,3 +67,6 @@ jobs:
 
       - name: Browser Community Home parity (mocked no-write)
         run: node scripts/production-smoke.mjs browser-community-home
+
+      - name: Browser iPhone native PNG for all visual templates (no-write)
+        run: node scripts/production-smoke.mjs browser-iphone-png
