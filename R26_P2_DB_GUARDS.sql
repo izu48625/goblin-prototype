@@ -1,7 +1,10 @@
 -- Stats Maker R26 P2: transactional DB protection for anonymous-first writes.
 -- Applied through a database migration; no charges, no service role in the browser.
 -- One user per topic vote remains unchanged; existing rows untouched.
--- The Supabase migration runner supplies transaction management.
+-- SQL Editor: paste this entire file and press Run once.
+-- BEGIN/COMMIT keeps the installation atomic on errors.
+
+begin;
 
 create schema if not exists private;
 revoke all on schema private from public, anon, authenticated;
@@ -261,3 +264,13 @@ revoke insert, update, delete on public.rating_sets from anon, authenticated;
 revoke insert, update, delete on public.scores from anon, authenticated;
 
 notify pgrst, 'reload schema';
+
+commit;
+
+-- Expected: installed=true, direct_rating_insert=false, direct_scores_update=false.
+select
+  to_regclass('private.write_budgets') is not null
+    and to_regprocedure('private.consume_write_budget(text,integer,integer)') is not null
+    and exists (select 1 from pg_trigger where tgrelid='public.topics'::regclass and tgname='r26_topic_write_budget' and not tgisinternal) as installed,
+  has_table_privilege('authenticated','public.rating_sets','INSERT') as direct_rating_insert,
+  has_table_privilege('authenticated','public.scores','UPDATE') as direct_scores_update;
