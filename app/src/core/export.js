@@ -993,9 +993,35 @@ export function exportProjectJSON(project){
   ordinaryDownload(blob,`${safeName(project)}.statsmaker.json`);
 }
 
+// Read the data file before replacing a currently open project. The old
+// importer accepted partial objects and could crash the editor AFTER the
+// active project had been replaced. Hidden legacy templates must remain
+// supported so older exported backups can still be restored.
+const IMPORTABLE_PROJECT_TYPES=new Set([
+  "ranking-card","stat-card","bar","radar","quadrant","dot","range",
+  "scatter","tier-list","ring","heatmap","waffle","stat-board"
+]);
+const isRecord=value=>value!==null&&typeof value==="object"&&!Array.isArray(value);
+
 export async function readProjectJSON(file){
-  const text=await file.text();
-  const data=JSON.parse(text);
-  if(!data || typeof data!=="object" || !data.type || !data.meta)throw new Error("Invalid Stats Maker project");
+  if(!file||typeof file.text!=="function")throw new Error("Select a Stats Maker JSON file");
+  // Real backups may contain images; cap only pathological payloads.
+  if(typeof file.size==="number"&&(file.size<=0||file.size>50*1024*1024))
+    throw new Error("Invalid project backup size");
+
+  let data;
+  try{data=JSON.parse(await file.text())}
+  catch{throw new Error("Invalid project JSON")}
+
+  if(!isRecord(data)||!IMPORTABLE_PROJECT_TYPES.has(data.type)
+    ||!isRecord(data.meta)||typeof data.meta.title!=="string"
+    ||!isRecord(data.canvas)||!isRecord(data.style)
+    ||!isRecord(data.data)||!isRecord(data.settings))
+    throw new Error("Invalid Stats Maker project");
+
+  const w=Number(data.canvas.width),h=Number(data.canvas.height);
+  if(!Number.isInteger(w)||!Number.isInteger(h)||w<1||h<1
+    ||w>10000||h>10000||data.meta.title.length>1000)
+    throw new Error("Invalid Stats Maker project dimensions or title");
   return data;
 }
