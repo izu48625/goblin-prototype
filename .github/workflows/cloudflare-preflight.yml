@@ -90,6 +90,7 @@ jobs:
           node --check scripts/r29-source-link-safety-test.mjs
           node --check app/src/core/source-sync.js
           node --check scripts/r29-mobile-backup-ui-test.mjs
+          node --check scripts/r29-home-backup-undo-qa.mjs
           node --check app/src/launcher.js
       - name: R26 edge guard test
         run: node scripts/r26-edge-test.mjs
