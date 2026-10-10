@@ -97,7 +97,24 @@ async function securityDenialSmoke(){
     assert([401,403,404].includes(response.status),
       'Anonymous direct '+rpc+' was not blocked by authorization ('+response.status+')');
   }
-  console.log('Security denial probes PASS (no real rating writes).');
+  // R29: five SECURITY DEFINER functions are installed as internal triggers.
+  // They must not be callable directly over PostgREST by unauthenticated users.
+  // Empty POST bodies are strictly denial checks, not trigger execution/writes.
+  for(const rpc of [
+    'prevent_locked_criterion_structure',
+    'prevent_locked_item_structure',
+    'prevent_locked_topic_structure',
+    'validate_rating_submission',
+    'validate_score_range'
+  ]){
+    const response=await fetch(url+'/rest/v1/rpc/'+rpc,{
+      method:'POST',headers:{apikey:publicKey,'Content-Type':'application/json'},
+      body:'{}',cache:'no-store'
+    });
+    assert([401,403,404].includes(response.status),
+      'R29 internal '+rpc+' became directly callable ('+response.status+')');
+  }
+  console.log('Security denial probes PASS (no real rating or trigger writes).');
 }
 
 async function waitForGlobalLanguageDeploy(){
