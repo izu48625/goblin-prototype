@@ -194,6 +194,15 @@ async function browserHome(){
     await frame.locator('#titleInput').waitFor({state:'visible',timeout:30000});
     assert(await frame.locator('#titleInput').inputValue()==='','Fresh browser should start with a blank title');
     assert(await frame.locator('#descInput').inputValue()==='','Fresh browser should start with a blank description');
+
+    assert(await page.locator('.globalLocaleBar').count()===1,
+      'Home must have exactly one shared outer locale bar');
+    assert(await frame.locator('.globalLocaleBar').count()===0,
+      'Embedded Home still adds a duplicate locale bar');
+    assert(await page.locator('.globalHomeBtn').isVisible(),
+      'HOME button must be pinned in the shared upper bar');
+    assert(await frame.locator('#editorHomeBtn').isHidden(),
+      'Old Home action must not duplicate shared upper HOME');
     assert(await frame.locator('#myPageBtn').count()===0,'My Page must not be exposed in editor');
     assert(await frame.locator('#publishSignInBtn').count()===0,'Login UI must not be exposed');
   });
@@ -215,10 +224,12 @@ async function browserEditorHome(){
     await frame.locator('#titleInput').waitFor({state:'visible',timeout:30000});
     await frame.locator('#titleInput').fill('EDITOR HOME PRESERVED');
     await frame.locator('#descInput').fill('do not erase me');
-    await frame.locator('#editorHomeBtn').waitFor({state:'visible',timeout:30000});
+
+    await page.locator('.globalHomeBtn').waitFor({state:'visible',timeout:30000});
+    assert(await frame.locator('#editorHomeBtn').isHidden(),'Duplicate embedded HOME is visible');
     const buttons=frame.locator('.topActions > :not(.hidden):visible');
-    assert(await buttons.count()>=5,'Editor top bar should include HOME plus existing actions');
-    await frame.locator('#editorHomeBtn').click();
+    assert(await buttons.count()>=4,'Remaining Home actions must stay visible');
+    await page.locator('.globalHomeBtn').click();
     await page.waitForTimeout(700);
     assert(await frame.locator('#titleInput').inputValue()==='','Editor HOME should clear current title');
     assert(await frame.locator('#descInput').inputValue()==='','Editor HOME should clear current description');
@@ -229,7 +240,8 @@ async function browserEditorHome(){
     const active=state.sheets.find(s=>s.id===state.activeId);
     assert(active?.title===''&&active?.rows?.length===4&&active?.cols?.length===4,'Editor HOME should use the default blank four-by-four format');
     assert(!active.sourceTopicId,'Editor HOME should not retain a Remix source');
-    assert(await frame.locator('#editorHomeBtn').isVisible(),'Editor HOME button should remain available');
+
+    assert(await page.locator('.globalHomeBtn').isVisible(),'Pinned HOME is unavailable after reset');
   });
 }
 
@@ -499,8 +511,18 @@ async function browserGlobalLanguage(){
     await frame.locator('#titleInput').waitFor({timeout:30000});
     const bar=page.locator('.globalLocaleBar');
     assert(await bar.count()===1,'Home shared locale bar missing');
+
     assert(await frame.locator('.homeLangSwitch').count()===0,
       'Old locale control remains beside the sheet title');
+    assert(await frame.locator('.globalLocaleBar').count()===0,
+      'Nested Home frame has duplicated the JA/EN control');
+    assert(await page.locator('.globalHomeBtn').count()===1,
+      'The shared top bar must include a single HOME button');
+    const beforeTop=await page.locator('.globalHomeBtn').boundingBox();
+    await frame.locator('body').evaluate(el=>{el.scrollTop=620;el.ownerDocument.documentElement.scrollTop=620;});
+    const afterTop=await page.locator('.globalHomeBtn').boundingBox();
+    assert(beforeTop&&afterTop&&Math.abs(beforeTop.y-afterTop.y)<2,
+      'HOME scrolled away rather than remaining pinned');
     const input=frame.locator('#titleInput');
     await input.fill('DO NOT ERASE LANGUAGE QA');
     await bar.locator('[data-global-lang="en"]').click();
