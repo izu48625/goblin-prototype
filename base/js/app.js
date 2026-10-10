@@ -11,32 +11,6 @@
   const $ = id => document.getElementById(id);
   const t = (key,vars={}) => window.SM_I18N?.t(key,vars) ?? key;
 
-  const sampleSheet = () => ({
-    id: makeId(),
-    title:'ワンピース 各編評価',
-    desc:'各編を100点満点で自由に採点',
-    cols:['ストーリー','戦闘','敵キャラ','感動','世界観'],
-    rows:[
-      {name:'東の海',image:'',scores:[88,80,82,91,84]},
-      {name:'アラバスタ',image:'',scores:[94,92,95,94,92]},
-      {name:'空島',image:'',scores:[91,84,87,89,98]},
-      {name:'W7・エニエスロビー',image:'',scores:[98,97,94,99,93]},
-      {name:'頂上戦争',image:'',scores:[97,99,99,99,97]}
-    ],
-    sortKey:null,
-    sortDesc:true,
-    rankMetric:'avg',
-    compare:[1,2,4],
-    compareView:'radar',
-    viewMode:'sheet',
-    fitMode:'auto',
-    fitZoom:1,
-    weighted:false,
-    weights:[1,1,1,1,1],
-    scale:100,
-    updatedAt:Date.now()
-  });
-
   const blankSheet = (title=t('fallback.newTopic')) => ({
     id:makeId(),
     title,
@@ -73,7 +47,7 @@
         }
       }
     }catch(e){}
-    const first = sampleSheet();
+    const first = blankSheet('');
     return {activeId:first.id,sheets:[first]};
   }
 
@@ -1669,7 +1643,7 @@
   function publicPageUrl(topicId){
     const url=new URL('../public.html',location.href);
     url.searchParams.set('id',topicId);
-    url.searchParams.set('v','r24p4');
+    url.searchParams.set('v','r25p1');
     return url.href;
   }
 

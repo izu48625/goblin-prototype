@@ -1,0 +1,39 @@
+name: Production Smoke Test
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: stats-maker-production-smoke
+  cancel-in-progress: true
+
+jobs:
+  smoke:
+    runs-on: ubuntu-latest
+    timeout-minutes: 12
+    env:
+      BASE_URL: https://statsmaker.app
+      PUBLIC_TOPIC_ID: 57b432ed-fbf2-4261-b57d-9e0f27356d2e
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+
+      - name: HTTP production smoke
+        run: node scripts/production-smoke.mjs http
+
+      - name: Install Playwright
+        run: |
+          npm install --no-save playwright@1.56.1
+          npx playwright install --with-deps chromium
+
+      - name: Browser production smoke
+        run: node scripts/production-smoke.mjs browser
