@@ -4,6 +4,18 @@ import worker from '../worker/index.js';
 
 const conf=JSON.parse(await readFile(new URL('../wrangler.jsonc',import.meta.url),'utf8'));
 assert.equal(conf.ratelimits.length,3);
+assert.equal(conf.previews.ratelimits.length,3);
+const prod=new Map(conf.ratelimits.map(x=>[x.name,x]));
+const previewNamespaces=new Set();
+for (const binding of conf.previews.ratelimits) {
+  const baseline=prod.get(binding.name);
+  assert(baseline);
+  assert.match(binding.namespace_id,/^[1-9][0-9]*$/);
+  assert.notEqual(binding.namespace_id,baseline.namespace_id);
+  assert(!previewNamespaces.has(binding.namespace_id));
+  previewNamespaces.add(binding.namespace_id);
+  assert.deepEqual(binding.simple,baseline.simple);
+}
 assert(conf.assets.run_worker_first.includes('/api/og*'));
 assert(conf.assets.run_worker_first.includes('/p/*'));
 

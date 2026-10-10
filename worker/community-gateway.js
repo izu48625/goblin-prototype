@@ -1,6 +1,7 @@
-// Stats Maker R26 P3: optional Turnstile-validated Community write gateway.
-// Not an enforcement boundary until direct Supabase RPC EXECUTE is revoked.
-// No privileged Supabase keys are used. All calls retain the anonymous user's JWT.
+// Stats Maker R26 P4: staged, trusted Community write gateway.
+// Browser JWT is checked by Supabase Auth; a service-only RPC persists the vote.
+// Enforcement begins only after R26_P4_CUTOVER.sql revokes direct RPC EXECUTE.
+// SUPABASE_SERVICE_ROLE_KEY must exist only as a Cloudflare Worker runtime secret.
 
 const SUPABASE_URL='https://ibpdxbeltdwkquowjeay.supabase.co';
 const SUPABASE_KEY='sb_publishable_6abnwW_1p-U_Y_DefUXfFQ_Dz_Y2vsD';
@@ -19,16 +20,31 @@ function credentialsConfigured(env){
     && typeof env.TURNSTILE_SECRET==='string' && env.TURNSTILE_SECRET.length>6;
 }
 
+function trustedRpcConfigured(env){
+  const key=env.SUPABASE_SERVICE_ROLE_KEY;
+  if(typeof key!=='string'||key.length<100)return false;
+  const parts=key.split('.');
+  if(parts.length!==3||!parts.every(part=>/^[A-Za-z0-9_-]+$/.test(part)))return false;
+  try{
+    // A local sanity check only. Supabase verifies the actual JWT signature.
+    const payload=JSON.parse(atob(parts[1].replace(/-/g,'+').replace(/_/g,'/')));
+    return payload?.role==='service_role' && (typeof payload.exp!=='number'||payload.exp>Date.now()/1000);
+  }catch{return false}
+}
+
 export function gatewayEnabled(env){
-  return env.TURNSTILE_COMMUNITY_STAGE==='1' && credentialsConfigured(env);
+  return env.TURNSTILE_COMMUNITY_STAGE==='1'
+    && credentialsConfigured(env) && trustedRpcConfigured(env);
 }
 
 export function securityConfig(env){
   const configured=credentialsConfigured(env);
+  const trusted=trustedRpcConfigured(env);
   const enabled=gatewayEnabled(env);
-  // Read-only readiness flag. Never return the secret or the sitekey before cutover.
+  // Public metadata only. Neither the Turnstile secret nor privileged DB key
+  // is ever returned. The sitekey remains hidden until enabled.
   return json({communityGatewayEnabled:enabled,siteKey:enabled?env.TURNSTILE_SITE_KEY:null,
-    turnstileConfigured:configured});
+    turnstileConfigured:configured,trustedGatewayConfigured:trusted});
 }
 
 export async function communityGateway(request,env){
@@ -53,7 +69,10 @@ export async function communityGateway(request,env){
   let body;
   try{
     const raw=await request.text();
-    if(raw.length>100000)return reject(413,'payload_too_large');
+    // Content-Length can be absent or dishonest. Enforce the actual UTF-8
+    // byte size, not UTF-16 JS string length (which undercounts emoji/CJK).
+    if(new TextEncoder().encode(raw).byteLength>100000)
+      return reject(413,'payload_too_large');
     body=JSON.parse(raw);
   }catch{return reject(400,'invalid_json')}
   const topic=body?.p_topic_id;
@@ -73,7 +92,9 @@ export async function communityGateway(request,env){
   }catch{return reject(503,'auth_unavailable')}
   if(!userResp.ok)return reject(401,'invalid_session');
   const user=await userResp.json().catch(()=>null);
-  if(!user?.id)return reject(401,'invalid_session');
+  if(!user?.id||typeof user.id!=='string'
+      ||!/^[0-9a-f]{8}-[0-9a-f]{4}-[1-8][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(user.id))
+    return reject(401,'invalid_session');
 
   const params=new URLSearchParams({
     secret:env.TURNSTILE_SECRET,response:token
@@ -93,21 +114,40 @@ export async function communityGateway(request,env){
       ||!Number.isFinite(age)||age< -60000||age>300000)
     return reject(403,'challenge_failed');
 
-  // Forward only the already authenticated user's JWT and validated RPC fields.
-  // This still requires P3 enforcement cutover to close direct RPC access.
+  // The end-user identity was verified by Supabase Auth above. Forward that
+  // trusted ID (never a browser-provided p_user_id) to the service-only RPC.
+  // The service-role key is held ONLY in the Worker runtime, never in HTML,
+  // any public config endpoint, a database table, or the GitHub repository.
   let rpcResp;
   try{
-    rpcResp=await fetch(SUPABASE_URL+'/rest/v1/rpc/save_my_topic_rating',{
+    rpcResp=await fetch(SUPABASE_URL+'/rest/v1/rpc/gateway_save_my_topic_rating',{
       method:'POST',
-      headers:{apikey:SUPABASE_KEY,Authorization:'Bearer '+bearer[1], 'Content-Type':'application/json'},
-      body:JSON.stringify({p_topic_id:topic,p_scores:body.p_scores,p_submit:body.p_submit})
+      headers:{
+        apikey:env.SUPABASE_SERVICE_ROLE_KEY,
+        Authorization:'Bearer '+env.SUPABASE_SERVICE_ROLE_KEY,
+        'Content-Type':'application/json'
+      },
+      body:JSON.stringify({
+        p_user_id:user.id,p_topic_id:topic,
+        p_scores:body.p_scores,p_submit:body.p_submit
+      })
     });
   }catch{return reject(503,'rating_unavailable')}
   const result=await rpcResp.json().catch(()=>null);
   if(!rpcResp.ok){
     if(rpcResp.status===429||String(result?.message||'').includes('RATE_LIMITED'))
       return reject(429,'rate_limited');
-    return json({error:'rating_rejected',message:String(result?.message||'Rating was not saved.').slice(0,240)},rpcResp.status>=500?503:400);
+    return json({error:'rating_rejected',message:'Rating could not be saved. Please retry.'},rpcResp.status>=500?503:400);
   }
+  // A 2xx response is not proof of persistence when an upstream returns
+  // malformed JSON or an unexpected shape. Do not show false "Saved" success.
+  const saved=Array.isArray(result)&&result.length===1?result[0]:null;
+  if(!saved || typeof saved.rating_set_id!=='string'
+      || !/^[0-9a-f]{8}-[0-9a-f]{4}-[1-8][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(saved.rating_set_id)
+      || !['draft','submitted'].includes(saved.rating_status)
+      || !(saved.submitted_at===null
+        || (typeof saved.submitted_at==='string'
+          && Number.isFinite(Date.parse(saved.submitted_at)))))
+    return reject(503,'invalid_rating_response');
   return json({data:result});
 }
