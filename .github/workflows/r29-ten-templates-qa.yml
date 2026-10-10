@@ -1,0 +1,33 @@
+name: R29 Ten Visible Templates QA
+
+on:
+  pull_request:
+    paths:
+      - "scripts/r29-ten-launcher-qa.mjs"
+      - ".github/workflows/r29-ten-templates-qa.yml"
+      - "app/src/launcher.js"
+      - "app/src/core/**"
+      - "app/src/editor/**"
+      - "index.html"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  template-qa:
+    runs-on: ubuntu-latest
+    timeout-minutes: 8
+    env:
+      BASE_URL: https://statsmaker.app
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+      - name: Install Playwright Chromium
+        run: |
+          npm install --no-save playwright@1.56.1
+          npx playwright install --with-deps chromium
+      - name: Exercise all ten visible graph extensions without cloud writes
+        run: node scripts/r29-ten-launcher-qa.mjs
