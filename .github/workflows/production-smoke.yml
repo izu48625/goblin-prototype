@@ -55,3 +55,11 @@ jobs:
 
       - name: Browser Community panel
         run: node scripts/production-smoke.mjs browser-community-panel
+
+      - name: Upload smoke diagnostics
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: production-smoke-diagnostics
+          path: /tmp/stats-maker-smoke
+          if-no-files-found: ignore
