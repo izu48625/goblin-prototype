@@ -1,4 +1,4 @@
-import {t,getLanguage,setLanguage,toggleLanguage,applyI18n} from "../core/i18n.js";
+import {t,getLanguage,setLanguage,toggleLanguage,applyI18n} from "../core/i18n.js?v=r27lang1";
 import {getProject,saveProject} from "../core/store.js";
 import {THEMES,CANVAS_PRESETS,applyTheme,applyCanvasPreset,newItemId,newStatId,newAxisId,newSeriesId} from "../core/project.js";
 import {History} from "../core/history.js";
