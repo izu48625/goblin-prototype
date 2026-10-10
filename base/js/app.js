@@ -770,6 +770,16 @@
       el.addEventListener('change',e=>{
         const ri=+e.currentTarget.dataset.scoreRow,ci=+e.currentTarget.dataset.scoreCol;
         s.rows[ri].scores[ci]=clampScore(e.currentTarget.value);
+        // The Home editor normally rebuilds the entire table on blur.
+        // For Community this drops focus/taps on the next numeric field.
+        // Keep the actual input nodes mounted while editing consecutive scores.
+        if(communityMode){
+          renderOverview();
+          renderFitTable();
+          renderSidebar();
+          scheduleSave('');
+          return;
+        }
         // Important: editing a score never reorders the table.
         renderAll();
         scheduleSave('');
