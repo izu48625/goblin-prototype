@@ -5,7 +5,7 @@
 /* R27 Community rating workspace: visual parity with the Home scoring editor. */
 .ratingWorkspace{padding:12px!important}
 .workspaceModes{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:7px;margin:4px 0 10px}
-.modeBtn{min-height:42px;padding:8px 10px;border:1px solid #355372;border-radius:10px;background:#122239;color:#b5c8e1;font:900 12px/1.3 inherit;cursor:pointer}
+.modeBtn{min-height:42px;padding:8px 10px;border:1px solid #355372;border-radius:10px;background:#122239;color:#b5c8e1;font-family:inherit;font-weight:900;font-size:12px;line-height:1.3;cursor:pointer}
 .modeBtn.active{background:#294a78;color:#f2f7ff;border-color:#719bfa;box-shadow:inset 0 0 0 1px #456cad}
 .communityToolbar{display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:8px;margin-bottom:12px;padding:8px 1px;color:#8da5c1;font-size:11px}
 .communityToolbar .visualLaunch{min-height:39px;background:#315fc0;border-color:#6c98f1}
