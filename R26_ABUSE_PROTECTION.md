@@ -30,15 +30,23 @@ Supabase already enforces: RLS owner restrictions, one submitted rating set per
 user/topic, and the minimum-five-users Community aggregation privacy gate. But
 an attacker can create new anonymous identities and bypass per-user quotas.
 
-## P2 — Database write guards (pending)
+## P2 — Database write guards (installed 2026-10-10; live UI test remains)
 
-1. Apply transactional, server-side per-identity quotas to public-topic creation
-   and the `save_my_topic_rating` RPC.
-2. Remove unnecessary direct `INSERT/UPDATE/DELETE` privileges on
-   `rating_sets` and `scores` so the validated RPC is the only write path.
-3. Test existing anonymous vote creation/update and publishing before release.
-4. Do not expose the internal quota implementation through PostgREST.
-5. Track quota violations and use clear client-facing retry messages.
+Applied by the account owner using `R26_P2_DB_GUARDS.sql` in the Supabase SQL Editor.
+Read-only verification against production confirmed:
+
+- `private.write_budgets` and `private.consume_write_budget` exist.
+- Topic creation and updates have a write-budget trigger.
+- Community RPC remains executable for authenticated (including anonymous) users.
+- Direct browser `INSERT/UPDATE/DELETE` on `rating_sets` and `scores` are revoked.
+- Five previously submitted rating sets remain intact after installation.
+- Identity quotas: 30 new topics/day, 120 topic updates/hour, 60 rating saves/hour.
+- Maximum per-request rating payload: 400 cells; title/description/snapshot size ceilings.
+
+**Remaining QA:** Confirm one real device can still publish/update a topic and
+submit/update its own Community rating. SQL inspection alone is not an
+authenticated, user-level end-to-end mutation test. Never artificially inflate
+public Community counts for QA.
 
 ## P3 — Turnstile and write gateway (pending)
 
