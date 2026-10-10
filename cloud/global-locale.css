@@ -1,0 +1,25 @@
+/* Shared language control above all page titles and primary content. */
+.globalLocaleBar{
+  display:flex;justify-content:flex-end;align-items:center;gap:10px;
+  height:44px;min-height:44px;padding:4px max(12px,env(safe-area-inset-right));
+  border-bottom:1px solid #273d59;
+  color:#96aecb;background:#081625;
+  font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",system-ui,sans-serif;
+  position:sticky;top:0;z-index:100;
+}
+.globalLocaleLabel{font-size:11px;font-weight:800;white-space:nowrap}
+.globalLocaleSwitch{display:flex;gap:3px;padding:3px;border:1px solid #355477;border-radius:10px;background:#0e2036}
+.globalLocaleSwitch button{cursor:pointer;min-width:46px;min-height:31px;padding:3px 10px;background:transparent;border:0;border-radius:7px;color:#a7bad3;font:900 12px/1.2 system-ui,sans-serif}
+.globalLocaleSwitch button.active{background:#315fae;color:#fff;box-shadow:0 1px 5px #0004}
+.globalLocaleSwitch button:focus-visible{outline:2px solid #9cbcff;outline-offset:2px}
+body.hasGlobalLocaleBar .top,body.hasGlobalLocaleBar .topbar{top:44px}
+body.hasGlobalLocaleBar.editor-body .editor-layout{height:calc(100vh - 102px)}
+body.hasGlobalLocaleBar.editor-body #langBtn,body.hasGlobalLocaleBar.editor-body #mobileLangBtn{display:none!important}
+body.hasGlobalLocaleBar.homeHost #basicRoot{top:44px}
+body.hasGlobalLocaleBar.homeHost .communityLoading{top:44px}
+@media(max-width:760px){
+  body.hasGlobalLocaleBar.editor-body .editor-layout{height:auto}
+  body.hasGlobalLocaleBar.editor-body .preview-area{min-height:calc(100vh - 154px)}
+  body.hasGlobalLocaleBar.editor-body .canvas-stage{min-height:calc(100vh - 194px)}
+}
+@media(max-width:420px){.globalLocaleBar{padding-right:12px}.globalLocaleSwitch button{min-width:44px}}
