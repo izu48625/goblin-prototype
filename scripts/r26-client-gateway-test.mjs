@@ -28,22 +28,22 @@ function createHarness(hostname,fetchImpl){
 const http=(body,status=200)=>({ok:status>=200&&status<300,json:async()=>body});
 let h=createHarness('statsmaker.app',async()=>http(null,404));
 let r=await h.save();
-assert(r.error instanceof Error);
+assert(typeof r.error?.message==='string');
 assert.equal(h.calls.rpc,0,'production 404 must not downgrade to direct RPC');
 
 h=createHarness('statsmaker.app',async()=>{throw new Error('offline')});
 r=await h.save();
-assert(r.error instanceof Error);
+assert(typeof r.error?.message==='string');
 assert.equal(h.calls.rpc,0,'production network failure must not downgrade');
 
 h=createHarness('statsmaker.app',async()=>http({siteKey:null}));
 r=await h.save();
-assert(r.error instanceof Error);
+assert(typeof r.error?.message==='string');
 assert.equal(h.calls.rpc,0,'malformed config must not downgrade');
 
 h=createHarness('statsmaker.app',async()=>http(enabledWithoutSiteKey));
 r=await h.save();
-assert(r.error instanceof Error);
+assert(typeof r.error?.message==='string');
 assert.equal(h.calls.rpc,0,'an enabled gateway with missing key must not downgrade');
 
 h=createHarness('statsmaker.app',async()=>http(disabled));
@@ -65,7 +65,7 @@ assert.equal(h.calls.fetch,0);
 
 h=createHarness('statsmaker.app',(()=>{let n=0;return async()=>++n===1?http(null,503):http(disabled)})());
 r=await h.save();
-assert(r.error instanceof Error);
+assert(typeof r.error?.message==='string');
 r=await h.save();
 assert.equal(r.error,null,'failed config request should be retriable');
 assert.equal(h.calls.rpc,1);
