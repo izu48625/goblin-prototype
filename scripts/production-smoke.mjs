@@ -375,8 +375,24 @@ async function browserCommunityHome(){
       'Community exposed structural row editing');
     const initialStorage=await page.evaluate(()=>localStorage.getItem('statsMakerV014Library'));
     await frame.locator('[data-score-row="0"][data-score-col="0"]').fill('8');
+    assert(await frame.locator('#scoreTable tbody tr').nth(0).locator('.progressPill').innerText()==='1/2',
+      'Community incomplete row count did not update live');
+    assert(await frame.locator('#scoreTable tbody tr').nth(0).locator('.avgValue').innerText()==='8',
+      'Community first score average did not update live');
     await frame.locator('[data-score-row="0"][data-score-col="1"]').fill('10');
+    assert(await frame.locator('#scoreTable tbody tr').nth(0).locator('.progressPill').innerText()==='2/2',
+      'Community completed row count did not update live');
+    assert(await frame.locator('#scoreTable tbody tr').nth(0).locator('.avgValue').innerText()==='9',
+      'Community two-score average did not update live');
     await frame.locator('[data-score-row="1"][data-score-col="0"]').fill('9');
+    assert(await frame.locator('#scoreTable tbody tr').nth(1).locator('.progressPill').innerText()==='1/2',
+      'Community next row count did not update live');
+    assert(await frame.locator('#scoreTable tbody tr').nth(1).locator('.avgValue').innerText()==='9',
+      'Community partial row average did not update live');
+    assert((await page.locator('#communityMessage').innerText()).includes('未保存'),
+      'Score changes did not show unsaved reminder');
+    assert(await page.evaluate(()=>!window.__communityMockSaved),
+      'Community score edits were automatically submitted without user action');
     await frame.locator('[data-sort-now="0"][data-sort-dir="desc"]').first().click();
     await frame.locator('#overviewViewBtn').click();
     await frame.locator('#sheetViewBtn').click();

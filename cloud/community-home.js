@@ -103,6 +103,14 @@ if(uuid.test(topicId)){
       busy=false;$('communityDraft').disabled=$('communitySubmit').disabled=false;
     }
   }
+  // Show whether Home-style edits are merely local or actually submitted.
+  window.addEventListener('message',event=>{
+    if(event.origin!==location.origin||event.source!==frame.contentWindow||
+      event.data?.type!=='statsmaker:community-score-dirty')return;
+    msg(context?.topic?.language_code==='en'
+      ?'Unsaved changes — tap Update rating to publish.'
+      :'未保存の変更があります。「評価を更新」でCommunityに反映できます。');
+  });
   $('communityDraft').onclick=()=>save(false);
   $('communitySubmit').onclick=()=>save(true);
   $('communityBackLink').href='public.html?id='+encodeURIComponent(topicId);
