@@ -35,8 +35,12 @@ export function getSourceSheet(project,explicitSheet=null){
   if(!library?.sheets?.length)return null;
 
   const wanted=project?.settings?.sourceSheetId;
-  return library.sheets.find(s=>s.id===wanted)
-    || library.sheets.find(s=>s.id===library.activeId)
+  // Do not silently attach a saved chart to an unrelated active Home sheet
+  // if its original source was deleted. Keep the chart's saved snapshot intact
+  // until that exact sheet ID is recovered (for example, from a backup).
+  if(wanted)return library.sheets.find(s=>s.id===wanted)||null;
+  // Backwards compatibility for pre-R10 charts without a sourceSheetId:
+  return library.sheets.find(s=>s.id===library.activeId)
     || library.sheets[0]
     || null;
 }
