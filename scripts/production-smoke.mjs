@@ -298,6 +298,100 @@ async function browserCommunityPanel(){
   });
 }
 
+// Browser QA with a mocked Supabase SDK: exercises real Home UI and Community
+// submit wiring without creating anonymous users or writing production ratings.
+async function browserCommunityHome(){
+  await withBrowser('Browser Community Home parity',async page=>{
+    const mockSdk=`
+      (() => {
+        const id='57b432ed-fbf2-4261-b57d-9e0f27356d2e';
+        let count=1;
+        const client={
+          auth:{
+            getSession:async()=>({data:{session:{
+              user:{id:'11111111-1111-4111-8111-111111111111'},access_token:'fake-test-token'
+            }},error:null})
+          },
+          from(table){
+            return {
+              select(){
+                return {
+                  eq(){
+                    return {
+                      single:async()=>table==='topics'?({data:{
+                        id,title:'COMMUNITY HOME MOCK',description:'QA',
+                        language_code:'ja',score_scale:10,weighted:false,
+                        allow_ratings:true,visibility:'public',
+                        topic_items:[
+                          {id:'aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa',name:'Alpha',position:0},
+                          {id:'bbbbbbbb-bbbb-4bbb-8bbb-bbbbbbbbbbbb',name:'Beta',position:1}
+                        ],
+                        criteria:[
+                          {id:'cccccccc-cccc-4ccc-8ccc-cccccccccccc',name:'Shoot',weight:1,position:0},
+                          {id:'dddddddd-dddd-4ddd-8ddd-dddddddddddd',name:'IQ',weight:1,position:1}
+                        ]
+                      },error:null}):({data:null,error:{message:'Unexpected single'}}),
+                      maybeSingle:async()=>({data:null,error:null})
+                    };
+                  }
+                };
+              }
+            };
+          },
+          async rpc(name,params){
+            if(name==='get_topic_participant_count')
+              return {data:count,error:null};
+            if(name==='save_my_topic_rating'){
+              window.__communityMockSaved=params;
+              count=2;
+              return {data:[{rating_set_id:'eeeeeeee-eeee-4eee-8eee-eeeeeeeeeeee',
+                rating_status:'submitted',submitted_at:new Date().toISOString()}],error:null};
+            }
+            return {data:null,error:{message:'Unexpected RPC '+name}};
+          }
+        };
+        window.supabase={createClient:()=>client};
+      })();`;
+    await page.route('**/supabase-js@2',route=>
+      route.fulfill({status:200,contentType:'application/javascript',body:mockSdk}));
+    await page.route('**/api/security/config',route=>
+      route.fulfill({status:200,contentType:'application/json',
+        body:JSON.stringify({communityGatewayEnabled:false,siteKey:null,
+          turnstileConfigured:true,trustedGatewayConfigured:true})}));
+    await page.goto(BASE_URL+'/index.html?community='+encodeURIComponent(PUBLIC_TOPIC_ID),
+      {waitUntil:'domcontentloaded',timeout:60000});
+    await page.locator('#communityControls:not(.hidden)').waitFor({timeout:30000});
+    const frame=page.frameLocator('#basicFrame');
+    await frame.locator('#scoreTable .scoreInput').first().waitFor({timeout:30000});
+    assert(await frame.locator('#titleInput').inputValue()==='COMMUNITY HOME MOCK',
+      'Community did not mount topic into the actual Home title');
+    assert(await frame.locator('#sheetViewBtn').count()===1&&
+      await frame.locator('#overviewViewBtn').count()===1&&
+      await frame.locator('#radarTab').count()===1,
+      'Community does not use real Home comparison UI');
+    assert(await frame.locator('#titleInput').isEditable()===false,
+      'Public topic title can be modified in Community mode');
+    assert(await frame.locator('#addRowBtn').isHidden(),
+      'Community exposed structural row editing');
+    const initialStorage=await page.evaluate(()=>localStorage.getItem('statsMakerV014Library'));
+    await frame.locator('[data-score-row="0"][data-score-col="0"]').fill('8');
+    await frame.locator('[data-score-row="0"][data-score-col="1"]').fill('10');
+    await frame.locator('[data-sort-now="0"][data-sort-dir="desc"]').first().click();
+    await frame.locator('#overviewViewBtn').click();
+    await frame.locator('#sheetViewBtn').click();
+    await page.locator('#communitySubmit').click();
+    await page.locator('.communityMessage.ok').waitFor({timeout:30000});
+    const result=await page.evaluate(()=>window.__communityMockSaved);
+    assert(result?.p_scores?.length===2,'Community Home sent wrong score count');
+    assert(result.p_scores.every(row=>row.item_id==='aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa'),
+      'Home sorting corrupted the rated item ID');
+    assert(await page.locator('#communityParticipant').innerText()==='参加者 2人',
+      'Community participant count did not refresh');
+    assert(await page.evaluate(()=>localStorage.getItem('statsMakerV014Library'))===initialStorage,
+      'Community Home overwrote local Home saved sheets');
+  });
+}
+
 if(mode==='http')await httpSmoke();
 else if(mode==='browser-home')await browserHome();
 else if(mode==='browser-editor-home')await browserEditorHome();
@@ -308,4 +402,5 @@ else if(mode==='browser-remix-redirect')await browserRemixRedirect();
 else if(mode==='browser-remix-storage')await browserRemixStorage();
 else if(mode==='browser-remix-context')await browserRemixContext();
 else if(mode==='browser-community-panel')await browserCommunityPanel();
+else if(mode==='browser-community-home')await browserCommunityHome();
 else throw new Error('Unknown smoke mode: '+mode);
