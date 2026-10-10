@@ -452,7 +452,8 @@ async function browserCommunityHome(){
     await page.goto(BASE_URL+'/rate.html?id='+encodeURIComponent(PUBLIC_TOPIC_ID),
       {waitUntil:'domcontentloaded',timeout:60000});
     await page.waitForURL(url=>url.pathname.endsWith('/index.html')&&
-      url.searchParams.get('community')===PUBLIC_TOPIC_ID,{timeout:15000});
+      url.searchParams.get('community')===PUBLIC_TOPIC_ID,
+      {timeout:15000,waitUntil:'commit'});
     await page.goto(BASE_URL+'/rate.html?id='+encodeURIComponent(PUBLIC_TOPIC_ID)+'&legacy=1',
       {waitUntil:'domcontentloaded',timeout:60000});
     assert(new URL(page.url()).pathname.endsWith('/rate.html'),
