@@ -95,8 +95,9 @@ body.communityShell #extLauncher{bottom:calc(8px + env(safe-area-inset-bottom))}
  body.communityShell #extLauncher{bottom:20px}
 }
 </style>
+<link rel="stylesheet" href="cloud/global-locale.css?v=r27lang1">
 </head>
-<body data-build="R25-P4">
+<body data-build="R25-P4" class="homeHost">
 <div id="basicRoot"><iframe id="basicFrame" title="Stats Maker"></iframe></div>
 <script>
 (() => {
@@ -142,5 +143,6 @@ if(document.body.classList.contains('communityShell'))document.getElementById('c
 
 <script type="module" src="app/src/launcher.js?v=r27h1"></script>
 <script type="module" src="cloud/community-home.js?v=r27h1"></script>
+<script src="cloud/global-locale.js?v=r27lang1"></script>
 </body>
 </html>
