@@ -38,7 +38,7 @@
     content.innerHTML=`<section class="hero"><h1>${esc(topic.title)}${state.ratingSet?.status==='submitted'?`<span class="submittedBadge">${ja?'投稿済み':'SUBMITTED'}</span>`:''}</h1><p>${ja?'登録なしで参加できます。各項目を採点し、最低1つの対象について全項目を埋めるとCommunityへ投稿できます。':'No account required. Score the metrics below and complete every metric for at least one target to submit to Community.'}</p><div class="meta"><span class="pill">${scale}${ja?'点満点':'-point scale'}</span><span class="pill">${items.length}${ja?'対象':' targets'}</span><span class="pill">${criteria.length}${ja?'項目':' metrics'}</span><span id="participantPill" class="pill participantPill">${ja?`参加者 ${state.participant}人`:`${state.participant} participant${state.participant===1?'':'s'}`}</span></div></section>
     <section class="card"><div style="display:flex;justify-content:space-between;gap:8px;align-items:center"><h2>${ja?'あなたの評価':'Your Ratings'}</h2><div id="progress" class="progress"></div></div><div class="tableWrap"><table><thead><tr><th class="nameHead">${ja?'対象':'Target'}</th>${criteria.map(c=>`<th>${esc(c.name)}</th>`).join('')}</tr></thead><tbody>${items.map(item=>`<tr><td class="targetCell"><span class="targetName">${esc(item.name)}</span></td>${criteria.map(c=>{const value=state.scoreMap.get(`${item.id}|${c.id}`);return `<td><input class="scoreInput" inputmode="decimal" type="number" min="0" max="${scale}" step="${step}" data-item="${item.id}" data-criterion="${c.id}" value="${value??''}"></td>`}).join('')}</tr>`).join('')}</tbody></table></div><div class="privacy">${ja?'評価データはあなた自身以外には個別表示されません。Communityでは5人以上集まった対象だけ平均値を表示します。':'Individual ratings stay private. Community averages are shown only when at least 5 eligible participants have rated an item.'}</div><div id="message" class="message"></div><div class="actions"><button id="draftBtn" class="btn">${ja?'下書き保存':'Save Draft'}</button><button id="submitBtn" class="btn primary">${state.ratingSet?.status==='submitted'?(ja?'評価を更新':'Update Rating'):(ja?'Communityへ投稿':'Submit to Community')}</button></div></section>`;
     document.querySelectorAll('.scoreInput').forEach(input=>input.addEventListener('input',updateProgress));
-    document.getElementById('draftBtn').onclick=()=>save(false);document.getElementById('submitBtn').onclick=()=>save(true);updateProgress();setupRatingWorkspace();
+    document.getElementById('draftBtn').onclick=()=>save(false);document.getElementById('submitBtn').onclick=()=>save(true);updateProgress();if(new URLSearchParams(location.search).get('workspace')==='1')setupRatingWorkspace();
   }
 
   function communitySheetSnapshot(){
@@ -73,7 +73,7 @@
     const total=sheet.cols.length;
     const rows=sheet.rows.map((r,i)=>{
       const valid=r.scores.filter(Number.isFinite);
-      const avg=valid.length?valid.reduce((a,b)=>a+b,0)/valid.length:null;
+      const avg=valid.length?(()=>{let n=0,d=0;r.scores.forEach((v,i)=>{if(!Number.isFinite(v))return;const w=sheet.weighted?sheet.weights[i]:1;n+=v*w;d+=w;});return d?n/d:null;})():null;
       return {...r,index:i,avg,filled:valid.length};
     }).sort((a,b)=>(b.avg??-1)-(a.avg??-1));
     container.replaceChildren();
