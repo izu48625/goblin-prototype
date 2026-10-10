@@ -74,7 +74,7 @@ async function httpSmoke(){
   console.log('HTTP smoke PASS');
 }
 
-async function browserSmoke(){
+async function withBrowser(testName,test){
   const {chromium}=await import('playwright');
   const browser=await chromium.launch({headless:true});
   try{
@@ -83,7 +83,15 @@ async function browserSmoke(){
       viewport:{width:390,height:844}
     });
     const page=await context.newPage();
+    await test(page);
+    console.log(testName+' PASS');
+  }finally{
+    await browser.close();
+  }
+}
 
+async function browserHome(){
+  await withBrowser('Browser home',async page=>{
     await page.goto(BASE_URL+'/',{waitUntil:'networkidle',timeout:60000});
     const frame=page.frameLocator('#basicFrame');
     await frame.locator('#titleInput').waitFor({state:'visible',timeout:30000});
@@ -91,31 +99,44 @@ async function browserSmoke(){
     assert(await frame.locator('#descInput').inputValue()==='','Fresh browser should start with a blank description');
     assert(await frame.locator('#myPageBtn').count()===0,'My Page must not be exposed in editor');
     assert(await frame.locator('#publishSignInBtn').count()===0,'Login UI must not be exposed');
+  });
+}
 
+async function browserDiscover(){
+  await withBrowser('Browser Discover',async page=>{
     await page.goto(BASE_URL+'/discover.html',{waitUntil:'networkidle',timeout:60000});
     await page.locator('#grid:not(.hidden)').waitFor({timeout:30000});
     assert(await page.locator('.workCard').count()>0,'Discover returned no public work cards');
+  });
+}
 
+async function browserPublic(){
+  await withBrowser('Browser public/community',async page=>{
     await page.goto(BASE_URL+'/public.html?id='+encodeURIComponent(PUBLIC_TOPIC_ID),{waitUntil:'networkidle',timeout:60000});
     await page.locator('#content:not(.hidden)').waitFor({timeout:30000});
     assert((await page.locator('h1').first().innerText()).trim().length>0,'Public work title missing');
     await page.locator('#communityContent').waitFor({state:'visible',timeout:30000});
     const communityText=await page.locator('#communityContent').innerText();
     assert(!communityText.includes('集計中'),'Community summary did not finish loading');
+  });
+}
 
+async function browserRemix(){
+  await withBrowser('Browser Remix',async page=>{
+    await page.goto(BASE_URL+'/public.html?id='+encodeURIComponent(PUBLIC_TOPIC_ID),{waitUntil:'networkidle',timeout:60000});
+    await page.locator('#content:not(.hidden)').waitFor({timeout:30000});
     await page.locator('#remixBtn').click();
     await page.waitForURL(/index\.html\?remixed=1/,{timeout:30000});
     const remixFrame=page.frameLocator('#basicFrame');
     await remixFrame.locator('#remixContextPanel:not(.hidden)').waitFor({timeout:30000});
     await remixFrame.locator('#communityJoinPanel:not(.hidden)').waitFor({timeout:30000});
     assert(await remixFrame.locator('#communityJoinBtn').count()===1,'Community join action missing after Remix');
-
-    console.log('Browser smoke PASS');
-  }finally{
-    await browser.close();
-  }
+  });
 }
 
 if(mode==='http')await httpSmoke();
-else if(mode==='browser')await browserSmoke();
+else if(mode==='browser-home')await browserHome();
+else if(mode==='browser-discover')await browserDiscover();
+else if(mode==='browser-public')await browserPublic();
+else if(mode==='browser-remix')await browserRemix();
 else throw new Error('Unknown smoke mode: '+mode);
