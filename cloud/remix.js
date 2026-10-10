@@ -27,7 +27,8 @@
 
     return {
       id:makeId(),
-      title:`${topic.title}${locale==='ja'?'（Remix）':' (Remix)'}`,
+      // Prevent repeated "(Remix)" suffixes when copying a copy.
+      title:(String(topic.title||'').replace(/(?:\s*[（(]\s*(?:Remix|Copy|コピー)\s*[)）])+\s*$/gi,'').trim()||String(topic.title||'').trim())+(locale==='ja'?'（コピー）':' (Copy)'),
       desc:topic.description||'',
       cols,
       rows,
