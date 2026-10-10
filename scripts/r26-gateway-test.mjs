@@ -34,8 +34,14 @@ const env={
 
 try{
   let r=await worker.fetch(new Request('https://statsmaker.app/api/security/config'),{...env,TURNSTILE_COMMUNITY_STAGE:'0'});
-  assert.deepEqual(await r.json(),{communityGatewayEnabled:false,siteKey:null});
-  assert(!JSON.stringify(await (await worker.fetch(new Request('https://statsmaker.app/api/security/config'),env)).json()).includes(env.TURNSTILE_SECRET));
+  assert.deepEqual(await r.json(),{communityGatewayEnabled:false,siteKey:null,turnstileConfigured:true});
+  const activeConfig=await (await worker.fetch(new Request('https://statsmaker.app/api/security/config'),env)).json();
+  assert.deepEqual(activeConfig,{communityGatewayEnabled:true,siteKey:env.TURNSTILE_SITE_KEY,turnstileConfigured:true});
+  assert(!JSON.stringify(activeConfig).includes(env.TURNSTILE_SECRET));
+  const emptyConfig=await (await worker.fetch(new Request('https://statsmaker.app/api/security/config'),{
+    ...env,TURNSTILE_SECRET:undefined
+  })).json();
+  assert.deepEqual(emptyConfig,{communityGatewayEnabled:false,siteKey:null,turnstileConfigured:false});
   r=await worker.fetch(makeReq(),{...env,TURNSTILE_COMMUNITY_STAGE:'0'});
   assert.equal(r.status,503);
   assert.equal(outbound.length,0);
