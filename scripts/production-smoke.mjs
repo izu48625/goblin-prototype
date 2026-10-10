@@ -81,6 +81,41 @@ async function securityDenialSmoke(){
   assert(url?.startsWith('https://')&&publicKey?.startsWith('sb_publishable_'),
     'Public Supabase API config unavailable for deny-only test');
 
+  // R29 read-only Supabase RLS audit from a real anonymous client.
+  // No sign-in, account creation, or database mutations are attempted.
+  // Anon can inspect public / URL-limited work, but never see private work,
+  // and cannot read raw participant rating sets or scores.
+  const publicHeaders={apikey:publicKey,Accept:'application/json'};
+  const topicList=await fetch(url+'/rest/v1/topics?select=id,visibility&limit=100',{
+    method:'GET',headers:publicHeaders,cache:'no-store'
+  });
+  assert(topicList.ok,'Anonymous public-topic read failed: '+topicList.status);
+  const visibleTopics=await topicList.json();
+  assert(Array.isArray(visibleTopics)&&visibleTopics.length>0,
+    'Anonymous topic list is empty or malformed');
+  assert(visibleTopics.every(t=>t&&['public','unlisted'].includes(t.visibility)),
+    'RLS leaked private topics to an anonymous user');
+  assert(visibleTopics.some(t=>t.id===PUBLIC_TOPIC_ID),
+    'Known published topic unexpectedly inaccessible to anonymous visitors');
+  const allowedIds=new Set(visibleTopics.map(t=>t.id));
+  for(const table of ['topic_items','criteria']){
+    const response=await fetch(url+'/rest/v1/'+table+'?select=topic_id&limit=100',{
+      method:'GET',headers:publicHeaders,cache:'no-store'
+    });
+    assert(response.ok,'Anonymous '+table+' read unexpectedly failed: '+response.status);
+    const rows=await response.json();
+    assert(Array.isArray(rows)&&rows.every(x=>allowedIds.has(x.topic_id)),
+      'RLS leaked a private topic relation through '+table);
+  }
+  for(const table of ['rating_sets','scores']){
+    const response=await fetch(url+'/rest/v1/'+table+'?select=topic_id&limit=1',{
+      method:'GET',headers:publicHeaders,cache:'no-store'
+    });
+    assert([401,403].includes(response.status),
+      'Anonymous raw '+table+' SELECT unexpectedly allowed: '+response.status);
+  }
+  console.log('Anonymous RLS privacy PASS: public/unlisted viewable, private topics and raw ratings denied.');
+
   // Use a nonexistent topic UUID; a broken privilege should still not
   // create or modify any real rating data.
   const unknownId='00000000-0000-4000-8000-000000000000';
