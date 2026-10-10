@@ -43,6 +43,11 @@ begin
   -- resolves the authenticated user ID verified by the trusted Worker.
   -- set_config(..., true) is limited to this PostgREST transaction.
   perform pg_catalog.set_config('request.jwt.claim.sub',p_user_id::text,true);
+  -- Fail closed if a future auth.uid() implementation stops honoring this
+  -- transaction-local claim. Never risk attributing a vote to another actor.
+  if auth.uid() is distinct from p_user_id then
+    raise exception 'Gateway identity forwarding failed.' using errcode = '42501';
+  end if;
 
   return query
   select s.rating_set_id,s.rating_status,s.submitted_at
