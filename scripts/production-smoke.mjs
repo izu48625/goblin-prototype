@@ -146,8 +146,9 @@ async function httpSmoke(){
   const rate=await (await fetchOk(BASE_URL+'/rate.html?id='+encodeURIComponent(PUBLIC_TOPIC_ID))).text();
   assert(rate.includes('index.html?community=')&&rate.includes("params.get('legacy')==='1'"),
     'Standard rate route must redirect to shared Home with a legacy fallback.');
-  assert(rate.includes('cloud/rate.js')&&rate.includes('fresh=1'),
-    'Legacy rating fallback must remain available.');
+  assert(rate.includes('cloud/rate.js')&&rate.includes('global-locale.js')&&
+    !rate.includes('id="homeLink"'),
+    'Legacy rating fallback must keep the shared Home action without a duplicate HOME button.');
 
   const rateJs=await (await fetchOk(BASE_URL+'/cloud/rate.js')).text();
   assert(rateJs.includes('participantPill'),'Rate UI is missing participant-count feedback');
