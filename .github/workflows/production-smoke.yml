@@ -35,5 +35,14 @@ jobs:
           npm install --no-save playwright@1.56.1
           npx playwright install --with-deps chromium
 
-      - name: Browser production smoke
-        run: node scripts/production-smoke.mjs browser
+      - name: Browser home
+        run: node scripts/production-smoke.mjs browser-home
+
+      - name: Browser Discover
+        run: node scripts/production-smoke.mjs browser-discover
+
+      - name: Browser public and Community
+        run: node scripts/production-smoke.mjs browser-public
+
+      - name: Browser Remix route
+        run: node scripts/production-smoke.mjs browser-remix
