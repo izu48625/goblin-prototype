@@ -1,3 +1,4 @@
+import {buildCommunitySheet,collectCommunityScores} from './community-rating-model.js';
 // R27: Community reuses the exact Home base/index.html scoring engine.
 // A separate in-memory sheet is mounted; Home localStorage is never changed.
 const query=new URLSearchParams(location.search);
@@ -42,23 +43,7 @@ if(uuid.test(topicId)){
       if(scoreError)throw scoreError;
       existingScores=data||[];
     }
-    const scoreMap=new Map(existingScores.map(score=>[
-      score.item_id+'|'+score.criterion_id,numberOrNull(score.score)
-    ]));
-    const sheet={
-      id:'community_'+topicId,title:topic.title,desc:topic.description||'',
-      sourceTopicId:topicId, // lets the mount validate the supplied topic
-      cols:criteria.map(c=>c.name),
-      rows:items.map(item=>({
-        name:item.name,image:'',note:'',sourceItemId:item.id,
-        scores:criteria.map(c=>scoreMap.get(item.id+'|'+c.id)??null)
-      })),
-      sortKey:null,sortDesc:true,rankMetric:'avg',
-      compare:items.slice(0,Math.min(items.length,3)).map((_,i)=>i),
-      compareView:'radar',viewMode:'sheet',fitMode:'auto',fitZoom:1,
-      weighted:!!topic.weighted,weights:criteria.map(c=>Math.max(0,Number(c.weight)||0)),
-      scale:Number(topic.score_scale)===10?10:100,updatedAt:Date.now()
-    };
+    const sheet=buildCommunitySheet(topic,items,criteria,existingScores);
     const {data:count,error:countError}=await sb.rpc('get_topic_participant_count',{p_topic_id:topicId});
     return {topic,items,criteria,sheet,existing,participant:countError?null:Number(count||0)};
   }
@@ -75,27 +60,7 @@ if(uuid.test(topicId)){
   }
   function collectScores(){
     const sheet=frame.contentWindow?.__statsMakerGetActiveSheet?.();
-    if(!sheet||sheet.sourceTopicId!==topicId||!context)throw new Error('Community sheet has not loaded.');
-    const scale=context.sheet.scale,entries=[];let completed=0;
-    if(sheet.rows.length!==context.items.length||sheet.cols.length!==context.criteria.length ||
-      sheet.cols.some((label,i)=>label!==context.criteria[i].name))
-      throw new Error('The published rating structure changed.');
-    const validIds=new Set(context.items.map(item=>item.id)),seen=new Set();
-    for(const row of sheet.rows){
-      if(!validIds.has(row.sourceItemId)||seen.has(row.sourceItemId))
-        throw new Error('The published rating items no longer match.');
-      seen.add(row.sourceItemId);
-      let complete=true;
-      for(let j=0;j<context.criteria.length;j++){
-        const value=numberOrNull(row.scores?.[j]);
-        if(value===null){complete=false;continue;}
-        if(!Number.isFinite(value)||value<0||value>scale)
-          throw new Error('Scores must be within the published rating scale.');
-        entries.push({item_id:row.sourceItemId,criterion_id:context.criteria[j].id,score:value});
-      }
-      if(complete)completed++;
-    }
-    return {entries,completed};
+    return collectCommunityScores(sheet,context);
   }
   function syncButtons(){
     $('communitySubmit').textContent=context?.existing?.status==='submitted'
