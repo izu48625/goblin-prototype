@@ -623,7 +623,7 @@ async function browserIphonePng(){
       userAgent:'Mozilla/5.0 (iPhone; CPU iPhone OS 18_0 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/18.0 Mobile/15E148 Safari/604.1'
     });
     const page=await context.newPage();
-    await page.goto(BASE_URL+'/app/editor.html',{waitUntil:'domcontentloaded',timeout:60000});
+    await page.goto(BASE_URL+'/index.html',{waitUntil:'domcontentloaded',timeout:60000});
     const outcome=await page.evaluate(async()=>{
       const [{createProject},{exportPreview,isIOS}]=await Promise.all([
         import('/app/src/core/project.js'),
