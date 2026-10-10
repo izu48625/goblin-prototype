@@ -279,8 +279,67 @@
     $('statusText').textContent=t('backup.exported');
   }
 
+  // Keep a reversible, local-only checkpoint before replacing Home sheets.
+  // All checks happen before altering the active library or its storage key.
+  const PRE_RESTORE_KEY='statsMakerV014PreRestoreBackup';
+  function prepareImportLibrary(input){
+    if(!input||Array.isArray(input)||typeof input!=='object'||
+       !Array.isArray(input.sheets)||input.sheets.length<1||input.sheets.length>2000)
+      throw new Error('invalid library');
+    const ids=new Set();
+    for(const sheet of input.sheets){
+      if(!sheet||typeof sheet!=='object'||Array.isArray(sheet)||
+         (sheet.title!==undefined&&typeof sheet.title!=='string')||
+         !Array.isArray(sheet.cols)||sheet.cols.length<1||sheet.cols.length>MAX_COLS||
+         !sheet.cols.every(col=>typeof col==='string')||
+         !Array.isArray(sheet.rows)||sheet.rows.length<1||sheet.rows.length>MAX_ROWS)
+        throw new Error('invalid sheet');
+      if(sheet.id){
+        if(typeof sheet.id!=='string'||ids.has(sheet.id))throw new Error('duplicate sheet');
+        ids.add(sheet.id);
+      }
+      for(const row of sheet.rows){
+        if(!row||typeof row!=='object'||Array.isArray(row)||
+           (row.name!==undefined&&typeof row.name!=='string')||
+           (row.image!==undefined&&typeof row.image!=='string')||
+           !Array.isArray(row.scores)||row.scores.length>MAX_COLS||
+           !row.scores.every(value=>value===null||value===''||
+             (typeof value==='number'&&Number.isFinite(value))))
+          throw new Error('invalid score');
+      }
+    }
+    input.sheets.forEach(normalizeSheet);
+    if(!input.activeId||!input.sheets.some(sheet=>sheet.id===input.activeId))
+      input.activeId=input.sheets[0].id;
+    return input;
+  }
+  function applyImportLibrary(incoming){
+    // If storage capacity is insufficient to preserve the original, do NOT
+    // replace the user's saved work. No cloud data or other keys are touched.
+    localStorage.setItem(PRE_RESTORE_KEY,JSON.stringify(library));
+    localStorage.setItem(STORAGE_KEY,JSON.stringify(incoming));
+    library=incoming;
+    closeImportDialog();
+    renderAll();
+  }
+  function updateUndoRestoreButton(){
+    const button=$('undoLastRestoreBtn');
+    if(button)button.classList.toggle('hidden',!localStorage.getItem(PRE_RESTORE_KEY));
+  }
+  function undoLastRestore(){
+    if(!localStorage.getItem(PRE_RESTORE_KEY))return;
+    if(!window.confirm(t('backup.undoConfirm')))return;
+    try{
+      const original=prepareImportLibrary(JSON.parse(localStorage.getItem(PRE_RESTORE_KEY)));
+      applyImportLibrary(original);
+      $('statusText').textContent=t('backup.undoSuccess');
+    }catch{
+      $('statusText').textContent=t('backup.invalid');
+    }
+  }
   function openImportDialog(){
     $('importFileInput').value='';
+    updateUndoRestoreButton();
     $('importBackdrop').classList.remove('hidden');
   }
 
@@ -291,22 +350,14 @@
   async function importBackupFile(file){
     if(!file)return;
     try{
+      if(file.size>50*1024*1024)throw new Error('backup too large');
       const text=await file.text();
       const parsed=JSON.parse(text);
-      const incoming=parsed?.library || parsed;
-      if(!incoming || !Array.isArray(incoming.sheets) || !incoming.sheets.length){
-        throw new Error('invalid');
-      }
-      incoming.sheets.forEach(normalizeSheet);
-      if(!incoming.activeId || !incoming.sheets.some(s=>s.id===incoming.activeId)){
-        incoming.activeId=incoming.sheets[0].id;
-      }
-      library=incoming;
-      localStorage.setItem(STORAGE_KEY,JSON.stringify(library));
-      closeImportDialog();
-      renderAll();
+      const incoming=prepareImportLibrary(parsed?.library||parsed);
+      applyImportLibrary(incoming);
       $('statusText').textContent=t('backup.restored');
     }catch(e){
+      console.warn('Home backup restore blocked',e);
       $('statusText').textContent=t('backup.invalid');
     }
   }
@@ -2223,6 +2274,7 @@
   $('exportCsvBtn').addEventListener('click',exportCsv);
   $('shareImageBtn').addEventListener('click',openShareImage);
   $('importCancelBtn').addEventListener('click',closeImportDialog);
+  $('undoLastRestoreBtn').addEventListener('click',undoLastRestore);
   $('importBackdrop').addEventListener('click',e=>{
     if(e.target===$('importBackdrop'))closeImportDialog();
   });
