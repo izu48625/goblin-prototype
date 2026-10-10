@@ -116,6 +116,31 @@ async function browserDiscover(){
   });
 }
 
+async function browserEditorHome(){
+  await withBrowser('Browser editor HOME',async page=>{
+    await page.goto(BASE_URL+'/',{waitUntil:'networkidle',timeout:60000});
+    const frame=page.frameLocator('#basicFrame');
+    await frame.locator('#titleInput').waitFor({state:'visible',timeout:30000});
+    await frame.locator('#titleInput').fill('EDITOR HOME PRESERVED');
+    await frame.locator('#descInput').fill('do not erase me');
+    await frame.locator('#editorHomeBtn').waitFor({state:'visible',timeout:30000});
+    const buttons=frame.locator('.topActions > :not(.hidden):visible');
+    assert(await buttons.count()>=5,'Editor top bar should include HOME plus existing actions');
+    await frame.locator('#editorHomeBtn').click();
+    await page.waitForTimeout(700);
+    assert(await frame.locator('#titleInput').inputValue()==='','Editor HOME should clear current title');
+    assert(await frame.locator('#descInput').inputValue()==='','Editor HOME should clear current description');
+    assert(await frame.locator('#remixContextPanel').isHidden(),'Editor HOME should leave Remix context');
+    assert(await frame.locator('#communityJoinPanel').isHidden(),'Editor HOME should leave Community participation');
+    const state=await page.evaluate(()=>JSON.parse(localStorage.getItem('statsMakerV014Library')||'null'));
+    assert(state?.sheets?.some(s=>s.title==='EDITOR HOME PRESERVED'),'Editor HOME erased a saved sheet');
+    const active=state.sheets.find(s=>s.id===state.activeId);
+    assert(active?.title===''&&active?.rows?.length===4&&active?.cols?.length===4,'Editor HOME should use the default blank four-by-four format');
+    assert(!active.sourceTopicId,'Editor HOME should not retain a Remix source');
+    assert(await frame.locator('#editorHomeBtn').isVisible(),'Editor HOME button should remain available');
+  });
+}
+
 async function browserFreshHome(){
   await withBrowser('Browser fresh Home',async page=>{
     await page.goto(BASE_URL+'/',{waitUntil:'networkidle',timeout:60000});
@@ -201,6 +226,7 @@ async function browserCommunityPanel(){
 
 if(mode==='http')await httpSmoke();
 else if(mode==='browser-home')await browserHome();
+else if(mode==='browser-editor-home')await browserEditorHome();
 else if(mode==='browser-discover')await browserDiscover();
 else if(mode==='browser-fresh-home')await browserFreshHome();
 else if(mode==='browser-public')await browserPublic();

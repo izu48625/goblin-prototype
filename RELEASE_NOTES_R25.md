@@ -51,3 +51,12 @@ The browser smoke is read-only with respect to Community data; it does not submi
 - HOME opens a brand-new blank sheet while preserving all existing locally saved sheets.
 - Active release/cache key: `r25p3`.
 - Production smoke now verifies fresh HOME navigation and preservation of existing local sheets.
+
+## P4 — Editor HOME Navigation
+
+- Add a visible HOME button to the **editor's own** top action bar, alongside Discover / Publish / New.
+- Mobile Safari uses five equal-width header actions so HOME does not hide inside the overflow menu.
+- HOME opens a blank sheet with the default four rows and four criteria, without deleting any prior local sheets.
+- Reuse one shared blank-sheet routine for editor HOME and existing HOME navigation from Public / Discover / Rate.
+- Browser production smoke verifies the editor HOME button, empty content, Remix/Community context reset, and preservation of saved sheets.
+- Active editor and Cloudflare release: `r25p4`.

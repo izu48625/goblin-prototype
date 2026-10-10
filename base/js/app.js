@@ -1644,7 +1644,7 @@
   function publicPageUrl(topicId){
     const url=new URL('../public.html',location.href);
     url.searchParams.set('id',topicId);
-    url.searchParams.set('v','r25p3');
+    url.searchParams.set('v','r25p4');
     return url.href;
   }
 
@@ -2125,6 +2125,16 @@
     }
   }
 
+  function createFreshSheet(){
+    const sheet=blankSheet('');
+    library.sheets.push(sheet);
+    library.activeId=sheet.id;
+    renderAll();
+    scheduleSave('');
+    window.scrollTo(0,0);
+    return clone(sheet);
+  }
+
   function createNewSheet(){
     const s=blankSheet(`${t('fallback.newTopic')} ${library.sheets.length+1}`);
     library.sheets.push(s);library.activeId=s.id;renderAll();scheduleSave(t('sheet.created'));
@@ -2184,6 +2194,7 @@
   $('editorCommunityRefreshBtn').addEventListener('click',()=>refreshEditorCommunitySummary(true));
   $('editorCommunityOpenBtn').addEventListener('click',openEditorCommunityPublicPage);
 
+  $('editorHomeBtn').addEventListener('click',createFreshSheet);
   $('newSheetBtn').addEventListener('click',createNewSheet);
   $('duplicateBtn').addEventListener('click',duplicateSheet);
   $('deleteSheetBtn').addEventListener('click',deleteActiveSheet);
@@ -2337,13 +2348,6 @@
   // R10 bridge for source-linked visual extensions.
   window.__statsMakerGetActiveSheet = () => clone(activeSheet());
   window.__statsMakerGetLibrary = () => clone(library);
-  window.__statsMakerCreateFreshSheet = () => {
-    const sheet=blankSheet('');
-    library.sheets.push(sheet);
-    library.activeId=sheet.id;
-    renderAll();
-    scheduleSave('');
-    return clone(sheet);
-  };
+  window.__statsMakerCreateFreshSheet = createFreshSheet;
 
 })();

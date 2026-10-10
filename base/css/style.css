@@ -46,6 +46,7 @@
     .btn{min-height:40px;border:1px solid var(--line2);border-radius:10px;padding:0 12px;background:#132139;color:var(--text);font-weight:800;font-size:12px;white-space:nowrap}
     .btn:hover{border-color:#4c6687}
     .discoverBtn{display:inline-flex;align-items:center;justify-content:center;text-decoration:none;border-color:#3b5f87;background:#0d2139;color:#b9d1f3}
+    .editorHomeBtn{border-color:#385577;background:#0e1b30;color:#b9d1f3;font-weight:950;letter-spacing:.04em}
     .btn.primary{background:linear-gradient(180deg,#668fff,#4f79e6);border-color:#6f98ff}
     .btn.ghost{background:transparent}
     .btn.danger{color:#ff9aa7}
@@ -1346,7 +1347,7 @@ html[lang="en"] .rankModeBtn{
   .topActions{
     position:relative;
     display:grid;
-    grid-template-columns:repeat(4,minmax(0,1fr));
+    grid-template-columns:repeat(5,minmax(0,1fr));
     gap:5px;
     width:100%;
   }
