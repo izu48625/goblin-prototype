@@ -61,3 +61,6 @@ jobs:
 
       - name: Browser Community panel
         run: node scripts/production-smoke.mjs browser-community-panel
+
+      - name: Browser Community Home parity (mocked no-write)
+        run: node scripts/production-smoke.mjs browser-community-home
