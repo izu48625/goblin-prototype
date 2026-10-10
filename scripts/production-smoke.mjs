@@ -266,6 +266,8 @@ async function browserPublic(){
 async function navigateRemix(page){
   await page.goto(BASE_URL+'/public.html?id='+encodeURIComponent(PUBLIC_TOPIC_ID),{waitUntil:'networkidle',timeout:60000});
   await page.locator('#content:not(.hidden)').waitFor({timeout:30000});
+  assert((await page.locator('#remixBtn').innerText()).includes('コピーして採点する'),
+    'Public copy action wording regressed');
   await page.locator('#remixBtn').click();
   await page.waitForURL(url=>url.searchParams.get('remixed')==='1',{timeout:30000});
 }
@@ -285,6 +287,10 @@ async function browserRemixStorage(){
     assert(state&&Array.isArray(state.sheets)&&state.sheets.length>0,'Remix library was not saved');
     const active=state.sheets.find(sheet=>sheet.id===state.activeId);
     assert(active?.sourceTopicId===PUBLIC_TOPIC_ID,'Remix active sheet lost sourceTopicId');
+    assert(active.title.endsWith('（コピー）')&&!/\(Remix\)\s*\(Remix\)/i.test(active.title),
+      'Copied sheet name retained stacked Remix labels');
+    assert(active.rows.every(row=>row.scores.every(v=>v===null)),
+      'Copy incorrectly inherited creator scores');
   });
 }
 
@@ -293,6 +299,12 @@ async function browserRemixContext(){
     await navigateRemix(page);
     const remixFrame=page.frameLocator('#basicFrame');
     await remixFrame.locator('#remixContextPanel:not(.hidden)').waitFor({timeout:30000});
+    assert(await remixFrame.locator('.remixChoiceGrid').count()===0,
+      'Verbose Remix choice cards were not removed');
+    assert((await remixFrame.locator('.remixContextHelp').innerText()).includes('点数は空欄です'),
+      'Short copy explanation did not display');
+    assert((await remixFrame.locator('#remixPublishOwnBtn').innerText())==='別作品として公開',
+      'Separate publish label is unclear');
   });
 }
 

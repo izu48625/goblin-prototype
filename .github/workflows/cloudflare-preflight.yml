@@ -21,6 +21,7 @@ on:
       - "scripts/r26-client-gateway-test.mjs"
       - "scripts/r27-community-visual-test.mjs"
       - "scripts/r27-community-home-test.mjs"
+      - "scripts/r27-remix-copy-test.mjs"
       - ".github/workflows/production-smoke.yml"
       - "wrangler.jsonc"
       - "package.json"
@@ -74,6 +75,8 @@ jobs:
           node --check cloud/community-rating-model.js
           node --check scripts/r27-community-home-test.mjs
           node --check scripts/r27-community-visual-test.mjs
+          node --check cloud/remix.js
+          node --check scripts/r27-remix-copy-test.mjs
           node --check app/src/launcher.js
       - name: R26 edge guard test
         run: node scripts/r26-edge-test.mjs
@@ -85,6 +88,8 @@ jobs:
         run: node scripts/r27-community-visual-test.mjs
       - name: R27 shared Home/Community rating identity test
         run: node scripts/r27-community-home-test.mjs
+      - name: R27 copied-sheet title and lineage regression test
+        run: node scripts/r27-remix-copy-test.mjs
       - name: Build static bundle
         run: npm run build:cloudflare
       - name: Verify required assets

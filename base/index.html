@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
   <meta name="theme-color" content="#07101f">
   <title>Stats Maker</title>
-  <link rel="stylesheet" href="css/style.css?v=r25p4">
+  <link rel="stylesheet" href="css/style.css?v=r27r1">
   <link rel="stylesheet" href="css/community-mode.css?v=r27h1">
 </head>
 <body data-build="R25-P4">
@@ -62,40 +62,30 @@
 
   <section id="remixContextPanel" class="remixContextPanel panel hidden">
     <div class="remixContextCopy">
-      <div class="eyebrow">REMIX</div>
-      <div class="remixContextTitle" data-i18n="remix.contextTitle">Remix元</div>
+      <div class="eyebrow" data-i18n="remix.badge">コピーしたシート</div>
+      <div class="remixContextTitle" data-i18n="remix.contextTitle">コピー元</div>
       <div id="remixSourceTitle" class="remixSourceTitle">—</div>
-      <div class="remixContextHelp" data-i18n="remix.contextHelp">このシートは公開作品の構成を引き継いだ自分用コピーです。点数は引き継がれていません。</div>
-      <div class="remixChoiceGrid">
-        <div class="remixChoice">
-          <b data-i18n="remix.communityChoiceTitle">元作品のCommunityに参加</b>
-          <span data-i18n="remix.communityChoiceHelp">元作品と構成が同じ間だけ、あなたの評価を元作品のCommunityへ送れます。</span>
-        </div>
-        <div class="remixChoice">
-          <b data-i18n="remix.publishChoiceTitle">自分版として公開</b>
-          <span data-i18n="remix.publishChoiceHelp">自分の点数・説明を別の公開作品として公開します。元作品とのRemix関係は残ります。</span>
-        </div>
-      </div>
+      <div class="remixContextHelp" data-i18n="remix.contextHelp">元作品の対象・評価項目をコピーしました。点数は空欄です。</div>
     </div>
     <div class="remixContextActions">
       <button id="remixOpenSourceBtn" class="btn" type="button" data-i18n="remix.openSource">元作品を見る</button>
-      <button id="remixPublishOwnBtn" class="btn publishBtn" type="button" data-i18n="remix.publishOwn">自分版を公開</button>
+      <button id="remixPublishOwnBtn" class="btn publishBtn" type="button" data-i18n="remix.publishOwn">別作品として公開</button>
     </div>
   </section>
 
   <section id="communityJoinPanel" class="communityJoinPanel panel hidden">
     <div class="communityJoinCopy">
       <div class="eyebrow">COMMUNITY</div>
-      <div class="communityJoinTitle" data-i18n="community.joinTitle">Communityに参加</div>
-      <div id="communityJoinNotice" class="communityJoinNotice" data-i18n="community.joinNotice">元の公開作品と対象・評価項目・点数尺度が同じ場合のみ、Communityへ評価を投稿できます。対象や評価項目を追加・削除した場合は参加できません。同じ参加者の再投稿は新しい1票を増やさず、既存評価の更新になります。</div>
+      <div class="communityJoinTitle" data-i18n="community.joinTitle">元作品の評価に参加</div>
+      <div id="communityJoinNotice" class="communityJoinNotice" data-i18n="community.joinNotice">元作品と対象・評価項目・点数尺度が同じ場合のみ投稿できます。再投稿は以前の評価を更新します。</div>
       <details class="communityJoinMobileDetails mobileOnly">
         <summary data-i18n="community.conditions">参加条件</summary>
-        <div data-i18n="community.joinNotice">元の公開作品と対象・評価項目・点数尺度が同じ場合のみ、Communityへ評価を投稿できます。対象や評価項目を追加・削除した場合は参加できません。同じ参加者の再投稿は新しい1票を増やさず、既存評価の更新になります。</div>
+        <div data-i18n="community.joinNotice">元作品と対象・評価項目・点数尺度が同じ場合のみ投稿できます。再投稿は以前の評価を更新します。</div>
       </details>
       <div id="communityJoinReason" class="communityJoinReason hidden"></div>
     </div>
     <div class="communityJoinActions">
-      <button id="communityJoinBtn" class="btn primary" type="button" data-i18n="community.joinButton">Communityに参加</button>
+      <button id="communityJoinBtn" class="btn primary" type="button" data-i18n="community.joinButton">元作品へ評価を投稿</button>
       <div id="communityJoinStatus" class="communityJoinStatus"></div>
     </div>
   </section>
@@ -438,7 +428,7 @@
 <script src="../cloud/supabase.js?v=r25p4"></script>
 <script src="../cloud/publish-model.js?v=r25p4"></script>
 <script src="../cloud/community-gateway.js?v=r26p3"></script>
-<script src="js/i18n.js?v=r25p4"></script>
+<script src="js/i18n.js?v=r27r1"></script>
 <script src="js/app.js?v=r27h4"></script>
 <script src="js/publish-guard.js?v=r25p4"></script>
 <script>
