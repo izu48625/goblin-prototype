@@ -7,6 +7,7 @@ const serviceKey='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.'+
   Buffer.from(JSON.stringify({role:'service_role',exp:4070908800})).toString('base64url')+
   '.'+'x'.repeat(64); // Dummy JWT-shaped test key, NEVER a real credential.
 const sampleTopic='57b432ed-fbf2-4261-b57d-9e0f27356d2e';
+const ratingId='c6f8c2d4-d623-4a9a-b7de-4d612976b91c';
 const endpoint='https://statsmaker.app/api/guard/community';
 const makeBody=()=>({p_topic_id:sampleTopic,p_scores:[{item_id:sampleTopic,criterion_id:sampleTopic,score:83}],p_submit:true,turnstile_token:'test-solved-token-012345'});
 const makeReq=(body=makeBody(),authorization='Bearer '+jwt)=>new Request(endpoint,{
@@ -17,13 +18,14 @@ const makeReq=(body=makeBody(),authorization='Bearer '+jwt)=>new Request(endpoin
 });
 
 let rateSuccess=true,authSuccess=true,verdict={success:true,hostname:'statsmaker.app',action:'community_submit',challenge_ts:new Date().toISOString()};
+let rpcStatus=200,rpcBody=[{rating_set_id:ratingId,rating_status:'submitted',submitted_at:new Date().toISOString()}];
 let outbound=[];
 const originalFetch=globalThis.fetch;
 globalThis.fetch=async (url,options={})=>{
   const u=String(url);outbound.push({u,options});
   if(u.includes('/auth/v1/user'))return Response.json(authSuccess?{id:authUserId}:{msg:'not signed in'},{status:authSuccess?200:401});
   if(u.includes('challenges.cloudflare.com/turnstile'))return Response.json(verdict);
-  if(u.includes('/rpc/gateway_save_my_topic_rating'))return Response.json([{rating_set_id:'abc',rating_status:'submitted'}]);
+  if(u.includes('/rpc/gateway_save_my_topic_rating'))return Response.json(rpcBody,{status:rpcStatus});
   throw new Error('Unexpected external request: '+u);
 };
 const env={
@@ -63,6 +65,14 @@ try{
   assert.equal(wrongRole.trustedGatewayConfigured,false);
   r=await worker.fetch(makeReq(),{...env,SUPABASE_SERVICE_ROLE_KEY:undefined});
   assert.equal(r.status,503,'no privileged secret must disable the gateway');
+  assert.equal(outbound.length,0);
+
+  // A Unicode payload may be <100,000 JS code units yet >100,000 bytes.
+  r=await worker.fetch(makeReq({...makeBody(),p_scores:[{
+    item_id:sampleTopic,criterion_id:sampleTopic,score:83,
+    note:'🧪'.repeat(26000)
+  }]}),env);
+  assert.equal(r.status,413,'actual UTF-8 byte size must be limited');
   assert.equal(outbound.length,0);
 
   r=await worker.fetch(makeReq(),{...env,TURNSTILE_COMMUNITY_STAGE:'0'});
@@ -121,5 +131,27 @@ try{
   assert.notEqual(payload.p_user_id,'attempted-spoof');
   assert(!JSON.stringify(result).includes(serviceKey));
   assert(!JSON.stringify(result).includes(env.TURNSTILE_SECRET));
+
+  // Fail closed on a malformed success result; never tell the editor it saved.
+  rpcBody={rating_set_id:ratingId,rating_status:'submitted'};
+  outbound=[];
+  r=await worker.fetch(makeReq(),env);
+  assert.equal(r.status,503,'non-array RPC response is not a saved rating');
+  assert.equal((await r.json()).error,'invalid_rating_response');
+  rpcBody=[{rating_set_id:'wrong-id',rating_status:'submitted',submitted_at:null}];
+  r=await worker.fetch(makeReq(),env);
+  assert.equal(r.status,503,'invalid rating ID is not a saved rating');
+
+  // DB errors may contain internal messages; do not leak them to the browser.
+  rpcBody={message:'secret-must-not-leak-'+serviceKey};
+  rpcStatus=400;
+  r=await worker.fetch(makeReq(),env);
+  assert.equal(r.status,400);
+  assert(!JSON.stringify(await r.json()).includes(serviceKey));
+  rpcBody={message:'RATE_LIMITED: too many writes'};
+  rpcStatus=400;
+  r=await worker.fetch(makeReq(),env);
+  assert.equal(r.status,429,'underlying per-identity rate limit is retained');
+
   console.log('R26 P4 privileged Turnstile gateway tests PASS');
 }finally{globalThis.fetch=originalFetch}
