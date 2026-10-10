@@ -1,7 +1,7 @@
 -- Stats Maker R26 P2: transactional DB protection for anonymous-first writes.
 -- Applied through a database migration; no charges, no service role in the browser.
 -- One user per topic vote remains unchanged; existing rows untouched.
-begin;
+-- The Supabase migration runner supplies transaction management.
 
 create schema if not exists private;
 revoke all on schema private from public, anon, authenticated;
@@ -74,6 +74,14 @@ security definer
 set search_path = ''
 as $$
 begin
+  -- Allow trusted SQL/migration administration and service-role maintenance;
+  -- browser traffic always carries an anon/authenticated JWT role.
+  if auth.uid() is null and auth.role() is null then
+    return new;
+  end if;
+  if auth.role() = 'service_role' then
+    return new;
+  end if;
   if auth.uid() is null or new.owner_id is distinct from auth.uid() then
     raise exception 'Topic owner must match authenticated user.';
   end if;
@@ -253,4 +261,3 @@ revoke insert, update, delete on public.rating_sets from anon, authenticated;
 revoke insert, update, delete on public.scores from anon, authenticated;
 
 notify pgrst, 'reload schema';
-commit;
