@@ -759,13 +759,41 @@
       });
     });
 
+    // In Community mode, live summary updates must NOT remount score inputs:
+    // doing so can swallow a mobile keyboard edit when focus moves to the next cell.
+    const syncCommunityScoreSummary=(field,ri)=>{
+      if(!communityMode)return;
+      const row=s.rows[ri],tableRow=field.closest('tr');
+      if(!row||!tableRow)return;
+      const value=avg(row),progress=rowProgress(row);
+      const avgCell=tableRow.querySelector('.avgCell');
+      if(avgCell){
+        avgCell.className=`avgCell ${heatClass(value)}`;
+        const amount=avgCell.querySelector('.avgValue');
+        const rank=avgCell.querySelector('.grade');
+        if(amount)amount.textContent=fmt(value);
+        if(rank)rank.textContent=grade(value);
+      }
+      const pill=tableRow.querySelector('.progressPill');
+      if(pill){
+        pill.textContent=`${progress.done}/${progress.total}`;
+        pill.classList.toggle('complete',progress.pct===100);
+      }
+      const scoreCell=field.closest('.scoreCell');
+      if(scoreCell)scoreCell.className=`scoreCell ${heatClass(row.scores[+field.dataset.scoreCol])}`;
+    };
+
     document.querySelectorAll('[data-score-row]').forEach(el=>{
       // In Community, preserve numeric edits on every keystroke. Home's
       // change-handler rebuilds the table on blur, which can otherwise drop
       // the next focused score before its own change event fires.
       if(communityMode)el.addEventListener('input',e=>{
-        const ri=+e.currentTarget.dataset.scoreRow,ci=+e.currentTarget.dataset.scoreCol;
-        s.rows[ri].scores[ci]=clampScore(e.currentTarget.value);
+        const field=e.currentTarget,ri=+field.dataset.scoreRow,ci=+field.dataset.scoreCol;
+        s.rows[ri].scores[ci]=clampScore(field.value);
+        syncCommunityScoreSummary(field,ri);
+        $('statusText').textContent='点数を変更しました。Communityへの反映には「評価を更新」を押してください。';
+        if(window.parent!==window)window.parent.postMessage(
+          {type:'statsmaker:community-score-dirty'},location.origin);
       });
       el.addEventListener('change',e=>{
         const ri=+e.currentTarget.dataset.scoreRow,ci=+e.currentTarget.dataset.scoreCol;
@@ -774,6 +802,7 @@
         // For Community this drops focus/taps on the next numeric field.
         // Keep the actual input nodes mounted while editing consecutive scores.
         if(communityMode){
+          syncCommunityScoreSummary(e.currentTarget,ri);
           renderOverview();
           renderFitTable();
           renderSidebar();
