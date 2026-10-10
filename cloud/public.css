@@ -181,3 +181,7 @@ a{color:inherit}
   .shareAspectGrid .shareChoice{min-height:60px;padding:9px}
 }
 
+
+/* R27: Community participation opens the shared Home scoring workspace. */
+.actionBtn.communityRate{background:linear-gradient(180deg,#286aa9,#174d83);border-color:#5f9ed9;color:#fff}
+@media(max-width:600px){.primaryActions .actionBtn.communityRate{grid-column:span 2}}

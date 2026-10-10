@@ -128,8 +128,10 @@ async function httpSmoke(){
   assert(publicHtml.includes('cloud/public.js'),'Public shell is missing cloud/public.js');
 
   const rate=await (await fetchOk(BASE_URL+'/rate.html?id='+encodeURIComponent(PUBLIC_TOPIC_ID))).text();
-  assert(rate.includes('cloud/rate.js'),'Rate shell is missing cloud/rate.js');
-  assert(rate.includes('fresh=1'),'Rate page is missing fresh Home navigation');
+  assert(rate.includes('index.html?community=')&&rate.includes("params.get('legacy')==='1'"),
+    'Standard rate route must redirect to shared Home with a legacy fallback.');
+  assert(rate.includes('cloud/rate.js')&&rate.includes('fresh=1'),
+    'Legacy rating fallback must remain available.');
 
   const rateJs=await (await fetchOk(BASE_URL+'/cloud/rate.js')).text();
   assert(rateJs.includes('participantPill'),'Rate UI is missing participant-count feedback');
@@ -253,6 +255,11 @@ async function browserPublic(){
     await page.locator('#communityContent').waitFor({state:'visible',timeout:30000});
     const communityText=await page.locator('#communityContent').innerText();
     assert(!communityText.includes('集計中'),'Community summary did not finish loading');
+    const newRating=page.locator('#communityRateLink');
+    assert(await newRating.count()===1,'Enabled Community lacks standard rating entry');
+    const href=await newRating.getAttribute('href')||'';
+    assert(href.includes('index.html?community='+PUBLIC_TOPIC_ID),
+      'Community rating entry does not open actual Home workspace');
   });
 }
 
@@ -342,13 +349,14 @@ async function browserCommunityHome(){
             if(name==='get_topic_participant_count')
               return {data:count,error:null};
             if(name==='save_my_topic_rating'){
-              window.__communityMockSaved=params;
-              count=2;
-              return {data:[{rating_set_id:'eeeeeeee-eeee-4eee-8eee-eeeeeeeeeeee',
-                rating_status:'submitted',submitted_at:new Date().toISOString()}],error:null};
+              throw new Error('Direct legacy RPC called during secure Community smoke');
             }
             return {data:null,error:{message:'Unexpected RPC '+name}};
           }
+        };
+        window.__communityMockMarkSaved=params=>{
+          window.__communityMockSaved=params;
+          count=2;
         };
         window.supabase={createClient:()=>client};
       })();`;
@@ -356,8 +364,25 @@ async function browserCommunityHome(){
       route.fulfill({status:200,contentType:'application/javascript',body:mockSdk}));
     await page.route('**/api/security/config',route=>
       route.fulfill({status:200,contentType:'application/json',
-        body:JSON.stringify({communityGatewayEnabled:false,siteKey:null,
+        body:JSON.stringify({communityGatewayEnabled:true,siteKey:'test-public-sitekey',
           turnstileConfigured:true,trustedGatewayConfigured:true})}));
+    await page.route('**/turnstile/v0/api.js?*',route=>
+      route.fulfill({status:200,contentType:'application/javascript',
+        body:`window.turnstile={render:(_slot,opts)=>{
+          Promise.resolve().then(()=>opts.callback('QA_TOKEN_FOR_MOCK_ONLY'));
+          return 'mock-widget';
+        },remove:()=>{}};`}));
+    await page.route('**/api/guard/community',async route=>{
+      const req=route.request(),body=req.postDataJSON();
+      assert(req.method()==='POST'&&
+        req.headers()['authorization']==='Bearer fake-test-token'&&
+        body.turnstile_token==='QA_TOKEN_FOR_MOCK_ONLY',
+        'Community did not use authenticated Turnstile gateway');
+      await page.evaluate(params=>window.__communityMockMarkSaved(params),body);
+      await route.fulfill({status:200,contentType:'application/json',
+        body:JSON.stringify({data:{rating_set_id:'eeeeeeee-eeee-4eee-8eee-eeeeeeeeeeee',
+          rating_status:'submitted',submitted_at:new Date().toISOString()}})});
+    });
     await page.goto(BASE_URL+'/index.html?community='+encodeURIComponent(PUBLIC_TOPIC_ID),
       {waitUntil:'domcontentloaded',timeout:60000});
     await page.locator('#communityControls:not(.hidden)').waitFor({timeout:30000});
@@ -409,6 +434,8 @@ async function browserCommunityHome(){
         JSON.stringify({message,rows:sheet?.rows,cols:sheet?.cols,saved}));
     }
     const result=await page.evaluate(()=>window.__communityMockSaved);
+    assert(result?.turnstile_token==='QA_TOKEN_FOR_MOCK_ONLY',
+      'Community submission did not send verified challenge token');
     assert(result?.p_scores?.length===3,'Community Home sent wrong score count');
     assert(result.p_scores[0]?.item_id==='bbbbbbbb-bbbb-4bbb-8bbb-bbbbbbbbbbbb'
       && result.p_scores[0]?.score===9,
@@ -420,6 +447,16 @@ async function browserCommunityHome(){
       'Community participant count did not refresh');
     assert(await page.evaluate(()=>localStorage.getItem('statsMakerV014Library'))===initialStorage,
       'Community Home overwrote local Home saved sheets');
+    // Old saved URLs automatically open the same Home UI, while the manual
+    // emergency fallback remains accessible without losing its former form.
+    await page.goto(BASE_URL+'/rate.html?id='+encodeURIComponent(PUBLIC_TOPIC_ID),
+      {waitUntil:'domcontentloaded',timeout:60000});
+    await page.waitForURL(url=>url.pathname.endsWith('/index.html')&&
+      url.searchParams.get('community')===PUBLIC_TOPIC_ID,{timeout:15000});
+    await page.goto(BASE_URL+'/rate.html?id='+encodeURIComponent(PUBLIC_TOPIC_ID)+'&legacy=1',
+      {waitUntil:'domcontentloaded',timeout:60000});
+    assert(new URL(page.url()).pathname.endsWith('/rate.html'),
+      'Legacy fallback must not redirect to Home');
   });
 }
 
