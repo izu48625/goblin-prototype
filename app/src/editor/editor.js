@@ -1,4 +1,4 @@
-import {t,getLanguage,toggleLanguage,applyI18n} from "../core/i18n.js";
+import {t,getLanguage,setLanguage,toggleLanguage,applyI18n} from "../core/i18n.js";
 import {getProject,saveProject} from "../core/store.js";
 import {THEMES,CANVAS_PRESETS,applyTheme,applyCanvasPreset,newItemId,newStatId,newAxisId,newSeriesId} from "../core/project.js";
 import {History} from "../core/history.js";
@@ -1808,6 +1808,11 @@ function render({panels=true}={}){
   renderPreview();
   if(panels)renderPanels();
 }
+
+window.SM_APP_SET_LANGUAGE=next=>{
+  setLanguage(next);
+  render();
+};
 
 function openMobileSheet(){
   if(!mobileQuery.matches)return;
