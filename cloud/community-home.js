@@ -50,7 +50,7 @@ if(uuid.test(topicId)){
       sourceTopicId:topicId, // lets the mount validate the supplied topic
       cols:criteria.map(c=>c.name),
       rows:items.map(item=>({
-        name:item.name,image:'',note:'',
+        name:item.name,image:'',note:'',sourceItemId:item.id,
         scores:criteria.map(c=>scoreMap.get(item.id+'|'+c.id)??null)
       })),
       sortKey:null,sortDesc:true,rankMetric:'avg',
@@ -77,16 +77,21 @@ if(uuid.test(topicId)){
     const sheet=frame.contentWindow?.__statsMakerGetActiveSheet?.();
     if(!sheet||sheet.sourceTopicId!==topicId||!context)throw new Error('Community sheet has not loaded.');
     const scale=context.sheet.scale,entries=[];let completed=0;
-    if(sheet.rows.length!==context.items.length||sheet.cols.length!==context.criteria.length)
+    if(sheet.rows.length!==context.items.length||sheet.cols.length!==context.criteria.length ||
+      sheet.cols.some((label,i)=>label!==context.criteria[i].name))
       throw new Error('The published rating structure changed.');
-    for(let i=0;i<context.items.length;i++){
+    const validIds=new Set(context.items.map(item=>item.id)),seen=new Set();
+    for(const row of sheet.rows){
+      if(!validIds.has(row.sourceItemId)||seen.has(row.sourceItemId))
+        throw new Error('The published rating items no longer match.');
+      seen.add(row.sourceItemId);
       let complete=true;
       for(let j=0;j<context.criteria.length;j++){
-        const value=numberOrNull(sheet.rows[i]?.scores?.[j]);
+        const value=numberOrNull(row.scores?.[j]);
         if(value===null){complete=false;continue;}
         if(!Number.isFinite(value)||value<0||value>scale)
           throw new Error('Scores must be within the published rating scale.');
-        entries.push({item_id:context.items[i].id,criterion_id:context.criteria[j].id,score:value});
+        entries.push({item_id:row.sourceItemId,criterion_id:context.criteria[j].id,score:value});
       }
       if(complete)completed++;
     }
