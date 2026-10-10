@@ -101,18 +101,29 @@ async function securityDenialSmoke(){
 }
 
 async function waitForGlobalLanguageDeploy(){
+  // Derive the active asset version from GitHub main checked out for this
+  // workflow, rather than pinning a previous release like r27lang1.
+  // Every new UI commit can bump the asset key independently.
+  const pages=['index.html','app/editor.html'];
+  const expected=await Promise.all(pages.map(async name=>{
+    const html=await fs.readFile(new URL('../'+name,import.meta.url),'utf8');
+    const token=html.match(/global-locale\.js\?v=[a-zA-Z0-9_-]+/)?.[0];
+    assert(token,'The checked-out '+name+' does not load the global locale bar');
+    return {name,token};
+  }));
   for(let attempt=1;attempt<=40;attempt++){
     try{
-      const response=await fetch(BASE_URL+'/index.html?qaLang='+Date.now(),{cache:'no-store'});
-      const html=await response.text();
-      const editor=await fetch(BASE_URL+'/app/editor.html?qaLang='+Date.now(),{cache:'no-store'});
-      const editorHtml=await editor.text();
-      if(response.ok&&editor.ok&&html.includes('global-locale.js?v=r27lang1')&&
-        editorHtml.includes('global-locale.js?v=r27lang1'))return;
+      const results=await Promise.all(expected.map(async ({name,token})=>{
+        const response=await fetch(BASE_URL+'/'+name+'?qaLang='+Date.now(),
+          {cache:'no-store'});
+        return response.ok&&(await response.text()).includes(token);
+      }));
+      if(results.every(Boolean))return;
     }catch{}
     await new Promise(resolve=>setTimeout(resolve,5000));
   }
-  throw new Error('Global-language front-end deployment has not reached production.');
+  throw new Error('Global-language front-end deployment has not reached production for '+
+    expected.map(x=>x.name+'='+x.token).join(', '));
 }
 
 async function httpSmoke(){
