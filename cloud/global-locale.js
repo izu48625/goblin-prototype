@@ -24,9 +24,10 @@
     if(lang===current()){paint();return;}
     localStorage.setItem(KEY,lang);
     localStorage.setItem(LEGACY,lang);
-    if(window.SM_I18N?.setLanguage){window.SM_I18N.setLanguage(lang);paint();return;}
-    if(window.SM_APP_SET_LANGUAGE){window.SM_APP_SET_LANGUAGE(lang);paint();return;}
-    if(window.SM_LAUNCHER_SET_LANGUAGE){window.SM_LAUNCHER_SET_LANGUAGE(lang);paint();return;}
+    const announce=()=>window.dispatchEvent(new CustomEvent('statsmaker:site-languagechange',{detail:{locale:lang}}));
+    if(window.SM_I18N?.setLanguage){window.SM_I18N.setLanguage(lang);paint();announce();return;}
+    if(window.SM_APP_SET_LANGUAGE){window.SM_APP_SET_LANGUAGE(lang);paint();announce();return;}
+    if(window.SM_LAUNCHER_SET_LANGUAGE){window.SM_LAUNCHER_SET_LANGUAGE(lang);paint();announce();return;}
     // Pages that render from a topic snapshot use a fresh read-only render.
     // No scoring or public-data writes happen on a display-language change.
     location.reload();
