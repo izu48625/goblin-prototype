@@ -1,0 +1,38 @@
+
+/* Community mode uses the real Home editor, but the published structure is immutable. */
+body.community-mode #editorHomeBtn,
+body.community-mode #publishBtn,
+body.community-mode #newSheetBtn,
+body.community-mode #duplicateBtn,
+body.community-mode #deleteSheetBtn,
+body.community-mode #mobileHeaderMoreBtn,
+body.community-mode #mobileHeaderMoreMenu,
+body.community-mode #addRowBtn,
+body.community-mode #addColBtn,
+body.community-mode #columnManageBtn,
+body.community-mode #scoreSettingsBtn,
+body.community-mode #moreToolsBtn,
+body.community-mode #scoreSettingsPanel,
+body.community-mode #columnManage,
+body.community-mode #utilityBar,
+body.community-mode #remixContextPanel,
+body.community-mode #communityJoinPanel,
+body.community-mode .rowDelete,
+body.community-mode .rowMove,
+body.community-mode .rowNoteBtn,
+body.community-mode .thumbBtn,
+body.community-mode .removeImg,
+body.community-mode #weightModeBtn,
+body.community-mode #scaleModeBtn{display:none!important}
+body.community-mode .nameInput,
+body.community-mode .metricHeaderInput,
+body.community-mode #titleInput,
+body.community-mode #descInput,
+body.community-mode #sheetSelect{pointer-events:none;caret-color:transparent}
+body.community-mode .nameInput,
+body.community-mode .metricHeaderInput{opacity:1;color:#eef5ff}
+body.community-mode .sheetToolbar{padding-bottom:10px}
+body.community-mode .nameCell .nameWrap{grid-template-columns:1fr!important}
+body.community-mode .nameCell{min-width:118px}
+body.community-mode .deleteCell .rowActionWrap{justify-content:center}
+body.community-mode .topActions{min-height:0}

@@ -2,7 +2,9 @@
 (() => {
   'use strict';
 
-  const STORAGE_KEY = 'statsMakerV014Library';
+  const communityTopicId=new URLSearchParams(location.search).get('community')||'';
+  const communityMode=/^[0-9a-f]{8}-[0-9a-f]{4}-[1-8][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(communityTopicId);
+  const STORAGE_KEY = communityMode?'statsMakerCommunityDraft:'+communityTopicId:'statsMakerV014Library';
   const LEGACY_STORAGE_KEYS = ['statsMakerV0134Library','statsMakerV0133Library','statsMakerV013Library','statsMakerV012Library','statsMakerV011Library','statsMakerV010Library','statsMakerV09Library','statsMakerV08Library','statsMakerV07Library','statsMakerV05Library','statsMakerV04Library','statsMakerV03Library'];
   const MAX_ROWS = 40;
   const MAX_COLS = 10;
@@ -35,7 +37,7 @@
 
   function loadLibrary(){
     try{
-      const raw = localStorage.getItem(STORAGE_KEY) || LEGACY_STORAGE_KEYS.map(k=>localStorage.getItem(k)).find(Boolean);
+      const raw = communityMode?null:(localStorage.getItem(STORAGE_KEY) || LEGACY_STORAGE_KEYS.map(k=>localStorage.getItem(k)).find(Boolean));
       if(raw){
         const parsed = JSON.parse(raw);
         if(parsed && Array.isArray(parsed.sheets) && parsed.sheets.length){
@@ -99,8 +101,8 @@
       try{
         const s=activeSheet();
         s.updatedAt=Date.now();
-        localStorage.setItem(STORAGE_KEY,JSON.stringify(library));
-        $('saveBadge').textContent=t('save.saved');
+        if(!communityMode)localStorage.setItem(STORAGE_KEY,JSON.stringify(library));
+        $('saveBadge').textContent=communityMode?'編集中（投稿前）':t('save.saved');
         if(message)$('statusText').textContent=message;
       }catch(e){
         $('saveBadge').textContent=t('save.failed');
@@ -644,7 +646,7 @@
       h+=`<th class="metricHead">
         <div class="metricHeaderBox">
           <div class="metricHeaderMain">
-            <input class="metricHeaderInput" data-col-name="${ci}" value="${esc(name)}" aria-label="${esc(t('aria.editMetric',{name}))}" autocomplete="off" spellcheck="false">
+            <input class="metricHeaderInput" data-col-name="${ci}" value="${esc(name)}" ${communityMode?'readonly tabindex="-1"':''} aria-label="${esc(t('aria.editMetric',{name}))}" autocomplete="off" spellcheck="false">
           </div>
           <div class="headerSortRow">
             <button class="headerSortBtn" data-sort-now="${ci}" data-sort-dir="asc" type="button" aria-label="${esc(t('aria.sortAsc',{name}))}">▲</button>
@@ -670,7 +672,7 @@
       h+=`<td class="indexCell">${displayIndex+1}</td>`;
       h+=`<td class="nameCell"><div class="nameWrap">
         <button class="thumbBtn" data-pick-image="${index}" type="button" aria-label="${esc(t('aria.chooseImage'))}">${row.image?`<img src="${row.image}" alt="">`:'＋'}</button>
-        <input class="nameInput" data-row-name="${index}" value="${esc(row.name)}" placeholder="${esc(t('table.targetName'))}">
+        <input class="nameInput" data-row-name="${index}" value="${esc(row.name)}" ${communityMode?'readonly tabindex="-1"':''} placeholder="${esc(t('table.targetName'))}">
         <button class="removeImg ${row.image?'':'hidden'}" data-remove-image="${index}" type="button" aria-label="${esc(t('aria.removeImage'))}">×</button>
         <input class="hidden fileInput" data-image-input="${index}" type="file" accept="image/*">
       </div></td>`;
@@ -2126,6 +2128,7 @@
   }
 
   function createFreshSheet(){
+    if(communityMode)return clone(activeSheet());
     const sheet=blankSheet('');
     library.sheets.push(sheet);
     library.activeId=sheet.id;
@@ -2136,11 +2139,13 @@
   }
 
   function createNewSheet(){
+    if(communityMode)return;
     const s=blankSheet(`${t('fallback.newTopic')} ${library.sheets.length+1}`);
     library.sheets.push(s);library.activeId=s.id;renderAll();scheduleSave(t('sheet.created'));
   }
 
   function duplicateSheet(){
+    if(communityMode)return;
     const src=activeSheet(),copy=clone(src);
     copy.id=makeId();copy.title=(src.title||t('fallback.untitledSheet'))+t('fallback.copySuffix');copy.updatedAt=Date.now();
     delete copy.cloudTopicId;
@@ -2150,6 +2155,7 @@
   }
 
   function deleteActiveSheet(){
+    if(communityMode)return;
     if(library.sheets.length<=1){$('statusText').textContent=t('sheet.lastCannotDelete');return;}
     const current=activeSheet();
     if(!window.confirm(t('sheet.deleteConfirm',{name:current.title||t('fallback.untitledSheet')})))return;
@@ -2349,5 +2355,22 @@
   window.__statsMakerGetActiveSheet = () => clone(activeSheet());
   window.__statsMakerGetLibrary = () => clone(library);
   window.__statsMakerCreateFreshSheet = createFreshSheet;
+  window.__statsMakerMountCommunitySheet = incoming => {
+    if(!communityMode || incoming?.sourceTopicId!==communityTopicId ||
+      !Array.isArray(incoming.rows)||!Array.isArray(incoming.cols) ||
+      !incoming.rows.length||!incoming.cols.length ||
+      incoming.rows.length>40||incoming.cols.length>10)return false;
+    const safe=clone(incoming);
+    normalizeSheet(safe);
+    library={activeId:safe.id,sheets:[safe]};
+    $('titleInput').readOnly=true;
+    $('descInput').readOnly=true;
+    $('sheetSelect').disabled=true;
+    renderAll();
+    $('statusText').textContent=window.SM_I18N?.getLanguage?.()==='en'
+      ?'Edit your scores, then submit to Community.':'自分の点数を編集してCommunityに投稿できます。';
+    return true;
+  };
+  if(communityMode)document.body.classList.add('community-mode');
 
 })();

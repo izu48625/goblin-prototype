@@ -20,6 +20,8 @@ const UI={
 };
 const $=id=>document.getElementById(id);
 const frame=$("basicFrame"),backdrop=$("extBackdrop");
+const communityTopicId=new URLSearchParams(location.search).get('community')||'';
+const communityMode=/^[0-9a-f]{8}-[0-9a-f]{4}-[1-8][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(communityTopicId);
 let freshHomeHandled=false;
 let language=localStorage.getItem("statsMakerV2Language")||localStorage.getItem("statsMaker.locale")||((navigator.language||"ja").toLowerCase().startsWith("ja")?"ja":"en");
 
@@ -49,7 +51,7 @@ function renderLanguage(){
 function getLiveSheet(){
   try{
     const lib=frame.contentWindow?.__statsMakerGetLibrary?.();
-    if(lib)localStorage.setItem("statsMakerV014Library",JSON.stringify(lib));
+    if(lib&&!communityMode)localStorage.setItem("statsMakerV014Library",JSON.stringify(lib));
     return frame.contentWindow?.__statsMakerGetActiveSheet?.()||null;
   }catch(error){console.error("Base bridge failed",error);return null}
 }
@@ -57,10 +59,22 @@ function openExtension(type){
   try{
     const sheet=getLiveSheet();
     const project=createProject(type);
+    if(communityMode){
+      if(!sheet?.sourceTopicId||sheet.sourceTopicId!==communityTopicId||
+        !sheet.rows.some(r=>r.scores.some(Number.isFinite)))
+        throw new Error('採点してから拡張機能を開いてください。');
+    }
     if(sheet?.id)project.settings.sourceSheetId=sheet.id;
     syncSourceProject(project,{},sheet);
+    if(communityMode){
+      // The community score snapshot is not a local Home sheet.
+      project.settings.sourceLinked=false;
+      project.settings.communitySnapshot=true;
+      delete project.settings.sourceSheetId;
+    }
     saveProject(project);
-    location.href=`app/editor.html?v=r25p4&id=${encodeURIComponent(project.id)}`;
+    location.href=`app/editor.html?v=r27h1&id=${encodeURIComponent(project.id)}`+
+      (communityMode?`&from=community&topic=${encodeURIComponent(communityTopicId)}`:'');
   }catch(error){
     console.error(error);
     alert((language==="ja"?"拡張機能を開けませんでした：":"Could not open visual tool: ")+(error?.message||error));
