@@ -38,6 +38,9 @@ jobs:
       - name: Browser home
         run: node scripts/production-smoke.mjs browser-home
 
+      - name: Browser global JA EN across routes
+        run: node scripts/production-smoke.mjs browser-global-language
+
       - name: Browser editor HOME
         run: node scripts/production-smoke.mjs browser-editor-home
 

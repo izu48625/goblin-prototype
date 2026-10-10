@@ -32,6 +32,7 @@ function setLanguage(next){
   try{frame.contentWindow?.SM_I18N?.setLanguage(language)}catch{}
   renderLanguage();
 }
+window.SM_LAUNCHER_SET_LANGUAGE=setLanguage;
 function renderLanguage(){
   const u=UI[language];
   $("launcherTitle").textContent=u.launcherTitle;$("launcherSub").textContent=u.launcherSub;$("pickerTitle").textContent=u.pickerTitle;$("pickerDesc").textContent=u.pickerDesc;

@@ -70,6 +70,9 @@ jobs:
           node --check cloud/public.js
           node --check cloud/discover.js
           node --check cloud/rate.js
+          node --check cloud/global-locale.js
+          node --check app/src/core/i18n.js
+          node --check app/src/editor/editor.js
           node --check cloud/rate-visuals.js
           node --check cloud/community-home.js
           node --check cloud/community-rating-model.js
@@ -103,6 +106,8 @@ jobs:
           test -f dist/cloud/supabase.js
           test -f dist/cloud/community-gateway.js
           test -f dist/cloud/community-home.js
+          test -f dist/cloud/global-locale.js
+          test -f dist/cloud/global-locale.css
           test -f dist/cloud/community-rating-model.js
           test -f dist/cloud/runtime-config.js
       - name: Verify no private server files are published

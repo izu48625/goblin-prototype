@@ -310,7 +310,8 @@
         if(source&&source.visibility!=='private')sourceTopic=source;
       }
     }catch{}
-    const ja=data.language_code!=='en';document.documentElement.lang=ja?'ja':'en';document.title=`${data.title} - Stats Maker`;
+    const preferred=localStorage.getItem('statsMaker.locale')||localStorage.getItem('statsMakerV2Language')||navigator.language||'ja';
+    const ja=!String(preferred).toLowerCase().startsWith('en');document.documentElement.lang=ja?'ja':'en';document.title=`${data.title} - Stats Maker`;
     const metaDescription=document.querySelector('meta[name="description"]');
     if(metaDescription)metaDescription.content=data.description||`${data.title} - Stats Maker`;
     const footerOpen=document.getElementById('footerOpenApp');

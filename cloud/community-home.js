@@ -3,6 +3,7 @@ import {buildCommunitySheet,collectCommunityScores} from './community-rating-mod
 // A separate in-memory sheet is mounted; Home localStorage is never changed.
 const query=new URLSearchParams(location.search);
 const topicId=query.get('community')||'';
+const siteLanguage=()=>String(localStorage.getItem('statsMaker.locale')||'ja').toLowerCase().startsWith('en')?'en':'ja';
 const uuid=/^[0-9a-f]{8}-[0-9a-f]{4}-[1-8][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
 if(uuid.test(topicId)){
   const $=id=>document.getElementById(id);
@@ -64,11 +65,11 @@ if(uuid.test(topicId)){
   }
   function syncButtons(){
     $('communitySubmit').textContent=context?.existing?.status==='submitted'
-      ?(context.topic.language_code==='en'?'Update rating':'評価を更新')
-      :(context?.topic?.language_code==='en'?'Submit to Community':'Communityへ投稿');
+      ?(siteLanguage()==='en'?'Update rating':'評価を更新')
+      :(siteLanguage()==='en'?'Submit to Community':'Communityへ投稿');
     const count=context?.participant;
     $('communityParticipant').textContent=count===null?'Community':
-      context.topic.language_code==='en'?count+' participants':'参加者 '+count+'人';
+      siteLanguage()==='en'?count+' participants':'参加者 '+count+'人';
   }
   async function save(submit){
     if(busy)return;
@@ -76,10 +77,10 @@ if(uuid.test(topicId)){
     try{
       const {entries,completed}=collectScores();
       if(submit&&completed<1)throw new Error(
-        context.topic.language_code==='en'?
+        siteLanguage()==='en'?
         'Complete every metric for at least one target.':'最低1つの対象の全評価項目を入力してください。'
       );
-      msg(context.topic.language_code==='en'?'Saving…':'保存中…');
+      msg(siteLanguage()==='en'?'Saving…':'保存中…');
       const {data,error}=await window.SM_COMMUNITY_GATEWAY.save(window.SM_SUPABASE.client,{
         p_topic_id:topicId,p_scores:entries,p_submit:submit
       });
@@ -93,11 +94,11 @@ if(uuid.test(topicId)){
       }
       syncButtons();
       msg(submit?
-        (context.topic.language_code==='en'?'Community updated successfully.':'Communityへ反映しました。'):
-        (context.topic.language_code==='en'?'Draft saved.':'下書きを保存しました。'),'ok');
+        (siteLanguage()==='en'?'Community updated successfully.':'Communityへ反映しました。'):
+        (siteLanguage()==='en'?'Draft saved.':'下書きを保存しました。'),'ok');
     }catch(error){
       console.error('[Stats Maker] Community save rejected',error);
-      msg((context?.topic?.language_code==='en'?'Save error: ':'保存エラー：')+
+      msg((siteLanguage()==='en'?'Save error: ':'保存エラー：')+
         (error?.message||String(error)),'error');
     }finally{
       busy=false;$('communityDraft').disabled=$('communitySubmit').disabled=false;
@@ -107,9 +108,14 @@ if(uuid.test(topicId)){
   window.addEventListener('message',event=>{
     if(event.origin!==location.origin||event.source!==frame.contentWindow||
       event.data?.type!=='statsmaker:community-score-dirty')return;
-    msg(context?.topic?.language_code==='en'
+    msg(siteLanguage()==='en'
       ?'Unsaved changes — tap Update rating to publish.'
       :'未保存の変更があります。「評価を更新」でCommunityに反映できます。');
+  });
+  window.addEventListener('statsmaker:site-languagechange',()=>{
+    $('communityBackLink').textContent=siteLanguage()==='en'?'← Back to public work':'← 公開ページへ戻る';
+    $('communityDraft').textContent=siteLanguage()==='en'?'Save draft':'下書き保存';
+    if(context)syncButtons();
   });
   $('communityDraft').onclick=()=>save(false);
   $('communitySubmit').onclick=()=>save(true);
@@ -125,6 +131,8 @@ if(uuid.test(topicId)){
       context=await loadData(sb);
       await mountSheet(context.sheet);
       syncButtons();
+      $('communityBackLink').textContent=siteLanguage()==='en'?'← Back to public work':'← 公開ページへ戻る';
+      $('communityDraft').textContent=siteLanguage()==='en'?'Save draft':'下書き保存';
       panel.classList.remove('hidden');
       loading.classList.add('hidden');
     }catch(error){

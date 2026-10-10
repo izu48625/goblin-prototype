@@ -252,7 +252,8 @@ const STRINGS={
 };
 
 const KEY="statsMakerV2Language";
-let language=localStorage.getItem(KEY)||((navigator.language||"ja").toLowerCase().startsWith("ja")?"ja":"en");
+const SHARED_KEY="statsMaker.locale";
+let language=localStorage.getItem(SHARED_KEY)||localStorage.getItem(KEY)||((navigator.language||"ja").toLowerCase().startsWith("ja")?"ja":"en");
 
 export function t(key,vars={}){
   let s=(STRINGS[language]&&STRINGS[language][key])||STRINGS.ja[key]||key;
@@ -263,6 +264,7 @@ export function getLanguage(){return language}
 export function setLanguage(next){
   language=next==="en"?"en":"ja";
   localStorage.setItem(KEY,language);
+  localStorage.setItem(SHARED_KEY,language);
   applyI18n();
 }
 export function toggleLanguage(){

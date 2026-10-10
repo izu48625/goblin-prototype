@@ -100,8 +100,24 @@ async function securityDenialSmoke(){
   console.log('Security denial probes PASS (no real rating writes).');
 }
 
+async function waitForGlobalLanguageDeploy(){
+  for(let attempt=1;attempt<=40;attempt++){
+    try{
+      const response=await fetch(BASE_URL+'/index.html?qaLang='+Date.now(),{cache:'no-store'});
+      const html=await response.text();
+      const editor=await fetch(BASE_URL+'/app/editor.html?qaLang='+Date.now(),{cache:'no-store'});
+      const editorHtml=await editor.text();
+      if(response.ok&&editor.ok&&html.includes('global-locale.js?v=r27lang1')&&
+        editorHtml.includes('global-locale.js?v=r27lang1'))return;
+    }catch{}
+    await new Promise(resolve=>setTimeout(resolve,5000));
+  }
+  throw new Error('Global-language front-end deployment has not reached production.');
+}
+
 async function httpSmoke(){
   await waitForRelease();
+  await waitForGlobalLanguageDeploy();
 
   const securityResponse=await fetchOk(BASE_URL+'/api/security/config');
   const security=await securityResponse.json();
@@ -474,8 +490,54 @@ async function browserCommunityHome(){
   });
 }
 
+// A real browser toggles language without editing the Home library, then
+// traverses routes that historically chose incompatible language settings.
+async function browserGlobalLanguage(){
+  await withBrowser('Browser global JA/EN across routes',async page=>{
+    await page.goto(BASE_URL+'/index.html',{waitUntil:'domcontentloaded',timeout:60000});
+    const frame=page.frameLocator('#basicFrame');
+    await frame.locator('#titleInput').waitFor({timeout:30000});
+    const bar=page.locator('.globalLocaleBar');
+    assert(await bar.count()===1,'Home shared locale bar missing');
+    assert(await frame.locator('.homeLangSwitch').count()===0,
+      'Old locale control remains beside the sheet title');
+    const input=frame.locator('#titleInput');
+    await input.fill('DO NOT ERASE LANGUAGE QA');
+    await bar.locator('[data-global-lang="en"]').click();
+    await page.waitForFunction(()=>localStorage.getItem('statsMaker.locale')==='en');
+    assert(await input.inputValue()==='DO NOT ERASE LANGUAGE QA',
+      'Switching Home locale erased the active sheet');
+    assert(await frame.locator('#publishBtn').innerText()==='Publish',
+      'Home was not translated to English');
+    await page.goto(BASE_URL+'/discover.html',{waitUntil:'domcontentloaded',timeout:60000});
+    await page.waitForFunction(()=>document.querySelector('.hero h1')?.textContent==='Discover public Stats',
+      {timeout:30000});
+    assert(await page.locator('.globalLocaleBar [data-global-lang="en"]').getAttribute('aria-pressed')==='true',
+      'Discover did not keep the selected English locale');
+    await page.goto(BASE_URL+'/public.html?id='+encodeURIComponent(PUBLIC_TOPIC_ID),
+      {waitUntil:'domcontentloaded',timeout:60000});
+    await page.locator('#content:not(.hidden)').waitFor({timeout:30000});
+    assert(await page.locator('#remixBtn').innerText().then(x=>x.includes('Copy & rate')),
+      'Public work ignored selected English locale');
+    await page.locator('.globalLocaleBar [data-global-lang="ja"]').click();
+    await page.waitForFunction(()=>document.documentElement.lang==='ja'&&
+      document.querySelector('#remixBtn')?.textContent?.includes('コピーして採点する'),{timeout:30000});
+    await page.goto(BASE_URL+'/my.html',{waitUntil:'domcontentloaded',timeout:60000});
+    await page.waitForFunction(()=>document.querySelector('#pageLead')?.textContent.includes('アカウント'),
+      {timeout:30000});
+    assert(await page.locator('.globalLocaleBar').count()===1,'My Page shared locale bar missing');
+    await page.goto(BASE_URL+'/app/editor.html?id=not-a-project',
+      {waitUntil:'domcontentloaded',timeout:60000});
+    assert(await page.locator('.globalLocaleBar').count()===1,
+      'Visual editor shared locale bar missing');
+    assert(await page.evaluate(()=>localStorage.getItem('statsMaker.locale'))==='ja',
+      'Visual editor did not retain the global locale');
+  });
+}
+
 if(mode==='http')await httpSmoke();
 else if(mode==='browser-home')await browserHome();
+else if(mode==='browser-global-language')await browserGlobalLanguage();
 else if(mode==='browser-editor-home')await browserEditorHome();
 else if(mode==='browser-discover')await browserDiscover();
 else if(mode==='browser-fresh-home')await browserFreshHome();
