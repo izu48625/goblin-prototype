@@ -451,9 +451,12 @@ async function browserCommunityHome(){
     // emergency fallback remains accessible without losing its former form.
     await page.goto(BASE_URL+'/rate.html?id='+encodeURIComponent(PUBLIC_TOPIC_ID),
       {waitUntil:'domcontentloaded',timeout:60000});
-    await page.waitForURL(url=>url.pathname.endsWith('/index.html')&&
-      url.searchParams.get('community')===PUBLIC_TOPIC_ID,
-      {timeout:15000,waitUntil:'commit'});
+    await page.waitForTimeout(750);
+    const actualRedirect=new URL(page.url());
+    assert((actualRedirect.pathname.endsWith('/index.html')||
+      actualRedirect.pathname==='/')&&
+      actualRedirect.searchParams.get('community')===PUBLIC_TOPIC_ID,
+      'Rate page did not redirect to Community Home (actual URL: '+page.url()+')');
     await page.goto(BASE_URL+'/rate.html?id='+encodeURIComponent(PUBLIC_TOPIC_ID)+'&legacy=1',
       {waitUntil:'domcontentloaded',timeout:60000});
     assert(new URL(page.url()).pathname.endsWith('/rate.html'),
