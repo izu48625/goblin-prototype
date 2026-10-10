@@ -22,6 +22,9 @@ button,input{font:inherit}
 .top{position:sticky;top:0;z-index:20;display:flex;align-items:center;justify-content:space-between;gap:10px;padding:9px 0 12px;background:linear-gradient(180deg,rgba(7,16,31,.98),rgba(7,16,31,.9) 78%,rgba(7,16,31,0));backdrop-filter:blur(10px)}
 .brand{display:flex;align-items:center;gap:9px;text-decoration:none;color:#c9d6e8;font-size:11px;font-weight:950;letter-spacing:.09em}
 .mark{width:32px;height:32px;border-radius:9px;background:#234879;display:grid;place-items:center;color:white}
+.topActions{display:flex;align-items:center;gap:7px}
+.homeLink{display:inline-flex;align-items:center;justify-content:center;min-height:34px;padding:0 10px;border:1px solid #345577;border-radius:9px;background:#0b192a;color:#9fb9dc;font-size:9px;font-weight:950;letter-spacing:.08em;text-decoration:none}
+.homeLink:hover{border-color:#5278a8;color:#d7e6fb}
 .createLink{padding:9px 12px;border:1px solid #3a5e86;border-radius:9px;background:#10223a;color:#cae0ff;font-size:10px;font-weight:950;text-decoration:none}
 
 .hero{position:relative;overflow:hidden;padding:clamp(22px,5vw,42px);border:1px solid var(--line);border-radius:18px;background:
