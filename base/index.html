@@ -342,6 +342,7 @@
     </label>
     <input id="importFileInput" class="hidden" type="file" accept=".json,application/json">
     <div class="importActions">
+      <button id="undoLastRestoreBtn" class="btn hidden" type="button" data-i18n="backup.undoButton">復元前のデータに戻す</button>
       <button id="importCancelBtn" class="btn" type="button" data-i18n="common.cancel">キャンセル</button>
     </div>
   </div>
@@ -425,8 +426,8 @@
 <script src="../cloud/supabase.js?v=r25p4"></script>
 <script src="../cloud/publish-model.js?v=r25p4"></script>
 <script src="../cloud/community-gateway.js?v=r26p3"></script>
-<script src="js/i18n.js?v=r27r1"></script>
-<script src="js/app.js?v=r27h4"></script>
+<script src="js/i18n.js?v=r29homebk1"></script>
+<script src="js/app.js?v=r29homebk1"></script>
 <script src="js/publish-guard.js?v=r25p4"></script>
 <script>
 window.addEventListener("statsmaker:languagechange",event=>{
