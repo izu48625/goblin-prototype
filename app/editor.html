@@ -106,7 +106,7 @@
     if(params.get('from') === 'community'
        && /^[0-9a-f]{8}-[0-9a-f]{4}-[1-8][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(topic)){
       const link = document.querySelector('.editor-back-btn');
-      if(link)link.href = '../rate.html?id=' + encodeURIComponent(topic) + '&workspace=1';
+      if(link)link.href = '../index.html?community=' + encodeURIComponent(topic);
     }
   })();
 </script>
