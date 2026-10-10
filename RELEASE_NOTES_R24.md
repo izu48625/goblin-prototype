@@ -138,3 +138,7 @@ The GitHub Pages My Page URL must be allowed as an Auth redirect URL.
 
 ### Build
 - Active cache key: `r24p4`.
+
+### Worker name sync
+- Cloudflare production Worker name is `stats-maker-web`.
+- `wrangler.jsonc` is aligned with the Worker created in Cloudflare Dashboard.
