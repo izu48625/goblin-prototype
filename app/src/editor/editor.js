@@ -3,7 +3,7 @@ import {getProject,saveProject} from "../core/store.js";
 import {THEMES,CANVAS_PRESETS,applyTheme,applyCanvasPreset,newItemId,newStatId,newAxisId,newSeriesId} from "../core/project.js";
 import {History} from "../core/history.js";
 import {getVisualization} from "../visualizations/registry.js";
-import {exportPreview,exportProjectJSON,readProjectJSON,isIOS} from "../core/export.js";
+import {exportPreview,exportProjectJSON,readProjectJSON,isIOS} from "../core/export.js?v=r28png1";
 import {createImageManager} from "./image-editor.js";
 import {createDataImport} from "./data-import.js";
 import {createSpreadsheetEditor} from "./spreadsheet-editor.js";
