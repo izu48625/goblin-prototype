@@ -41,6 +41,65 @@ async function waitForRelease(){
   throw new Error('Timed out waiting for matching Cloudflare production release');
 }
 
+// Non-mutating negative probes after the privileged Community cutover.
+// Anonymous callers must not reach either legacy or service-only RPC, and
+// requests without a verified identity must not reach the Turnstile verifier.
+async function securityDenialSmoke(){
+  const guard=BASE_URL+'/api/guard/community';
+  const notAllowed=await fetch(guard,{method:'GET',cache:'no-store'});
+  assert(notAllowed.status===405,'Community gateway unexpectedly allows GET');
+
+  const hostile=await fetch(guard,{
+    method:'POST',
+    headers:{Origin:'https://hostile.example','Content-Type':'application/json'},
+    body:'{}',cache:'no-store'
+  });
+  assert(hostile.status===403,'Community gateway did not reject a foreign Origin');
+
+  const wrongType=await fetch(guard,{
+    method:'POST',
+    headers:{Origin:BASE_URL,'Content-Type':'text/plain'},
+    body:'{}',cache:'no-store'
+  });
+  assert(wrongType.status===415,'Community gateway accepted non-JSON request');
+
+  const missingAuth=await fetch(guard,{
+    method:'POST',
+    headers:{Origin:BASE_URL,'Content-Type':'application/json'},
+    body:JSON.stringify({p_topic_id:PUBLIC_TOPIC_ID,p_scores:[],p_submit:false,
+      turnstile_token:'invalid-token-no-write'}),
+    cache:'no-store'
+  });
+  assert(missingAuth.status===401,
+    'Community gateway did not enforce authentication before a write');
+
+  // The publishable key is already public in worker/index.js; never use or
+  // fetch service-role credentials in this production negative test.
+  const source=await fs.readFile(new URL('../worker/index.js',import.meta.url),'utf8');
+  const url=source.match(/const SUPABASE_URL='([^']+)'/)?.[1];
+  const publicKey=source.match(/const SUPABASE_KEY='([^']+)'/)?.[1];
+  assert(url?.startsWith('https://')&&publicKey?.startsWith('sb_publishable_'),
+    'Public Supabase API config unavailable for deny-only test');
+
+  // Use a nonexistent topic UUID; a broken privilege should still not
+  // create or modify any real rating data.
+  const unknownId='00000000-0000-4000-8000-000000000000';
+  for(const [rpc,params] of [
+    ['save_my_topic_rating',{p_topic_id:unknownId,p_scores:[],p_submit:false}],
+    ['gateway_save_my_topic_rating',{p_user_id:unknownId,
+      p_topic_id:unknownId,p_scores:[],p_submit:false}]
+  ]){
+    const response=await fetch(url+'/rest/v1/rpc/'+rpc,{
+      method:'POST',
+      headers:{apikey:publicKey,'Content-Type':'application/json'},
+      body:JSON.stringify(params),cache:'no-store'
+    });
+    assert([401,403,404].includes(response.status),
+      'Anonymous direct '+rpc+' was not blocked by authorization ('+response.status+')');
+  }
+  console.log('Security denial probes PASS (no real rating writes).');
+}
+
 async function httpSmoke(){
   await waitForRelease();
 
@@ -57,6 +116,7 @@ async function httpSmoke(){
   assert((securityResponse.headers.get('cache-control')||'').includes('no-store'),
     'Turnstile config must not be cached.');
   console.log('Turnstile keys and privileged gateway ready; staged Community gateway enabled.');
+  await securityDenialSmoke();
 
   const home=await (await fetchOk(BASE_URL+'/')).text();
   assert(home.includes('id="basicFrame"'),'Home shell is missing basicFrame');
