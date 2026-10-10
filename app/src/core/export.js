@@ -732,6 +732,206 @@ function renderRing(project){
   return canvas;
 }
 
+
+/* Native Canvas renderers for every project type, including newer templates.
+ * Safari's share/export path cannot rely on html2canvas or foreignObject. */
+function renderHeatmap(project){
+  const {canvas,ctx,c,width,height}=baseCanvas(project);
+  const y0=drawHeader(ctx,project,c,width,{kicker:"HEATMAP",top:70});
+  const rows=(project.data?.rows||[]).slice(0,40);
+  const columns=(project.data?.columns||[]).slice(0,10);
+  if(!columns.length||!rows.length)return canvas;
+  const settings=project.settings||{};
+  const min=Number.isFinite(Number(settings.min))?Number(settings.min):0;
+  const declaredMax=Number(settings.max);
+  const max=Number.isFinite(declaredMax)&&declaredMax>min?declaredMax:min+100;
+  const pad=width*.065,gridW=width-pad*2,nameW=Math.min(gridW*.27,width*.25);
+  const gap=Math.max(2,width*.003),cellW=(gridW-nameW-gap*columns.length)/columns.length;
+  const headingH=Math.max(48,Math.min(83,(height-y0)*.12));
+  const rowH=Math.max(8,(height-y0-headingH-height*.055)/rows.length);
+  const decimals=Math.max(0,Math.min(2,Math.floor(Number(settings.decimals)||0)));
+  const canLabel=cellW>=37&&rowH>=26;
+  font(ctx,Math.max(9,Math.min(width*.017,headingH*.3)),800,c.family);
+  ctx.fillStyle=c.muted;
+  columns.forEach((col,i)=>{
+    const x=pad+nameW+i*(cellW+gap)+cellW*.5;
+    const label=ellipsis(ctx,col.label||"",Math.max(3,cellW*.88));
+    ctx.textAlign="center";
+    ctx.fillText(label,x,y0+headingH*.62);
+  });
+  ctx.textAlign="left";
+  rows.forEach((row,ri)=>{
+    const y=y0+headingH+ri*rowH;
+    font(ctx,Math.max(9,Math.min(width*.018,rowH*.34)),750,c.family);
+    ctx.fillStyle=c.text;
+    ctx.fillText(ellipsis(ctx,row.name||"",nameW*.93),pad,y+rowH*.59);
+    columns.forEach((col,ci)=>{
+      const x=pad+nameW+ci*(cellW+gap);
+      const raw=row.values?.[ci];
+      const value=raw===null||raw===undefined||String(raw).trim()===''?null:Number(raw);
+      fillRound(ctx,x,y+gap*.5,Math.max(2,cellW),Math.max(3,rowH-gap),
+        Math.min(9,rowH*.13),c.surface,c.border,1);
+      if(value!==null&&Number.isFinite(value)){
+        const pct=Math.max(0,Math.min(1,(value-min)/(max-min)));
+        ctx.save();
+        ctx.globalAlpha=.18+.78*pct;
+        fillRound(ctx,x+1,y+gap*.5+1,Math.max(1,cellW-2),Math.max(1,rowH-gap-2),
+          Math.min(8,rowH*.12),c.accent);
+        ctx.restore();
+        if(settings.showValues!==false&&canLabel){
+          font(ctx,Math.max(9,Math.min(rowH*.3,cellW*.20)),900,c.family);
+          ctx.fillStyle=pct>.57?"#fff":c.text;
+          ctx.textAlign="center";
+          ctx.fillText(value.toFixed(decimals),x+cellW/2,y+rowH*.6);
+          ctx.textAlign="left";
+        }
+      }
+    });
+  });
+  return canvas;
+}
+
+function renderWaffle(project){
+  const {canvas,ctx,c,width,height}=baseCanvas(project);
+  const y0=drawHeader(ctx,project,c,width,{kicker:"WAFFLE",top:70});
+  const settings=project.settings||{};
+  const categories=(project.data?.categories||[]).slice(0,12);
+  const cells=Math.max(10,Math.min(400,Math.floor(Number(settings.cells)||100)));
+  const cols=Math.max(2,Math.min(30,Math.floor(Number(settings.columns)||10)));
+  const gridRows=Math.ceil(cells/cols);
+  const values=categories.map(item=>Math.max(0,Number(item.value)||0));
+  const total=values.reduce((a,b)=>a+b,0);
+  const raw=values.map(v=>total>0?(v/total)*cells:0);
+  const allocation=raw.map(Math.floor);
+  let remaining=total>0?cells-allocation.reduce((a,b)=>a+b,0):0;
+  const order=raw.map((n,i)=>({i,fraction:n-Math.floor(n)}))
+    .sort((a,b)=>b.fraction-a.fraction||a.i-b.i);
+  for(let j=0;remaining>0&&order.length;j++,remaining--)allocation[order[j%order.length].i]++;
+  const palette=[c.accent,"#69cbb8","#f7b96b","#a58cf4","#f48eac","#79bbf0",
+    "#d3c475","#82cf80","#e89979","#afb5df","#bce4e0","#b3b3b3"];
+  const color=(item,i)=>/^#[0-9a-fA-F]{3,8}$/.test(item?.color||"")?item.color:palette[i%palette.length];
+  const pad=width*.075,maxGridW=width-pad*2;
+  const legendH=settings.showLegend===false?0:Math.min(height*.24,250);
+  const roomH=Math.max(80,height-y0-legendH-height*.08);
+  const side=Math.max(2,Math.min(maxGridW/cols,roomH/gridRows));
+  const gap=Math.max(1,side*.1),cellSide=Math.max(1,side-gap);
+  const gridW=side*cols,gridH=side*gridRows;
+  const startX=(width-gridW)/2,startY=y0+Math.max(12,(roomH-gridH)/2);
+  let filled=0;
+  for(let ci=0;ci<cells;ci++){
+    let slot=-1,cumulative=0;
+    for(let i=0;i<allocation.length;i++){
+      cumulative+=allocation[i];
+      if(ci<cumulative){slot=i;break}
+    }
+    const x=startX+(ci%cols)*side,y=startY+Math.floor(ci/cols)*side;
+    fillRound(ctx,x,y,cellSide,cellSide,Math.max(1,side*.12),
+      slot>=0?color(categories[slot],slot):c.surface,c.border,Math.max(1,side*.022));
+    if(slot>=0)filled++;
+  }
+  if(settings.showLegend!==false){
+    const legendY=Math.min(height-height*.13,startY+gridH+height*.04);
+    const columns=categories.length>6?3:2;
+    const legendRows=Math.ceil(categories.length/columns),colW=(width-pad*2)/columns;
+    const lineH=Math.max(20,Math.min(width*.056,(height-legendY-height*.05)/Math.max(1,legendRows)));
+    categories.forEach((item,i)=>{
+      const x=pad+(i%columns)*colW,y=legendY+Math.floor(i/columns)*lineH;
+      fillRound(ctx,x,y-lineH*.25,lineH*.31,lineH*.31,lineH*.06,color(item,i));
+      font(ctx,Math.max(10,Math.min(width*.019,lineH*.40)),750,c.family);
+      ctx.fillStyle=c.text;
+      const label=(item.label||"")+"  "+fmt(item.value)+(settings.unit||"");
+      ctx.fillText(ellipsis(ctx,label,colW-lineH*.55),x+lineH*.46,y);
+    });
+  }
+  return canvas;
+}
+
+function renderStatBoard(project){
+  const {canvas,ctx,c,width,height}=baseCanvas(project);
+  const y0=drawHeader(ctx,project,c,width,{kicker:"STAT BOARD",top:70});
+  const blocks=(project.data?.blocks||[]).slice(0,36);
+  const columns=Math.max(1,Math.min(4,Math.floor(Number(project.settings?.columns)||2)));
+  const gap=width*(project.settings?.gap==="small"?.014:project.settings?.gap==="large"?.032:.022);
+  const pad=width*.065,cellW=(width-2*pad-gap*(columns-1))/columns;
+  const rows=[];
+  let current=[],used=0;
+  for(const block of blocks){
+    const span=Math.max(1,Math.min(columns,Math.floor(Number(block.span)||1)));
+    if(current.length&&used+span>columns){rows.push(current);current=[];used=0}
+    current.push({block,span,offset:used});
+    used+=span;
+    if(used===columns){rows.push(current);current=[];used=0}
+  }
+  if(current.length)rows.push(current);
+  if(!rows.length)return canvas;
+  const heightFor=blocks=>Math.max(...blocks.map(({block})=>
+    block.type==="hero"?1.35:block.type==="text"?1.3:block.type==="ring"?1.25:1));
+  const units=rows.map(heightFor);
+  const totalUnit=units.reduce((a,b)=>a+b,0);
+  const usableH=Math.max(140,height-y0-height*.06-gap*(rows.length-1));
+  const rowScale=usableH/totalUnit;
+  let cursor=y0;
+  rows.forEach((row,rIndex)=>{
+    const h=units[rIndex]*rowScale;
+    row.forEach(({block,span,offset})=>{
+      const x=pad+offset*(cellW+gap),w=span*cellW+(span-1)*gap;
+      fillRound(ctx,x,cursor,w,h,Math.min(23,width*.016),c.surface,c.border,Math.max(2,width*.0018));
+      const inset=Math.min(w*.09,width*.025),left=x+inset,contentW=w-2*inset;
+      const kind=block.type||"number";
+      if(kind==="hero"){
+        font(ctx,Math.max(10,Math.min(width*.02,h*.12)),800,c.family);
+        ctx.fillStyle=c.muted;ctx.fillText(ellipsis(ctx,block.title||"",contentW),left,cursor+h*.22);
+        font(ctx,Math.max(15,Math.min(width*.088,h*.42)),950,c.family);
+        ctx.fillStyle=c.accent;
+        ctx.fillText(ellipsis(ctx,block.value||"",contentW),left,cursor+h*.67);
+        if(block.subtitle){
+          font(ctx,Math.max(9,Math.min(width*.017,h*.12)),650,c.family);
+          ctx.fillStyle=c.muted;
+          ctx.fillText(ellipsis(ctx,block.subtitle,contentW),left,cursor+h*.85);
+        }
+      }else if(kind==="ring"){
+        const max=Math.max(1,Number(block.max)||100);
+        const pct=Math.max(0,Math.min(1,(Number(block.value)||0)/max));
+        const radius=Math.max(8,Math.min(h*.23,w*.24));
+        const cx=x+w*.5,cy=cursor+h*.48;
+        ctx.lineWidth=Math.max(5,width*.012);
+        ctx.strokeStyle=c.border;ctx.beginPath();ctx.arc(cx,cy,radius,0,Math.PI*2);ctx.stroke();
+        ctx.strokeStyle=c.accent;ctx.beginPath();ctx.arc(cx,cy,radius,-Math.PI/2,-Math.PI/2+Math.PI*2*pct);ctx.stroke();
+        font(ctx,Math.max(10,Math.min(radius*.68,width*.037)),900,c.family);
+        ctx.fillStyle=c.text;ctx.textAlign="center";
+        ctx.fillText(fmt(block.value),cx,cy+radius*.16);
+        font(ctx,Math.max(9,Math.min(width*.017,h*.12)),750,c.family);
+        ctx.fillStyle=c.muted;ctx.fillText(ellipsis(ctx,block.label||"",contentW),cx,cursor+h*.9);
+        ctx.textAlign="left";
+      }else if(kind==="progress"){
+        font(ctx,Math.max(9,Math.min(width*.02,h*.14)),750,c.family);
+        ctx.fillStyle=c.muted;ctx.fillText(ellipsis(ctx,block.label||"",contentW),left,cursor+h*.25);
+        const max=Math.max(1,Number(block.max)||100);
+        const pct=Math.max(0,Math.min(1,(Number(block.value)||0)/max));
+        const barY=cursor+h*.5,barH=Math.max(8,h*.10);
+        fillRound(ctx,left,barY,contentW,barH,barH/2,c.border);
+        if(pct>0)fillRound(ctx,left,barY,Math.max(2,contentW*pct),barH,barH/2,c.accent);
+        font(ctx,Math.max(10,Math.min(width*.032,h*.19)),900,c.family);
+        ctx.fillStyle=c.text;ctx.fillText(fmt(block.value),left,cursor+h*.84);
+      }else if(kind==="text"){
+        font(ctx,Math.max(10,Math.min(width*.024,h*.16)),900,c.family);
+        ctx.fillStyle=c.text;ctx.fillText(ellipsis(ctx,block.title||"",contentW),left,cursor+h*.25);
+        font(ctx,Math.max(9,Math.min(width*.019,h*.13)),650,c.family);
+        ctx.fillStyle=c.muted;
+        const lines=wrapLines(ctx,block.text||"",contentW,3);
+        lines.forEach((line,i)=>ctx.fillText(line,left,cursor+h*(.48+i*.17)));
+      }else{
+        font(ctx,Math.max(9,Math.min(width*.019,h*.14)),750,c.family);
+        ctx.fillStyle=c.muted;ctx.fillText(ellipsis(ctx,block.label||block.title||"",contentW),left,cursor+h*.27);
+        font(ctx,Math.max(13,Math.min(width*.06,h*.36)),950,c.family);
+        ctx.fillStyle=c.text;ctx.fillText(ellipsis(ctx,block.value||"",contentW),left,cursor+h*.72);
+      }
+    });
+    cursor+=h+gap;
+  });
+  return canvas;
+}
+
 export async function renderNativeProject(project){
   switch(project.type){
     case "ranking-card": return await renderRanking(project);
@@ -744,6 +944,9 @@ export async function renderNativeProject(project){
     case "scatter": return renderScatter(project);
     case "tier-list": return renderTier(project);
     case "ring": return renderRing(project);
+    case "heatmap": return renderHeatmap(project);
+    case "waffle": return renderWaffle(project);
+    case "stat-board": return renderStatBoard(project);
     default: throw new Error(`Native exporter does not support ${project.type}`);
   }
 }
