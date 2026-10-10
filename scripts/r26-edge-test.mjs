@@ -3,7 +3,7 @@ import {readFile} from 'node:fs/promises';
 import worker from '../worker/index.js';
 
 const conf=JSON.parse(await readFile(new URL('../wrangler.jsonc',import.meta.url),'utf8'));
-assert.equal(conf.ratelimits.length,2);
+assert.equal(conf.ratelimits.length,3);
 assert(conf.assets.run_worker_first.includes('/api/og*'));
 assert(conf.assets.run_worker_first.includes('/p/*'));
 
