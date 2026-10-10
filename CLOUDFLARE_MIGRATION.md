@@ -30,7 +30,7 @@ The Vercel hostname is no longer exposed in newly generated share URLs on Cloudf
 7. Connect GitHub and allow access to `izu48625/goblin-prototype`.
 8. Select that repository.
 9. Worker name must be exactly:
-   `stats-maker`
+   `stats-maker-web`
 10. Production branch:
    `main`
 11. Build command:
@@ -57,7 +57,7 @@ Before connecting the custom domain, verify:
 
 After workers.dev QA passes:
 
-1. Open the `stats-maker` Worker.
+1. Open the `stats-maker-web` Worker.
 2. Go to **Settings > Domains & Routes**.
 3. Add Custom Domain:
    `statsmaker.app`
