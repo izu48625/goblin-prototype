@@ -24,6 +24,7 @@ on:
       - "scripts/r27-remix-copy-test.mjs"
       - "scripts/r28-publish-lifecycle-test.mjs"
       - "scripts/r29-backup-restore-test.mjs"
+      - "scripts/r29-source-link-safety-test.mjs"
       - "scripts/r29-mobile-backup-ui-test.mjs"
       - ".github/workflows/production-smoke.yml"
       - "wrangler.jsonc"
@@ -86,6 +87,8 @@ jobs:
           node --check scripts/r27-remix-copy-test.mjs
           node --check scripts/r28-publish-lifecycle-test.mjs
           node --check scripts/r29-backup-restore-test.mjs
+          node --check scripts/r29-source-link-safety-test.mjs
+          node --check app/src/core/source-sync.js
           node --check scripts/r29-mobile-backup-ui-test.mjs
           node --check app/src/launcher.js
       - name: R26 edge guard test
@@ -102,6 +105,9 @@ jobs:
         run: node scripts/r27-remix-copy-test.mjs
       - name: R29 safe project-backup import and persistence
         run: node scripts/r29-backup-restore-test.mjs
+
+      - name: R29 orphaned chart source isolation and restore
+        run: node scripts/r29-source-link-safety-test.mjs
       - name: Build static bundle
         run: npm run build:cloudflare
       - name: Verify required assets
