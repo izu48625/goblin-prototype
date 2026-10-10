@@ -401,7 +401,7 @@
           ${data.show_community===true&&data.allow_ratings===true&&data.visibility!=='private'
             ?`<a id="communityRateLink" class="actionBtn communityRate" href="index.html?community=${encodeURIComponent(id)}&v=r27std1">${ja?'Communityで採点する':'Rate in Community'}</a>`
             :''}
-          <button id="remixBtn" class="actionBtn remix">${ja?'Remixして使う':'Remix this'}<span class="actionCount">${remixCount}</span></button>
+          <button id="remixBtn" class="actionBtn remix">${ja?'コピーして採点する':'Copy & rate'}<span class="actionCount">${remixCount}</span></button>
           <button id="shareBtn" class="actionBtn ghost">${ja?'URL共有':'Share URL'}</button>
           <button id="shareImageBtn" class="actionBtn shareImage">${ja?'画像で共有':'Share Image'}</button>
           ${isOwner?`<button id="ownerManageBtn" class="actionBtn owner">${ja?'編集・公開設定':'Edit / Publish settings'}</button>`:''}
@@ -409,8 +409,8 @@
         ${isOwner?`<div class="ownerHint">${ja?'このブラウザの公開者セッションで開いています。元シートが残っていれば編集画面へ戻せます。':'You are viewing this with the publisher session. If the local source sheet still exists, it will be selected when you return.'}</div>`:''}
 
         <div class="notice remixNotice">
-          <b>${ja?'Remixでは構成だけをコピーし、作成者の点数はコピーしません。':'Remix copies the structure, not the creator’s scores.'}</b>
-          <span>${ja?'採点後は「元作品のCommunityに参加」か、「自分版として公開」かを選べます。Community参加はこの作品の集計へ評価を送り、自分版公開はRemix関係を残した別作品になります。':'After scoring, choose either “Join the source Community” or “Publish as your own version.” Community submission contributes to this work; publishing creates a separate linked work.'}</span>
+          <b>${ja?'対象と評価項目をコピーして、自分で採点できます。':'Copy the targets and metrics to score them yourself.'}</b>
+          <span>${ja?'元の点数はコピーされません。':'Original scores are not copied.'}</span>
         </div>
         ${rows.some(row=>row.hasLocalImage)?`<div class="notice">${ja?'現在、作成者のローカル画像は公開ページへアップロードされません。':'Creator-local images are not uploaded to the public page yet.'}</div>`:''}
       </section>
@@ -476,7 +476,7 @@
       try{
         const sheet=window.SM_REMIX.buildSheet(data,snap,dbCriteria,items,ja?'ja':'en');
         window.SM_REMIX.saveSheet(sheet);
-        toast(ja?'Remixしました。編集画面へ移動します。':'Remixed. Opening the editor…');
+        toast(ja?'採点用のコピーを作りました。':'Scoring copy created.');
         setTimeout(()=>{location.href='index.html?remixed=1&v=r25p3'},500);
       }catch(e){toast((ja?'Remixに失敗しました：':'Remix failed: ')+(e?.message||e))}
     };
