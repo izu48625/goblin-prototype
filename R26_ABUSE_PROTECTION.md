@@ -83,6 +83,25 @@ Implemented checks before saving a rating:
    Community submissions. Disabled by default; activate only after testing
    and explicit approval.
 
+### P3 readiness QA (keys installed; enrollment still disabled)
+
+- `GET /api/security/config` exposes only a boolean
+  `turnstileConfigured` to confirm the Worker sees both key names/values.
+  The actual secret value is never returned; `siteKey` stays null while
+  `communityGatewayEnabled` is false. It cannot validate whether the
+  secret and sitekey belong to the same widget without a real Siteverify call.
+- Production Smoke asserts that the configured keys are available at runtime
+  and that the gate remains **disabled** until a separate authorization
+  migration and tested write-path cutover. This check is read-only.
+- Production Community/Remix clients now fail closed when the Worker security
+  config endpoint returns an HTTP error, malformed content, or a network
+  failure. A confirmed `communityGatewayEnabled:false` response still
+  preserves legacy behavior. GitHub Pages and local previews retain direct
+  RPC by design.
+- Cloudflare dashboard runtime variables are preserved across Wrangler
+  deployments by `keep_vars: true`. Never commit the private key to GitHub.
+- No Supabase permissions were revoked as part of this readiness patch.
+
 ### Important: the gateway alone is NOT a bypass-proof security boundary
 
 The existing Supabase `save_my_topic_rating` RPC is still callable directly
