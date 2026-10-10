@@ -39,3 +39,15 @@ The browser smoke is read-only with respect to Community data; it does not submi
 - `renderRemixContext()` now runs with the normal header render path, alongside Community participation state.
 - Remix save/redirect/localStorage behavior was already working; this fixes the missing initial UI context.
 - Active release/cache key: `r25p2`.
+
+
+## P3 — Community Feedback & Fresh Home
+
+- Community participant counting was verified against production data: submitted rating sets and `get_topic_participant_count` agree.
+- Re-submitting from the same anonymous user updates the existing vote and does not increase the participant count.
+- The Community rating page now shows the current participant count and refreshes it immediately after a successful submission.
+- Public pages reload when restored from browser BFCache so a just-submitted participant count is not left stale after navigating back.
+- Added an explicit HOME action to Public, Discover, and Community rating pages.
+- HOME opens a brand-new blank sheet while preserving all existing locally saved sheets.
+- Active release/cache key: `r25p3`.
+- Production smoke now verifies fresh HOME navigation and preservation of existing local sheets.

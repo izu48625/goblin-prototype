@@ -1644,7 +1644,7 @@
   function publicPageUrl(topicId){
     const url=new URL('../public.html',location.href);
     url.searchParams.set('id',topicId);
-    url.searchParams.set('v','r25p2');
+    url.searchParams.set('v','r25p3');
     return url.href;
   }
 
@@ -2337,5 +2337,13 @@
   // R10 bridge for source-linked visual extensions.
   window.__statsMakerGetActiveSheet = () => clone(activeSheet());
   window.__statsMakerGetLibrary = () => clone(library);
+  window.__statsMakerCreateFreshSheet = () => {
+    const sheet=blankSheet('');
+    library.sheets.push(sheet);
+    library.activeId=sheet.id;
+    renderAll();
+    scheduleSave('');
+    return clone(sheet);
+  };
 
 })();

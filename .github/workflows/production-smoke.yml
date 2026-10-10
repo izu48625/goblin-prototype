@@ -41,6 +41,9 @@ jobs:
       - name: Browser Discover
         run: node scripts/production-smoke.mjs browser-discover
 
+      - name: Browser fresh Home
+        run: node scripts/production-smoke.mjs browser-fresh-home
+
       - name: Browser public and Community
         run: node scripts/production-smoke.mjs browser-public
 
