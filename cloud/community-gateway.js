@@ -2,17 +2,18 @@
 // When enabled, never fall back to direct Supabase writes after an error.
 (() => {
   'use strict';
-  let configPromise;
   let scriptPromise;
-  const config=()=>configPromise||(configPromise=fetch('/api/security/config',{cache:'no-store'})
+  // A page can stay open through a staged gateway cutover. Fetch the live
+  // security mode before every write, rather than pinning an old disabled
+  // response and sending users to the revoked legacy RPC after cutover.
+  const config=()=>fetch('/api/security/config',{cache:'no-store'})
     .then(async r=>{
       if(!r.ok)throw new Error('Security settings are temporarily unavailable. Please retry.');
       const value=await r.json();
       if(!value||typeof value.communityGatewayEnabled!=='boolean')
         throw new Error('Security settings could not be verified. Please retry.');
       return value;
-    })
-    .catch(error=>{configPromise=null;throw error;}));
+    });
 
   function loadScript(){
     if(window.turnstile?.render)return Promise.resolve();
