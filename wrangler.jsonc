@@ -33,6 +33,25 @@
       "simple": { "limit": 300, "period": 60 }
     }
   ],
+  "previews": {
+    "ratelimits": [
+      {
+        "name": "OG_RATE_LIMIT",
+        "namespace_id": "726101",
+        "simple": { "limit": 90, "period": 60 }
+      },
+      {
+        "name": "COMMUNITY_GATEWAY_RATE_LIMIT",
+        "namespace_id": "726103",
+        "simple": { "limit": 30, "period": 60 }
+      },
+      {
+        "name": "SHARE_RATE_LIMIT",
+        "namespace_id": "726102",
+        "simple": { "limit": 300, "period": 60 }
+      }
+    ]
+  },
   "observability": {
     "enabled": true
   }
