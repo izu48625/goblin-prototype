@@ -107,7 +107,7 @@ async function waitForGlobalLanguageDeploy(){
   const pages=['index.html','app/editor.html'];
   const expected=await Promise.all(pages.map(async name=>{
     const html=await fs.readFile(new URL('../'+name,import.meta.url),'utf8');
-    const token=html.match(/global-locale\\.js\\?v=[a-zA-Z0-9_-]+/)?.[0];
+    const token=html.match(/global-locale\.js\?v=[a-zA-Z0-9_-]+/)?.[0];
     assert(token,'The checked-out '+name+' does not load the global locale bar');
     return {name,token};
   }));
