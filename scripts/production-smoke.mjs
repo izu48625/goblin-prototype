@@ -538,6 +538,10 @@ async function browserGlobalLanguage(){
     await page.goto(BASE_URL+'/app/editor.html?id='+encodeURIComponent(projectId),
       {waitUntil:'domcontentloaded',timeout:60000});
     await page.locator('#projectTitleInput').waitFor({state:'visible',timeout:30000});
+    // The input itself exists in the initial HTML; the async chart editor
+    // fills it only after its ES modules have loaded and rendered the project.
+    await page.waitForFunction(()=>document.querySelector('#projectTitleInput')?.value==='SAFE LOCALE GRAPH',
+      null,{timeout:30000});
     assert(await page.locator('#projectTitleInput').inputValue()==='SAFE LOCALE GRAPH',
       'Visual editor failed to load saved chart');
     assert(await page.locator('.globalLocaleBar').count()===1,
