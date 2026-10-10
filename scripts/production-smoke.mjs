@@ -381,7 +381,17 @@ async function browserCommunityHome(){
     await frame.locator('#overviewViewBtn').click();
     await frame.locator('#sheetViewBtn').click();
     await page.locator('#communitySubmit').click();
-    await page.locator('.communityMessage.ok').waitFor({timeout:30000});
+    try{
+      await page.locator('.communityMessage.ok').waitFor({timeout:9000});
+    }catch(error){
+      const message=await page.locator('#communityMessage').innerText();
+      const sheet=await frame.locator('#scoreTable').evaluate(
+        el=>el.ownerDocument.defaultView.__statsMakerGetActiveSheet?.()
+      );
+      const saved=await page.evaluate(()=>window.__communityMockSaved||null);
+      throw new Error('Mock Community Home save did not succeed: '+
+        JSON.stringify({message,rows:sheet?.rows,cols:sheet?.cols,saved}));
+    }
     const result=await page.evaluate(()=>window.__communityMockSaved);
     assert(result?.p_scores?.length===3,'Community Home sent wrong score count');
     assert(result.p_scores[0]?.item_id==='bbbbbbbb-bbbb-4bbb-8bbb-bbbbbbbbbbbb'
