@@ -102,7 +102,7 @@
         const s=activeSheet();
         s.updatedAt=Date.now();
         if(!communityMode)localStorage.setItem(STORAGE_KEY,JSON.stringify(library));
-        $('saveBadge').textContent=t('save.saved');
+        $('saveBadge').textContent=communityMode?'編集中（投稿前）':t('save.saved');
         if(message)$('statusText').textContent=message;
       }catch(e){
         $('saveBadge').textContent=t('save.failed');
@@ -2363,6 +2363,9 @@
     const safe=clone(incoming);
     normalizeSheet(safe);
     library={activeId:safe.id,sheets:[safe]};
+    $('titleInput').readOnly=true;
+    $('descInput').readOnly=true;
+    $('sheetSelect').disabled=true;
     renderAll();
     $('statusText').textContent=window.SM_I18N?.getLanguage?.()==='en'
       ?'Edit your scores, then submit to Community.':'自分の点数を編集してCommunityに投稿できます。';
