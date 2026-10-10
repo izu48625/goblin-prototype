@@ -49,6 +49,7 @@
     // No scoring or public-data writes happen on a display-language change.
     location.reload();
   }
+  const homePath=()=>location.pathname.startsWith('/app/')?'../index.html?fresh=1':'index.html?fresh=1';
   function openHome(event){
     event.preventDefault();
     const frame=document.getElementById('basicFrame');
@@ -62,7 +63,7 @@
     if(community&&!confirm(current()==='ja'
       ?'未投稿の評価は保存されません。ホームへ戻りますか？'
       :'Unsubmitted scores will not be saved. Return Home?'))return;
-    location.assign(new URL('index.html?fresh=1',location.href).href);
+    location.assign(new URL(homePath(),location.href).href);
   }
   function mount(){
     if(document.querySelector('.globalLocaleBar'))return;
@@ -72,6 +73,7 @@
     bar.setAttribute('role','group');
     bar.innerHTML='<a class="globalHomeBtn" href="index.html?fresh=1" aria-label="ホームを開く">HOME</a><div class="globalLocaleControls"><span class="globalLocaleLabel">表示言語</span><div class="globalLocaleSwitch"><button type="button" data-global-lang="ja" aria-label="日本語">JA</button><button type="button" data-global-lang="en" aria-label="English">EN</button></div></div>';
     document.body.prepend(bar);
+    bar.querySelector('.globalHomeBtn').href=new URL(homePath(),location.href).href;
     bar.querySelector('.globalHomeBtn').addEventListener('click',openHome);
     bar.querySelectorAll('[data-global-lang]').forEach(btn=>btn.addEventListener('click',()=>set(btn.dataset.globalLang)));
     paint();
