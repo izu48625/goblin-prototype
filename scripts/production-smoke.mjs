@@ -366,7 +366,7 @@ async function browserCommunityHome(){
       route.fulfill({status:200,contentType:'application/json',
         body:JSON.stringify({communityGatewayEnabled:true,siteKey:'test-public-sitekey',
           turnstileConfigured:true,trustedGatewayConfigured:true})}));
-    await page.route('**/challenges.cloudflare.com/turnstile/v0/api.js?render=explicit',route=>
+    await page.route('**/turnstile/v0/api.js?*',route=>
       route.fulfill({status:200,contentType:'application/javascript',
         body:`window.turnstile={render:(_slot,opts)=>{
           Promise.resolve().then(()=>opts.callback('QA_TOKEN_FOR_MOCK_ONLY'));
@@ -447,6 +447,16 @@ async function browserCommunityHome(){
       'Community participant count did not refresh');
     assert(await page.evaluate(()=>localStorage.getItem('statsMakerV014Library'))===initialStorage,
       'Community Home overwrote local Home saved sheets');
+    // Old saved URLs automatically open the same Home UI, while the manual
+    // emergency fallback remains accessible without losing its former form.
+    await page.goto(BASE_URL+'/rate.html?id='+encodeURIComponent(PUBLIC_TOPIC_ID),
+      {waitUntil:'domcontentloaded',timeout:60000});
+    await page.waitForURL(url=>url.pathname.endsWith('/index.html')&&
+      url.searchParams.get('community')===PUBLIC_TOPIC_ID,{timeout:15000});
+    await page.goto(BASE_URL+'/rate.html?id='+encodeURIComponent(PUBLIC_TOPIC_ID)+'&legacy=1',
+      {waitUntil:'domcontentloaded',timeout:60000});
+    assert(new URL(page.url()).pathname.endsWith('/rate.html'),
+      'Legacy fallback must not redirect to Home');
   });
 }
 
