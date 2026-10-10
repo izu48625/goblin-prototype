@@ -125,48 +125,12 @@ async function navigateRemix(page){
   await page.goto(BASE_URL+'/public.html?id='+encodeURIComponent(PUBLIC_TOPIC_ID),{waitUntil:'networkidle',timeout:60000});
   await page.locator('#content:not(.hidden)').waitFor({timeout:30000});
   await page.locator('#remixBtn').click();
-  await page.waitForURL(/index\.html\?remixed=1/,{timeout:30000});
+  await page.waitForURL(url=>url.searchParams.get('remixed')==='1',{timeout:30000});
 }
 
 async function browserRemixRedirect(){
   await withBrowser('Browser Remix redirect',async page=>{
-    const consoleMessages=[];
-    const pageErrors=[];
-    page.on('console',msg=>consoleMessages.push({type:msg.type(),text:msg.text()}));
-    page.on('pageerror',error=>pageErrors.push(String(error?.stack||error)));
-
-    await page.goto(BASE_URL+'/public.html?id='+encodeURIComponent(PUBLIC_TOPIC_ID),{waitUntil:'networkidle',timeout:60000});
-    await page.locator('#content:not(.hidden)').waitFor({timeout:30000});
-
-    const before=await page.evaluate(()=>({
-      href:location.href,
-      remixObject:!!window.SM_REMIX,
-      buildSheetType:typeof window.SM_REMIX?.buildSheet,
-      saveSheetType:typeof window.SM_REMIX?.saveSheet,
-      storage:localStorage.getItem('statsMakerV014Library')
-    }));
-
-    await page.locator('#remixBtn').click();
-    await page.waitForTimeout(1600);
-
-    const after=await page.evaluate(()=>({
-      href:location.href,
-      storage:localStorage.getItem('statsMakerV014Library'),
-      toasts:[...document.querySelectorAll('.toast')].map(el=>el.textContent||'')
-    }));
-
-    await fs.mkdir('/tmp/stats-maker-smoke',{recursive:true});
-    await fs.writeFile('/tmp/stats-maker-smoke/remix-diagnostic.json',JSON.stringify({
-      topic:PUBLIC_TOPIC_ID,
-      before,
-      after,
-      consoleMessages,
-      pageErrors
-    },null,2));
-    await page.screenshot({path:'/tmp/stats-maker-smoke/remix-diagnostic.png',fullPage:true});
-
-    assert(/\/index\.html\?remixed=1/.test(new URL(after.href).pathname+new URL(after.href).search),
-      'Remix redirect did not occur; diagnostic artifact created');
+    await navigateRemix(page);
   });
 }
 
