@@ -10,7 +10,7 @@
   const moreBtn=document.getElementById('moreBtn');
   const refreshBtn=document.getElementById('refreshBtn');
 
-  const locale=localStorage.getItem('statsMaker.locale')==='en'?'en':'ja';
+  const locale=String(localStorage.getItem('statsMaker.locale')||localStorage.getItem('statsMakerV2Language')||navigator.language||'ja').toLowerCase().startsWith('en')?'en':'ja';
   const categories=['all','sports','manga_anime','movie_tv','food','game','music','books','travel','tech','lifestyle','other'];
   const categoryLabels={
     ja:{
