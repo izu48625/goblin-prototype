@@ -73,10 +73,48 @@ button{font:inherit}
   .extHead{align-items:flex-start}
 }
 @media(max-width:390px){.extGrid{grid-template-columns:1fr}}
+
+/* The Community screen is exactly the Home shell and table, with a submit bar. */
+.communityControls{position:fixed;z-index:110;left:10px;right:10px;bottom:calc(74px + env(safe-area-inset-bottom));display:flex;flex-direction:column;gap:6px;padding:9px 12px;border:1px solid #345775;border-radius:14px;background:#0c1b30;box-shadow:0 10px 28px rgba(0,0,0,.35);color:#dce9fb}
+.communityHead{display:flex;align-items:center;justify-content:space-between;gap:8px;font-size:11px;font-weight:850}
+.communityHead a{color:#a5c5ff;text-decoration:none}
+.communityButtons{display:grid;grid-template-columns:1fr 1.35fr;gap:7px}
+.communityButtons button{min-height:40px;border-radius:9px;border:1px solid #4b6996;background:#1a3458;color:white;font-weight:850;font-size:12px}
+.communityButtons button.primary{background:#3465bd}
+.communityButtons button:disabled{opacity:.6}
+.communityMessage{font-size:11px;color:#b9c9df;min-height:12px}
+.communityMessage.ok{color:#72e2ab}
+.communityMessage.error{color:#ff9595}
+.communityLoading{position:fixed;inset:0;z-index:111;display:grid;place-items:center;background:#07101f;color:#b6cbeb;font-size:15px;text-align:center;padding:20px}
+.communityLoading.error{color:#ff9b9b}
+body.communityShell #basicRoot{bottom:calc(178px + env(safe-area-inset-bottom))}
+body.communityShell #extLauncher{bottom:calc(8px + env(safe-area-inset-bottom))}
+@media(min-width:601px){
+ .communityControls{left:50%;right:auto;transform:translateX(-50%);width:min(560px,calc(100% - 30px));bottom:20px}
+ body.communityShell #basicRoot{bottom:112px}
+ body.communityShell #extLauncher{bottom:20px}
+}
 </style>
 </head>
 <body data-build="R25-P4">
-<div id="basicRoot"><iframe id="basicFrame" src="base/index.html?v=r26p3" title="Stats Maker"></iframe></div>
+<div id="basicRoot"><iframe id="basicFrame" title="Stats Maker"></iframe></div>
+<script>
+(() => {
+  const topic = new URLSearchParams(location.search).get('community')||'';
+  const valid = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-8][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(topic);
+  if(valid)document.body.classList.add('communityShell');
+  document.getElementById('basicFrame').src='base/index.html?v=r27h1'+(valid?'&community='+encodeURIComponent(topic):'');
+})();
+</script>
+<div id="communityLoading" class="communityLoading hidden">Communityを読み込み中…</div>
+<div id="communityControls" class="communityControls hidden">
+  <div class="communityHead"><a id="communityBackLink" href="public.html">← 公開ページへ戻る</a><span id="communityParticipant">Community</span></div>
+  <div id="communityMessage" class="communityMessage">自分の点数を入力して投稿できます。</div>
+  <div class="communityButtons"><button type="button" id="communityDraft">下書き保存</button><button type="button" id="communitySubmit" class="primary">Communityへ投稿</button></div>
+</div>
+<script>
+if(document.body.classList.contains('communityShell'))document.getElementById('communityLoading').classList.remove('hidden');
+</script>
 
 <button id="extLauncher" type="button">
   <span class="launchIcon">＋</span>
@@ -102,6 +140,7 @@ button{font:inherit}
   </section>
 </div>
 
-<script type="module" src="app/src/launcher.js?v=r25p4"></script>
+<script type="module" src="app/src/launcher.js?v=r27h1"></script>
+<script type="module" src="cloud/community-home.js?v=r27h1"></script>
 </body>
 </html>
