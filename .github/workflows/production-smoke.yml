@@ -44,5 +44,14 @@ jobs:
       - name: Browser public and Community
         run: node scripts/production-smoke.mjs browser-public
 
-      - name: Browser Remix route
-        run: node scripts/production-smoke.mjs browser-remix
+      - name: Browser Remix redirect
+        run: node scripts/production-smoke.mjs browser-remix-redirect
+
+      - name: Browser Remix storage
+        run: node scripts/production-smoke.mjs browser-remix-storage
+
+      - name: Browser Remix context
+        run: node scripts/production-smoke.mjs browser-remix-context
+
+      - name: Browser Community panel
+        run: node scripts/production-smoke.mjs browser-community-panel

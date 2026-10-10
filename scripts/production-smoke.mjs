@@ -121,14 +121,43 @@ async function browserPublic(){
   });
 }
 
-async function browserRemix(){
-  await withBrowser('Browser Remix',async page=>{
-    await page.goto(BASE_URL+'/public.html?id='+encodeURIComponent(PUBLIC_TOPIC_ID),{waitUntil:'networkidle',timeout:60000});
-    await page.locator('#content:not(.hidden)').waitFor({timeout:30000});
-    await page.locator('#remixBtn').click();
-    await page.waitForURL(/index\.html\?remixed=1/,{timeout:30000});
+async function navigateRemix(page){
+  await page.goto(BASE_URL+'/public.html?id='+encodeURIComponent(PUBLIC_TOPIC_ID),{waitUntil:'networkidle',timeout:60000});
+  await page.locator('#content:not(.hidden)').waitFor({timeout:30000});
+  await page.locator('#remixBtn').click();
+  await page.waitForURL(/index\.html\?remixed=1/,{timeout:30000});
+}
+
+async function browserRemixRedirect(){
+  await withBrowser('Browser Remix redirect',async page=>{
+    await navigateRemix(page);
+  });
+}
+
+async function browserRemixStorage(){
+  await withBrowser('Browser Remix storage',async page=>{
+    await navigateRemix(page);
+    const state=await page.evaluate(()=>{
+      try{return JSON.parse(localStorage.getItem('statsMakerV014Library')||'null')}catch{return null}
+    });
+    assert(state&&Array.isArray(state.sheets)&&state.sheets.length>0,'Remix library was not saved');
+    const active=state.sheets.find(sheet=>sheet.id===state.activeId);
+    assert(active?.sourceTopicId===PUBLIC_TOPIC_ID,'Remix active sheet lost sourceTopicId');
+  });
+}
+
+async function browserRemixContext(){
+  await withBrowser('Browser Remix context',async page=>{
+    await navigateRemix(page);
     const remixFrame=page.frameLocator('#basicFrame');
     await remixFrame.locator('#remixContextPanel:not(.hidden)').waitFor({timeout:30000});
+  });
+}
+
+async function browserCommunityPanel(){
+  await withBrowser('Browser Community panel',async page=>{
+    await navigateRemix(page);
+    const remixFrame=page.frameLocator('#basicFrame');
     await remixFrame.locator('#communityJoinPanel:not(.hidden)').waitFor({timeout:30000});
     assert(await remixFrame.locator('#communityJoinBtn').count()===1,'Community join action missing after Remix');
   });
@@ -138,5 +167,8 @@ if(mode==='http')await httpSmoke();
 else if(mode==='browser-home')await browserHome();
 else if(mode==='browser-discover')await browserDiscover();
 else if(mode==='browser-public')await browserPublic();
-else if(mode==='browser-remix')await browserRemix();
+else if(mode==='browser-remix-redirect')await browserRemixRedirect();
+else if(mode==='browser-remix-storage')await browserRemixStorage();
+else if(mode==='browser-remix-context')await browserRemixContext();
+else if(mode==='browser-community-panel')await browserCommunityPanel();
 else throw new Error('Unknown smoke mode: '+mode);
