@@ -398,6 +398,9 @@
         </div>
 
         <div class="primaryActions">
+          ${data.show_community===true&&data.allow_ratings===true&&data.visibility!=='private'
+            ?`<a id="communityRateLink" class="actionBtn communityRate" href="index.html?community=${encodeURIComponent(id)}&v=r27std1">${ja?'Communityで採点する':'Rate in Community'}</a>`
+            :''}
           <button id="remixBtn" class="actionBtn remix">${ja?'Remixして使う':'Remix this'}<span class="actionCount">${remixCount}</span></button>
           <button id="shareBtn" class="actionBtn ghost">${ja?'URL共有':'Share URL'}</button>
           <button id="shareImageBtn" class="actionBtn shareImage">${ja?'画像で共有':'Share Image'}</button>
