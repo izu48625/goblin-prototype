@@ -65,7 +65,13 @@ try{
   assert(share.includes('/public.html?id='+TOPIC),'Published share URL wrong');
   // Repeat publishing without changing structure must update the SAME topic.
   await home.locator('#publishExecuteBtn').click();
-  await home.locator('#publishStatus.ok').waitFor({timeout:20000});
+  await home.locator('body').evaluate(async()=>{
+    for(let i=0;i<100;i++){
+      if(window.__qaPublishDb.calls.some(x=>x.table==='topics'&&x.operation==='update'))return;
+      await new Promise(resolve=>setTimeout(resolve,50));
+    }
+    throw new Error('Publish update did not reach mock Supabase');
+  });
   state=await home.locator('body').evaluate(()=>window.__qaPublishDb);
   assert.equal(state.topics.length,1,'Repeated publish created duplicate topics');
   assert.equal(state.topics[0].visibility,'unlisted');
@@ -73,7 +79,17 @@ try{
   assert.equal(state.criteria.length,1);
   // Turning it private must revoke the public link without touching other sheets.
   await home.locator('#publishUnpublishBtn').click();
-  await home.locator('#publishUnpublishBtn.hidden').waitFor({timeout:20000});
+  await home.locator('#publishUnpublishBtn').waitFor({state:'hidden',timeout:20000});
+  // App intentionally persists changed cloud visibility after its debounce.
+  await home.locator('body').evaluate(async()=>{
+    for(let i=0;i<40;i++){
+      const local=JSON.parse(localStorage.getItem('statsMakerV014Library')||'null');
+      if(window.__qaPublishDb.topics[0]?.visibility==='private'&&
+        local?.sheets?.some(x=>x.cloudVisibility==='private'))return;
+      await new Promise(resolve=>setTimeout(resolve,100));
+    }
+    throw new Error('Private visibility did not reach mock database and local library');
+  });
   state=await home.locator('body').evaluate(()=>({
     db:window.__qaPublishDb,
     library:JSON.parse(localStorage.getItem('statsMakerV014Library')||'null')
