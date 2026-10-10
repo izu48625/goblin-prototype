@@ -17,6 +17,7 @@ on:
       - "scripts/build-cloudflare.mjs"
       - "scripts/production-smoke.mjs"
       - "scripts/r26-edge-test.mjs"
+      - "scripts/r26-gateway-test.mjs"
       - ".github/workflows/production-smoke.yml"
       - "wrangler.jsonc"
       - "package.json"
@@ -54,6 +55,9 @@ jobs:
       - name: Syntax check
         run: |
           node --check worker/index.js
+          node --check worker/community-gateway.js
+          node --check scripts/r26-gateway-test.mjs
+          node --check cloud/community-gateway.js
           node --check scripts/r26-edge-test.mjs
           node --check scripts/build-cloudflare.mjs
           node --check scripts/production-smoke.mjs
@@ -64,6 +68,8 @@ jobs:
           node --check app/src/launcher.js
       - name: R26 edge guard test
         run: node scripts/r26-edge-test.mjs
+      - name: R26 Turnstile gateway test
+        run: node scripts/r26-gateway-test.mjs
       - name: Build static bundle
         run: npm run build:cloudflare
       - name: Verify required assets
@@ -75,6 +81,7 @@ jobs:
           test -f dist/public.html
           test -f dist/rate.html
           test -f dist/cloud/supabase.js
+          test -f dist/cloud/community-gateway.js
           test -f dist/cloud/runtime-config.js
       - name: Verify no private server files are published
         run: |
