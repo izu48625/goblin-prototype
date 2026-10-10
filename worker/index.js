@@ -1,3 +1,4 @@
+import {communityGateway,securityConfig} from './community-gateway.js';
 const SUPABASE_URL='https://ibpdxbeltdwkquowjeay.supabase.co';
 const SUPABASE_KEY='sb_publishable_6abnwW_1p-U_Y_DefUXfFQ_Dz_Y2vsD';
 const LEGACY_OG_ORIGIN='https://stats-maker-ogp.vercel.app';
@@ -35,7 +36,7 @@ function shareHtml({origin,id,topic}){
   const language=topic?.language_code==='en'?'en':'ja';
   const title=exists?String(topic.title||'Stats Maker')+' - Stats Maker':'Stats Maker';
   const description=String(topic?.description||'').trim()||(language==='ja'?'Stats Makerで作成された公開評価シート':'A public rating sheet created with Stats Maker');
-  const appUrl=exists?origin+'/public.html?id='+encodeURIComponent(id)+'&v=r26p1':origin+'/';
+  const appUrl=exists?origin+'/public.html?id='+encodeURIComponent(id)+'&v=r26p3':origin+'/';
   const shareUrl=exists?origin+'/p/'+encodeURIComponent(id):appUrl;
   const version=encodeURIComponent(String(topic?.snapshot_updated_at||topic?.published_at||Date.now()));
   const imageUrl=exists?origin+'/api/og?id='+encodeURIComponent(id)+'&v='+version:'';
@@ -88,8 +89,13 @@ export default {
   async fetch(request,env){
     const url=new URL(request.url);
     if(url.pathname==='/api/health'){
-      return Response.json({ok:true,service:'stats-maker',release:'r26p1',hosting:'cloudflare-workers',ogBackend:'vercel-stage1'},{headers:{'Cache-Control':'no-store'}});
+      return Response.json({ok:true,service:'stats-maker',release:'r26p3',hosting:'cloudflare-workers',ogBackend:'vercel-stage1'},{headers:{'Cache-Control':'no-store'}});
     }
+    if(url.pathname==='/api/security/config'){
+      if(request.method!=='GET')return new Response('Method Not Allowed',{status:405,headers:{Allow:'GET'}});
+      return securityConfig(env);
+    }
+    if(url.pathname==='/api/guard/community')return communityGateway(request,env);
     if(url.pathname==='/api/og'){
       if(request.method!=='GET'&&request.method!=='HEAD')return new Response('Method Not Allowed',{status:405,headers:{Allow:'GET, HEAD'}});
       const blocked=await checkPublicRateLimit(request,env.OG_RATE_LIMIT);
