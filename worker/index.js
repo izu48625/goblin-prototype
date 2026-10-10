@@ -35,7 +35,7 @@ function shareHtml({origin,id,topic}){
   const language=topic?.language_code==='en'?'en':'ja';
   const title=exists?String(topic.title||'Stats Maker')+' - Stats Maker':'Stats Maker';
   const description=String(topic?.description||'').trim()||(language==='ja'?'Stats Makerで作成された公開評価シート':'A public rating sheet created with Stats Maker');
-  const appUrl=exists?origin+'/public.html?id='+encodeURIComponent(id)+'&v=r25p2':origin+'/';
+  const appUrl=exists?origin+'/public.html?id='+encodeURIComponent(id)+'&v=r25p3':origin+'/';
   const shareUrl=exists?origin+'/p/'+encodeURIComponent(id):appUrl;
   const version=encodeURIComponent(String(topic?.snapshot_updated_at||topic?.published_at||Date.now()));
   const imageUrl=exists?origin+'/api/og?id='+encodeURIComponent(id)+'&v='+version:'';
@@ -73,7 +73,7 @@ export default {
   async fetch(request,env){
     const url=new URL(request.url);
     if(url.pathname==='/api/health'){
-      return Response.json({ok:true,service:'stats-maker',release:'r25p2',hosting:'cloudflare-workers',ogBackend:'vercel-stage1'},{headers:{'Cache-Control':'no-store'}});
+      return Response.json({ok:true,service:'stats-maker',release:'r25p3',hosting:'cloudflare-workers',ogBackend:'vercel-stage1'},{headers:{'Cache-Control':'no-store'}});
     }
     if(url.pathname==='/api/og')return proxyLegacyOg(request);
     const match=url.pathname.match(/^\/p\/([a-zA-Z0-9_-]{8,128})\/?$/);
