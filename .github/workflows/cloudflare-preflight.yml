@@ -23,6 +23,7 @@ on:
       - "scripts/r27-community-home-test.mjs"
       - "scripts/r27-remix-copy-test.mjs"
       - "scripts/r28-publish-lifecycle-test.mjs"
+      - "scripts/r29-backup-restore-test.mjs"
       - ".github/workflows/production-smoke.yml"
       - "wrangler.jsonc"
       - "package.json"
@@ -83,6 +84,7 @@ jobs:
           node --check cloud/remix.js
           node --check scripts/r27-remix-copy-test.mjs
           node --check scripts/r28-publish-lifecycle-test.mjs
+          node --check scripts/r29-backup-restore-test.mjs
           node --check app/src/launcher.js
       - name: R26 edge guard test
         run: node scripts/r26-edge-test.mjs
@@ -96,6 +98,8 @@ jobs:
         run: node scripts/r27-community-home-test.mjs
       - name: R27 copied-sheet title and lineage regression test
         run: node scripts/r27-remix-copy-test.mjs
+      - name: R29 safe project-backup import and persistence
+        run: node scripts/r29-backup-restore-test.mjs
       - name: Build static bundle
         run: npm run build:cloudflare
       - name: Verify required assets
