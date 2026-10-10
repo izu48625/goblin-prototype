@@ -28,6 +28,8 @@ export function readBaseLibrary(){
 
 export function getSourceSheet(project,explicitSheet=null){
   if(explicitSheet)return explicitSheet;
+  // Community graph snapshots must never rebind to the Home active sheet.
+  if(project?.settings?.communitySnapshot)return null;
 
   const library=readBaseLibrary();
   if(!library?.sheets?.length)return null;
