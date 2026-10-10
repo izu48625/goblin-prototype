@@ -63,6 +63,17 @@ assert.equal(r.error,null);
 assert.equal(h.calls.rpc,1,'GitHub Pages preview should retain RPC');
 assert.equal(h.calls.fetch,0);
 
+// A long-lived tab must not pin a disabled configuration across cutover.
+// Simulate the first save before activation, followed by a gateway-enabled
+// response that lacks its site key (fail closed instead of sending the old RPC).
+h=createHarness('statsmaker.app',(()=>{let n=0;return async()=>++n===1?http(disabled):http(enabledWithoutSiteKey)})());
+r=await h.save();
+assert.equal(r.error,null,'the pre-cutover save still uses the old RPC');
+r=await h.save();
+assert(typeof r.error?.message==='string','new enabled config must be enforced');
+assert.equal(h.calls.fetch,2,'the security mode must refresh before every save');
+assert.equal(h.calls.rpc,1,'post-cutover attempt must never use the old RPC');
+
 h=createHarness('statsmaker.app',(()=>{let n=0;return async()=>++n===1?http(null,503):http(disabled)})());
 r=await h.save();
 assert(typeof r.error?.message==='string');
