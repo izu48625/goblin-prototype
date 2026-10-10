@@ -89,7 +89,7 @@ export default {
   async fetch(request,env){
     const url=new URL(request.url);
     if(url.pathname==='/api/health'){
-      return Response.json({ok:true,service:'stats-maker',release:'r26p3',hosting:'cloudflare-workers',ogBackend:'vercel-stage1'},{headers:{'Cache-Control':'no-store'}});
+      return Response.json({ok:true,service:'stats-maker',release:'r26p4-prep',hosting:'cloudflare-workers',ogBackend:'vercel-stage1'},{headers:{'Cache-Control':'no-store'}});
     }
     if(url.pathname==='/api/security/config'){
       if(request.method!=='GET')return new Response('Method Not Allowed',{status:405,headers:{Allow:'GET'}});
