@@ -58,7 +58,7 @@ try{
     try{
       // External image/CDN resources can keep the "load" event pending even
       // after the editor navigation has already committed successfully.
-      await page.waitForURL(url=>url.pathname.endsWith('/app/editor.html'),
+      await page.waitForURL(url=>/\/app\/editor(?:\.html)?$/.test(url.pathname),
         {waitUntil:'domcontentloaded',timeout:15000});
     }catch(error){
       const ui=await page.locator('body').evaluate(el=>({
