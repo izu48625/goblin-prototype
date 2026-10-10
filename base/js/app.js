@@ -759,13 +759,22 @@
       });
     });
 
-    document.querySelectorAll('[data-score-row]').forEach(el=>el.addEventListener('change',e=>{
-      const ri=+e.currentTarget.dataset.scoreRow,ci=+e.currentTarget.dataset.scoreCol;
-      s.rows[ri].scores[ci]=clampScore(e.currentTarget.value);
-      // Important: editing a score never reorders the table.
-      renderAll();
-      scheduleSave('');
-    }));
+    document.querySelectorAll('[data-score-row]').forEach(el=>{
+      // In Community, preserve numeric edits on every keystroke. Home's
+      // change-handler rebuilds the table on blur, which can otherwise drop
+      // the next focused score before its own change event fires.
+      if(communityMode)el.addEventListener('input',e=>{
+        const ri=+e.currentTarget.dataset.scoreRow,ci=+e.currentTarget.dataset.scoreCol;
+        s.rows[ri].scores[ci]=clampScore(e.currentTarget.value);
+      });
+      el.addEventListener('change',e=>{
+        const ri=+e.currentTarget.dataset.scoreRow,ci=+e.currentTarget.dataset.scoreCol;
+        s.rows[ri].scores[ci]=clampScore(e.currentTarget.value);
+        // Important: editing a score never reorders the table.
+        renderAll();
+        scheduleSave('');
+      });
+    });
 
     document.querySelectorAll('[data-sort-now]').forEach(el=>el.addEventListener('click',e=>{
       const raw=e.currentTarget.dataset.sortNow;
