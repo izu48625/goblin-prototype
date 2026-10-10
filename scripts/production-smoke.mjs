@@ -376,15 +376,20 @@ async function browserCommunityHome(){
     const initialStorage=await page.evaluate(()=>localStorage.getItem('statsMakerV014Library'));
     await frame.locator('[data-score-row="0"][data-score-col="0"]').fill('8');
     await frame.locator('[data-score-row="0"][data-score-col="1"]').fill('10');
+    await frame.locator('[data-score-row="1"][data-score-col="0"]').fill('9');
     await frame.locator('[data-sort-now="0"][data-sort-dir="desc"]').first().click();
     await frame.locator('#overviewViewBtn').click();
     await frame.locator('#sheetViewBtn').click();
     await page.locator('#communitySubmit').click();
     await page.locator('.communityMessage.ok').waitFor({timeout:30000});
     const result=await page.evaluate(()=>window.__communityMockSaved);
-    assert(result?.p_scores?.length===2,'Community Home sent wrong score count');
-    assert(result.p_scores.every(row=>row.item_id==='aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa'),
-      'Home sorting corrupted the rated item ID');
+    assert(result?.p_scores?.length===3,'Community Home sent wrong score count');
+    assert(result.p_scores[0]?.item_id==='bbbbbbbb-bbbb-4bbb-8bbb-bbbbbbbbbbbb'
+      && result.p_scores[0]?.score===9,
+      'Home sorting lost Beta identity');
+    assert(result.p_scores.slice(1).every(row=>
+      row.item_id==='aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa'),
+      'Home sorting corrupted Alpha identity');
     assert(await page.locator('#communityParticipant').innerText()==='参加者 2人',
       'Community participant count did not refresh');
     assert(await page.evaluate(()=>localStorage.getItem('statsMakerV014Library'))===initialStorage,
