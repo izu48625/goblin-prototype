@@ -1606,3 +1606,15 @@ html[lang="en"] .rankModeBtn{
   .fitTable td.fitScoreCell{padding:0 2px!important}
 }
 
+
+/* R27: concise copy notice, with the Community action in its own panel. */
+.remixContextPanel{gap:10px;padding:11px 12px}
+.remixContextCopy .eyebrow{font-size:9px;letter-spacing:.08em;color:#bda9e1}
+.remixContextTitle{margin-top:5px}
+.remixSourceTitle{font-size:13px}
+.remixContextHelp{font-size:11px;line-height:1.5;margin-top:5px}
+@media(max-width:760px){
+  .remixContextPanel{gap:9px;padding:12px}
+  .remixContextActions{gap:8px}
+  .remixContextActions .btn{min-height:44px;font-size:12px}
+}
