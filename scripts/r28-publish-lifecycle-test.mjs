@@ -28,11 +28,33 @@ try{
   await home.locator('#titleInput').fill('R28 QA UNLISTED SAMPLE');
   await home.locator('.nameInput').first().fill('TEST PERSON');
   await home.locator('[data-score-row="0"][data-score-col="0"]').fill('82');
+  await home.locator('[data-score-row="0"][data-score-col="0"]').press('Tab');
+  await home.locator('body').evaluate(async()=>{
+    for(let i=0;i<40;i++){
+      const sheet=window.__statsMakerGetActiveSheet?.();
+      if(sheet?.title==='R28 QA UNLISTED SAMPLE'&&
+        sheet.rows?.[0]?.name==='TEST PERSON'&&
+        sheet.rows?.[0]?.scores?.[0]===82)return;
+      await new Promise(resolve=>setTimeout(resolve,100));
+    }
+    throw new Error('Home numeric input did not commit before publish button');
+  });
   await home.locator('#publishBtn').click();
   await home.locator('#publishSettingsPane:not(.hidden)').waitFor({timeout:20000});
   await home.locator('input[name="publishVisibility"][value="unlisted"]').check();
   await home.locator('#publishExecuteBtn').click();
-  await home.locator('#publishResult:not(.hidden)').waitFor({timeout:20000});
+  try{
+    await home.locator('#publishResult:not(.hidden)').waitFor({timeout:9000});
+  }catch(error){
+    const diagnostic=await home.locator('body').evaluate(()=>({
+      status:document.querySelector('#publishStatus')?.textContent,
+      cls:document.querySelector('#publishStatus')?.className,
+      sheet:window.__statsMakerGetActiveSheet?.(),
+      calls:window.__qaPublishDb?.calls||[],
+      supabaseReady:window.SM_SUPABASE?.ready
+    }));
+    throw new Error('Mock URL-limited publish did not finish: '+JSON.stringify(diagnostic));
+  }
   await home.locator('#publishStatus.ok').waitFor({timeout:20000});
   // Publish returns before the normal local-first auto-save timer flushes.
   // Wait for the real Home library, rather than racing the 220ms timer.
