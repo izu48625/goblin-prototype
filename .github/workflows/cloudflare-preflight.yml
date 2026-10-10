@@ -72,6 +72,7 @@ jobs:
           node --check cloud/rate.js
           node --check cloud/global-locale.js
           node --check app/src/core/i18n.js
+          node --check app/src/core/export.js
           node --check app/src/editor/editor.js
           node --check cloud/rate-visuals.js
           node --check cloud/community-home.js
