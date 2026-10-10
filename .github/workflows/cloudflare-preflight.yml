@@ -16,6 +16,7 @@ on:
       - "worker/**"
       - "scripts/build-cloudflare.mjs"
       - "scripts/production-smoke.mjs"
+      - "scripts/r26-edge-test.mjs"
       - ".github/workflows/production-smoke.yml"
       - "wrangler.jsonc"
       - "package.json"
@@ -53,6 +54,7 @@ jobs:
       - name: Syntax check
         run: |
           node --check worker/index.js
+          node --check scripts/r26-edge-test.mjs
           node --check scripts/build-cloudflare.mjs
           node --check scripts/production-smoke.mjs
           node --check base/js/app.js
@@ -60,6 +62,8 @@ jobs:
           node --check cloud/discover.js
           node --check cloud/rate.js
           node --check app/src/launcher.js
+      - name: R26 edge guard test
+        run: node scripts/r26-edge-test.mjs
       - name: Build static bundle
         run: npm run build:cloudflare
       - name: Verify required assets

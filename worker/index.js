@@ -35,7 +35,7 @@ function shareHtml({origin,id,topic}){
   const language=topic?.language_code==='en'?'en':'ja';
   const title=exists?String(topic.title||'Stats Maker')+' - Stats Maker':'Stats Maker';
   const description=String(topic?.description||'').trim()||(language==='ja'?'Stats Makerで作成された公開評価シート':'A public rating sheet created with Stats Maker');
-  const appUrl=exists?origin+'/public.html?id='+encodeURIComponent(id)+'&v=r25p4':origin+'/';
+  const appUrl=exists?origin+'/public.html?id='+encodeURIComponent(id)+'&v=r26p1':origin+'/';
   const shareUrl=exists?origin+'/p/'+encodeURIComponent(id):appUrl;
   const version=encodeURIComponent(String(topic?.snapshot_updated_at||topic?.published_at||Date.now()));
   const imageUrl=exists?origin+'/api/og?id='+encodeURIComponent(id)+'&v='+version:'';
@@ -58,6 +58,21 @@ function shareHtml({origin,id,topic}){
     '<script>setTimeout(function(){location.replace('+JSON.stringify(appUrl)+')},60);<\/script></body></html>';
 }
 
+// Rate limiting is deliberately scoped to expensive public OG and share
+// endpoints. Supabase writes currently bypass this Worker and require their
+// own database/server-side protection before Turnstile can be enforced.
+async function checkPublicRateLimit(request,limiter){
+  // Cloudflare normally supplies CF-Connecting-IP. Use a deliberately
+  // conservative fallback only for non-Cloudflare local test traffic.
+  const ip=request.headers.get('CF-Connecting-IP')||'unknown-client';
+  const outcome=await limiter.limit({key:ip});
+  if(outcome.success)return null;
+  return Response.json({error:'rate_limited',message:'Please try again shortly.'},{
+    status:429,
+    headers:{'Retry-After':'60','Cache-Control':'no-store'}
+  });
+}
+
 async function proxyLegacyOg(request){
   const requestUrl=new URL(request.url);
   const target=new URL('/api/og',LEGACY_OG_ORIGIN);
@@ -73,11 +88,19 @@ export default {
   async fetch(request,env){
     const url=new URL(request.url);
     if(url.pathname==='/api/health'){
-      return Response.json({ok:true,service:'stats-maker',release:'r25p4',hosting:'cloudflare-workers',ogBackend:'vercel-stage1'},{headers:{'Cache-Control':'no-store'}});
+      return Response.json({ok:true,service:'stats-maker',release:'r26p1',hosting:'cloudflare-workers',ogBackend:'vercel-stage1'},{headers:{'Cache-Control':'no-store'}});
     }
-    if(url.pathname==='/api/og')return proxyLegacyOg(request);
+    if(url.pathname==='/api/og'){
+      if(request.method!=='GET'&&request.method!=='HEAD')return new Response('Method Not Allowed',{status:405,headers:{Allow:'GET, HEAD'}});
+      const blocked=await checkPublicRateLimit(request,env.OG_RATE_LIMIT);
+      if(blocked)return blocked;
+      return proxyLegacyOg(request);
+    }
     const match=url.pathname.match(/^\/p\/([a-zA-Z0-9_-]{8,128})\/?$/);
     if(match){
+      if(request.method!=='GET'&&request.method!=='HEAD')return new Response('Method Not Allowed',{status:405,headers:{Allow:'GET, HEAD'}});
+      const blocked=await checkPublicRateLimit(request,env.SHARE_RATE_LIMIT);
+      if(blocked)return blocked;
       const id=safeTopicId(match[1]);
       let topic=null;
       try{topic=await fetchTopic(id)}catch(error){console.error('[Stats Maker] share fetch failed',error)}
