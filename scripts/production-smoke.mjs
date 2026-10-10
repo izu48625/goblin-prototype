@@ -44,6 +44,18 @@ async function waitForRelease(){
 async function httpSmoke(){
   await waitForRelease();
 
+  const securityResponse=await fetchOk(BASE_URL+'/api/security/config');
+  const security=await securityResponse.json();
+  assert(security?.turnstileConfigured===true,
+    'Production Turnstile SITE_KEY or SECRET runtime variable is missing.');
+  assert(security.communityGatewayEnabled===false,
+    'Turnstile Community gateway was enabled before the bypass-proof DB cutover.');
+  assert(security.siteKey===null,
+    'Turnstile sitekey should not be exposed while the gateway is disabled.');
+  assert((securityResponse.headers.get('cache-control')||'').includes('no-store'),
+    'Turnstile config must not be cached.');
+  console.log('Turnstile keys detected; Community gateway intentionally disabled.');
+
   const home=await (await fetchOk(BASE_URL+'/')).text();
   assert(home.includes('id="basicFrame"'),'Home shell is missing basicFrame');
 
