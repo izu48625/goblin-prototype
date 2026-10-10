@@ -602,7 +602,7 @@
       const sb=window.SM_SUPABASE?.client;
       if(!sb)throw new Error('Supabase client is not ready');
       await ensureCloudIdentity();
-      const {data,error}=await sb.rpc('save_my_topic_rating',{
+      const {data,error}=await window.SM_COMMUNITY_GATEWAY.save(sb,{
         p_topic_id:s.sourceTopicId,
         p_scores:payload,
         p_submit:true
