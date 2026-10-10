@@ -550,6 +550,16 @@ async function browserGlobalLanguage(){
     await page.goto(BASE_URL+'/index.html',{waitUntil:'domcontentloaded',timeout:60000});
     const frame=page.frameLocator('#basicFrame');
     await frame.locator('#titleInput').waitFor({timeout:30000});
+    // Inputs exist in static HTML before the Home controller attaches handlers.
+    // Wait for the public runtime bridge, then confirm the data model has
+    // actually received the user edit before a cross-frame language change.
+    await frame.locator('body').evaluate(async()=>{
+      for(let attempt=0;attempt<100;attempt++){
+        if(typeof window.__statsMakerGetActiveSheet==='function')return;
+        await new Promise(resolve=>setTimeout(resolve,50));
+      }
+      throw new Error('Home runtime bridge did not initialize');
+    });
     const bar=page.locator('.globalLocaleBar');
     assert(await bar.count()===1,'Home shared locale bar missing');
 
@@ -566,6 +576,13 @@ async function browserGlobalLanguage(){
       'HOME scrolled away rather than remaining pinned');
     const input=frame.locator('#titleInput');
     await input.fill('DO NOT ERASE LANGUAGE QA');
+    await frame.locator('body').evaluate(async()=>{
+      for(let attempt=0;attempt<40;attempt++){
+        if(window.__statsMakerGetActiveSheet?.()?.title==='DO NOT ERASE LANGUAGE QA')return;
+        await new Promise(resolve=>setTimeout(resolve,50));
+      }
+      throw new Error('Home title input did not update the live model');
+    });
     await bar.locator('[data-global-lang="en"]').click();
     await page.waitForFunction(()=>localStorage.getItem('statsMaker.locale')==='en');
     assert(await input.inputValue()==='DO NOT ERASE LANGUAGE QA',
