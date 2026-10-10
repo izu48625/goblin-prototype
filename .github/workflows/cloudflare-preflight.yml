@@ -18,6 +18,7 @@ on:
       - "scripts/production-smoke.mjs"
       - "scripts/r26-edge-test.mjs"
       - "scripts/r26-gateway-test.mjs"
+      - "scripts/r26-client-gateway-test.mjs"
       - ".github/workflows/production-smoke.yml"
       - "wrangler.jsonc"
       - "package.json"
@@ -57,6 +58,7 @@ jobs:
           node --check worker/index.js
           node --check worker/community-gateway.js
           node --check scripts/r26-gateway-test.mjs
+          node --check scripts/r26-client-gateway-test.mjs
           node --check cloud/community-gateway.js
           node --check scripts/r26-edge-test.mjs
           node --check scripts/build-cloudflare.mjs
@@ -70,6 +72,8 @@ jobs:
         run: node scripts/r26-edge-test.mjs
       - name: R26 Turnstile gateway test
         run: node scripts/r26-gateway-test.mjs
+      - name: R26 browser gateway fail-closed test
+        run: node scripts/r26-client-gateway-test.mjs
       - name: Build static bundle
         run: npm run build:cloudflare
       - name: Verify required assets
