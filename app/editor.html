@@ -99,6 +99,17 @@
 </div>
 
 <script src="https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js"></script>
+<script>
+  (() => {
+    const params = new URLSearchParams(location.search);
+    const topic = params.get('topic') || '';
+    if(params.get('from') === 'community'
+       && /^[0-9a-f]{8}-[0-9a-f]{4}-[1-8][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(topic)){
+      const link = document.querySelector('.editor-back-btn');
+      if(link)link.href = '../rate.html?id=' + encodeURIComponent(topic) + '&workspace=1';
+    }
+  })();
+</script>
 <script type="module" src="src/editor-entry.js?v=r23p3b"></script>
 
 <div id="exportPreviewModal" class="export-preview-modal hidden" role="dialog" aria-modal="true">
