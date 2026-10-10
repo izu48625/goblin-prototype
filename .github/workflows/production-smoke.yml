@@ -73,3 +73,6 @@ jobs:
 
       - name: Browser Publish URL-limited, update, unpublish (fully mocked)
         run: node scripts/r28-publish-lifecycle-test.mjs
+
+      - name: Browser iPhone backup export and restore (local only)
+        run: node scripts/r29-mobile-backup-ui-test.mjs

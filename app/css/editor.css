@@ -1932,3 +1932,18 @@
   .source-subject-grid,.source-highlight-grid{grid-template-columns:1fr}
   .source-check,.source-highlight-row{min-height:40px;font-size:10px}
 }
+
+
+/* R29: keep the project backup/restore More menu reachable in iPhone Safari.
+ * Earlier compact-header selectors unintentionally hid #moreBtn. */
+@media(max-width:760px){
+  .editor-header-actions #moreBtn{
+    display:inline-flex!important;
+    align-items:center;
+    justify-content:center;
+    flex:0 0 40px;
+    height:40px;
+  }
+}
+/* The global 44px language/HOME bar sits above the 54px editor header. */
+body.hasGlobalLocaleBar #moreMenu{top:98px}
