@@ -52,6 +52,18 @@
       published:'/public',my_works:'/my',editor:'/app/editor',
       rating_legacy:'/rate',unknown:'/other'})[name];
   }
+  function safePageLocation(){
+    // Whitelist only short, benign campaign tags. Never send topic IDs,
+    // unlisted access URLs, search queries, free-text fields or adPreview.
+    const tags=new URLSearchParams(location.search);
+    const campaign=new URLSearchParams();
+    for(const key of ['utm_source','utm_medium','utm_campaign']){
+      const value=tags.get(key)||'';
+      if(/^[a-z0-9_-]{1,48}$/i.test(value))campaign.set(key,value.toLowerCase());
+    }
+    const suffix=campaign.toString();
+    return location.origin+safePath()+(suffix?'?'+suffix:'');
+  }
   function safeReferrer(){
     try{
       if(!document.referrer)return '';
@@ -94,7 +106,7 @@
     const fields={...item.params};
     if(item.name==='page_view'){
       fields.page_title='Stats Maker · '+fields.page_group;
-      fields.page_location=location.origin+safePath();
+      fields.page_location=safePageLocation();
       fields.page_referrer=safeReferrer();
     }
     window.gtag('event',item.name,fields);
@@ -129,7 +141,7 @@
     window.gtag('config',cfg.measurementId,{
       send_page_view:false,allow_google_signals:false,
       allow_ad_personalization_signals:false,
-      page_location:location.origin+safePath(),
+      page_location:safePageLocation(),
       page_referrer:safeReferrer()
     });
     const script=document.createElement('script');
@@ -197,6 +209,12 @@
   // A general, privacy-constrained DOM event bridge: never include user text,
   // typed fields, full URLs, titles, IDs or score values in a GA4 event.
   function clickTracking(){
+    const search=document.getElementById('searchInput');
+    if(search){
+      search.addEventListener('change',()=>{
+        if(String(search.value||'').trim())dispatch('discover_search',{amount_bucket:'1-3'});
+      });
+    }
     document.addEventListener('click',ev=>{
       const e=ev.target?.closest?.('button,a');
       if(!e)return;
