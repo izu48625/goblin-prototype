@@ -1,3 +1,17 @@
+# Stats Maker — 現行正式版
+
+**正式サービス:** https://statsmaker.app/
+
+**開発方針（2026-10-11）:** [ROADMAP_R31_PLUS.md](ROADMAP_R31_PLUS.md) を優先して参照してください。
+Google / Apple認証の追加・複雑なゲストID管理は開発ロードマップから外し、Home、グラフ、Discover、Community、iPhone Safariの品質を優先します。
+
+**正式なユーザー向け拡張機能:** Ranking Card / Stat Card / Bar Chart / Radar Chart / Quadrant / Dot Chart / Range / Dumbbell / Scatter / Tier List / Ring Gauge の10種類。
+Heatmap、Waffle、Stat Boardはユーザー向け拡張機能から廃止されています（内部レガシーコードが残る可能性あり）。
+
+---
+
+## 過去バージョンの開発記録（R8/R9・現行仕様ではありません）
+
 # Stats Maker V2 LOCAL COMPLETE R8
 
 ローカル機能を先に完成させるための統合基準版。
