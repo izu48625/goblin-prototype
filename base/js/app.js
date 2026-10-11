@@ -32,7 +32,6 @@
   let storageRecoveryRequired=false;
   let library = loadLibrary();
   let saveTimer = null;
-  let columnManagerVisible = true;
 
   function makeId(){
     return 's_' + Date.now().toString(36) + '_' + Math.random().toString(36).slice(2,8);
@@ -1409,7 +1408,6 @@
     $('sheetViewBtn').classList.toggle('active',mode==='sheet');
     $('overviewViewBtn').classList.toggle('active',mode==='overview');
     $('fitViewBtn').classList.toggle('active',mode==='fit');
-    syncColumnManagerVisibility();
     if(mode==='fit'){
       setTimeout(()=>{renderFitTable();applyFitScale();},0);
     }
@@ -2096,7 +2094,6 @@
     renderOverview();
     renderFitTable();
     renderColumnManager();
-    syncColumnManagerVisibility();
     renderSidebar();
     refreshEditorCommunitySummary(false);
     $('filterCount').textContent=t('count.filtered',{visible:filteredRows().length,total:s.rows.length});
@@ -2202,48 +2199,17 @@
   }
 
 
-  function syncColumnManagerVisibility(){
-    const panel=$('columnManage');
-    if(!panel)return;
-    panel.classList.toggle('hidden',!columnManagerVisible);
-
-    const button=$('columnManageBtn');
-    if(button){
-      button.textContent=columnManagerVisible
-        ? t('action.hideMetrics')
-        : t('action.manageMetrics');
-    }
-  }
-
+  // Keep metric chips visible even when Settings or More opens.
   function toggleScoreSettings(){
     const panel=$('scoreSettingsPanel');
     panel.classList.toggle('hidden');
-    if(!panel.classList.contains('hidden')){
-      $('utilityBar').classList.add('hidden');
-      $('columnManage').classList.add('hidden');
-    }else{
-      syncColumnManagerVisibility();
-    }
-  }
-
-  function toggleColumnManage(){
-    columnManagerVisible=!columnManagerVisible;
-    if(columnManagerVisible){
-      $('scoreSettingsPanel').classList.add('hidden');
-      $('utilityBar').classList.add('hidden');
-    }
-    syncColumnManagerVisibility();
+    if(!panel.classList.contains('hidden'))$('utilityBar').classList.add('hidden');
   }
 
   function toggleMoreTools(){
     const panel=$('utilityBar');
     panel.classList.toggle('hidden');
-    if(!panel.classList.contains('hidden')){
-      $('scoreSettingsPanel').classList.add('hidden');
-      $('columnManage').classList.add('hidden');
-    }else{
-      syncColumnManagerVisibility();
-    }
+    if(!panel.classList.contains('hidden'))$('scoreSettingsPanel').classList.add('hidden');
   }
 
   function createFreshSheet(){
@@ -2358,7 +2324,6 @@
   $('addRowBtn').addEventListener('click',addRow);
   $('addRowWideBtn').addEventListener('click',addRow);
   $('addColBtn').addEventListener('click',addColumn);
-  $('columnManageBtn').addEventListener('click',toggleColumnManage);
   $('scoreSettingsBtn').addEventListener('click',toggleScoreSettings);
   $('moreToolsBtn').addEventListener('click',toggleMoreTools);
   $('fitAutoBtn').addEventListener('click',()=>setFitMode('auto'));
