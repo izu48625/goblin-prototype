@@ -28,7 +28,9 @@
   // The page language is authoritative when arriving from a search engine.
   const landingLang=()=>['en','ja'].includes(document.body?.dataset.smLocalizedLanding)
     ?document.body.dataset.smLocalizedLanding:'';
-  const current=()=>landingLang()||normalize(localStorage.getItem(KEY)||localStorage.getItem(LEGACY)||navigator.language||'ja');
+  const legalLang=()=>['en','ja'].includes(document.body?.dataset.smLegalPage)
+    ?document.body.dataset.smLegalPage:'';
+  const current=()=>landingLang()||legalLang()||normalize(localStorage.getItem(KEY)||localStorage.getItem(LEGACY)||navigator.language||'ja');
   // Browser/CDN rewrites may expose an embedded Home as /base/ instead of
   // /base/index.html. Check the frame relationship, never the URL spelling.
   // All embedded views borrow the parent's single fixed language/Home bar.
@@ -65,6 +67,10 @@
     if(lang===current()){paint();return;}
     localStorage.setItem(KEY,lang);
     localStorage.setItem(LEGACY,lang);
+    if(legalLang()){
+      location.assign(previewUrl(new URL('/'+lang+'/legal.html',location.origin).href));
+      return;
+    }
     if(landingLang()){
       // Selecting JA or EN on an intro page opens the corresponding real
       // localized page, not a reload of the previous language.
@@ -104,10 +110,10 @@
   }
   function mount(){
     if(document.querySelector('.globalLocaleBar'))return;
-    if(landingLang()){
+    if(landingLang()||legalLang()){
       try{
-        localStorage.setItem(KEY,landingLang());
-        localStorage.setItem(LEGACY,landingLang());
+        localStorage.setItem(KEY,landingLang()||legalLang());
+        localStorage.setItem(LEGACY,landingLang()||legalLang());
       }catch{}
     }
     document.body.classList.add('hasGlobalLocaleBar');
