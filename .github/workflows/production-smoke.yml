@@ -79,3 +79,6 @@ jobs:
 
       - name: Browser Home backup undo and corrupt import (local only)
         run: node scripts/r29-home-backup-undo-qa.mjs
+        
+      - name: Browser R30 unreadable Home storage preserves raw bytes (isolated, no cloud writes)
+        run: node scripts/r30-home-corrupt-recovery-qa.mjs
