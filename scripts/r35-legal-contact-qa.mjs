@@ -26,6 +26,10 @@ assert(!ja.includes('法的な最終確認は継続中です。'));
 assert(!en.includes('legal review is ongoing.'));
 assert(ja.includes('非公開の受付箱')&&en.includes('private review queue'));
 assert(ja.includes('本人確認書類')&&en.includes('identity documents'));
+assert(ja.includes('作成者が公開した評価結果やスナップショット'));
+assert(en.includes("creator's published rating results and snapshots"));
+assert(ja.includes('Community参加者ごとの採点データ'));
+
 
 assert(locale.includes('const legalLang=()')&&locale.includes("'/'+lang+'/legal.html"));
 for(const content of [discover,published])for(const section of ['terms','privacy','contact'])assert(content.includes('data-sm-legal-link="'+section+'"'));
