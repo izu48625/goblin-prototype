@@ -96,8 +96,10 @@ if(uuid.test(topicId)){
       msg(submit?
         (siteLanguage()==='en'?'Community updated successfully.':'Communityへ反映しました。'):
         (siteLanguage()==='en'?'Draft saved.':'下書きを保存しました。'),'ok');
+      if(submit)window.SM_ANALYTICS?.event('rating_success',{outcome:'success'});
     }catch(error){
       console.error('[Stats Maker] Community save rejected',error);
+      if(submit)window.SM_ANALYTICS?.event('rating_failure',{outcome:'failure'});
       msg((siteLanguage()==='en'?'Save error: ':'保存エラー：')+
         (error?.message||String(error)),'error');
     }finally{

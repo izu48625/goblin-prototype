@@ -77,6 +77,7 @@ function openExtension(type){
       delete project.settings.sourceSheetId;
     }
     saveProject(project);
+    window.SM_ANALYTICS?.event('template_selected',{template_type:type});
     const editorUrl=`app/editor.html?v=r27h1&id=${encodeURIComponent(project.id)}`+
       (communityMode?`&from=community&topic=${encodeURIComponent(communityTopicId)}`:'');
     location.href=window.SM_AD_PREVIEW_NAV?.url(editorUrl)||editorUrl;

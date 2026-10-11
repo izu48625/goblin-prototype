@@ -428,6 +428,7 @@
   document.querySelectorAll('.browseTab').forEach(button=>{
     button.addEventListener('click',()=>{
       state.view=button.dataset.view==='community'?'community':'all';
+      window.SM_ANALYTICS?.event('discover_filter',{filter_type:state.view});
       state.visible=12;
       document.querySelectorAll('.browseTab').forEach(btn=>btn.classList.toggle('active',btn===button));
       render();
@@ -438,6 +439,7 @@
     button.addEventListener('click',()=>{
       const requested=button.dataset.category||'all';
       state.category=categories.includes(requested)?requested:'all';
+      window.SM_ANALYTICS?.event('discover_filter',{filter_type:'category'});
       state.visible=12;
       document.querySelectorAll('.categoryBtn').forEach(btn=>btn.classList.toggle('active',btn===button));
       render();

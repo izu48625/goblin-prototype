@@ -473,6 +473,16 @@
         </div>
       </div>`;
 
+    // Public-only short key; no private/unlisted topic IDs or user content.
+    if(data.visibility==='public'&&!window.__smPublicWorkViewSent){
+      window.__smPublicWorkViewSent=true;
+      window.SM_ANALYTICS?.event('work_view',{
+        visibility:'public',
+        eligible:data.show_community===true&&data.allow_ratings===true?'yes':'no',
+        work_code:String(id).slice(0,8).toLowerCase()
+      });
+    }
+
     document.getElementById('remixBtn').onclick=()=>{
       try{
         const sheet=window.SM_REMIX.buildSheet(data,snap,dbCriteria,items,ja?'ja':'en');

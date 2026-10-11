@@ -1893,11 +1893,14 @@ async function doExport(){
   const oldText=button.textContent;
   try{
     button.disabled=true;
+    window.SM_ANALYTICS?.event("editor_export_started",{template_type:current().type});
     button.textContent=getLanguage()==="ja"?"生成中…":"Rendering…";
     const result=await exportPreview($("previewRoot"),current(),"png");
     if(result.method==="preview")showExportPreview(result);
+    window.SM_ANALYTICS?.event("editor_export_completed",{template_type:current().type,outcome:"success"});
   }catch(e){
     console.error(e);
+    window.SM_ANALYTICS?.event("editor_export_completed",{template_type:current().type,outcome:"failure"});
     alert(getLanguage()==="ja"
       ?`PNG生成に失敗しました\n${e?.message||""}`
       :`PNG export failed\n${e?.message||""}`);

@@ -1,0 +1,45 @@
+name: R33 Free Analytics Privacy and Funnels QA
+on:
+  pull_request:
+    paths:
+      - "cloud/analytics*"
+      - "index.html"
+      - "discover.html"
+      - "public.html"
+      - "my.html"
+      - "rate.html"
+      - "base/index.html"
+      - "app/editor.html"
+      - "scripts/r33-analytics-browser-qa.mjs"
+      - ".github/workflows/r33-free-analytics-qa.yml"
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  consent-and-funnels:
+    runs-on: ubuntu-latest
+    timeout-minutes: 12
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+      - name: Static syntax and default disabled audits
+        run: |
+          node --check cloud/analytics-config.js
+          node --check cloud/analytics.js
+          node --check scripts/r33-analytics-browser-qa.mjs
+          node -e "const fs=require('fs');const c=fs.readFileSync('cloud/analytics-config.js','utf8');if(!c.includes('enabled:false'))process.exit(1)"
+      - name: Local build
+        run: npm run build:cloudflare
+      - name: Install isolated Chromium
+        run: |
+          npm install --no-save playwright@1.56.1
+          npx playwright install --with-deps chromium
+      - name: Validate safe, consent-gated journeys
+        run: |
+          python3 -m http.server 8765 --directory dist >/tmp/r33analytics.log 2>&1 &
+          HTTP_PID=$!
+          trap 'kill $HTTP_PID || true' EXIT
+          sleep 2
+          BASE_URL=http://127.0.0.1:8765 node scripts/r33-analytics-browser-qa.mjs

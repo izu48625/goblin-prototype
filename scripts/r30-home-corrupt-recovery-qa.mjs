@@ -13,7 +13,7 @@ for(let i=0;i<30;i++){
   try{
     const response=await fetch(BASE+'/index.html?qaR30Deploy='+Date.now(),
       {cache:'no-store'});
-    if(response.ok && (await response.text()).includes('base/index.html?v=r30guard1')){
+    if(response.ok && /base\/index\.html\?v=(?:r30guard1|r33analytics1)/.test(await response.text())){
       deployed=true;break;
     }
   }catch{}
