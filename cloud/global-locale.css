@@ -32,7 +32,7 @@ body.hasGlobalLocaleBar.homeHost .communityLoading{top:44px}
 html.embeddedSiteFrame .globalLocaleBar{display:none!important}
 html.embeddedSiteFrame #editorHomeBtn{display:none!important}
 @media(max-width:760px){
-  html.embeddedSiteFrame .topActions{grid-template-columns:repeat(4,minmax(0,1fr))!important}
+  html.embeddedSiteFrame .topActions{grid-template-columns:repeat(3,minmax(0,1fr))!important}
 }
 
 
