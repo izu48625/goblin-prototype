@@ -23,10 +23,26 @@ try{
   });
   const page=await context.newPage();
   for(const item of cases){
-    await page.goto(BASE+item.path,{waitUntil:'domcontentloaded',timeout:45000});
+    let targetPath=item.path;
+    // The visual editor requires a real local-only project to stay on screen.
+    // Create one in an isolated test browser; never touch cloud publications.
+    if(item.label==='Graph editor'){
+      await page.goto(BASE+'/index.html',{waitUntil:'domcontentloaded',timeout:45000});
+      const id=await page.evaluate(async()=>{
+        const [{createProject},{saveProject}]=await Promise.all([
+          import('/app/src/core/project.js'),import('/app/src/core/store.js')
+        ]);
+        const project=createProject('bar');
+        project.meta.title='R31 AD LAYOUT LOCAL QA';
+        saveProject(project);
+        return project.id;
+      });
+      targetPath+='?id='+encodeURIComponent(id);
+    }
+    await page.goto(BASE+targetPath,{waitUntil:'domcontentloaded',timeout:45000});
     assert.equal(await page.locator('[data-sm-slot]').count(),0,
       item.label+' unexpectedly renders ad inventory to visitors');
-    await page.goto(previewURL(item.path),{waitUntil:'domcontentloaded',timeout:45000});
+    await page.goto(previewURL(targetPath),{waitUntil:'domcontentloaded',timeout:45000});
     await page.waitForFunction(expected=>
       document.querySelectorAll('[data-sm-slot]').length===expected,
       item.count,{timeout:15000});
