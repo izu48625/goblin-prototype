@@ -10,4 +10,4 @@ function showFatal(error){
 }
 window.addEventListener("error",event=>{if(event.error)showFatal(event.error)});
 window.addEventListener("unhandledrejection",event=>showFatal(event.reason));
-import("./editor/editor.js?v=r29source1").catch(showFatal);
+import("./editor/editor.js?v=r33analytics1").catch(showFatal);
