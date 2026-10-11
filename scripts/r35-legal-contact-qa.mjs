@@ -18,6 +18,19 @@ for(const [language,page] of [['ja',ja],['en',en]]){
   assert(!/service_role|TURNSTILE_SECRET/.test(page));
 }
 assert(client.includes("sb.auth.signInAnonymously()")&&client.includes("'/api/report/contact'"));
+assert(ja.includes('一般問い合わせは任意、その他は必須'),'Japanese email requirement must match server');
+assert(ja.includes('著作権・異議申立ては必須'),'Japanese URL requirement must match server');
+assert(en.includes('optional for questions; required for other requests'),'English email requirement must match server');
+assert(en.includes('required for copyright claims and appeals'),'English URL requirement must match server');
+assert(!ja.includes('法的な最終確認は継続中です。'));
+assert(!en.includes('legal review is ongoing.'));
+assert(ja.includes('非公開の受付箱')&&en.includes('private review queue'));
+assert(ja.includes('本人確認書類')&&en.includes('identity documents'));
+assert(ja.includes('作成者が公開した評価結果やスナップショット'));
+assert(en.includes("creator's published rating results and snapshots"));
+assert(ja.includes('Community参加者ごとの採点データ'));
+
+
 assert(locale.includes('const legalLang=()')&&locale.includes("'/'+lang+'/legal.html"));
 for(const content of [discover,published])for(const section of ['terms','privacy','contact'])assert(content.includes('data-sm-legal-link="'+section+'"'));
 assert(r30.includes('if(!(await tray.isVisible()))'),'R30 only toggles hidden utility tray');

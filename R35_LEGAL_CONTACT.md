@@ -52,6 +52,13 @@ Do **not** create an anonymous/public moderator dashboard. Manually confirm any 
 
 2026-10-11 smoke build of 35cec812 failed at scripts/r30-home-corrupt-recovery-qa.mjs: the test clicked "More" and then Restore, which was hidden. "More" is a **toggle**. The QA now checks whether the tray is open before clicking and asserts its visibility; this prevents accidentally closing an already open tray. This does **not** establish that actual manual restore works until the corrected browser QA successfully runs. Do not remove the test or hide its assertions.
 
+## Follow-on## Public copy accuracy audit (R35 P4)
+
+- The legal/contact form clearly distinguishes optional general-question email from required email for copyright, appeal and privacy requests. Copyright/appeal work URLs are required in both languages, matching frontend and backend validation.
+- Removed internal legal-review status from the visitor-facing page; **this does not mean legal review is complete**. Keep legal review open as an operational task.
+- Clarified that messages enter a private admin queue rather than triggering an automated email, and cautioned visitors not to send identity documents or passwords. Operator response capability and time have not been guaranteed.
+- Before wider promotion, verify operator identity and address disclosure obligations under Japan APPI Article 32 and the appropriate lawful procedure for data access/correction/deletion. Real operator details must be provided by the site operator, not guessed or hard-coded.
+
 ## Follow-on
 
 - Final legal review and real operator contact/identity requirements; mail notification only with explicit approval and free/paid cost review.
