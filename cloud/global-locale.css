@@ -34,3 +34,24 @@ html.embeddedSiteFrame #editorHomeBtn{display:none!important}
 @media(max-width:760px){
   html.embeddedSiteFrame .topActions{grid-template-columns:repeat(4,minmax(0,1fr))!important}
 }
+
+
+/* R31: Discover is a persistent sibling of HOME, not an editor action. */
+.globalNavLinks{display:flex;align-items:center;gap:6px;min-width:0}
+.globalDiscoverBtn{
+  display:inline-flex;align-items:center;justify-content:center;min-height:35px;
+  padding:0 12px;border:1px solid #2a496a;border-radius:9px;
+  background:#0f243a;color:#bfd5ef;text-decoration:none;
+  white-space:nowrap;font:900 12px/1 system-ui,-apple-system,sans-serif;
+}
+.globalDiscoverBtn:hover,.globalDiscoverBtn:focus-visible{background:#183451;border-color:#5e89b9;color:#fff}
+@media(max-width:600px){
+  .globalLocaleLabel{display:none}
+  .globalLocaleBar{gap:5px;padding-left:8px;padding-right:8px}
+  .globalNavLinks{gap:4px}
+  .globalHomeBtn{min-width:60px;padding:0 9px}
+  .globalDiscoverBtn{padding:0 9px}
+  .globalLocaleSwitch{padding:2px;gap:1px}
+  .globalLocaleSwitch button{min-width:34px;min-height:31px;padding:3px 5px}
+  html.embeddedSiteFrame .topActions{grid-template-columns:repeat(3,minmax(0,1fr))!important}
+}
