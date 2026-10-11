@@ -1,0 +1,46 @@
+name: R31 Home UX Consolidation QA
+on:
+  pull_request:
+    paths:
+      - "index.html"
+      - "base/index.html"
+      - "base/js/app.js"
+      - "base/css/style.css"
+      - "cloud/global-locale.*"
+      - "cloud/ad-layout.*"
+      - "public.html"
+      - "scripts/r31-home-ux-qa.mjs"
+      - "scripts/r31-home-ux-audit.mjs"
+      - ".github/workflows/r31-home-ux-qa.yml"
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  home-ux:
+    runs-on: ubuntu-latest
+    timeout-minutes: 12
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+      - name: Validate JS and removed toggles
+        run: |
+          node --check base/js/app.js
+          node --check cloud/global-locale.js
+          node --check cloud/ad-layout.js
+          node --check scripts/r31-home-ux-qa.mjs
+          node scripts/r31-home-ux-audit.mjs
+      - name: Build local site
+        run: npm run build:cloudflare
+      - name: Install Playwright
+        run: |
+          npm install --no-save playwright@1.56.1
+          npx playwright install --with-deps chromium
+      - name: Browser QA iPhone-size Home and navigation
+        run: |
+          python3 -m http.server 8765 --directory dist >/tmp/r31home.log 2>&1 &
+          P=$!
+          trap 'kill $P || true' EXIT
+          sleep 2
+          BASE_URL=http://127.0.0.1:8765 node scripts/r31-home-ux-qa.mjs
