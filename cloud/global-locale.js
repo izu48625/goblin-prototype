@@ -88,7 +88,7 @@
     localStorage.setItem(KEY,lang);
     localStorage.setItem(LEGACY,lang);
     if(legalLang()){
-      location.assign(previewUrl(new URL('/'+lang+'/legal.html',location.origin).href));
+      location.assign(previewUrl(new URL('/'+lang+'/legal.html'+location.hash,location.origin).href));
       return;
     }
     if(landingLang()){
