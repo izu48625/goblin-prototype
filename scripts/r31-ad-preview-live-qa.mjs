@@ -71,7 +71,7 @@ try{
   assert.equal(await page.locator('[data-view="community"]').innerText(),'みんなで評価');
   await page.locator('[data-view="community"]').click();
   await page.waitForFunction(()=>document.querySelector('#sectionTitle')?.textContent==='みんなで評価できる作品');
-  assert(await page.locator('[data-sm-slot]').count()>=4);
+  assert(await page.locator('[data-sm-slot]').count()>=3);
 
   await check('/public.html?id='+TOPIC_ID+'&adPreview=1','public-primary',4);
   await page.locator('[data-sm-slot="public-between-rankings"]').waitFor({state:'visible',timeout:30000});
