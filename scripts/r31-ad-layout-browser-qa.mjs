@@ -74,6 +74,51 @@ try{
   await page.goto(BASE+'/',{waitUntil:'domcontentloaded',timeout:45000});
   await frame.locator('main.app').waitFor({timeout:20000});
   assert.equal(await frame.locator('[data-sm-slot]').count(),0);
+  // R31: opt-in ad placement must follow the actual user navigation chain,
+  // not just work when a developer manually types ?adPreview=1 on each page.
+  await page.goto(BASE+'/?adPreview=1',{waitUntil:'domcontentloaded',timeout:45000});
+  await page.locator('.globalDiscoverBtn').waitFor({state:'visible',timeout:15000});
+  assert.equal(new URL(await page.locator('.globalDiscoverBtn').getAttribute('href')).searchParams.get('adPreview'),'1');
+  await page.locator('.globalDiscoverBtn').click();
+  await page.waitForURL(url=>url.pathname.endsWith('/discover.html')&&url.searchParams.get('adPreview')==='1');
+  await page.locator('[data-sm-slot="discover-primary"]').waitFor({state:'visible',timeout:15000});
+  await page.locator('[data-sm-slot="discover-secondary"]').waitFor({state:'visible',timeout:15000});
+
+  // Discover inserts cards dynamically; captured same-origin link clicks must
+  // preserve the preview marker without modifying copied/share URLs.
+  await page.evaluate(()=>{
+    const link=document.createElement('a');
+    link.id='r31-preview-public-link';
+    link.href='public.html?id=11111111-1111-4111-8111-111111111111&v=qa';
+    link.textContent='Preview published page';
+    document.body.appendChild(link);
+  });
+  await page.locator('#r31-preview-public-link').click();
+  await page.waitForURL(url=>url.pathname.endsWith('/public.html')&&url.searchParams.get('adPreview')==='1');
+  await page.locator('[data-sm-slot="public-primary"]').waitFor({state:'visible',timeout:15000});
+  await page.locator('[data-sm-slot="public-secondary"]').waitFor({state:'visible',timeout:15000});
+
+  await page.locator('.globalHomeBtn').click();
+  await page.waitForURL(url=>url.pathname.endsWith('/index.html')&&url.searchParams.get('adPreview')==='1');
+  await page.frameLocator('#basicFrame').locator('[data-sm-slot="home-inline"]').waitFor({state:'visible',timeout:20000});
+
+  // Extension opens via JS rather than a normal anchor. It should also carry
+  // preview through to the visual editor without fetching ad vendors.
+  await page.locator('#extLauncher').click();
+  await page.locator('.extCard').first().click();
+  await page.waitForURL(url=>url.pathname.endsWith('/app/editor.html')&&url.searchParams.get('adPreview')==='1',
+    {timeout:25000});
+  await page.locator('[data-sm-slot="editor-mobile"]').waitFor({state:'attached',timeout:15000});
+
+  // Ordinary visitors never inherit preview state, even after a previous
+  // preview was opened in the same browser tab.
+  await page.goto(BASE+'/',{waitUntil:'domcontentloaded',timeout:45000});
+  await page.locator('.globalDiscoverBtn').click();
+  await page.waitForURL(url=>url.pathname.endsWith('/discover.html'));
+  assert.equal(new URL(page.url()).searchParams.has('adPreview'),false,
+    'Normal navigation unexpectedly retained ad preview');
+  assert.equal(await page.locator('[data-sm-slot]').count(),0,
+    'Normal Discover unexpectedly displays preview slots');
   assert.deepEqual(requests,[],'Unexpected external ad calls');
   await context.close();
   console.log('R31 ad placement layout QA PASS, no ad serving or iframe control overlays');
