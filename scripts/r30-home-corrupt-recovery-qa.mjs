@@ -77,8 +77,18 @@ try{
     cols:['Score'],rows:[{name:'Preserved user',scores:[92],note:'',image:''}],
     weights:[1],weighted:false,scale:100
   }]};
-  await home.locator('#moreToolsBtn').click();
-  await home.locator('#importJsonBtn').click();
+  // "More" toggles the utility tray. Depending on restore state and
+  // browser navigation the tray may already be expanded: never click to
+  // inadvertently close it before attempting Restore.
+  const tray=home.locator('#utilityBar');
+  if(!(await tray.isVisible()))await home.locator('#moreToolsBtn').click();
+  await tray.waitFor({state:'visible',timeout:15000});
+  const restore=home.locator('#importJsonBtn');
+  if(!(await restore.isVisible())){
+    const viewMode=await home.locator('body').evaluate(el=>el.className);
+    throw new Error('Restore action unexpectedly hidden after expanding tools; Home body='+viewMode);
+  }
+  await restore.click();
   await home.locator('#importFileInput').setInputFiles({
     name:'r30-good.json',mimeType:'application/json',
     buffer:Buffer.from(JSON.stringify({app:'Stats Maker',library:restored}))
