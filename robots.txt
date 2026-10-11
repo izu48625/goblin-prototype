@@ -1,3 +1,4 @@
 User-agent: *
 Allow: /
 Allow: /api/og
+Sitemap: https://statsmaker.app/sitemap.xml
