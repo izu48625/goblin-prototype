@@ -3,8 +3,8 @@ import {readFile} from 'node:fs/promises';
 import worker from '../worker/index.js';
 
 const conf=JSON.parse(await readFile(new URL('../wrangler.jsonc',import.meta.url),'utf8'));
-assert.equal(conf.ratelimits.length,3);
-assert.equal(conf.previews.ratelimits.length,3);
+assert.equal(conf.ratelimits.length,4);
+assert.equal(conf.previews.ratelimits.length,4);
 const prod=new Map(conf.ratelimits.map(x=>[x.name,x]));
 const previewNamespaces=new Set();
 for (const binding of conf.previews.ratelimits) {
@@ -18,6 +18,8 @@ for (const binding of conf.previews.ratelimits) {
 }
 assert(conf.assets.run_worker_first.includes('/api/og*'));
 assert(conf.assets.run_worker_first.includes('/p/*'));
+assert(conf.assets.run_worker_first.includes('/api/report/*'));
+assert(conf.ratelimits.some(x=>x.name==='REPORT_RATE_LIMIT'&&x.simple.limit===6));
 
 let externalFetches=0;
 const savedFetch=globalThis.fetch;
