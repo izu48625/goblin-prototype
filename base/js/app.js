@@ -27,6 +27,9 @@
     sortKey:null,sortDesc:true,rankMetric:'avg',compare:[],compareView:'radar',viewMode:'sheet',fitMode:'auto',fitZoom:1,weighted:false,weights:[1,1,1,1],scale:100,updatedAt:Date.now()
   });
 
+  // If an existing saved library is unreadable, preserve its raw bytes.
+  // A blank in-memory sheet must never silently replace it on autosave.
+  let storageRecoveryRequired=false;
   let library = loadLibrary();
   let saveTimer = null;
   let columnManagerVisible = true;
@@ -47,8 +50,12 @@
           }
           return parsed;
         }
+        storageRecoveryRequired=true;
       }
-    }catch(e){}
+    }catch(e){
+      storageRecoveryRequired=true;
+      console.warn('Saved Home library could not be loaded; original storage retained',e);
+    }
     const first = blankSheet('');
     return {activeId:first.id,sheets:[first]};
   }
@@ -101,12 +108,15 @@
       try{
         const s=activeSheet();
         s.updatedAt=Date.now();
+        if(storageRecoveryRequired && !communityMode){
+          throw new Error('Unreadable Home storage; refusing to overwrite saved raw bytes');
+        }
         if(!communityMode)localStorage.setItem(STORAGE_KEY,JSON.stringify(library));
         $('saveBadge').textContent=communityMode?'編集中（投稿前）':t('save.saved');
         if(message)$('statusText').textContent=message;
       }catch(e){
         $('saveBadge').textContent=t('save.failed');
-        $('statusText').textContent=t('save.quota');
+        $('statusText').textContent=t(storageRecoveryRequired?'save.corrupt':'save.quota');
       }
     },220);
   }
@@ -282,6 +292,7 @@
   // Keep a reversible, local-only checkpoint before replacing Home sheets.
   // All checks happen before altering the active library or its storage key.
   const PRE_RESTORE_KEY='statsMakerV014PreRestoreBackup';
+  const DAMAGED_RAW_KEY='statsMakerV014UnreadableRawBackup';
   function prepareImportLibrary(input){
     if(!input||Array.isArray(input)||typeof input!=='object'||
        !Array.isArray(input.sheets)||input.sheets.length<1||input.sheets.length>2000)
@@ -316,10 +327,17 @@
     return input;
   }
   function applyImportLibrary(incoming){
-    // If storage capacity is insufficient to preserve the original, do NOT
-    // replace the user's saved work. No cloud data or other keys are touched.
+    // A deliberate restore may replace damaged storage only after preserving
+    // its exact raw bytes separately. Failed backups/quota abort the import.
+    if(storageRecoveryRequired&&!communityMode){
+      const damaged=localStorage.getItem(STORAGE_KEY);
+      if(damaged!==null && localStorage.getItem(DAMAGED_RAW_KEY)===null){
+        localStorage.setItem(DAMAGED_RAW_KEY,damaged);
+      }
+    }
     localStorage.setItem(PRE_RESTORE_KEY,JSON.stringify(library));
     localStorage.setItem(STORAGE_KEY,JSON.stringify(incoming));
+    storageRecoveryRequired=false;
     library=incoming;
     closeImportDialog();
     renderAll();
@@ -2456,6 +2474,7 @@
   // R10 bridge for source-linked visual extensions.
   window.__statsMakerGetActiveSheet = () => clone(activeSheet());
   window.__statsMakerGetLibrary = () => clone(library);
+  window.__statsMakerCanPersist = () => !storageRecoveryRequired;
   window.__statsMakerCreateFreshSheet = createFreshSheet;
   window.__statsMakerMountCommunitySheet = incoming => {
     if(!communityMode || incoming?.sourceTopicId!==communityTopicId ||
