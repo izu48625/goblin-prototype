@@ -1,12 +1,28 @@
 const PROJECT_KEY="statsMakerV2Projects";
 const PREF_KEY="statsMakerV2Preferences";
 
-function parseProjects(){
+// Malformed persistent storage is NOT an empty project library.
+// Reads retain their previous fallback for compatibility; writes fail closed
+// so the next autosave/import/delete cannot erase recoverable raw bytes.
+function parseProjects({forWrite=false}={}){
   try{
     const raw=localStorage.getItem(PROJECT_KEY);
-    const list=raw?JSON.parse(raw):[];
-    return Array.isArray(list)?list:[];
-  }catch{return []}
+    if(raw===null)return [];
+    const list=JSON.parse(raw);
+    if(!Array.isArray(list)||list.some(p=>
+      !p||typeof p!=="object"||Array.isArray(p)||
+      typeof p.id!=="string"||!p.id.trim()||
+      !p.meta||typeof p.meta!=="object"||Array.isArray(p.meta)
+    )||new Set(list.map(p=>p.id)).size!==list.length){
+      throw new Error("Invalid saved project list");
+    }
+    return list;
+  }catch(error){
+    if(forWrite){
+      throw new Error("Existing chart storage could not be read. Save blocked to protect previous work.",{cause:error});
+    }
+    return [];
+  }
 }
 
 export function listProjects(){
@@ -18,7 +34,7 @@ export function getProject(id){
 }
 
 export function saveProject(project){
-  const list=parseProjects();
+  const list=parseProjects({forWrite:true});
   const idx=list.findIndex(p=>p.id===project.id);
   const copy=structuredClone(project);
   copy.meta.updatedAt=new Date().toISOString();
@@ -29,7 +45,7 @@ export function saveProject(project){
 }
 
 export function deleteProject(id){
-  localStorage.setItem(PROJECT_KEY,JSON.stringify(parseProjects().filter(p=>p.id!==id)));
+  localStorage.setItem(PROJECT_KEY,JSON.stringify(parseProjects({forWrite:true}).filter(p=>p.id!==id)));
 }
 
 export function getPreferences(){
