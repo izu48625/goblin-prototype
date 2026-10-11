@@ -20,8 +20,8 @@
   // Workers Static Assets may rewrite /discover.html to /discover and
   // similar extensionless routes. Never depend on the public URL spelling.
   // Each page declares its layout identity in a static <body> data attribute.
-  const rawPath=location.pathname.replace(/\\/+$/,'');
-  const routeName=rawPath.split('/').pop()?.replace(/\\.html$/i,'')||'';
+  const rawPath=location.pathname.replace(/\/+$/,'');
+  const routeName=rawPath.split('/').pop()?.replace(/\.html$/i,'')||'';
   const page=document.body?.dataset.smAdPage
     ||({discover:'discover',public:'public',my:'works',rate:'rate',editor:'editor',
          base:'home'}[routeName]||'');
