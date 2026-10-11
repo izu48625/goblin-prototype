@@ -53,8 +53,14 @@ try{
     assert.equal(await page.locator('iframe[src*="doubleclick"]').count(),0,
       'Ads iframe served before approval');
     if(item.label==='Graph editor'){
-      assert.equal(await page.locator('[data-sm-slot="editor-mobile"]').isVisible(),true);
+      // Editor's mobile settings sheet intentionally stays closed by default.
+      // Its ad slot should only become visible when the user opens that sheet.
+      assert.equal(await page.locator('[data-sm-slot="editor-mobile"]').isVisible(),false);
       assert.equal(await page.locator('[data-sm-slot="editor-sidebar"]').isVisible(),false);
+      await page.locator('.mobile-bottom-tabs .mobile-tab').first().click();
+      await page.locator('[data-sm-slot="editor-mobile"]').waitFor({
+        state:'visible',timeout:12000
+      });
     }
     console.log('PASS '+item.label+' normal hidden / preview '+item.count);
   }
