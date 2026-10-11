@@ -478,7 +478,7 @@
         const sheet=window.SM_REMIX.buildSheet(data,snap,dbCriteria,items,ja?'ja':'en');
         window.SM_REMIX.saveSheet(sheet);
         toast(ja?'採点用のコピーを作りました。':'Scoring copy created.');
-        setTimeout(()=>{location.href='index.html?remixed=1&v=r25p3'},500);
+        setTimeout(()=>{const target='index.html?remixed=1&v=r25p3';location.href=window.SM_AD_PREVIEW_NAV?.url(target)||target},500);
       }catch(e){toast((ja?'Remixに失敗しました：':'Remix failed: ')+(e?.message||e))}
     };
     document.getElementById('shareBtn').onclick=async()=>{
@@ -623,7 +623,8 @@
           }
           sessionStorage.setItem('statsMaker:openPublish','1');
         }catch{}
-        location.href='index.html?v=r25p3&from=public';
+        const target='index.html?v=r25p3&from=public';
+        location.href=window.SM_AD_PREVIEW_NAV?.url(target)||target;
       };
     };
 
