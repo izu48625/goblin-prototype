@@ -140,7 +140,10 @@ async function securityDenialSmoke(){
     'prevent_locked_item_structure',
     'prevent_locked_topic_structure',
     'validate_rating_submission',
-    'validate_score_range'
+    'validate_score_range',
+    // R29 P2: internal Auth signup and DDL event hooks also deny direct RPC.
+    'handle_new_auth_user',
+    'rls_auto_enable'
   ]){
     const response=await fetch(url+'/rest/v1/rpc/'+rpc,{
       method:'POST',headers:{apikey:publicKey,'Content-Type':'application/json'},
