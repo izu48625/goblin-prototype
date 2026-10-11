@@ -1,5 +1,5 @@
 // R35 Public work reports. Cloudflare limits bursts; Supabase verifies user JWT and RLS.
-const URL='https://ibpdxbeltdwkquowjeay.supabase.co';
+const SUPABASE_URL='https://ibpdxbeltdwkquowjeay.supabase.co';
 const KEY='sb_publishable_6abnwW_1p-U_Y_DefUXfFQ_Dz_Y2vsD';
 const REASONS=new Set(['spam','inappropriate','harassment','copyright','other']);
 const UUID=/^[0-9a-f]{8}-[0-9a-f]{4}-[1-8][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
@@ -20,7 +20,7 @@ export async function workReportGateway(request,env){
   if(!UUID.test(topic||'')||!REASONS.has(reason)||typeof details!=='string'||details.length>500||(reason==='other'&&details.trim().length<8))return reply(400,'invalid_payload');
   // The database fills reporter_id with auth.uid(). Browser cannot write review status.
   let upstream;
-  try{upstream=await fetch(URL+'/rest/v1/work_reports',{
+  try{upstream=await fetch(SUPABASE_URL+'/rest/v1/work_reports',{
     method:'POST',headers:{apikey:KEY,Authorization:'Bearer '+auth[1],'Content-Type':'application/json',Prefer:'return=minimal'},
     body:JSON.stringify({topic_id:topic,reason,details:details.trim()})
   })}catch{return reply(503,'report_unavailable')}
