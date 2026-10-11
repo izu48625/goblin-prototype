@@ -60,6 +60,19 @@
       home.title=lang==='ja'?'ホームへ':'Home';
       home.setAttribute('aria-label',lang==='ja'?'ホームを開く':'Open Home');
     }
+    const help=bar.querySelector('.globalSupportMenu');
+    if(help){
+      const summary=help.querySelector('summary');
+      summary.textContent=lang==='ja'?'ヘルプ':'Help';
+      summary.title=lang==='ja'?'利用規約・プライバシー・お問い合わせ':'Terms, privacy and contact';
+      help.setAttribute('aria-label',lang==='ja'?'サポートメニュー':'Support menu');
+      const items={terms:['利用規約','Terms'],privacy:['プライバシー','Privacy'],contact:['お問い合わせ','Contact']};
+      for(const link of help.querySelectorAll('[data-global-support]')){
+        const section=link.dataset.globalSupport;
+        link.textContent=items[section][lang==='ja'?0:1];
+        link.href=previewUrl(new URL('/'+lang+'/legal.html#'+section,location.origin).href);
+      }
+    }
     bar.setAttribute('aria-label',lang==='ja'?'表示言語を切り替える':'Choose display language');
     document.querySelectorAll('[data-sm-legal-link]').forEach(link=>{
       const section=link.dataset.smLegalLink;
@@ -127,10 +140,19 @@
     bar=document.createElement('div');
     bar.className='globalLocaleBar';
     bar.setAttribute('role','group');
-    bar.innerHTML='<nav class="globalNavLinks" aria-label="Site navigation"><a class="globalHomeBtn" href="index.html?fresh=1" aria-label="ホームを開く">HOME</a><a class="globalDiscoverBtn" href="discover.html" aria-label="Discoverを開く">Discover</a></nav><div class="globalLocaleControls"><span class="globalLocaleLabel">表示言語</span><div class="globalLocaleSwitch"><button type="button" data-global-lang="ja" aria-label="日本語">JA</button><button type="button" data-global-lang="en" aria-label="English">EN</button></div></div>';
+    bar.innerHTML='<nav class="globalNavLinks" aria-label="Site navigation"><a class="globalHomeBtn" href="index.html?fresh=1" aria-label="ホームを開く">HOME</a><a class="globalDiscoverBtn" href="discover.html" aria-label="Discoverを開く">Discover</a><details class="globalSupportMenu"><summary>ヘルプ</summary><div class="globalSupportPanel"><a data-global-support="terms" href="/ja/legal.html#terms">利用規約</a><a data-global-support="privacy" href="/ja/legal.html#privacy">プライバシー</a><a data-global-support="contact" href="/ja/legal.html#contact">お問い合わせ</a></div></details></nav><div class="globalLocaleControls"><span class="globalLocaleLabel">表示言語</span><div class="globalLocaleSwitch"><button type="button" data-global-lang="ja" aria-label="日本語">JA</button><button type="button" data-global-lang="en" aria-label="English">EN</button></div></div>';
     document.body.prepend(bar);
     bar.querySelector('.globalHomeBtn').href=previewUrl(new URL(landingLang()?'/index.html?lang='+current():homePath(),location.href).href);
     bar.querySelector('.globalDiscoverBtn').href=previewUrl(new URL(landingLang()?'/discover.html?lang='+current():(legalLang()?'/discover.html':(location.pathname.startsWith('/app/')?'../discover.html':'discover.html')),location.href).href);
+    // Preserve a compact navigation bar on iPhone; close the dropdown on
+    // outside click or Escape, rather than adding another wide fixed tab.
+    document.addEventListener('click',event=>{
+      const open=bar?.querySelector('.globalSupportMenu[open]');
+      if(open&&!open.contains(event.target))open.removeAttribute('open');
+    });
+    document.addEventListener('keydown',event=>{
+      if(event.key==='Escape')bar?.querySelector('.globalSupportMenu[open]')?.removeAttribute('open');
+    });
     bar.querySelector('.globalHomeBtn').addEventListener('click',openHome);
     bar.querySelectorAll('[data-global-lang]').forEach(btn=>btn.addEventListener('click',()=>set(btn.dataset.globalLang)));
     paint();
