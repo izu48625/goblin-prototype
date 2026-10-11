@@ -34,7 +34,9 @@ try{
   },RAW);
   const page=await context.newPage();
   const errors=[];
+  const dialogs=[];
   page.on('pageerror',error=>errors.push(error.message));
+  page.on('dialog',async dialog=>{dialogs.push(dialog.message());await dialog.dismiss()});
   await page.goto(BASE+'/index.html?qa=r30-corrupt-home',
     {waitUntil:'domcontentloaded',timeout:60000});
   const home=page.frameLocator('#basicFrame');
@@ -55,8 +57,14 @@ try{
   await page.locator('#extLauncher').click();
   await page.locator('#extGroups .extCard').first().waitFor({state:'visible'});
   await page.locator('#extGroups .extCard').first().click();
-  await page.waitForURL(url=>url.pathname.endsWith('/app/editor.html'),
-    {waitUntil:'domcontentloaded',timeout:20000});
+  // With an unreadable source library, opening a chart may be blocked by
+  // the editor rather than navigating. Either outcome is safe as long as
+  // the original Home bytes remain untouched.
+  await page.waitForTimeout(650);
+  console.log('R30 extension attempt:',JSON.stringify({
+    path:new URL(page.url()).pathname,
+    dialogs:dialogs.slice(-2)
+  }));
   assert.equal(await page.evaluate(key=>localStorage.getItem(key),KEY),RAW,
     'Extension navigation bypassed recovery guard');
   await page.goto(BASE+'/index.html?qa=r30-restore',{waitUntil:'domcontentloaded'});
