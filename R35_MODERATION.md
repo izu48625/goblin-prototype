@@ -1,6 +1,6 @@
 # R35 Public Work Reporting — Operations & Security
 
-Status: implementation in the `r35-public-work-report-safety` PR. Apply database migration before turning on the UI in production. Existing topics, scoring, visibility, anonymized participant ratings and GA4 configuration are unchanged.
+Status: PR #124 is merged and the private reports table was installed and verified on 2026-10-11. Existing topics, scoring, visibility, anonymized participant ratings and GA4 configuration are unchanged.
 
 ## Behavior
 
@@ -37,6 +37,10 @@ When resolved or dismissed, manually change only the report status and note. **N
 2. Before production merge: apply `R35_REPORTS_MIGRATION.sql` through the connected Supabase migration tool and verify table schema, RLS, privileges, UNIQUE and policy. No test reports in production.
 3. Merge only after CI and migration verification. Production Cloudflare Workers deployment may be managed outside GitHub, so verify Worker deploy separately instead of assuming a GitHub merge deploys automatically.
 4. Manually test a report only using an isolated staging project or explicit owner-approved test work. Never submit false reports against real Public content.
+
+## R35 P2 legal/contact follow-on
+
+Bilingual Terms/Privacy/Copyright/Appeals and an isolated private contact form are tracked in [R35_LEGAL_CONTACT.md](R35_LEGAL_CONTACT.md). Legal language remains subject to operator review. Work reports and contact requests have separate DB tables, and neither automatically removes content.
 
 ## Remaining R35 tasks
 

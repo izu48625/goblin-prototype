@@ -1,0 +1,48 @@
+name: R35 Legal & Private Contact QA
+on:
+  pull_request:
+    paths:
+      - "ja/**"
+      - "en/**"
+      - "cloud/legal*"
+      - "cloud/global-locale.js"
+      - "cloud/public.css"
+      - "cloud/discover.css"
+      - "worker/**"
+      - "R35_CONTACT_MIGRATION.sql"
+      - "R35_MODERATION.md"
+      - "R35_LEGAL_CONTACT.md"
+      - "scripts/r35-legal-contact-qa.mjs"
+      - "scripts/r30-home-corrupt-recovery-qa.mjs"
+      - "public.html"
+      - "discover.html"
+      - ".github/workflows/r35-legal-contact-qa.yml"
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  verify-legal-and-contact:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with: {node-version: '22'}
+      - name: Lint API and bilingual form
+        run: |
+          node --check worker/legal-contact.js
+          node --check worker/index.js
+          node --check cloud/legal-contact.js
+          node --check cloud/global-locale.js
+          node --check scripts/r30-home-corrupt-recovery-qa.mjs
+          node scripts/r35-legal-contact-qa.mjs
+          node scripts/r35-report-qa.mjs
+          node scripts/r34-seo-edge-test.mjs
+      - name: Compile Cloudflare bundle
+        run: |
+          npm run build:cloudflare
+          test -f dist/ja/legal.html
+          test -f dist/en/legal.html
+          test -f dist/cloud/legal-contact.js
+          test -f dist/cloud/legal.css
+          test ! -e dist/R35_CONTACT_MIGRATION.sql

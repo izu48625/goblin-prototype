@@ -28,7 +28,9 @@
   // The page language is authoritative when arriving from a search engine.
   const landingLang=()=>['en','ja'].includes(document.body?.dataset.smLocalizedLanding)
     ?document.body.dataset.smLocalizedLanding:'';
-  const current=()=>landingLang()||normalize(localStorage.getItem(KEY)||localStorage.getItem(LEGACY)||navigator.language||'ja');
+  const legalLang=()=>['en','ja'].includes(document.body?.dataset.smLegalPage)
+    ?document.body.dataset.smLegalPage:'';
+  const current=()=>landingLang()||legalLang()||normalize(localStorage.getItem(KEY)||localStorage.getItem(LEGACY)||navigator.language||'ja');
   // Browser/CDN rewrites may expose an embedded Home as /base/ instead of
   // /base/index.html. Check the frame relationship, never the URL spelling.
   // All embedded views borrow the parent's single fixed language/Home bar.
@@ -59,12 +61,23 @@
       home.setAttribute('aria-label',lang==='ja'?'ホームを開く':'Open Home');
     }
     bar.setAttribute('aria-label',lang==='ja'?'表示言語を切り替える':'Choose display language');
+    document.querySelectorAll('[data-sm-legal-link]').forEach(link=>{
+      const section=link.dataset.smLegalLink;
+      const labels={terms:['利用規約','Terms'],privacy:['プライバシー','Privacy'],contact:['問い合わせ','Contact']};
+      if(!labels[section])return;
+      link.textContent=labels[section][lang==='ja'?0:1];
+      link.href='/'+lang+'/legal.html#'+section;
+    });
   }
   function set(next){
     const lang=normalize(next);
     if(lang===current()){paint();return;}
     localStorage.setItem(KEY,lang);
     localStorage.setItem(LEGACY,lang);
+    if(legalLang()){
+      location.assign(previewUrl(new URL('/'+lang+'/legal.html',location.origin).href));
+      return;
+    }
     if(landingLang()){
       // Selecting JA or EN on an intro page opens the corresponding real
       // localized page, not a reload of the previous language.
@@ -86,7 +99,7 @@
     // No scoring or public-data writes happen on a display-language change.
     location.reload();
   }
-  const homePath=()=>location.pathname.startsWith('/app/')?'../index.html?fresh=1':'index.html?fresh=1';
+  const homePath=()=>legalLang()?'/index.html?fresh=1':(location.pathname.startsWith('/app/')?'../index.html?fresh=1':'index.html?fresh=1');
   function openHome(event){
     event.preventDefault();
     const frame=document.getElementById('basicFrame');
@@ -104,10 +117,10 @@
   }
   function mount(){
     if(document.querySelector('.globalLocaleBar'))return;
-    if(landingLang()){
+    if(landingLang()||legalLang()){
       try{
-        localStorage.setItem(KEY,landingLang());
-        localStorage.setItem(LEGACY,landingLang());
+        localStorage.setItem(KEY,landingLang()||legalLang());
+        localStorage.setItem(LEGACY,landingLang()||legalLang());
       }catch{}
     }
     document.body.classList.add('hasGlobalLocaleBar');
@@ -117,7 +130,7 @@
     bar.innerHTML='<nav class="globalNavLinks" aria-label="Site navigation"><a class="globalHomeBtn" href="index.html?fresh=1" aria-label="ホームを開く">HOME</a><a class="globalDiscoverBtn" href="discover.html" aria-label="Discoverを開く">Discover</a></nav><div class="globalLocaleControls"><span class="globalLocaleLabel">表示言語</span><div class="globalLocaleSwitch"><button type="button" data-global-lang="ja" aria-label="日本語">JA</button><button type="button" data-global-lang="en" aria-label="English">EN</button></div></div>';
     document.body.prepend(bar);
     bar.querySelector('.globalHomeBtn').href=previewUrl(new URL(landingLang()?'/index.html?lang='+current():homePath(),location.href).href);
-    bar.querySelector('.globalDiscoverBtn').href=previewUrl(new URL(landingLang()?'/discover.html?lang='+current():(location.pathname.startsWith('/app/')?'../discover.html':'discover.html'),location.href).href);
+    bar.querySelector('.globalDiscoverBtn').href=previewUrl(new URL(landingLang()?'/discover.html?lang='+current():(legalLang()?'/discover.html':(location.pathname.startsWith('/app/')?'../discover.html':'discover.html')),location.href).href);
     bar.querySelector('.globalHomeBtn').addEventListener('click',openHome);
     bar.querySelectorAll('[data-global-lang]').forEach(btn=>btn.addEventListener('click',()=>set(btn.dataset.globalLang)));
     paint();
