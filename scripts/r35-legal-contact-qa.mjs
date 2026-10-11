@@ -34,6 +34,25 @@ assert(ja.includes('Community参加者ごとの採点データ'));
 assert(locale.includes('const legalLang=()')&&locale.includes("'/'+lang+'/legal.html"));
 for(const content of [discover,published])for(const section of ['terms','privacy','contact'])assert(content.includes('data-sm-legal-link="'+section+'"'));
 assert(r30.includes('if(!(await tray.isVisible()))'),'R30 only toggles hidden utility tray');
+
+const [remix,analytics,ads,publishModel]=await Promise.all([
+ 'cloud/remix.js','cloud/analytics-config.js','cloud/ad-layout.js','cloud/publish-model.js'
+].map(get));
+assert(ja.includes('制定：2026年10月11日')&&en.includes('Effective: October 11, 2026'));
+for(const [language,page,requirements] of [
+  ['ja',ja,['無料で使える範囲','コピーして採点する（Remix）','準拠法・紛争対応','運営者と窓口','安全管理','海外からの利用','Cloudflare','Supabase','jsDelivr']],
+  ['en',en,['Free features','Copy &amp; rate (Remix)','Governing law and disputes','Operator and requests','Security','International users','Cloudflare','Supabase','jsDelivr']]
+]){
+ for(const phrase of requirements)assert(page.includes(phrase),language+': policy missing '+phrase);
+ assert.equal((page.match(/id="legalContactForm"/g)||[]).length,1,'Contact form must not duplicate');
+ assert(!page.includes('Google Analytics 4 is enabled')&&!page.includes('AdSense is enabled'));
+}
+assert(remix.includes('scores:Array(cols.length).fill(null)'),'Remix must start without source scores');
+assert(remix.includes('sourceTopicId:topic.id'),'Remix source attribution must be retained');
+assert(publishModel.includes("relation:'remix'"),'Republished Remix must retain source relation');
+assert(analytics.includes('enabled:false')&&analytics.includes("measurementId:''"),'GA4 must remain disabled');
+assert(ads.includes("get('adPreview')==='1'"),'Ad slots remain developer-only previews');
+
 const key='a'.repeat(70)+'.'+'b'.repeat(70)+'.'+'c'.repeat(70);
 const data={category:'copyright',reply_email:'owner@example.com',
  work_url:'https://statsmaker.app/public.html?id=57b432ed-fbf2-4261-b57d-9e0f27356d2e',
