@@ -8,7 +8,7 @@ const cases=[
   {path:'/public.html',count:2,label:'Published work'},
   {path:'/my.html',count:1,label:'My Works'},
   {path:'/rate.html?legacy=1',count:1,label:'Legacy Community'},
-  {path:'/app/editor.html',count:2,label:'Graph editor'},
+  {path:'/app/editor.html',count:3,label:'Graph editor'},
   {path:'/base/index.html',count:1,label:'Home inner frame'}
 ];
 function previewURL(path){
@@ -53,6 +53,8 @@ try{
     assert.equal(await page.locator('iframe[src*="doubleclick"]').count(),0,
       'Ads iframe served before approval');
     if(item.label==='Graph editor'){
+      assert.equal(await page.locator('[data-sm-slot="editor-top"]').isVisible(),true,
+        'Editor top preview placement should be visible immediately');
       // Editor's mobile settings sheet intentionally stays closed by default.
       // Its ad slot should only become visible when the user opens that sheet.
       assert.equal(await page.locator('[data-sm-slot="editor-mobile"]').isVisible(),false);
@@ -62,8 +64,48 @@ try{
         state:'visible',timeout:12000
       });
     }
+    if(item.label==='Discover'){
+      await page.locator('[data-view="all"]').waitFor({state:'visible'});
+      await page.waitForFunction(()=>document.querySelector('[data-view="all"]')?.textContent==='すべての作品');
+      assert.equal(await page.locator('[data-view="community"]').textContent(),'みんなで評価');
+      await page.locator('[data-view="community"]').click();
+      await page.waitForFunction(()=>document.querySelector('#sectionTitle')?.textContent==='みんなで評価できる作品');
+      assert.equal(await page.locator('[data-sm-slot]').count(),2,
+        'Switching to Rate Together hid ad preview');
+    }
     console.log('PASS '+item.label+' normal hidden / preview '+item.count);
   }
+  // Simulate Cloudflare Workers extensionless routes that serve the same HTML.
+  for(const alias of [
+    {url:'/discover',asset:'/discover.html',slot:'discover-primary',count:2},
+    {url:'/public',asset:'/public.html',slot:'public-primary',count:2},
+    {url:'/my',asset:'/my.html',slot:'works-inline',count:1}
+  ]){
+    const pattern=new RegExp(alias.url+'(?:\\?.*)?$');
+    await context.route(pattern,async route=>{
+      const response=await context.request.get(BASE+alias.asset);
+      await route.fulfill({status:200,contentType:'text/html; charset=utf-8',
+        body:await response.text()});
+    });
+    await page.goto(BASE+alias.url+'?adPreview=1',{waitUntil:'domcontentloaded'});
+    const dotted=page.locator('[data-sm-slot="'+alias.slot+'"]');
+    await dotted.waitFor({state:'visible',timeout:15000});
+    assert.equal(await page.locator('[data-sm-slot]').count(),alias.count);
+    const style=await dotted.evaluate(el=>({
+      border:getComputedStyle(el).borderTopStyle,
+      width:el.getBoundingClientRect().width,
+      height:el.getBoundingClientRect().height
+    }));
+    assert.equal(style.border,'dashed');
+    assert(style.width>100&&style.height>35,
+      'Missing visible dotted preview on '+alias.url);
+    await page.goto(BASE+alias.asset,{waitUntil:'domcontentloaded'});
+    assert.equal(await page.locator('[data-sm-slot]').count(),0,
+      'Preview unexpectedly appeared without explicit opt-in');
+    await context.unroute(pattern);
+    console.log('PASS Cloudflare clean URL '+alias.url);
+  }
+
   // Home is an outer, full-height shell containing a same-origin iframe.
   await page.goto(BASE+'/?adPreview=1',{waitUntil:'domcontentloaded',timeout:45000});
   const frame=page.frameLocator('#basicFrame');

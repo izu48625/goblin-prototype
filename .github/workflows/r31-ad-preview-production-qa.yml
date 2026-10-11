@@ -1,0 +1,42 @@
+name: R31 Live Ad Preview and Discover Tabs QA
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - "cloud/ad-layout.js"
+      - "cloud/ad-layout.css"
+      - "cloud/discover.js"
+      - "discover.html"
+      - "public.html"
+      - "my.html"
+      - "app/editor.html"
+      - "base/index.html"
+      - "rate.html"
+      - "scripts/r31-ad-preview-live-qa.mjs"
+      - ".github/workflows/r31-ad-preview-production-qa.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  live-dotted-slots:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+      - name: Check live QA script
+        run: node --check scripts/r31-ad-preview-live-qa.mjs
+      - name: Install Chromium
+        run: |
+          npm install --no-save playwright@1.56.1
+          npx playwright install --with-deps chromium
+      - name: Wait for deployment and check REAL statsmaker.app pages
+        env:
+          BASE_URL: https://statsmaker.app
+          PUBLIC_TOPIC_ID: 57b432ed-fbf2-4261-b57d-9e0f27356d2e
+        run: node scripts/r31-ad-preview-live-qa.mjs
