@@ -686,9 +686,11 @@
       renderRemixContext();
     renderCommunityParticipation();
       setCommunityStatus(wasUpdate?t('community.updateSuccess'):t('community.success'),'ok');
+      window.SM_ANALYTICS?.event('rating_success',{outcome:'success'});
     }catch(error){
       console.error(error);
       setCommunityStatus(t('community.errorPrefix')+(error?.message||String(error)),'error');
+      window.SM_ANALYTICS?.event('rating_failure',{outcome:'failure'});
       renderCommunityParticipation();
     }
   }
@@ -2049,8 +2051,12 @@
         const {data:insertData,error:insertError}=await sb.from('topics').insert(insertPayload).select('id').single();if(insertError)throw insertError;topicId=insertData.id;await insertPublishedStructure(sb,topicId,model);
       }
 
+      window.SM_ANALYTICS?.event('publish_success',{visibility,outcome:'success'});
       s.cloudTopicId=topicId;s.cloudVisibility=visibility;s.cloudPublishedAt=now;scheduleSave('');publishState.url=publicPageUrl(topicId);$('publishUrlInput').value=publishState.url;$('publishResult').classList.remove('hidden');$('publishUnpublishBtn').classList.remove('hidden');$('publishExecuteBtn').textContent=t('publish.updateExecute');setPublishStatus(versioned?t('publish.versionedSuccess'):(updating?t('publish.updateSuccess'):t('publish.success')),'ok');renderHeader();refreshEditorCommunitySummary(true);
-    }catch(e){setPublishStatus(t('publish.errorPrefix')+(e?.message||String(e))+migrationHint(e),'error')}
+    }catch(e){
+      window.SM_ANALYTICS?.event('publish_failure',{outcome:'failure'});
+      setPublishStatus(t('publish.errorPrefix')+(e?.message||String(e))+migrationHint(e),'error')
+    }
   }
 
   async function unpublishTopic(){
