@@ -40,7 +40,6 @@ try{
   assert.equal(await metricPanel.locator('.columnChip').count(),5);
   await metricPanel.locator('[data-delete-col="4"]').click();
   assert.equal(await metricPanel.locator('.columnChip').count(),4);
-  await page.evaluate(()=>localStorage.removeItem('statsMakerV014Library'));
 
   const homeNavRect=await nav.evaluate(el=>{
     const home=el.querySelector('.globalHomeBtn').getBoundingClientRect();
@@ -64,7 +63,7 @@ try{
     label:el.textContent
   }));
   assert(ad.previous,'Home ad preview is not immediately under the action header');
-  assert(ad.position&Node.DOCUMENT_POSITION_FOLLOWING,'Home ad preview is below workspace');
+  assert((ad.position&4)!==0,'Home ad preview must appear before the workspace');
   assert.equal(ad.style,'dashed');
   assert.equal(ad.width,'2px');
   assert(ad.label.includes('メイン操作直下'));
