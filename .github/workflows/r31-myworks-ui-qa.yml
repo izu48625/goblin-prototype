@@ -1,0 +1,44 @@
+name: R31 My Works without OAuth QA
+
+on:
+  pull_request:
+    paths:
+      - "my.html"
+      - "cloud/my.js"
+      - "cloud/my.css"
+      - "base/index.html"
+      - "base/js/i18n.js"
+      - "scripts/r31-myworks-simple-ui-qa.mjs"
+      - ".github/workflows/r31-myworks-ui-qa.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  myworks-no-auth-qa:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+      - name: Check JS and test syntax
+        run: |
+          node --check cloud/my.js
+          node --check scripts/r31-myworks-simple-ui-qa.mjs
+          node --check base/js/i18n.js
+      - name: Build local static bundle
+        run: npm run build:cloudflare
+      - name: Install Playwright Chromium
+        run: |
+          npm install --no-save playwright@1.56.1
+          npx playwright install --with-deps chromium
+      - name: Verify no-OAuth My Works in isolated browser
+        run: |
+          python3 -m http.server 8765 --directory dist >/tmp/r31-myworks-server.log 2>&1 &
+          SERVER_PID=$!
+          trap 'kill $SERVER_PID || true' EXIT
+          sleep 2
+          BASE_URL=http://127.0.0.1:8765 node scripts/r31-myworks-simple-ui-qa.mjs
