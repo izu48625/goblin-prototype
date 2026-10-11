@@ -1,5 +1,14 @@
 # R33 無料アクセス解析・利用導線計測
 
+## 現在の状態（2026-10-11：PC操作まで保留）
+
+- ユーザーはGoogle Analyticsの無料アカウント／プロパティを作成し、`https://statsmaker.app` のWebデータストリームも作成済み。
+- iPhone SafariのGoogle Analytics初期画面が操作しにくく、ストリームの**測定ID（`G-...`）はまだ取得できていない**。
+- **本人がPCで操作できるときに再開**する。Google Analytics管理画面 → 管理 → データ ストリーム → 既存のStats Maker Web → 測定IDを確認して共有。ストリームの追加作成は不要。
+- それまでは `cloud/analytics-config.js` の `enabled:false`／測定ID空欄を維持。Google Analyticsへのデータ送信は始めない。Googleアカウント操作・課金・広告配信も進めない。
+- 測定ID受領後はプライバシー表示／同意機構を再検証し、ユーザーの有効化承認を得てからテスト・リリースする。作業の詳細は本書「GA4導入前に必要な作業」を参照。
+- **次の開発は公開作品のSEOと広告審査の土台**。本件は明示的な再開指示があるまで保留とする。
+
 ## 目的
 
 Stats Makerの広告配信開始後に、**流入元 → 最初のページ → Discoverで作品を探す → 公開作品を閲覧 → 自分でも評価／グラフを作る → 公開 → 共有**という導線を改善する。
@@ -9,7 +18,7 @@ Stats Makerの広告配信開始後に、**流入元 → 最初のページ → 
 ## 構成（無料）
 
 1. **Cloudflare Web Analytics**（管理画面で後日ユーザーが有効化）：訪問数／流入ドメイン／訪問ページ／パフォーマンス。無料、Cookieを使わない。Workers構成ではCloudflare Web Analyticsで手動表示した beacon snippet/token が必要になる場合がある。ユーザーのCloudflareアカウント内で有効化の要否を確認すること。現時点では未設定。
-2. **Google Analytics 4**（無料プロパティを後日ユーザーが作成）：経路データ探索／ファネル探索／媒体・デバイス別、カスタムイベントによる行動分析。現時点では計測IDがなく **enabled:false**、タグ・ネットワーク通信はゼロ。
+2. **Google Analytics 4**（無料プロパティをユーザーが作成済み、測定ID未取得）：経路データ探索／ファネル探索／媒体・デバイス別、カスタムイベントによる行動分析。現時点では計測IDがなく **enabled:false**、タグ・ネットワーク通信はゼロ。
 3. **AdSense** は別系統。広告表示量や収益データを扱う。実際の収益を広告枠別に確認する場合はAdSenseの実績とGA4の行動指標を組み合わせる。GA4だけで広告売上を自動的に取得できるとは限らない。
 
 ## 実装済み（R33）
@@ -47,7 +56,7 @@ Stats Makerの広告配信開始後に、**流入元 → 最初のページ → 
 
 ## GA4導入前に必要な作業（本人の承認が必要）
 
-1. 無料のGoogle Analytics 4プロパティを `Stats Maker` の名称で作る。Webデータストリームを `https://statsmaker.app` として登録し、測定ID `G-...` を確認。
+1. 作成済みのGA4プロパティとWebデータストリームをPCから開き、測定ID `G-...` を確認する。新たなストリームを作成しない。
 2. プライバシーポリシーに、GA4／Cloudflareによる解析の目的・保存・第三者サービス・同意撤回方法を明記。必要地域の法令・同意管理を確認。
 3. 本人から測定IDを受け取った後だけ、`cloud/analytics-config.js` の `measurementId` と `enabled:true` を設定。費用が生じる操作やAds連携は事前確認。
 4. GA4で **カスタムディメンション** `page_group`、`template_type`、`filter_type`、`visibility`、`outcome`、`work_code`、`slot_id` を必要に応じて登録。値の種類が多い `work_code` はGA4の高カーディナリティ化に注意。
