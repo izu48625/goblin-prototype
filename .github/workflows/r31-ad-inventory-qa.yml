@@ -1,0 +1,46 @@
+name: R31 Ad Inventory Preview QA
+on:
+  pull_request:
+    paths:
+      - "base/index.html"
+      - "app/editor.html"
+      - "discover.html"
+      - "public.html"
+      - "my.html"
+      - "rate.html"
+      - "cloud/ad-layout.*"
+      - "scripts/r31-ad-*.mjs"
+      - ".github/workflows/r31-ad-inventory-qa.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  ad-inventory-no-serving:
+    runs-on: ubuntu-latest
+    timeout-minutes: 12
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+      - name: Syntax and static non-serving audit
+        run: |
+          node --check cloud/ad-layout.js
+          node --check scripts/r31-ad-inventory-audit.mjs
+          node --check scripts/r31-ad-layout-browser-qa.mjs
+          node scripts/r31-ad-inventory-audit.mjs
+      - name: Build static bundle
+        run: npm run build:cloudflare
+      - name: Install Playwright Chromium
+        run: |
+          npm install --no-save playwright@1.56.1
+          npx playwright install --with-deps chromium
+      - name: Browser ad layout opt-in QA
+        run: |
+          python3 -m http.server 8765 --directory dist >/tmp/ad-preview-http.log 2>&1 &
+          HTTP_PID=$!
+          trap 'kill $HTTP_PID || true' EXIT
+          sleep 2
+          BASE_URL=http://127.0.0.1:8765 node scripts/r31-ad-layout-browser-qa.mjs
