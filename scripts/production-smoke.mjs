@@ -641,9 +641,13 @@ async function browserGlobalLanguage(){
     await page.waitForFunction(()=>document.documentElement.lang==='ja'&&
       document.querySelector('#remixBtn')?.textContent?.includes('コピーして採点する'),{timeout:30000});
     await page.goto(BASE_URL+'/my.html',{waitUntil:'domcontentloaded',timeout:60000});
-    await page.waitForFunction(()=>document.querySelector('#pageLead')?.textContent.includes('アカウント'),
+    await page.waitForFunction(()=>document.querySelector('#pageLead')?.textContent.includes('公開した作品'),
       {timeout:30000});
     assert(await page.locator('.globalLocaleBar').count()===1,'My Page shared locale bar missing');
+    assert(await page.locator('#googleBtn,#appleBtn,#signOutBtn,.authHealth,.accountIdentity').count()===0,
+      'Deprecated OAuth/guest management UI is still displayed in My Works');
+    assert(await page.locator('#browserNotice').count()===1,
+      'Browser-based ownership notice disappeared');
     const projectId=await page.evaluate(async()=>{
       const [{createProject},{saveProject}]=await Promise.all([
         import('/app/src/core/project.js'),import('/app/src/core/store.js')
