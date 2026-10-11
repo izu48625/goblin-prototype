@@ -2,6 +2,28 @@
   'use strict';
   const KEY='statsMaker.locale', LEGACY='statsMakerV2Language';
   const normalize=value=>String(value||'').toLowerCase().startsWith('en')?'en':'ja';
+  // Explicit preview mode belongs to the current navigation chain only:
+  // no storage flag, cookie, tracking, ad request or default visitor changes.
+  const adPreviewActive=()=>new URLSearchParams(location.search).get('adPreview')==='1';
+  function previewUrl(href){
+    if(!adPreviewActive())return href;
+    try{
+      const url=new URL(href,location.href);
+      if(url.origin!==location.origin||!['http:','https:'].includes(url.protocol))return href;
+      url.searchParams.set('adPreview','1');
+      return url.href;
+    }catch{return href}
+  }
+  // Works with links added asynchronously (Discover cards, Community links),
+  // but never rewrites copy/share URLs or changes a visitor's normal links.
+  document.addEventListener('click',event=>{
+    if(!adPreviewActive())return;
+    const link=event.target?.closest?.('a[href]');
+    if(!link||link.hasAttribute('download')||link.getAttribute('href')?.startsWith('#'))return;
+    const updated=previewUrl(link.href);
+    if(updated!==link.href)link.href=updated;
+  },true);
+  window.SM_AD_PREVIEW_NAV={active:adPreviewActive,url:previewUrl};
   const current=()=>normalize(localStorage.getItem(KEY)||localStorage.getItem(LEGACY)||navigator.language||'ja');
   // Browser/CDN rewrites may expose an embedded Home as /base/ instead of
   // /base/index.html. Check the frame relationship, never the URL spelling.
@@ -68,7 +90,7 @@
     if(community&&!confirm(current()==='ja'
       ?'未投稿の評価は保存されません。ホームへ戻りますか？'
       :'Unsubmitted scores will not be saved. Return Home?'))return;
-    location.assign(new URL(homePath(),location.href).href);
+    location.assign(previewUrl(new URL(homePath(),location.href).href));
   }
   function mount(){
     if(document.querySelector('.globalLocaleBar'))return;
@@ -78,8 +100,8 @@
     bar.setAttribute('role','group');
     bar.innerHTML='<nav class="globalNavLinks" aria-label="Site navigation"><a class="globalHomeBtn" href="index.html?fresh=1" aria-label="ホームを開く">HOME</a><a class="globalDiscoverBtn" href="discover.html" aria-label="Discoverを開く">Discover</a></nav><div class="globalLocaleControls"><span class="globalLocaleLabel">表示言語</span><div class="globalLocaleSwitch"><button type="button" data-global-lang="ja" aria-label="日本語">JA</button><button type="button" data-global-lang="en" aria-label="English">EN</button></div></div>';
     document.body.prepend(bar);
-    bar.querySelector('.globalHomeBtn').href=new URL(homePath(),location.href).href;
-    bar.querySelector('.globalDiscoverBtn').href=new URL(location.pathname.startsWith('/app/')?'../discover.html':'discover.html',location.href).href;
+    bar.querySelector('.globalHomeBtn').href=previewUrl(new URL(homePath(),location.href).href);
+    bar.querySelector('.globalDiscoverBtn').href=previewUrl(new URL(location.pathname.startsWith('/app/')?'../discover.html':'discover.html',location.href).href);
     bar.querySelector('.globalHomeBtn').addEventListener('click',openHome);
     bar.querySelectorAll('[data-global-lang]').forEach(btn=>btn.addEventListener('click',()=>set(btn.dataset.globalLang)));
     paint();
