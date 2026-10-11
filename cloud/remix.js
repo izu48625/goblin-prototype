@@ -52,9 +52,23 @@
   }
 
   function saveSheet(sheet){
+    // A copy is not permission to erase an unreadable existing Home library.
+    // Preserve the exact old bytes; fail closed and let the caller show its
+    // existing error UI instead of silently resetting saved sheets.
+    const raw=localStorage.getItem(STORAGE_KEY);
     let library=null;
-    try{library=JSON.parse(localStorage.getItem(STORAGE_KEY)||'null')}catch{}
-    if(!library||!Array.isArray(library.sheets))library={activeId:sheet.id,sheets:[]};
+    if(raw!==null){
+      try{library=JSON.parse(raw)}catch{
+        throw new Error('Saved Home library is unreadable; copy was not saved');
+      }
+      if(!library||typeof library!=='object'||Array.isArray(library)||
+         !Array.isArray(library.sheets)||
+         library.sheets.some(s=>!s||typeof s!=='object'||typeof s.id!=='string')){
+        throw new Error('Saved Home library is invalid; copy was not saved');
+      }
+    }else{
+      library={activeId:sheet.id,sheets:[]};
+    }
     library.sheets.push(sheet);
     library.activeId=sheet.id;
     localStorage.setItem(STORAGE_KEY,JSON.stringify(library));
