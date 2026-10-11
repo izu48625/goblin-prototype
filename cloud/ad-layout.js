@@ -17,30 +17,35 @@
   }
   if(!requestedPreview())return;
 
-  const path=location.pathname.replace(/\/+$/,'');
-  const inCommunity=(window.parent!==window
-    ?(()=>{
-      try{return new URLSearchParams(window.parent.location.search).has('community')}
-      catch{return false}
-    })()
-    :new URLSearchParams(location.search).has('community'));
+  // Workers Static Assets may rewrite /discover.html to /discover and
+  // similar extensionless routes. Never depend on the public URL spelling.
+  // Each page declares its layout identity in a static <body> data attribute.
+  const rawPath=location.pathname.replace(/\\/+$/,'');
+  const routeName=rawPath.split('/').pop()?.replace(/\\.html$/i,'')||'';
+  const page=document.body?.dataset.smAdPage
+    ||({discover:'discover',public:'public',my:'works',rate:'rate',editor:'editor',
+         base:'home'}[routeName]||'');
+  const inCommunity=window.parent!==window
+    ?(()=>{try{return new URLSearchParams(window.parent.location.search).has('community')}catch{return false}})()
+    :new URLSearchParams(location.search).has('community');
 
-  const zones=path.endsWith('/discover.html')?[
-      ['.controls','afterend','discover-primary','Discover · 作品一覧前のインライン枠'],
-      ['#grid','afterend','discover-secondary','Discover · 作品一覧後のインライン枠']
-    ]:path.endsWith('/public.html')?[
-      ['.top','afterend','public-primary','公開作品 · 概要前のインライン枠'],
-      ['#content','afterend','public-secondary','公開作品 · 評価・ランキング後のインライン枠']
-    ]:path.endsWith('/my.html')?[
-      ['.summaryGrid','afterend','works-inline','公開作品の管理 · 一覧前のインライン枠']
-    ]:path.endsWith('/rate.html')?[
-      ['#content','afterend','rate-inline','旧Community画面 · 採点エリアの後']
-    ]:path.endsWith('/app/editor.html')?[
-      ['#panelContent','afterend','editor-sidebar','グラフ編集 · PCサイドパネル下部'],
-      ['#mobilePanelContent','afterend','editor-mobile','グラフ編集 · モバイル詳細パネル末尾']
-    ]:(path.endsWith('/base/index.html')||path.endsWith('/base'))?[
-      [inCommunity?'main.app':'header.topbar',inCommunity?'beforeend':'afterend','home-inline',inCommunity
-        ?'Community · 採点表の後のインライン枠'
+  const zones=page==='discover'?[
+      ['.browseTabs','afterend','discover-primary','Discover · 作品一覧前の広告候補'],
+      ['#grid','afterend','discover-secondary','Discover · 作品一覧後の広告候補']
+    ]:page==='public'?[
+      ['.top','afterend','public-primary','公開作品 · 作品概要の前'],
+      ['#content','afterend','public-secondary','公開作品 · 評価とランキングの後']
+    ]:page==='works'?[
+      ['.hero','afterend','works-inline','自分の公開作品 · 一覧前']
+    ]:page==='rate'?[
+      ['.top','afterend','rate-inline','Community · 採点内容の前']
+    ]:page==='editor'?[
+      ['.editor-header','afterend','editor-top','グラフ編集 · 広告候補位置（確認用）'],
+      ['#panelContent','afterend','editor-sidebar','グラフ編集 · PC設定パネル末尾'],
+      ['#mobilePanelContent','afterend','editor-mobile','グラフ編集 · モバイル設定パネル末尾']
+    ]:page==='home'?[
+      ['header.topbar','afterend','home-inline',inCommunity
+        ?'Community · 採点操作の前の広告候補'
         :'Home · メイン操作直下のインライン枠']
     ]:[];
   function mount(){
