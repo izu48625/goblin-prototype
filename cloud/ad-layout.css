@@ -1,0 +1,43 @@
+/* R31 Ad placement inventory: NO ADS are served by this stylesheet. */
+/* Slots are injected only with the explicit ?adPreview=1 design-preview flag. */
+.sm-ad-preview{
+  min-width:0;
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  justify-content:center;
+  gap:5px;
+  min-height:100px;
+  margin:18px auto;
+  padding:15px 12px;
+  border:1px dashed #55708c;
+  border-radius:12px;
+  background:repeating-linear-gradient(135deg,#102238,#102238 14px,#13283e 14px,#13283e 28px);
+  color:#bdcde1;
+  text-align:center;
+  font-family:system-ui,-apple-system,sans-serif;
+  font-size:12px;
+  font-weight:800;
+  line-height:1.5;
+  overflow:hidden;
+}
+.sm-ad-preview strong{font-size:12px;font-weight:900;color:#dce9ff}
+.sm-ad-preview small{font-size:10px;font-weight:600;color:#91a9c5}
+.sm-ad-preview::before{content:"AD SLOT · DESIGN PREVIEW";font-size:9px;letter-spacing:.1em;color:#8fb6da}
+.sm-ad-preview[data-sm-slot="home-inline"]{max-width:970px;width:100%}
+.sm-ad-preview[data-sm-slot="editor-sidebar"]{min-height:78px;margin:10px 9px}
+.sm-ad-preview[data-sm-slot="editor-mobile"]{min-height:82px;margin:16px 0}
+.sm-ad-preview[data-sm-slot="discover-primary"],
+.sm-ad-preview[data-sm-slot="discover-secondary"],
+.sm-ad-preview[data-sm-slot="public-primary"],
+.sm-ad-preview[data-sm-slot="public-secondary"]{width:100%;max-width:980px}
+.sm-ad-preview[data-sm-slot="works-inline"],
+.sm-ad-preview[data-sm-slot="rate-inline"]{width:100%;max-width:970px}
+@media(max-width:760px){
+  .sm-ad-preview{min-height:76px;margin:12px auto;padding:10px}
+  .sm-ad-preview strong{font-size:11px}
+  .sm-ad-preview[data-sm-slot="editor-sidebar"]{display:none}
+}
+@media(min-width:761px){
+  .sm-ad-preview[data-sm-slot="editor-mobile"]{display:none}
+}
