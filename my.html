@@ -6,7 +6,7 @@
   <meta name="theme-color" content="#07101f">
   <meta name="robots" content="noindex,nofollow">
   <title>My Page - Stats Maker</title>
-  <link rel="stylesheet" href="cloud/my.css?v=r25p3">
+  <link rel="stylesheet" href="cloud/my.css?v=r31simple1">
   <link rel="stylesheet" href="cloud/global-locale.css?v=r27nav2">
 </head>
 <body>
@@ -27,55 +27,17 @@
   <main class="page">
     <section class="hero">
       <div>
-        <div class="eyebrow">R24 · ACCOUNT</div>
-        <h1 id="pageTitle">My Page</h1>
-        <p id="pageLead">アカウント状態と、自分が公開した作品をまとめて管理します。</p>
+        <div class="eyebrow">MY WORKS</div>
+        <h1 id="pageTitle">自分の公開作品</h1>
+        <p id="pageLead">このブラウザから公開した作品を確認・管理できます。</p>
       </div>
       <button id="refreshBtn" class="btn" type="button">更新</button>
     </section>
 
-    <section class="accountCard panel">
-      <div class="accountIdentity">
-        <div id="avatar" class="avatar">G</div>
-        <div class="accountCopy">
-          <div id="accountState" class="accountState">確認中…</div>
-          <div id="accountDetail" class="accountDetail">Supabaseセッションを確認しています。</div>
-          <div id="identityList" class="identityList"></div>
-        </div>
-      </div>
-
-      <div id="guestWarning" class="notice warning hidden">
-        この端末のゲストIDで公開作品を管理しています。ブラウザデータを消す前にGoogleまたはAppleへ連携すると、同じ所有者IDを維持できます。
-      </div>
-      <div id="signedOutNotice" class="notice hidden">
-        ログインしなくてもStats Makerの作成・編集は使えます。My Pageのクラウド作品管理だけログインが必要です。
-      </div>
-
-      <div class="providerActions">
-        <button id="googleBtn" class="providerBtn" type="button">
-          <span class="providerIcon">G</span><span id="googleLabel">Googleで保護</span>
-        </button>
-        <button id="appleBtn" class="providerBtn" type="button">
-          <span class="providerIcon apple">●</span><span id="appleLabel">Appleで保護</span>
-        </button>
-        <button id="signOutBtn" class="btn danger hidden" type="button">ログアウト</button>
-      </div>
-      <div id="authStatus" class="status"></div>
-      <div id="providerHelp" class="providerHelp">
-        Google / Apple連携にはSupabase側で各ProviderとManual Linkingの有効化が必要です。
-      </div>
-
-      <div class="authHealth">
-        <div id="authHealthTitle" class="authHealthTitle">Auth readiness</div>
-        <div class="authHealthGrid">
-          <span id="googleHealth" class="healthChip">Google: checking…</span>
-          <span id="appleHealth" class="healthChip">Apple: checking…</span>
-          <span id="linkHealth" class="healthChip">Identity link: required</span>
-        </div>
-      </div>
-
-      <div id="ownershipGuard" class="notice dangerNotice hidden"></div>
-    </section>
+    <div id="browserNotice" class="notice browserNotice">
+      作品の管理情報はこのブラウザに保存されます。ブラウザデータを削除すると編集できなくなる場合があります。
+    </div>
+    <div id="myStatus" class="status" role="status" aria-live="polite"></div>
 
     <section class="summaryGrid" aria-label="Work summary">
       <div class="summaryCard"><b id="countAll">0</b><span id="countAllLabel">全作品</span></div>
@@ -111,7 +73,7 @@
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <script src="cloud/runtime-config.js?v=r25p3"></script>
   <script src="cloud/supabase.js?v=r25p3"></script>
-  <script src="cloud/my.js?v=r25p3"></script>
+  <script src="cloud/my.js?v=r31simple1"></script>
 <script src="cloud/global-locale.js?v=r27nav2"></script>
 </body>
 </html>
