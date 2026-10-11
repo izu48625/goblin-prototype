@@ -62,7 +62,7 @@ try{
       body:"window.SM_ANALYTICS_CONFIG={enabled:true,measurementId:'G-TEST1234'};"
     });
   });
-  await context.route('**/www.googletagmanager.com/**',async route=>{
+  await context.route(/^https:\/\/www\.googletagmanager\.com\/gtag\/js.*$/,async route=>{
     await route.fulfill({
       status:200,contentType:'application/javascript',
       body:'window.__ga4DummyLoaded=true;'
