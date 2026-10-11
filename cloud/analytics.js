@@ -226,6 +226,8 @@
       else if(e.id==='publishExecuteBtn')dispatch('publish_attempt',{});
       else if(e.id==='communitySubmit'||e.id==='communityJoinBtn')dispatch('rating_attempt',{});
       else if(e.id==='shareImageBtn'||e.id==='shareBtn')dispatch('share_action',{action_type:e.id==='shareBtn'?'share_url':'share_image'});
+      else if(['shareImageCreateBtn','sharePreviewSaveBtn','exportPreviewShare'].includes(e.id))
+        dispatch('share_action',{action_type:'share_file'});
       else if(e.id==='remixBtn')dispatch('remix_started',{});
       else if(e.id==='exportJsonBtn')dispatch('home_action',{action_type:'backup_export'});
     },{passive:true});
