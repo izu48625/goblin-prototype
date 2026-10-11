@@ -1,4 +1,5 @@
 import {communityGateway,securityConfig} from './community-gateway.js';
+import {workReportGateway} from './work-report.js';
 import {publicWorkHtml,sitemapIndex,staticSitemap,workSitemap} from './seo.js';
 const SUPABASE_URL='https://ibpdxbeltdwkquowjeay.supabase.co';
 const SUPABASE_KEY='sb_publishable_6abnwW_1p-U_Y_DefUXfFQ_Dz_Y2vsD';
@@ -110,6 +111,7 @@ export default {
       return securityConfig(env);
     }
     if(url.pathname==='/api/guard/community')return communityGateway(request,env);
+    if(url.pathname==='/api/report/work')return workReportGateway(request,env);
     if(url.pathname==='/api/og'){
       if(request.method!=='GET'&&request.method!=='HEAD')return new Response('Method Not Allowed',{status:405,headers:{Allow:'GET, HEAD'}});
       const blocked=await checkPublicRateLimit(request,env.OG_RATE_LIMIT);
