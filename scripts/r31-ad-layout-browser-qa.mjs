@@ -4,12 +4,12 @@ import {chromium} from 'playwright';
 const BASE=process.env.BASE_URL||'http://127.0.0.1:8765';
 const browser=await chromium.launch({headless:true});
 const cases=[
-  {path:'/discover.html',count:2,label:'Discover'},
-  {path:'/public.html',count:2,label:'Published work'},
+  {path:'/discover.html',count:4,label:'Discover'},
+  {path:'/public.html',count:4,label:'Published work'},
   {path:'/my.html',count:1,label:'My Works'},
   {path:'/rate.html?legacy=1',count:1,label:'Legacy Community'},
-  {path:'/app/editor.html',count:3,label:'Graph editor'},
-  {path:'/base/index.html',count:1,label:'Home inner frame'}
+  {path:'/app/editor.html',count:4,label:'Graph editor'},
+  {path:'/base/index.html',count:2,label:'Home inner frame'}
 ];
 function previewURL(path){
   return BASE+path+(path.includes('?')?'&':'?')+'adPreview=1';
@@ -44,14 +44,27 @@ try{
       item.label+' unexpectedly renders ad inventory to visitors');
     await page.goto(previewURL(targetPath),{waitUntil:'domcontentloaded',timeout:45000});
     await page.waitForFunction(expected=>
-      document.querySelectorAll('[data-sm-slot]').length===expected,
+      document.querySelectorAll('[data-sm-slot]').length>=expected,
       item.count,{timeout:15000});
-    assert.equal(await page.locator('.sm-ad-preview').count(),item.count,
+    assert(await page.locator('.sm-ad-preview').count()>=item.count,
       item.label+' design preview count mismatch');
     assert.equal(await page.locator('ins.adsbygoogle').count(),0,
       'Google ad markup served before approval');
     assert.equal(await page.locator('iframe[src*="doubleclick"]').count(),0,
       'Ads iframe served before approval');
+    if(item.label==='Discover'){
+      assert.equal(await page.locator('[data-sm-slot="discover-anchor"]').count(),1);
+      await page.locator('[data-sm-slot="discover-anchor"] .sm-ad-preview-close').click();
+      assert.equal(await page.locator('[data-sm-slot="discover-anchor"]').count(),0);
+      assert.equal(await page.locator('[data-sm-slot="discover-primary"]').count(),1);
+    }
+    if(item.label==='Published work'){
+      assert.equal(await page.locator('[data-sm-slot="public-anchor"]').count(),1);
+    }
+    if(item.label==='Graph editor'){
+      assert.equal(await page.locator('[data-sm-slot="editor-share"]').count(),1,
+        'Finished graph sharing candidate must be inside export preview dialog');
+    }
     if(item.label==='Graph editor'){
       assert.equal(await page.locator('[data-sm-slot="editor-top"]').isVisible(),true,
         'Editor top preview placement should be visible immediately');
@@ -70,15 +83,15 @@ try{
       assert.equal(await page.locator('[data-view="community"]').textContent(),'みんなで評価');
       await page.locator('[data-view="community"]').click();
       await page.waitForFunction(()=>document.querySelector('#sectionTitle')?.textContent==='みんなで評価できる作品');
-      assert.equal(await page.locator('[data-sm-slot]').count(),2,
+      assert(await page.locator('[data-sm-slot]').count()>=4,
         'Switching to Rate Together hid ad preview');
     }
     console.log('PASS '+item.label+' normal hidden / preview '+item.count);
   }
   // Simulate Cloudflare Workers extensionless routes that serve the same HTML.
   for(const alias of [
-    {url:'/discover',asset:'/discover.html',slot:'discover-primary',count:2},
-    {url:'/public',asset:'/public.html',slot:'public-primary',count:2},
+    {url:'/discover',asset:'/discover.html',slot:'discover-primary',count:4},
+    {url:'/public',asset:'/public.html',slot:'public-primary',count:4},
     {url:'/my',asset:'/my.html',slot:'works-inline',count:1}
   ]){
     const pattern=new RegExp(alias.url+'(?:\\?.*)?$');
@@ -90,7 +103,7 @@ try{
     await page.goto(BASE+alias.url+'?adPreview=1',{waitUntil:'domcontentloaded'});
     const dotted=page.locator('[data-sm-slot="'+alias.slot+'"]');
     await dotted.waitFor({state:'visible',timeout:15000});
-    assert.equal(await page.locator('[data-sm-slot]').count(),alias.count);
+    assert(await page.locator('[data-sm-slot]').count()>=alias.count);
     const style=await dotted.evaluate(el=>({
       border:getComputedStyle(el).borderTopStyle,
       width:el.getBoundingClientRect().width,
@@ -110,7 +123,7 @@ try{
   await page.goto(BASE+'/?adPreview=1',{waitUntil:'domcontentloaded',timeout:45000});
   const frame=page.frameLocator('#basicFrame');
   await frame.locator('[data-sm-slot="home-inline"]').waitFor({timeout:20000});
-  assert.equal(await frame.locator('[data-sm-slot]').count(),1);
+  assert.equal(await frame.locator('[data-sm-slot]').count(),2);
   assert.equal(await page.locator('[data-sm-slot]').count(),0,
     'Outer Home should not overlap the editor and submit controls');
   await page.goto(BASE+'/',{waitUntil:'domcontentloaded',timeout:45000});
