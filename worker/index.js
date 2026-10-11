@@ -1,4 +1,5 @@
 import {communityGateway,securityConfig} from './community-gateway.js';
+import {publicWorkHtml,sitemapIndex,staticSitemap,workSitemap} from './seo.js';
 const SUPABASE_URL='https://ibpdxbeltdwkquowjeay.supabase.co';
 const SUPABASE_KEY='sb_publishable_6abnwW_1p-U_Y_DefUXfFQ_Dz_Y2vsD';
 const LEGACY_OG_ORIGIN='https://stats-maker-ogp.vercel.app';
@@ -88,6 +89,19 @@ async function proxyLegacyOg(request){
 export default {
   async fetch(request,env){
     const url=new URL(request.url);
+    if(url.pathname==='/sitemap.xml'||url.pathname==='/sitemap-static.xml'||/^\/sitemap-works-[1-9][0-9]*\.xml$/.test(url.pathname)){
+      if(request.method!=='GET'&&request.method!=='HEAD')
+        return new Response('Method Not Allowed',{status:405,headers:{Allow:'GET, HEAD'}});
+      if(url.pathname==='/sitemap.xml')return sitemapIndex();
+      if(url.pathname==='/sitemap-static.xml')return staticSitemap();
+      return workSitemap(url.pathname.match(/^\/sitemap-works-([0-9]+)\.xml$/)[1]);
+    }
+    const seoWork=url.pathname.match(/^\/work\/([a-zA-Z0-9_-]{8,128})\/?$/);
+    if(seoWork){
+      if(request.method!=='GET'&&request.method!=='HEAD')
+        return new Response('Method Not Allowed',{status:405,headers:{Allow:'GET, HEAD'}});
+      return publicWorkHtml(seoWork[1]);
+    }
     if(url.pathname==='/api/health'){
       return Response.json({ok:true,service:'stats-maker',release:'r26p4-prep',hosting:'cloudflare-workers',ogBackend:'vercel-stage1'},{headers:{'Cache-Control':'no-store'}});
     }
