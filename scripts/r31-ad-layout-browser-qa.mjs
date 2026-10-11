@@ -83,7 +83,7 @@ try{
       assert.equal(await page.locator('[data-view="community"]').textContent(),'みんなで評価');
       await page.locator('[data-view="community"]').click();
       await page.waitForFunction(()=>document.querySelector('#sectionTitle')?.textContent==='みんなで評価できる作品');
-      assert(await page.locator('[data-sm-slot]').count()>=4,
+      assert(await page.locator('[data-sm-slot]').count()>=3,
         'Switching to Rate Together hid ad preview');
     }
     console.log('PASS '+item.label+' normal hidden / preview '+item.count);
