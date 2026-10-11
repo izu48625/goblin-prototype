@@ -35,7 +35,7 @@
     amount_bucket:['0','1-3','4-10','11-20','21+'],
     work_code:[]
   };
-  const pageMap={discover:'discover',public:'published',my:'my_works',rate:'rating_legacy',
+  const pageMap={discover:'discover',public:'published',my:'my_works',works:'my_works',rate:'rating_legacy',
     editor:'editor',base:'home'};
   function group(){
     if(document.body?.dataset.smAdPage)return pageMap[document.body.dataset.smAdPage]||'unknown';
