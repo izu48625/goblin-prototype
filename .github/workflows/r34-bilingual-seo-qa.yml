@@ -1,0 +1,45 @@
+name: R34 Bilingual SEO and Public Sitemap QA
+on:
+  pull_request:
+    paths:
+      - "worker/index.js"
+      - "worker/seo.js"
+      - "wrangler.jsonc"
+      - "robots.txt"
+      - "index.html"
+      - "discover.html"
+      - "public.html"
+      - "my.html"
+      - "rate.html"
+      - "base/index.html"
+      - "app/editor.html"
+      - "en/**"
+      - "ja/**"
+      - "scripts/build-cloudflare.mjs"
+      - "scripts/r34-seo-edge-test.mjs"
+      - ".github/workflows/r34-bilingual-seo-qa.yml"
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  bilingual-seo-no-leaks:
+    runs-on: ubuntu-latest
+    timeout-minutes: 8
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+      - name: Verify syntax
+        run: |
+          node --check worker/seo.js
+          node --check worker/index.js
+          node --check scripts/r34-seo-edge-test.mjs
+      - name: SEO, visibility, XSS, and multilingual tests
+        run: node scripts/r34-seo-edge-test.mjs
+      - name: Confirm Workers assets include both languages
+        run: |
+          npm run build:cloudflare
+          test -f dist/en/index.html
+          test -f dist/ja/index.html
+          grep -q 'Sitemap: https://statsmaker.app/sitemap.xml' dist/robots.txt
