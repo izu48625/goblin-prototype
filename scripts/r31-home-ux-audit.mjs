@@ -10,6 +10,6 @@ assert(!js.includes('columnManagerVisible'));
 assert(!js.includes('toggleColumnManage'));
 assert(!js.includes("classList.add('hidden');\n      $('columnManage')"));
 assert(nav.includes('globalDiscoverBtn'));
-assert(ad.includes("inCommunity?'main.app':'header.topbar'"));
+assert(ad.includes("['header.topbar','afterend','home-inline'"),'Home/Community preview must follow the top action bar');
 assert(!html.includes('ins class="adsbygoogle"'));
 console.log('R31 Home UI no legacy toggles and no real ad serving PASS');
