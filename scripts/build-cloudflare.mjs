@@ -5,7 +5,7 @@ import {fileURLToPath} from 'node:url';
 const root=dirname(dirname(fileURLToPath(import.meta.url)));
 const out=join(root,'dist');
 
-const directories=['app','base','cloud','css','js'];
+const directories=['app','base','cloud','css','js','en','ja'];
 const files=[
   'index.html',
   'discover.html',
