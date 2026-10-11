@@ -17,8 +17,8 @@ assert(ja.includes(originalIntro.ja),'Japanese introduction changed unexpectedly
 assert(en.includes(originalIntro.en),'English introduction changed unexpectedly');
 for(const [s,language] of [[ja,'ja'],[en,'en']]){
   assert(s.includes('data-sm-localized-landing="'+language+'"'));
-  assert(s.includes('/cloud/global-locale.css?v=r31nav2'));
-  assert(s.includes('/cloud/global-locale.js?v=r34landing1'));
+  assert(s.includes('/cloud/global-locale.css?v=r35support1'));
+  assert(s.includes('/cloud/global-locale.js?v=r35support1'));
   assert(s.includes('hreflang="en"')&&s.includes('hreflang="ja"'));
 }
 const browser=await chromium.launch({headless:true});
@@ -42,7 +42,7 @@ try{
     assert.equal(await page.locator('header nav').count(),0,'Landing has duplicate old top navigation');
     assert.equal(await page.locator('.grid article').count(),4);
     assert.equal(await page.locator('.hero h1').count(),1);
-    assert.equal(await page.locator('details').count(),3);
+    assert.equal(await page.locator('main details').count(),3);
     const geometry=await page.evaluate(()=>{
       const card=document.querySelector('.grid article');
       const bar=document.querySelector('.globalLocaleBar');
