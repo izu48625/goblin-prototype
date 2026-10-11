@@ -79,12 +79,12 @@ try{
   await page.locator('#sm-analytics-consent button').last().click();
   await page.waitForFunction(()=>window.__ga4DummyLoaded===true);
   const after=await page.evaluate(()=>{
-    return {state:window.SM_ANALYTICS.state(),dataLayer:window.dataLayer};
+    return {state:window.SM_ANALYTICS.state(),dataLayer:window.dataLayer.map(x=>Array.from(x))};
   });
   assert.equal(after.state.consent,'granted');
   assert.equal(after.state.loaded,true);
   assert(requests.some(x=>x.includes('googletagmanager.com/gtag/js?id=G-TEST1234')));
-  const calls=after.dataLayer.map(x=>Array.from(x));
+  const calls=after.dataLayer;
   const config=calls.find(x=>x[0]==='config');
   const pageView=calls.find(x=>x[0]==='event'&&x[1]==='page_view');
   assert.equal(config[1],'G-TEST1234');
