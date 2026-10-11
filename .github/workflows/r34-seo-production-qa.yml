@@ -1,0 +1,30 @@
+name: R34 Production English and Public SEO QA
+on:
+  push:
+    branches: [main]
+    paths:
+      - "en/**"
+      - "ja/**"
+      - "worker/seo.js"
+      - "worker/index.js"
+      - "wrangler.jsonc"
+      - "robots.txt"
+      - "scripts/r34-seo-production-qa.mjs"
+      - ".github/workflows/r34-seo-production-qa.yml"
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  live-seo:
+    runs-on: ubuntu-latest
+    timeout-minutes: 8
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+      - run: node --check scripts/r34-seo-production-qa.mjs
+      - name: Read-only production URL and sitemap verification
+        env:
+          BASE_URL: https://statsmaker.app
+        run: node scripts/r34-seo-production-qa.mjs
