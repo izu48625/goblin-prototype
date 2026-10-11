@@ -61,6 +61,13 @@
       home.setAttribute('aria-label',lang==='ja'?'ホームを開く':'Open Home');
     }
     bar.setAttribute('aria-label',lang==='ja'?'表示言語を切り替える':'Choose display language');
+    document.querySelectorAll('[data-sm-legal-link]').forEach(link=>{
+      const section=link.dataset.smLegalLink;
+      const labels={terms:['利用規約','Terms'],privacy:['プライバシー','Privacy'],contact:['問い合わせ','Contact']};
+      if(!labels[section])return;
+      link.textContent=labels[section][lang==='ja'?0:1];
+      link.href='/'+lang+'/legal.html#'+section;
+    });
   }
   function set(next){
     const lang=normalize(next);
