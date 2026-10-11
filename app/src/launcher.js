@@ -77,8 +77,9 @@ function openExtension(type){
       delete project.settings.sourceSheetId;
     }
     saveProject(project);
-    location.href=`app/editor.html?v=r27h1&id=${encodeURIComponent(project.id)}`+
+    const editorUrl=`app/editor.html?v=r27h1&id=${encodeURIComponent(project.id)}`+
       (communityMode?`&from=community&topic=${encodeURIComponent(communityTopicId)}`:'');
+    location.href=window.SM_AD_PREVIEW_NAV?.url(editorUrl)||editorUrl;
   }catch(error){
     console.error(error);
     alert((language==="ja"?"拡張機能を開けませんでした：":"Could not open visual tool: ")+(error?.message||error));
