@@ -11,6 +11,7 @@
 - 英語 `https://statsmaker.app/en/`：free chart maker, rankings, comparisons, rating sheets, radar charts, tier lists, anime/sports/game comparisons 等の実在機能を説明。
 - ページ本文も各言語で独立して作成。双方の `rel="alternate" hreflang="ja"/"en"/"x-default"` とcanonicalを整備。
 - 日本語・英語の入口から `?lang=ja/en` でHome/Discoverを開き、ローカルの表示言語を明示して引き継ぐ。Google/Appleログインの追加を意味しない。
+- ユーザー要望で紹介文・見出し・SEOメタ情報は**維持**し、グラフ4種類の特徴紹介カードのみ省スペース化。共通Homeナビ（HOME｜Discover｜JA/EN）を両言語の紹介ページに適用し、言語切替では `/en/` と `/ja/` を正しく相互移動できるようにする。
 - 検索順位の保証や自動翻訳、架空のレビュー／作品数／集計値は掲載しない。
 
 ### 一般公開作品（Public）のみSEOインデックス対象
@@ -34,7 +35,9 @@
 ## 英語流入を増やすための残作業
 
 1. 本番のHTML・サイトマップ・canonical・robotsを確認し、Publicのみ掲載されていることをQA。
-2. Google Search Console（無料）でドメイン所有権を確認し、`sitemap.xml` を送信する。Search Consoleのアカウント操作・DNS変更が必要な場合はユーザー本人が承認して操作する。
+2. **[ ] 未完了：Google Search Console（無料）に `statsmaker.app` を登録し、ドメイン所有権を確認する。** DNS操作や外部アカウント接続はユーザー本人の承認が必要。
+   **[ ] 未完了：Search Consoleの「インデックス作成」→「サイトマップ」で `https://statsmaker.app/sitemap.xml` を送信する。** 送信済みではない。送信後にステータスとPublic作品の検索登録状況を確認する。
+   **[ ] 未完了：英語・日本語の検索クエリ、掲載順位、表示回数、クリック数の確認を開始する。** GA4のPC保留とは独立して進められる。
 3. Search Consoleの検索パフォーマンスで英語・日本語クエリ、表示回数、CTR、掲載順位、国別の流入を観測する。順位・インデックス登録はGoogleが決定し、保証されない。
 4. 作品の英語検索を増やすには、**英語で作成された公開作品のタイトル・説明・評価項目**が重要。機械翻訳の大量生成や、英語のキーワードだけを不自然に詰め込まない。
 5. AdSense審査前に公開作品の通報・モデレーション・適切な規約・プライバシー・著作権対応などをR35で整える。

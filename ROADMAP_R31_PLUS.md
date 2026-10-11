@@ -94,7 +94,10 @@ Heatmap / Waffle / Stat Board は現行のユーザー向け対象外。内部�
 
 - 日本語 `/ja/` と英語 `/en/` に独立した検索用コンテンツ、canonical、hreflang。
 - 一般公開作品のみ `/work/:id` に読み取り専用SEO紹介ページ。Public-only動的サイトマップ、robots.txt。詳しくは [SEO_R34.md](SEO_R34.md)。
-- GA4保留のままSEO作業は独立して実施。次はGoogle Search Console（無料）で所有権を確認し、sitemap.xmlを登録する。本人操作が必要な段階は事前確認。
+- GA4保留のままSEO作業は独立して実施。紹介ページの文章は保持し、特徴紹介カードをコンパクト化。紹介ページにも共通固定バー（HOME｜Discover｜JA/EN）を適用。
+- **[ ] 未完了：Google Search Console（無料）に `statsmaker.app` のプロパティを登録・所有権を確認。** DNS変更や外部アカウント操作は本人が実施・承認する。
+- **[ ] 未完了：Search Console → インデックス作成 → サイトマップ → `https://statsmaker.app/sitemap.xml` を送信。** 送信後は読み込み結果・インデックス状況・英語/日本語の検索クエリを確認する。実施済みと偽らない。
+- [ ] 公開作品だけの `/work/:id` がインデックスされ、URL限定・非公開作品が検索対象外であることを継続監視。
 - 検索順位・登録は保証されない。実際のサイトでの検証・改善を継続。
 
 ## R35 — 公開作品・Community安全性と審査準備
