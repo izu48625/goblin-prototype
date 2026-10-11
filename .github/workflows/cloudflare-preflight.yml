@@ -26,6 +26,8 @@ on:
       - "scripts/r29-backup-restore-test.mjs"
       - "scripts/r29-source-link-safety-test.mjs"
       - "scripts/r29-mobile-backup-ui-test.mjs"
+      - "scripts/r30-storage-and-max-data-qa.mjs"
+      - "scripts/r30-home-corrupt-recovery-qa.mjs"
       - ".github/workflows/production-smoke.yml"
       - "R29_P2_INTERNAL_HOOK_EXECUTE_RESTRICT.sql"
       - "R29_P2_INTERNAL_HOOK_EXECUTE_ROLLBACK.sql"
@@ -94,6 +96,8 @@ jobs:
           node --check app/src/core/source-sync.js
           node --check scripts/r29-mobile-backup-ui-test.mjs
           node --check scripts/r29-home-backup-undo-qa.mjs
+          node --check scripts/r30-storage-and-max-data-qa.mjs
+          node --check scripts/r30-home-corrupt-recovery-qa.mjs
           node --check app/src/launcher.js
       - name: R26 edge guard test
         run: node scripts/r26-edge-test.mjs
@@ -112,6 +116,8 @@ jobs:
 
       - name: R29 orphaned chart source isolation and restore
         run: node scripts/r29-source-link-safety-test.mjs
+      - name: R30 fail-closed chart persistence and max 40x10 data
+        run: node scripts/r30-storage-and-max-data-qa.mjs
       - name: Build static bundle
         run: npm run build:cloudflare
       - name: Verify required assets
