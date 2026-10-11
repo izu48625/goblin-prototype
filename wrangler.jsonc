@@ -10,6 +10,10 @@
     "not_found_handling": "404-page",
     "run_worker_first": [
       "/p/*",
+      "/work/*",
+      "/sitemap.xml",
+      "/sitemap-static.xml",
+      "/sitemap-works-*.xml",
       "/api/og*",
       "/api/health",
       "/api/security/*",
