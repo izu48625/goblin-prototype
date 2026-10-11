@@ -22,6 +22,11 @@
     });
     const label=bar.querySelector('.globalLocaleLabel');
     label.textContent=lang==='ja'?'表示言語':'Language';
+    const discover=bar.querySelector('.globalDiscoverBtn');
+    if(discover){
+      discover.title=lang==='ja'?'公開作品を探す':'Explore published works';
+      discover.setAttribute('aria-label',lang==='ja'?'Discoverを開く':'Open Discover');
+    }
     const home=bar.querySelector('.globalHomeBtn');
     if(home){
       home.title=lang==='ja'?'ホームへ':'Home';
@@ -71,9 +76,10 @@
     bar=document.createElement('div');
     bar.className='globalLocaleBar';
     bar.setAttribute('role','group');
-    bar.innerHTML='<a class="globalHomeBtn" href="index.html?fresh=1" aria-label="ホームを開く">HOME</a><div class="globalLocaleControls"><span class="globalLocaleLabel">表示言語</span><div class="globalLocaleSwitch"><button type="button" data-global-lang="ja" aria-label="日本語">JA</button><button type="button" data-global-lang="en" aria-label="English">EN</button></div></div>';
+    bar.innerHTML='<nav class="globalNavLinks" aria-label="Site navigation"><a class="globalHomeBtn" href="index.html?fresh=1" aria-label="ホームを開く">HOME</a><a class="globalDiscoverBtn" href="discover.html" aria-label="Discoverを開く">Discover</a></nav><div class="globalLocaleControls"><span class="globalLocaleLabel">表示言語</span><div class="globalLocaleSwitch"><button type="button" data-global-lang="ja" aria-label="日本語">JA</button><button type="button" data-global-lang="en" aria-label="English">EN</button></div></div>';
     document.body.prepend(bar);
     bar.querySelector('.globalHomeBtn').href=new URL(homePath(),location.href).href;
+    bar.querySelector('.globalDiscoverBtn').href=new URL(location.pathname.startsWith('/app/')?'../discover.html':'discover.html',location.href).href;
     bar.querySelector('.globalHomeBtn').addEventListener('click',openHome);
     bar.querySelectorAll('[data-global-lang]').forEach(btn=>btn.addEventListener('click',()=>set(btn.dataset.globalLang)));
     paint();
