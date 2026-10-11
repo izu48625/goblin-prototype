@@ -39,9 +39,9 @@
       ['#panelContent','afterend','editor-sidebar','グラフ編集 · PCサイドパネル下部'],
       ['#mobilePanelContent','afterend','editor-mobile','グラフ編集 · モバイル詳細パネル末尾']
     ]:(path.endsWith('/base/index.html')||path.endsWith('/base'))?[
-      ['main.app','beforeend','home-inline',inCommunity
+      [inCommunity?'main.app':'header.topbar',inCommunity?'beforeend':'afterend','home-inline',inCommunity
         ?'Community · 採点表の後のインライン枠'
-        :'Home · 入力コンテンツの末尾']
+        :'Home · メイン操作直下のインライン枠']
     ]:[];
   function mount(){
     for(const [selector,position,id,label] of zones){
