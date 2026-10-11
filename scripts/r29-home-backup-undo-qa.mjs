@@ -9,6 +9,19 @@ try{
   await page.goto(BASE+'/index.html?qa=r29-home-undo',{waitUntil:'domcontentloaded',timeout:60000});
   const home=page.frameLocator('#basicFrame');
   await home.locator('#titleInput').waitFor({state:'visible',timeout:30000});
+  // The input can be visible before the Home module binds autosave events.
+  // Wait for the exported bridge rather than racing first-run initialization.
+  const ready=await home.locator('body').evaluate(async()=>{
+    for(let i=0;i<100;i++){
+      if(typeof window.__statsMakerGetLibrary==='function' &&
+         typeof window.__statsMakerCanPersist==='function'){
+        return window.__statsMakerCanPersist();
+      }
+      await new Promise(resolve=>setTimeout(resolve,100));
+    }
+    throw new Error('Home runtime did not initialize before backup QA input');
+  });
+  assert.equal(ready,true,'Empty isolated Home unexpectedly blocked first-run saves');
   await home.locator('#titleInput').fill('PRECIOUS OLD SHEET');
   await home.locator('.nameInput').first().fill('Keep me');
   await home.locator('.nameInput').first().press('Tab');
