@@ -2,7 +2,34 @@
 
 更新日: 2026-10-11
 正式ソース: GitHub `main` / 本番 `https://statsmaker.app/`
-確定済み基準: R30 Data Safety & Recovery、HEAD `e3de485d0ac90ef401de25d4ac7b8f852e125f2b`
+基準: GitHub `main` の最新HEADを毎回確認する（固定SHAを最新版とみなさない）。R30 Data Safety & Recovery以降のR31 UI、R32広告配置プレビュー、R33無料解析基盤まで実装済み。
+
+## 現在の作業状態・次に進める開発（2026-10-11）
+
+### 保留：Google Analytics 4（GA4）無料アクセス解析の有効化
+
+**状態：ユーザー指示によりPCで操作できる時まで一時停止。ここから先を勝手に進めない。**
+- GA4の「Stats Maker」アカウント／プロパティとStats Makerの**ウェブデータストリームは本人が作成済み**。新しく作り直さない。
+- iPhone SafariではGoogle Analytics管理画面の表示が崩れ、ストリーム詳細と測定ID（`G-...`）を取得できなかった。
+- **PCでの再開手順**：同じGoogleアカウントで `https://analytics.google.com/` → 管理 → データ ストリーム → 作成済みStats Maker Web → 測定IDを確認 → このチャットへ測定IDを送る。
+- R33の `cloud/analytics.js`（プライバシーに配慮したイベント、同意機構）および `ANALYTICS_R33.md` は保持。**`cloud/analytics-config.js` は `enabled:false`、`measurementId:''` のまま固定**し、解析イベントを外部送信しない。
+- ID受領後もいきなり有効化せず、プライバシーポリシー／適切な同意管理を確認し、本人承認のうえで有効化→本番で検証する。無料運用を維持する。
+- ここでの「Google Analytics」は**解析サービス**のことで、ロードマップから除外したGoogle/Apple **ログイン認証**の復活を意味しない。
+- 期限や自動リマインダーは設定しない。ユーザーから再開の指示が来たときに再開。
+
+### 次の最優先：検索流入を増やす「公開作品SEO」＋AdSense審査の土台
+
+1. **SEO監査**：実際の `/p/:id`、`/public`、`/discover` のindex/noindex、canonical、OGP、作品データのレンダリング、検索エンジンの見え方を調査（現状 `worker/index.js` のOGP中継は `noindex,follow`、静的 `sitemap.xml` は未配置）。
+2. **Publicのみ検索対象**：一般公開作品だけインデックス対象を検討し、Unlisted／Private、評価中の下書き、所有者専用画面を検索から保護。作品タイトルや内容は公開時の同意・設定に沿って表示する。
+3. **動的サイトマップ・正規URL・構造化メタデータ**：無料のCloudflare Workersの範囲内で設計。データ量や無料枠、作品更新時の無駄なDBアクセスに注意。
+4. **AdSense審査・ユーザー投稿の安全性**：利用規約、プライバシーポリシー、問い合わせ／通報、スパム・不適切作品対応、使い方や作例などの独自コンテンツを監査。
+5. **テスト・リリース**：Google検索での順位・AdSense審査通過・売上は保証できない。外部アカウントへのログインや登録が必要な段階では止めて本人に確認する。課金・広告配信・データ削除・Google Search Console登録は無断で行わない。
+
+### 実装済みの開発基盤
+- **R31**：HomeのUI整理、DiscoverとCommunityのラベル、全主要ページの広告点線枠。
+- **R32**：Discoverカード間、公開作品ランキング間、PC右サイド、保存・共有画面、閉じられるアンカー／全画面候補の**配信前プレビュー**。
+- **R33**：無料GA4向けの行動イベントと基本同意管理のコードを本番反映済み。ただし計測は**未有効化**。
+- 将来の広告配信開始は別途承認が必要。Home／編集／Communityの操作性、iPhone Safari、データ耐久性と無料枠を優先。
 
 ## 製品方針
 
