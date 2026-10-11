@@ -52,7 +52,10 @@ function renderLanguage(){
 function getLiveSheet(){
   try{
     const lib=frame.contentWindow?.__statsMakerGetLibrary?.();
-    if(lib&&!communityMode)localStorage.setItem("statsMakerV014Library",JSON.stringify(lib));
+    // The Home iframe reports when its persisted library is corrupt. Never
+    // bypass its fail-closed autosave safeguard during extension navigation.
+    if(lib&&!communityMode&&frame.contentWindow?.__statsMakerCanPersist?.()!==false)
+      localStorage.setItem("statsMakerV014Library",JSON.stringify(lib));
     return frame.contentWindow?.__statsMakerGetActiveSheet?.()||null;
   }catch(error){console.error("Base bridge failed",error);return null}
 }
