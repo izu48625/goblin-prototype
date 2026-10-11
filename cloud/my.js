@@ -227,8 +227,11 @@
   async function handlePendingAuth(){
     const pending=pendingAuth();
     const guard=$('ownershipGuard');
-    if(guard){guard.classList.add('hidden');guard.textContent='';}
+    // Preserve a previously detected ownership mismatch until a new auth
+    // attempt; repeated refresh must not silently hide this warning.
+    if(guard&&pending){guard.classList.add('hidden');guard.textContent='';}
     if(!pending)return;
+    if(!['link','signin'].includes(pending.mode)){clearPendingAuth();return;}
     if(Date.now()-Number(pending.startedAt||0)>15*60*1000){clearPendingAuth();return;}
 
     const providers=providerNames();
@@ -396,7 +399,7 @@
       if(redirectError){
         clearPendingAuth();
         setStatus(c().authError+redirectError,'error');
-      }else if(!pendingAuth()){
+      }else if(!pendingAuth() && $('ownershipGuard')?.classList.contains('hidden')){
         setStatus('');
       }
       await loadAuthSettings();
@@ -422,7 +425,17 @@
     try{
       const {data:sessionData,error:sessionError}=await sb.auth.getSession();
       if(sessionError)throw sessionError;
-      const user=sessionData?.session?.user||null;
+      let user=null;
+      if(sessionData?.session){
+        // Verify the cached session against the Auth server before deciding
+        // to LINK a provider to an existing guest/owner identity.
+        const {data:userData,error:userError}=await sb.auth.getUser();
+        if(userError)throw userError;
+        if(!userData?.user || userData.user.id!==sessionData.session.user?.id){
+          throw new Error('Session identity could not be verified; link cancelled');
+        }
+        user=userData.user;
+      }
       savePendingAuth(provider,user);
       if(user){
         const {data,error}=await sb.auth.linkIdentity({
@@ -430,7 +443,7 @@
           options:{redirectTo}
         });
         if(error)throw error;
-        if(data?.url){
+        if(typeof data?.url==='string'&&data.url){
           location.assign(data.url);
           return;
         }
@@ -440,13 +453,14 @@
           options:{redirectTo}
         });
         if(error)throw error;
-        if(data?.url){
+        if(typeof data?.url==='string'&&data.url){
           location.assign(data.url);
           return;
         }
       }
-      setStatus(c().authLinked,'ok');
-      await refresh();
+      // An empty/missing provider redirect is NOT a successful auth/link.
+      // Never claim the guest owner ID was secured without a verified return.
+      throw new Error('Authentication redirect URL was not returned');
     }catch(error){
       console.error('[Stats Maker] provider auth failed',error);
       clearPendingAuth();
