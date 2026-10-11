@@ -28,4 +28,16 @@ assert.equal(en.title,'GOAT (Copy)');
 assert.equal(topic.title,'GOAT (Remix) （Remix） (Remix)','Source topic was modified');
 saveSheet(result);
 assert.equal(JSON.parse(stored.get('statsMakerV014Library')).sheets[0].title,'GOAT（コピー）');
-console.log('R27 copy labels and lineage regression PASS');
+const originalRaw=stored.get('statsMakerV014Library');
+for(const raw of ['{invalid-remix-backup',JSON.stringify({notSheets:true}),JSON.stringify({sheets:[null]})]){
+  stored.set('statsMakerV014Library',raw);
+  assert.throws(()=>saveSheet(result),/Saved Home library/,
+    'Remix must refuse to replace unreadable Home data');
+  assert.equal(stored.get('statsMakerV014Library'),raw,
+    'Remix erased unreadable Home backup');
+}
+stored.set('statsMakerV014Library',originalRaw);
+saveSheet(en);
+assert.equal(JSON.parse(stored.get('statsMakerV014Library')).sheets.length,2,
+  'Valid copies must still append rather than reset the library');
+console.log('R27/R30 copy labels, lineage, corrupt-storage guard regression PASS');
