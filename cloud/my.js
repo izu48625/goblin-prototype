@@ -48,7 +48,7 @@
   }
   function esc(value){return String(value??'').replace(/[&<>"']/g,ch=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[ch]))}
   function setStatus(message='',kind=''){
-    const el=$('authStatus'); if(!el)return;
+    const el=$('myStatus'); if(!el)return;
     el.textContent=message; el.className='status'+(kind?' '+kind:'');
   }
   function dateText(value){
