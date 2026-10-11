@@ -299,8 +299,16 @@ async function browserEditorHome(){
 
     await page.locator('.globalHomeBtn').waitFor({state:'visible',timeout:30000});
     assert(await frame.locator('#editorHomeBtn').isHidden(),'Duplicate embedded HOME is visible');
-    const buttons=frame.locator('.topActions > :not(.hidden):visible');
-    assert(await buttons.count()>=4,'Remaining Home actions must stay visible');
+    // Discover moved to the shared top bar; the mobile Home action row
+    // intentionally contains only Publish, New and More.
+    assert(await page.locator('.globalDiscoverBtn').isVisible(),
+      'Discover must be pinned beside HOME');
+    assert(await frame.locator('#discoverBtn').count()===0,
+      'Old embedded Discover button must be removed');
+    for(const id of ['publishBtn','newSheetBtn','mobileHeaderMoreBtn']){
+      assert(await frame.locator('#'+id).isVisible(),
+        'Required mobile Home action missing: '+id);
+    }
     await page.locator('.globalHomeBtn').click();
     await page.waitForTimeout(700);
     assert(await frame.locator('#titleInput').inputValue()==='','Editor HOME should clear current title');
