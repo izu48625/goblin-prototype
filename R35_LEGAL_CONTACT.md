@@ -50,9 +50,9 @@ Do **not** create an anonymous/public moderator dashboard. Manually confirm any 
 
 ## R30 incident
 
-2026-10-11 smoke build of 35cec812 failed at scripts/r30-home-corrupt-recovery-qa.mjs: the test clicked "More" and then Restore, which was hidden. "More" is a **toggle**. The QA now checks whether the tray is open before clicking and asserts its visibility; this prevents accidentally closing an already open tray. This does **not** establish that actual manual restore works until the corrected browser QA successfully runs. Do not remove the test or hide its assertions.
+2026-10-11 smoke build of 35cec812 failed at scripts/r30-home-corrupt-recovery-qa.mjs: the test clicked "More" and then Restore, which was hidden. "More" is a **toggle**. The QA now checks whether the tray is open before clicking and asserts its visibility; this prevents accidentally closing an already open tray. The corrected R30 browser recovery QA passed on main's 2026-10-11 production Smoke run. Keep the test and its assertions enabled to catch future regressions.
 
-## Follow-on## Public copy accuracy audit (R35 P4)
+## Public copy accuracy audit (R35 P4–P5)
 
 - The legal/contact form clearly distinguishes optional general-question email from required email for copyright, appeal and privacy requests. Copyright/appeal work URLs are required in both languages, matching frontend and backend validation.
 - Removed internal legal-review status from the visitor-facing page; **this does not mean legal review is complete**. Keep legal review open as an operational task.
@@ -61,6 +61,6 @@ Do **not** create an anonymous/public moderator dashboard. Manually confirm any 
 
 ## Follow-on
 
-- Final legal review and real operator contact/identity requirements; mail notification only with explicit approval and free/paid cost review.
+- The core user-facing policies and forms are implemented; keep them stable. Complete any legally required real operator identity/contact disclosures and review the retention policy in a separate operational step. Mail notification remains deferred unless explicitly requested.
 - Better bot prevention for public submissions, user appeal operations, and private moderation interface.
 - Defined verified deletion/retention operational policy (no promises about automatic deletion until implemented).
