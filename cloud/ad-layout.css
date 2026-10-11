@@ -64,3 +64,33 @@
     padding:9px 8px;
   }
 }
+
+
+/* R31: design-preview slots should be easy to spot on every route. */
+.sm-ad-preview[data-sm-slot="discover-primary"],
+.sm-ad-preview[data-sm-slot="public-primary"],
+.sm-ad-preview[data-sm-slot="works-inline"],
+.sm-ad-preview[data-sm-slot="rate-inline"]{
+  min-height:90px;
+  margin:12px auto 16px;
+}
+.sm-ad-preview[data-sm-slot="editor-top"]{
+  width:calc(100% - 18px);
+  max-width:970px;
+  min-height:65px;
+  margin:6px auto 10px;
+}
+@media(max-width:760px){
+  .sm-ad-preview[data-sm-slot="discover-primary"],
+  .sm-ad-preview[data-sm-slot="public-primary"],
+  .sm-ad-preview[data-sm-slot="works-inline"],
+  .sm-ad-preview[data-sm-slot="rate-inline"]{
+    min-height:78px;
+    margin:8px auto 12px;
+  }
+  .sm-ad-preview[data-sm-slot="editor-top"]{
+    min-height:60px;
+    margin:5px auto 7px;
+    padding:7px;
+  }
+}
