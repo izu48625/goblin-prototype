@@ -41,3 +41,26 @@
 @media(min-width:761px){
   .sm-ad-preview[data-sm-slot="editor-mobile"]{display:none}
 }
+
+
+/* R31: make the opt-in preview unmistakable instead of a faint divider. */
+.sm-ad-preview{
+  border:2px dashed #83adf2;
+  background:repeating-linear-gradient(135deg,#152b49,#152b49 14px,#1a3555 14px,#1a3555 28px);
+  box-shadow:inset 0 0 0 1px rgba(130,178,255,.08);
+}
+.sm-ad-preview::before{color:#b2d2ff;letter-spacing:.12em;font-weight:900}
+.sm-ad-preview strong{color:#edf5ff}
+.sm-ad-preview[data-sm-slot="home-inline"]{
+  margin:6px auto 12px;
+  min-height:82px;
+  max-width:none;
+  width:100%;
+}
+@media(max-width:760px){
+  .sm-ad-preview[data-sm-slot="home-inline"]{
+    min-height:78px;
+    margin:6px auto 9px;
+    padding:9px 8px;
+  }
+}

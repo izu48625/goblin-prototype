@@ -1,0 +1,15 @@
+import assert from 'node:assert/strict';
+import {readFile} from 'node:fs/promises';
+const read=async p=>readFile(new URL('../'+p,import.meta.url),'utf8');
+const html=await read('base/index.html'),js=await read('base/js/app.js');
+const nav=await read('cloud/global-locale.js'),ad=await read('cloud/ad-layout.js');
+assert(!html.includes('id="discoverBtn"'));
+assert(!html.includes('id="columnManageBtn"'));
+assert(html.includes('id="columnManage"'));
+assert(!js.includes('columnManagerVisible'));
+assert(!js.includes('toggleColumnManage'));
+assert(!js.includes("classList.add('hidden');\n      $('columnManage')"));
+assert(nav.includes('globalDiscoverBtn'));
+assert(ad.includes("inCommunity?'main.app':'header.topbar'"));
+assert(!html.includes('ins class="adsbygoogle"'));
+console.log('R31 Home UI no legacy toggles and no real ad serving PASS');
