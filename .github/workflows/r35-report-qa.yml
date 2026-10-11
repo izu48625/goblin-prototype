@@ -1,0 +1,36 @@
+name: R35 Public Work Reporting QA
+on:
+  pull_request:
+    paths:
+      - "worker/**"
+      - "cloud/work-report.js"
+      - "cloud/public.js"
+      - "cloud/public.css"
+      - "public.html"
+      - "wrangler.jsonc"
+      - "R35_REPORTS_MIGRATION.sql"
+      - "R35_MODERATION.md"
+      - "scripts/r35-report-qa.mjs"
+      - ".github/workflows/r35-report-qa.yml"
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  report-security-regression:
+    runs-on: ubuntu-latest
+    timeout-minutes: 8
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+      - name: Syntax, isolated report API and previous R34 SEO checks
+        run: |
+          node --check worker/work-report.js
+          node --check cloud/work-report.js
+          node --check worker/index.js
+          node --check cloud/public.js
+          node scripts/r35-report-qa.mjs
+          node scripts/r34-seo-edge-test.mjs
+      - name: Build Cloudflare static assets
+        run: npm run build:cloudflare

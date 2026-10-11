@@ -407,6 +407,7 @@
           <button id="shareImageBtn" class="actionBtn shareImage">${ja?'画像で共有':'Share Image'}</button>
           ${isOwner?`<button id="ownerManageBtn" class="actionBtn owner">${ja?'編集・公開設定':'Edit / Publish settings'}</button>`:''}
         </div>
+        ${data.visibility==='public'&&!isOwner?`<div class="reportWorkLine"><button id="reportTopicBtn" class="reportTopicBtn" type="button">${ja?'この作品を通報':'Report this work'}</button></div>`:''}
         ${isOwner?`<div class="ownerHint">${ja?'このブラウザの公開者セッションで開いています。元シートが残っていれば編集画面へ戻せます。':'You are viewing this with the publisher session. If the local source sheet still exists, it will be selected when you return.'}</div>`:''}
 
         <div class="notice remixNotice">
