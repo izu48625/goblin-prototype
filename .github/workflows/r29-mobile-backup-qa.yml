@@ -6,6 +6,7 @@ on:
       - "app/css/editor.css"
       - "app/editor.html"
       - "scripts/r29-mobile-backup-ui-test.mjs"
+      - "scripts/r30-home-corrupt-recovery-qa.mjs"
       - ".github/workflows/r29-mobile-backup-qa.yml"
   workflow_dispatch:
 
@@ -34,3 +35,4 @@ jobs:
           trap 'kill $SERVER_PID || true' EXIT
           sleep 2
           BASE_URL=http://127.0.0.1:8765 node scripts/r29-mobile-backup-ui-test.mjs
+          BASE_URL=http://127.0.0.1:8765 node scripts/r30-home-corrupt-recovery-qa.mjs
