@@ -4,8 +4,8 @@ const pages=['base/index.html','app/editor.html','discover.html','public.html','
 for(const p of pages){
   const s=await readFile(new URL('../'+p,import.meta.url),'utf8');
   const prefix=p.startsWith('base/')||p.startsWith('app/')?'../':'';
-  assert(s.includes(prefix+'cloud/ad-layout.js?v=r31ad3'),p+' lacks ad preview script');
-  assert(s.includes(prefix+'cloud/ad-layout.css?v=r31ad3'),p+' lacks ad preview stylesheet');
+  assert(s.includes(prefix+'cloud/ad-layout.js?v=r32ad1'),p+' lacks ad preview script');
+  assert(s.includes(prefix+'cloud/ad-layout.css?v=r32ad1'),p+' lacks ad preview stylesheet');
   assert(s.includes('data-sm-ad-page='),p+' lacks explicit ad page marker');
   assert(!/adsbygoogle|googlesyndication|doubleclick|data-ad-client/i.test(s),
     p+' unexpectedly embeds a real ad vendor');

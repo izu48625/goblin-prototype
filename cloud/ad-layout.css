@@ -94,3 +94,101 @@
     padding:7px;
   }
 }
+
+
+/* R32: revenue-oriented candidate inventory, STILL non-serving previews only. */
+.sm-ad-preview[data-sm-slot="discover-infeed"]{
+  grid-column:1/-1;
+  min-height:104px;
+  width:100%;
+  max-width:none;
+  margin:2px 0;
+}
+.sm-ad-preview[data-sm-slot="public-between-rankings"],
+.sm-ad-preview[data-sm-slot="public-share"],
+.sm-ad-preview[data-sm-slot="editor-share"]{
+  width:100%;max-width:none;margin:13px auto;min-height:82px;
+}
+.sm-ad-preview[data-sm-slot="public-share"]{min-height:66px}
+.sm-ad-preview[data-sm-slot="editor-share"]{
+  min-height:62px;padding:9px;margin:10px auto;
+}
+.sm-ad-preview[data-sm-slot$="-desktop-rail"]{display:none!important}
+@media(min-width:1600px){
+  /* PC side rails live in reserved whitespace, not over editing controls. */
+  .sm-ad-preview[data-sm-slot$="-desktop-rail"]{
+    display:flex!important;
+    position:fixed;
+    right:13px;top:110px;width:190px;min-height:270px;
+    max-height:min(60vh,470px);
+    z-index:10;margin:0;
+  }
+  html[data-sm-ad-preview="true"] body[data-sm-ad-page="home"] .app{
+    width:calc(100% - 228px);max-width:1370px;
+    margin-left:12px;margin-right:auto;
+  }
+}
+.sm-ad-preview[data-sm-slot$="-anchor"]{
+  position:fixed;
+  left:50%;
+  transform:translateX(-50%);
+  bottom:calc(14px + env(safe-area-inset-bottom));
+  z-index:45;
+  width:min(720px,calc(100% - 24px));
+  min-height:64px;
+  max-height:95px;
+  margin:0;
+  padding:10px 38px 8px 12px;
+  border-style:dashed;
+  box-shadow:0 8px 36px rgba(0,0,0,.48);
+}
+.sm-ad-preview-close{
+  position:absolute;right:7px;top:7px;
+  display:grid;place-items:center;
+  width:32px;height:32px;min-width:32px;
+  background:#294667;color:white;border:1px solid #85a7d8;
+  border-radius:50%;font-size:20px;cursor:pointer;
+}
+.sm-ad-preview-close:focus-visible,.sm-ad-fullscreen-launch:focus-visible,
+.sm-ad-demo-dismiss:focus-visible{outline:3px solid #c5dbff;outline-offset:2px}
+html[data-sm-ad-preview="true"] body[data-sm-ad-page="discover"] .wrap,
+html[data-sm-ad-preview="true"] body[data-sm-ad-page="public"] .wrap{
+  padding-bottom:calc(116px + env(safe-area-inset-bottom));
+}
+.sm-ad-fullscreen-launch{
+  display:block;margin:24px auto 12px;padding:9px 14px;
+  border-radius:9px;border:1px solid #405c82;
+  background:#13283f;color:#a9bdd7;font-size:11px;font-weight:800;
+  cursor:pointer;
+}
+.sm-ad-fullscreen-demo{
+  position:fixed;inset:0;z-index:999;
+  display:grid;place-items:center;
+  padding:calc(16px + env(safe-area-inset-top)) 16px calc(16px + env(safe-area-inset-bottom));
+  background:rgba(4,12,24,.96);
+}
+.sm-ad-fullscreen-demo .sm-ad-preview{
+  width:min(460px,100%);min-height:220px;padding:22px;max-height:80vh;
+}
+.sm-ad-demo-dismiss{
+  margin-top:15px;border:1px solid #7899c4;background:#274b79;
+  color:#fff;border-radius:10px;min-height:44px;padding:0 25px;
+  cursor:pointer;font-size:13px;font-weight:850;
+}
+@media(max-width:760px){
+  .sm-ad-preview[data-sm-slot="discover-infeed"]{
+    min-height:84px;margin:2px auto 5px;
+  }
+  .sm-ad-preview[data-sm-slot="public-between-rankings"],
+  .sm-ad-preview[data-sm-slot="public-share"],
+  .sm-ad-preview[data-sm-slot="editor-share"]{
+    min-height:65px;
+  }
+  /* Safari bottom navigation: anchor stays above the lower chrome. */
+  .sm-ad-preview[data-sm-slot$="-anchor"]{
+    bottom:calc(67px + env(safe-area-inset-bottom));
+    min-height:64px;
+    padding-right:42px;
+    max-height:84px;
+  }
+}
