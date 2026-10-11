@@ -92,7 +92,7 @@
     // No scoring or public-data writes happen on a display-language change.
     location.reload();
   }
-  const homePath=()=>location.pathname.startsWith('/app/')?'../index.html?fresh=1':'index.html?fresh=1';
+  const homePath=()=>legalLang()?'/index.html?fresh=1':(location.pathname.startsWith('/app/')?'../index.html?fresh=1':'index.html?fresh=1');
   function openHome(event){
     event.preventDefault();
     const frame=document.getElementById('basicFrame');
@@ -123,7 +123,7 @@
     bar.innerHTML='<nav class="globalNavLinks" aria-label="Site navigation"><a class="globalHomeBtn" href="index.html?fresh=1" aria-label="ホームを開く">HOME</a><a class="globalDiscoverBtn" href="discover.html" aria-label="Discoverを開く">Discover</a></nav><div class="globalLocaleControls"><span class="globalLocaleLabel">表示言語</span><div class="globalLocaleSwitch"><button type="button" data-global-lang="ja" aria-label="日本語">JA</button><button type="button" data-global-lang="en" aria-label="English">EN</button></div></div>';
     document.body.prepend(bar);
     bar.querySelector('.globalHomeBtn').href=previewUrl(new URL(landingLang()?'/index.html?lang='+current():homePath(),location.href).href);
-    bar.querySelector('.globalDiscoverBtn').href=previewUrl(new URL(landingLang()?'/discover.html?lang='+current():(location.pathname.startsWith('/app/')?'../discover.html':'discover.html'),location.href).href);
+    bar.querySelector('.globalDiscoverBtn').href=previewUrl(new URL(landingLang()?'/discover.html?lang='+current():(legalLang()?'/discover.html':(location.pathname.startsWith('/app/')?'../discover.html':'discover.html')),location.href).href);
     bar.querySelector('.globalHomeBtn').addEventListener('click',openHome);
     bar.querySelectorAll('[data-global-lang]').forEach(btn=>btn.addEventListener('click',()=>set(btn.dataset.globalLang)));
     paint();
