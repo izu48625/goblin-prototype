@@ -1618,3 +1618,46 @@ html[lang="en"] .rankModeBtn{
   .remixContextActions{gap:8px}
   .remixContextActions .btn{min-height:44px;font-size:12px}
 }
+
+
+/* R31: simplify the Home visual hierarchy. Strong borders belong on editable
+   fields and the data table; group containers are separated by spacing. */
+.topbar.panel{
+  border-color:transparent;
+  box-shadow:none;
+  background:linear-gradient(180deg,rgba(15,29,49,.94),rgba(12,25,43,.84));
+}
+.topbar .titleArea{gap:12px}
+.topbar .fieldLabel{letter-spacing:.045em;color:#a3b5cf}
+.topbar .titleInput,.topbar .descInput,.topbar .sheetSelect{
+  border-color:rgba(90,122,166,.38);
+  background:#101e32;
+  box-shadow:none;
+}
+.topbar .titleInput:focus,.topbar .descInput:focus,.topbar .sheetSelect:focus{
+  border-color:#83aeec;
+  outline:2px solid rgba(112,157,224,.16);
+  outline-offset:1px;
+}
+.topbar .topActions .btn:not(.primary):not(.publishBtn){
+  border-color:transparent;
+  box-shadow:none;
+  background:#162942;
+}
+.sheetPanel.panel{border-color:rgba(69,100,137,.32);box-shadow:none}
+.sheetPanel .sheetToolbar{border-bottom-color:transparent}
+.sheetPanel .columnManage{
+  border-top:0;
+  border-bottom:0;
+  background:transparent;
+  padding-top:8px;
+}
+.sheetPanel .columnChip{border-color:rgba(95,132,175,.26)}
+/* Never rely on a visibility toggle for metric editing. */
+.sheetPanel #columnManage:not(.hidden){display:flex}
+@media(max-width:760px){
+  .topbar.panel{padding:10px 8px;border-radius:12px}
+  .topbar .titleInput,.topbar .descInput,.topbar .sheetSelect{border-radius:10px}
+  .sheetPanel.panel{border-color:rgba(69,100,137,.23)}
+  .sheetPanel .columnManage{padding:8px 6px}
+}
