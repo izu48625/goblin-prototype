@@ -1,0 +1,40 @@
+name: R35 Shared Support Navbar QA
+on:
+  pull_request:
+    paths:
+      - "cloud/global-locale.js"
+      - "cloud/global-locale.css"
+      - "ja/**"
+      - "en/**"
+      - "*.html"
+      - "base/index.html"
+      - "scripts/r35-support-nav-qa.mjs"
+      - "scripts/r34-landing-compact-qa.mjs"
+      - ".github/workflows/r35-support-nav-qa.yml"
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  support-navbar-mobile:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with: {node-version: '22'}
+      - name: Syntax and build
+        run: |
+          node --check cloud/global-locale.js
+          node --check scripts/r35-support-nav-qa.mjs
+          npm run build:cloudflare
+      - name: Install Chromium
+        run: |
+          npm install --no-save playwright@1.56.1
+          npx playwright install --with-deps chromium
+      - name: 320/390px iPhone navigation, support routes, locale regression
+        run: |
+          python3 -m http.server 8765 --directory dist > /tmp/r35-support-http.log 2>&1 &
+          HTTP_PID=$!
+          trap 'kill $HTTP_PID || true' EXIT
+          sleep 2
+          BASE_URL=http://127.0.0.1:8765 node scripts/r35-support-nav-qa.mjs
