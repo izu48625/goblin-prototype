@@ -32,7 +32,8 @@
     depth:['25','50','75','90'],
     origin_type:['card','button','nav','other'],
     eligible:['yes','no'],
-    amount_bucket:['0','1-3','4-10','11-20','21+']
+    amount_bucket:['0','1-3','4-10','11-20','21+'],
+    work_code:[]
   };
   const pageMap={discover:'discover',public:'published',my:'my_works',rate:'rating_legacy',
     editor:'editor',base:'home'};
@@ -68,6 +69,11 @@
     if(!properties||typeof properties!=='object')return out;
     for(const [k,options] of Object.entries(paramsAllowed)){
       if(k==='page_group')continue;
+      if(k==='work_code'){
+        const code=String(properties.work_code||'').toLowerCase();
+        if(/^[a-f0-9]{8}$/.test(code))out.work_code=code;
+        continue;
+      }
       const value=String(properties[k]??'');
       if(options.includes(value))out[k]=value;
     }
@@ -194,9 +200,7 @@
     document.addEventListener('click',ev=>{
       const e=ev.target?.closest?.('button,a');
       if(!e)return;
-      if(e.matches('.browseTab'))dispatch('discover_filter',{filter_type:e.dataset.view==='community'?'community':'all'});
-      else if(e.matches('.categoryBtn'))dispatch('discover_filter',{filter_type:'category'});
-      else if(e.matches('.sortBtn'))dispatch('discover_filter',{filter_type:['newest','popular','remix'].includes(e.dataset.sort)?e.dataset.sort:'other'});
+      if(e.matches('.sortBtn'))dispatch('discover_filter',{filter_type:['newest','popular','remix'].includes(e.dataset.sort)?e.dataset.sort:'other'});
       else if(e.matches('.workMainLink,.openLabel'))dispatch('discover_open_work',{origin_type:e.matches('.workMainLink')?'card':'button'});
       else if(e.id==='extLauncher')dispatch('home_action',{action_type:'template_open'});
       else if(e.id==='publishBtn')dispatch('home_action',{action_type:'publish_open'});
@@ -258,15 +262,17 @@
   function start(){
     clickTracking();
     scrollTracking();
-    observeLiveAds();
+    if(valid||debug)observeLiveAds();
     // Prevent duplicate page views for Home's same-origin editable iframe.
     if(!framed){
       if(valid&&consent==='granted')loadGA4();
       else if(valid&&consent==='unset')notice();
-      const observer=new MutationObserver(()=>{settings();if(document.getElementById('sm-analytics-settings'))observer.disconnect()});
-      observer.observe(document.body,{childList:true,subtree:true});
-      settings();
-      if(debug)dispatch('page_view');
+      if(valid){
+        const observer=new MutationObserver(()=>{settings();if(document.getElementById('sm-analytics-settings'))observer.disconnect()});
+        observer.observe(document.body,{childList:true,subtree:true});
+        settings();
+      }
+      if(debug&&!valid)dispatch('page_view');
     }
   }
   if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',start,{once:true});
