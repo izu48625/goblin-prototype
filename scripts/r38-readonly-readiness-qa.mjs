@@ -116,7 +116,7 @@ async function liveAudit(){
   for(let i=0;i<24;i++){
     try{
       const p=await fetchPage('/work/'+KNOWN_PUBLIC);
-      if(p.response.status===200 && p.html.includes('/ja/legal.html#privacy')){
+      if(p.response.status===200 && /\/(ja|en)\/legal\.html#privacy/.test(p.html)){
         published=true;break;
       }
     }catch(e){banner('live-poll-retry',String(e))}
