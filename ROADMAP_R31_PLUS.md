@@ -140,7 +140,8 @@ Heatmap / Waffle / Stat Board は現行のユーザー向け対象外。内部�
 - **R37 P1（自動QA完了：2026-10-12）**：最大40対象×10項目を100点／10点の両方で読み込み、20回の採点変更、12回のシート切替、再読込、JSON復元と取り消しまで繰り返す隔離ブラウザテストをCIに追加。既存の保存容量不足・破損JSONの保護テストと合わせて検証。
 - **R37 P1権限監査**：本番SupabaseのRLSとSELECT権限を読み取り専用で確認。Privateは所有者のみ、Public／Unlistedは閲覧可、個別採点・問い合わせ・通報の一般SELECT不可を確認（詳細：[監査メモ](R37_DATA_SECURITY_AUDIT.md)）。
 - **R37 P1結果**：40×10両スケールで各20回の採点変更、12回の切替、2シートの再読込・JSON復元・Undo復元が成功。GitHub Actions Chromiumの初期描画は100点531ms、10点384ms（実機の速度を保証しない）。破損JSON9種、容量不足、過去のバックアップ13形式の安全性テストも成功。連続採点で旧`renderAll()`が次の入力を消す不具合を修正。
-- **R37 P2〜P4**：公開範囲のWeb/UIとDB整合、バックアップと長時間利用、性能上限、R38への引き継ぎ。
+- **R37 P2（公開範囲・共有の安全性）**：PublicのみDiscover／検索サイトマップに掲載。UnlistedはURLを知る人のみ閲覧でき、Discoverに載せない。Privateは所有者以外のWeb/API閲覧を拒否。Supabase RLS・UI・Workerの共有URLとOG画像を照合し、Public/Unlisted→Private切替後はWorkerが現在の公開範囲を再確認してタイトル・OG画像を出さず、レスポンスを `no-store` にする。独立した隔離テストを追加。
+- **R37 P3〜P4**：大容量バックアップ／QuotaExceeded・長時間利用／性能上限、最終QAとR38への引き継ぎ。
 
 - Local-first、自動保存、Undo/Redo、複数シート、JSONバックアップ／復元、容量不足、破損復元の再検証。
 - 大量データの描画速度・メモリ使用量・重複保存防止。無料枠を超えない運用設計。
