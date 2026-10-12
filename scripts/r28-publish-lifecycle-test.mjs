@@ -25,10 +25,24 @@ try{
     {waitUntil:'domcontentloaded',timeout:60000});
   const home=page.frameLocator('#basicFrame');
   await home.locator('#titleInput').waitFor({state:'visible',timeout:30000});
+  await home.locator('body').evaluate(async()=>{
+    for(let i=0;i<100;i++){
+      if(typeof window.__statsMakerGetActiveSheet==='function' &&
+         typeof window.__statsMakerCanPersist==='function')return;
+      await new Promise(resolve=>setTimeout(resolve,100));
+    }
+    throw new Error('Home runtime did not initialize before publish QA');
+  });
   await home.locator('#titleInput').fill('R28 QA UNLISTED SAMPLE');
   await home.locator('.nameInput').first().fill('TEST PERSON');
-  await home.locator('[data-score-row="0"][data-score-col="0"]').fill('82');
-  await home.locator('[data-score-row="0"][data-score-col="0"]').press('Tab');
+  const input=home.locator('[data-score-row="0"][data-score-col="0"]');
+  await input.fill('82');
+  // R36: verify the input listener commits to Home state BEFORE blur.
+  // A rapid publish click or Safari keyboard dismissal must not lose the score.
+  assert.equal(await home.locator('body').evaluate(()=>
+    window.__statsMakerGetActiveSheet()?.rows?.[0]?.scores?.[0]),82,
+    'Home score was not committed on input before blur');
+  await input.press('Tab');
   await home.locator('body').evaluate(async()=>{
     for(let i=0;i<40;i++){
       const sheet=window.__statsMakerGetActiveSheet?.();
