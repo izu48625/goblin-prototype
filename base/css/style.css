@@ -1661,3 +1661,55 @@ html[lang="en"] .rankModeBtn{
   .sheetPanel.panel{border-color:rgba(69,100,137,.23)}
   .sheetPanel .columnManage{padding:8px 6px}
 }
+
+
+/* R36 P2 — mobile Safari editing and short-viewport dialog polish.
+   iOS zooms an input on focus when its effective font-size is below 16px.
+   Scope this to editable fields; non-editing labels and graph data stay compact. */
+@media(max-width:760px){
+  #titleInput,#descInput,#sheetSelect,
+  #searchInput,#gradeFilter,
+  #scoreTable .nameInput,#scoreTable .scoreInput,
+  #noteTextarea,.fitMetricInput,.fitNameInput,.fitScoreInput,
+  .weightDialog input[type="number"],
+  #publishDialogBackdrop input:not([type="radio"]):not([type="checkbox"]),
+  #publishDialogBackdrop select{
+    font-size:16px;
+  }
+  /* Keep the existing grid but give keyboard-focused fields a reliable
+     tap area without forcing iOS browser zoom or creating a new toolbar. */
+  #titleInput,#descInput,#sheetSelect,
+  #searchInput,#gradeFilter{min-height:42px;}
+  .utilityBtn{min-height:42px;font-size:12px;touch-action:manipulation;}
+  #moreToolsBtn,#scoreSettingsBtn{min-height:42px;touch-action:manipulation;}
+  .noteDialog,.weightDialog,.importDialog,.sharePreviewDialog,
+  .publishDialog{
+    max-height:calc(100vh - 24px);
+    max-height:calc(100dvh - 24px);
+    overflow-y:auto;
+    overscroll-behavior:contain;
+    -webkit-overflow-scrolling:touch;
+  }
+  .noteDialog .noteActions .btn,
+  .weightDialog .weightDialogActions .btn,
+  .importDialog .importActions .btn,
+  .sharePreviewActions .btn,
+  .publishDialog .publishFooter .btn,
+  .publishDialog .publishResultActions .btn,
+  .publishDialog .iconCloseBtn{min-height:44px;}
+  .sharePreviewActions{
+    position:sticky;
+    bottom:-12px;
+    z-index:1;
+    background:#0f1b2e;
+    padding:9px 0 max(9px,env(safe-area-inset-bottom));
+  }
+  .sharePreviewDialog img{
+    max-height:min(52dvh,450px);
+    object-fit:contain;
+  }
+  #noteTextarea{min-height:120px;}
+  #scoreTable .nameInput,#scoreTable .scoreInput{
+    scroll-margin-block:72px;
+  }
+}
