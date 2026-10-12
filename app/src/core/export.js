@@ -535,7 +535,8 @@ function renderScatter(project){
     const xw=Math.min(width*.22,ctx.measureText(xl).width+12),yw=Math.min(width*.22,ctx.measureText(yl).width+12);
     const xb={x1:Math.min(R-xw,vx+8),y1:T+8,x2:Math.min(R,vx+8+xw),y2:T+32};
     const yb={x1:R-yw-8,y1:Math.max(T,Math.min(B-28,hy-30)),x2:R-8,y2:Math.max(T,Math.min(B-28,hy-30))+26};
-    ctx.fillText(xl,xb.x1+4,xb.y2-5);ctx.fillText(yl,yb.x1+4,yb.y2-5);reserved.push(xb,yb);
+    ctx.fillText(ellipsis(ctx,xl,xw-8),xb.x1+4,xb.y2-5);
+    ctx.fillText(ellipsis(ctx,yl,yw-8),yb.x1+4,yb.y2-5);reserved.push(xb,yb);
   }
 
   if(items.length>1&&settings.showTrend){
@@ -582,7 +583,9 @@ function renderScatter(project){
       {x1:x-w/2,y1:y+gap,x2:x+w/2,y2:y+gap+h,align:"center"}
     ];
     let box=cand.find(b=>b.x1>=L&&b.x2<=R&&b.y1>=T&&b.y2<=B&&!placed.some(p=>scatterBoxOverlap(b,p))&&!points.some((p,pi)=>pi!==index&&p.x>=b.x1-10&&p.x<=b.x2+10&&p.y>=b.y1-10&&p.y<=b.y2+10));
-    if(!box)box=cand.find(b=>b.x1>=L&&b.x2<=R&&b.y1>=T&&b.y2<=B)||cand[0];
+    // Dense plots keep every dot. Omit a label if it has no nonoverlapping
+    // position, rather than drawing text off-canvas or over another value.
+    if(!box)return;
     placed.push(box);
 
     const midx=(box.x1+box.x2)/2,midy=(box.y1+box.y2)/2;
@@ -594,8 +597,10 @@ function renderScatter(project){
     lines.forEach((line,li)=>ctx.fillText(line,tx,box.y1+size*(1+li*1.22)));
   });
 
-  font(ctx,width*.017,850,c.family);ctx.fillStyle=c.muted;ctx.textAlign="center";ctx.fillText(settings.xAxis?.label||"X",(L+R)/2,height*.93);
-  ctx.textAlign="left";ctx.fillText(settings.yAxis?.label||"Y",L,T-width*.015);
+  font(ctx,width*.017,850,c.family);ctx.fillStyle=c.muted;ctx.textAlign="center";
+  ctx.fillText(ellipsis(ctx,settings.xAxis?.label||"X",(R-L)*.85),(L+R)/2,height*.93);
+  ctx.textAlign="left";
+  ctx.fillText(ellipsis(ctx,settings.yAxis?.label||"Y",(R-L)*.65),L,T-width*.015);
   return canvas;
 }
 function renderDot(project){

@@ -48,7 +48,33 @@ function ticks(range){
   if(Math.abs(out.at(-1)-range.max)>eps)out.push(range.max);
   return [...new Set(out)].slice(0,7);
 }
-function textEstimate(text,size=22){return Math.min(250,Math.max(48,[...String(text||"")].length*size*.62+14))}
+function glyphWidth(ch,size){
+  // CJK characters occupy a full em; the older fixed .62 estimate
+  // under-counted Japanese names and caused box intersections.
+  return /[\u1100-\u11ff\u2e80-\u9fff\uac00-\ud7af\uff00-\uffef]/u.test(ch)?size:size*.62;
+}
+function fitLabelLines(raw,size,maxWidth=214){
+  const chars=[...String(raw||"").trim()];
+  const lines=[""];let line=0,width=0,used=0;
+  for(const ch of chars){
+    const next=glyphWidth(ch,size);
+    if(width+next>maxWidth&&width>0){
+      if(line===1)break;
+      line=1;lines.push("");width=0;
+    }
+    lines[line]+=ch;width+=next;used++;
+  }
+  if(used<chars.length){
+    let last=lines.length-1,ellipsisWidth=glyphWidth("…",size);
+    while(lines[last]&&[...lines[last]].reduce((n,ch)=>n+glyphWidth(ch,size),0)+ellipsisWidth>maxWidth)
+      lines[last]=[...lines[last]].slice(0,-1).join("");
+    lines[last]+="…";
+  }
+  return lines;
+}
+function textEstimate(text,size=22){
+  return Math.min(220,Math.max(30,[...String(text||"")].reduce((n,ch)=>n+glyphWidth(ch,size),0)+6));
+}
 function overlaps(a,b,pad=5){return !(a.x2+pad<b.x1||a.x1-pad>b.x2||a.y2+pad<b.y1||a.y1-pad>b.y2)}
 function candidateBoxes(px,py,w,h,gap=16){
   return [
@@ -157,29 +183,32 @@ export const scatterChart={
 
       if(s.showLabels===false || (index>=Math.max(1,Math.min(40,Number(s.labelLimit)||15)) && !highlight))return;
       const label=String(item.name||"").trim();if(!label)return;
-      const fontSize=label.length>18?18:label.length>12?20:22;
-      const maxW=220;
-      const boxW=Math.min(maxW,textEstimate(label,fontSize));
+      const fullLabel=document.createElementNS(NS,"title");
+      fullLabel.textContent=label;g.appendChild(fullLabel);
+      const fontSize=[...label].length>18?18:[...label].length>12?20:22;
+      const lines=fitLabelLines(label,fontSize);
+      const boxW=Math.max(...lines.map(l=>textEstimate(l,fontSize)));
       const lineH=fontSize+5;
-      const twoLine=label.length>18;
-      const boxH=twoLine?lineH*2:lineH;
+      const boxH=lines.length*lineH;
       const candidates=candidateBoxes(px,py,boxW,boxH,17);
-      let chosen=candidates.find(box=>within(box,L+2,R-2,T+2,B-2)&&!placed.some(p=>overlaps(box,p,5))&&!pointBoxes.some((p,pi)=>pi!==index&&overlaps(box,p,5)));
-      if(!chosen)chosen=candidates.find(box=>within(box,L+2,R-2,T+2,B-2))||candidates[0];
+      const chosen=candidates.find(box=>within(box,L+2,R-2,T+2,B-2)
+        &&!placed.some(p=>overlaps(box,p,5))
+        &&!pointBoxes.some((p,pi)=>pi!==index&&overlaps(box,p,5)));
+      // No free spot: preserve the point, omit only its label rather than
+      // overlap another label / clip past the SVG edge.
+      if(!chosen)return;
       placed.push(chosen);
 
-      const cx=clamp(chosen.tx,L+4,R-4),cy=clamp(chosen.ty,T+fontSize,B-4);
+      const cx=chosen.tx,cy=chosen.y1+fontSize;
       const dist=Math.hypot((chosen.x1+chosen.x2)/2-px,(chosen.y1+chosen.y2)/2-py);
       if(dist>35){
         const line=document.createElementNS(NS,"line");line.setAttribute("x1",px);line.setAttribute("y1",py);line.setAttribute("x2",(chosen.x1+chosen.x2)/2);line.setAttribute("y2",(chosen.y1+chosen.y2)/2);line.setAttribute("class","scatter-leader");svg.appendChild(line);
       }
 
       const tx=document.createElementNS(NS,"text");tx.setAttribute("x",cx);tx.setAttribute("y",cy);tx.setAttribute("text-anchor",chosen.anchor);tx.setAttribute("class","scatter-label");tx.style.fontSize=fontSize+"px";
-      if(twoLine){
-        const chars=[...label],mid=Math.ceil(chars.length/2);
-        const a=chars.slice(0,mid).join(""),b=chars.slice(mid).join("");
-        [a,b].forEach((line,li)=>{const sp=document.createElementNS(NS,"tspan");sp.setAttribute("x",cx);sp.setAttribute("dy",li===0?"0":String(lineH));sp.textContent=line;tx.appendChild(sp)});
-      }else tx.textContent=label;
+      if(lines.length>1){
+        lines.forEach((line,li)=>{const sp=document.createElementNS(NS,"tspan");sp.setAttribute("x",cx);sp.setAttribute("dy",li===0?"0":String(lineH));sp.textContent=line;tx.appendChild(sp)});
+      }else tx.textContent=lines[0];
       svg.appendChild(tx);
     });
 
