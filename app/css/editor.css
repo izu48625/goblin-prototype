@@ -1991,3 +1991,19 @@ body.hasGlobalLocaleBar #moreMenu{top:98px}
 .visual .ring-center{max-width:100%;overflow:hidden;}
 .visual .ring-center small{display:block;}
 .visual .scatter-svg,.visual .radar-svg{max-width:100%;}
+
+/* R36 P2.2: Stat Card uses .stat-name rather than .viz-title.
+   Without a line cap, long CJK names grew beyond the card and export frame. */
+.stat-top > div:first-child{min-width:0;flex:1;}
+.stat-top .ovr-box{flex:none;}
+.stat-name{
+  min-width:0;
+  max-width:100%;
+  overflow:hidden;
+  overflow-wrap:anywhere;
+  display:-webkit-box;
+  -webkit-line-clamp:2;
+  -webkit-box-orient:vertical;
+  line-height:1.08;
+}
+.stat-subtitle{max-width:100%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
