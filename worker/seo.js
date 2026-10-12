@@ -81,7 +81,11 @@ export async function publicWorkHtml(id){
     (list.length?'<section><h2>'+itemLabel+'</h2><ul>'+listHtml(list)+'</ul></section>':'')+
     (metrics.length?'<section><h2>'+metricLabel+'</h2><ul>'+listHtml(metrics)+'</ul></section>':'')+
     '</main><footer>Stats Maker — '+(en?'Free charts, comparisons and ratings':'無料でグラフ・評価・比較')+
-    ' · <a href="'+viewer+'">'+open+'</a></footer></body></html>';
+    ' · <a href="'+viewer+'">'+open+'</a>'+
+    ' · <a href="'+ORIGIN+(en?'/en/legal.html#terms':'/ja/legal.html#terms')+'">'+(en?'Terms':'利用規約')+'</a>'+
+    ' · <a href="'+ORIGIN+(en?'/en/legal.html#privacy':'/ja/legal.html#privacy')+'">'+(en?'Privacy':'プライバシー')+'</a>'+
+    ' · <a href="'+ORIGIN+(en?'/en/legal.html#contact':'/ja/legal.html#contact')+'">'+(en?'Contact':'お問い合わせ')+'</a>'+
+    '</footer></body></html>';
   // no-store is important: a formerly public work must not remain cached
   // after its owner switches it to private/unlisted.
   return response(html,'text/html; charset=utf-8',200,'no-store');

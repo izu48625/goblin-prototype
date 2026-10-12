@@ -1,0 +1,58 @@
+name: R38 P1 SEO and Ad Readiness (No Ads)
+on:
+  pull_request:
+    paths:
+      - "worker/seo.js"
+      - "ja/**"
+      - "en/**"
+      - "robots.txt"
+      - "scripts/r38-readonly-readiness-qa.mjs"
+      - "scripts/build-cloudflare.mjs"
+      - "R38_ADSENSE_READINESS.md"
+      - ".github/workflows/r38-readiness-qa.yml"
+  push:
+    branches: [main]
+    paths:
+      - "worker/seo.js"
+      - "ja/**"
+      - "en/**"
+      - "robots.txt"
+      - "scripts/r38-readonly-readiness-qa.mjs"
+      - ".github/workflows/r38-readiness-qa.yml"
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  no-write-source-audit:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+      - name: Local SEO content, access safety and compressed HTML budgets
+        run: |
+          node --check worker/seo.js
+          node --check scripts/r38-readonly-readiness-qa.mjs
+          node scripts/r34-seo-edge-test.mjs
+          node scripts/r38-readonly-readiness-qa.mjs local
+          npm run build:cloudflare
+          test -s dist/ja/index.html
+          test -s dist/en/index.html
+          test -s dist/robots.txt
+          test ! -e dist/ads.txt
+  live-readonly:
+    if: github.event_name != 'pull_request'
+    needs: no-write-source-audit
+    runs-on: ubuntu-latest
+    timeout-minutes: 9
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+      - name: Verify deployed public work/SEO; never mutate production
+        run: node scripts/r38-readonly-readiness-qa.mjs live
+      - name: Diagnose old Vercel direct-host revocation (observation only)
+        run: node scripts/r38-readonly-readiness-qa.mjs legacy
