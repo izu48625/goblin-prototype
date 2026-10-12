@@ -146,7 +146,7 @@ try{
     name:'quota.json',mimeType:'application/json',
     buffer:Buffer.from(JSON.stringify(alternative))
   });
-  await home.locator('#statusText').filter({hasText:'読み込めません'}).waitFor({timeout:12000});
+  await home.locator('#statusText').filter({hasText:'保存容量が不足'}).waitFor({timeout:12000});
   const after=await home.locator('body').evaluate((body,{key,pre})=>({
     main:localStorage.getItem(key),undo:localStorage.getItem(pre)
   }),{key:KEY,pre:PRE});
