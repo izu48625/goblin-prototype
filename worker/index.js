@@ -83,7 +83,9 @@ async function proxyLegacyOg(request){
   target.search=requestUrl.search;
   const upstream=await fetch(target.toString(),{headers:{'User-Agent':request.headers.get('User-Agent')||'Stats-Maker-Cloudflare'}});
   const headers=new Headers(upstream.headers);
-  headers.set('Cache-Control','public, max-age=3600, s-maxage=3600, stale-while-revalidate=86400');
+  headers.set('Cache-Control','private, no-store');
+  // A previously shared image must not remain in CDN/browser caches after
+  // the publisher changes visibility. Upstream Vercel caches remain separate.
   headers.set('X-Stats-Maker-OG-Backend','vercel-stage1');
   return new Response(upstream.body,{status:upstream.status,headers});
 }
@@ -118,6 +120,16 @@ export default {
       if(request.method!=='GET'&&request.method!=='HEAD')return new Response('Method Not Allowed',{status:405,headers:{Allow:'GET, HEAD'}});
       const blocked=await checkPublicRateLimit(request,env.OG_RATE_LIMIT);
       if(blocked)return blocked;
+      // Enforce the current visibility at request time. A cached old public
+      // image must not be returned through stats-maker.app after revocation.
+      const topicId=safeTopicId(url.searchParams.get('id'));
+      if(!topicId)return new Response('Not found',{status:404,headers:{'Cache-Control':'no-store'}});
+      let topic;
+      try{topic=await fetchTopic(topicId)}catch(error){
+        console.error('[Stats Maker] OG visibility check failed',error);
+        return new Response('Service temporarily unavailable',{status:503,headers:{'Cache-Control':'no-store'}});
+      }
+      if(!topic)return new Response('Not found',{status:404,headers:{'Cache-Control':'no-store'}});
       return proxyLegacyOg(request);
     }
     const match=url.pathname.match(/^\/p\/([a-zA-Z0-9_-]{8,128})\/?$/);
@@ -129,7 +141,7 @@ export default {
       let topic=null;
       try{topic=await fetchTopic(id)}catch(error){console.error('[Stats Maker] share fetch failed',error)}
       const html=shareHtml({origin:url.origin,id,topic});
-      return new Response(html,{status:topic?200:404,headers:{'Content-Type':'text/html; charset=utf-8','Cache-Control':topic?'public, s-maxage=300, stale-while-revalidate=3600':'no-store'}});
+      return new Response(html,{status:topic?200:404,headers:{'Content-Type':'text/html; charset=utf-8','Cache-Control':'no-store'}});
     }
     return env.ASSETS.fetch(request);
   }
