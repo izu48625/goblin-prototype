@@ -59,7 +59,7 @@ try{
       '40x10 sheet did not render 400 score fields');
     const renderedMs=Date.now()-start;
     assert(renderedMs<60000,'40x10 sheet took over 60 seconds to initialize');
-    const snapshot=()=>home.locator('body').evaluate(key=>{
+    const snapshot=()=>home.locator('body').evaluate((body,key)=>{
       const d=JSON.parse(localStorage.getItem(key));
       return {library:d,raw:localStorage.getItem(key)};
     },KEY);
@@ -78,7 +78,7 @@ try{
       source.rows[ri].scores[ci]=val;edits++;
       if(n%5===4){
         await home.locator('#titleInput').click();
-        await home.locator('body').evaluate(async key=>{
+        await home.locator('body').evaluate(async(body,key)=>{
           for(let i=0;i<60;i++){
             const d=JSON.parse(localStorage.getItem(key)||'null');
             if(d?.sheets?.[0]?.rows?.[4]?.scores) {
@@ -120,7 +120,7 @@ try{
       name:'r37-backup.json',mimeType:'application/json',
       buffer:Buffer.from(JSON.stringify({app:'Stats Maker',version:'1.0-A2',library:imported}))
     });
-    await home.locator('body').evaluate(async expected=>{
+    await home.locator('body').evaluate(async(body,expected)=>{
       for(let i=0;i<80;i++){
         if(document.querySelector('#titleInput')?.value===expected)return;
         await new Promise(resolve=>setTimeout(resolve,100));
@@ -129,7 +129,7 @@ try{
     },imported.sheets[0].title);
     let after=await snapshot();
     assert.equal(after.library.sheets[0].rows[39].scores[9],scale===100?99:9.9);
-    assert.deepEqual(JSON.parse(await home.locator('body').evaluate(key=>localStorage.getItem(key),BACKUP)),
+    assert.deepEqual(JSON.parse(await home.locator('body').evaluate((body,key)=>localStorage.getItem(key),BACKUP)),
       checkpoint,'Restore did not preserve exact previous multi-sheet checkpoint');
     // Undo is an explicit user action. Confirm that all 400 data cells AND
     // the other sheet return, not just the heading.
@@ -137,7 +137,7 @@ try{
     await importButton.click();
     await home.locator('#undoLastRestoreBtn').waitFor({state:'visible',timeout:10000});
     await home.locator('#undoLastRestoreBtn').click();
-    await home.locator('body').evaluate(async expected=>{
+    await home.locator('body').evaluate(async(body,expected)=>{
       for(let i=0;i<80;i++){
         if(document.querySelector('#titleInput')?.value===expected)return;
         await new Promise(resolve=>setTimeout(resolve,100));
