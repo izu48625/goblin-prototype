@@ -129,8 +129,16 @@ try{
     },imported.sheets[0].title);
     let after=await snapshot();
     assert.equal(after.library.sheets[0].rows[39].scores[9],scale===100?99:9.9);
-    assert.deepEqual(JSON.parse(await home.locator('body').evaluate((body,key)=>localStorage.getItem(key),BACKUP)),
-      checkpoint,'Restore did not preserve exact previous multi-sheet checkpoint');
+    const archived=JSON.parse(await home.locator('body').evaluate(
+      (body,key)=>localStorage.getItem(key),BACKUP));
+    // Autosave can legitimately refresh updatedAt between the earlier
+    // snapshot and the import click. Compare *all substantive content* while
+    // excluding only the volatile last-modified timestamp.
+    const stableLibrary=lib=>({...lib,sheets:lib.sheets.map(sheet=>{
+      const {updatedAt,...rest}=sheet;return rest;
+    })});
+    assert.deepEqual(stableLibrary(archived),stableLibrary(checkpoint),
+      'Restore checkpoint changed original sheet IDs, scores or metadata');
     // Undo is an explicit user action. Confirm that all 400 data cells AND
     // the other sheet return, not just the heading.
     if(!(await importButton.isVisible()))await home.locator('#moreToolsBtn').click();
