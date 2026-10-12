@@ -104,6 +104,19 @@ try{
     await page.waitForTimeout(400);
     await page.reload({waitUntil:'domcontentloaded'});
     await home.locator('#titleInput').waitFor({state:'visible',timeout:30000});
+    // The outer frame can expose its title before the inner Home renderer
+    // finishes rebuilding the entire 40×10 table (especially on busy CI).
+    // Check the finished table rather than treating a transient 0 as loss.
+    await home.locator('#scoreTable .scoreInput').first()
+      .waitFor({state:'visible',timeout:30000});
+    await home.locator('body').evaluate(async()=>{
+      for(let i=0;i<150;i++){
+        if(document.querySelectorAll('#scoreTable .scoreInput').length===400 &&
+           typeof window.__statsMakerGetLibrary==='function')return;
+        await new Promise(resolve=>setTimeout(resolve,100));
+      }
+      throw Error('R37 40x10 table not fully restored after reload');
+    });
     assert.equal(await home.locator('#scoreTable .scoreInput').count(),400);
     saved=(await snapshot()).library;
     assert.deepEqual(saved.sheets[0].rows.map(r=>r.scores),
