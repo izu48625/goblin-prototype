@@ -48,3 +48,13 @@ Google source references (checked 2026-10-12):
 - Squash merge via PR only; record full SHA.
 - After merge, Cloudflare Preflight, Production Smoke, GitHub Pages, R34 SEO and R38 read-only live tests pass for the new main.
 - If an external service blocks a GET or fails to deploy, report it explicitly rather than claiming account access, indexing or AdSense approval.
+
+## R38 P2 update — legacy direct OG diagnosis
+
+Read-only production diagnostic (2026-10-12) against the historic `stats-maker-ogp.vercel.app` host:
+
+- Direct `/p/<nonexistent UUID>`: HTTP 404, `Cache-Control: no-store`.
+- Direct `/api/og?id=<nonexistent UUID>`: HTTP **200**, `Cache-Control: public`. This does not by itself prove a leak of a revoked work's data, but shows the old host is **not conforming to the R37 P4 source-level fail-closed/no-store expectations**.
+- Production `https://statsmaker.app/api/og` remains subject to the Cloudflare request-time visibility gate.
+- R38 P2 switches GitHub Pages and localhost-generated *new share links* to the official `https://statsmaker.app/p/<id>` endpoint instead of generating new direct old-Vercel links. The old rendering backend is retained for valid public/unlisted OG images.
+- Existing third-party cached links/images cannot be revoked retroactively. Re-deploying, rewiring or shutting down the old Vercel project requires a separate service deployment/control-plane review; **not authorized or attempted** in this PR.
