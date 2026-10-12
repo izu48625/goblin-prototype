@@ -859,13 +859,23 @@
       // In Community, preserve numeric edits on every keystroke. Home's
       // change-handler rebuilds the table on blur, which can otherwise drop
       // the next focused score before its own change event fires.
-      if(communityMode)el.addEventListener('input',e=>{
+      // R36: commit score edits into the in-memory sheet on every keystroke,
+      // including Home. The old Home change-only path could leave a just-typed
+      // number uncommitted when Publish/blur/navigation happened rapidly.
+      // Never redraw the table on input: Safari must keep the active keyboard
+      // field mounted until the normal change handler refreshes summaries.
+      el.addEventListener('input',e=>{
         const field=e.currentTarget,ri=+field.dataset.scoreRow,ci=+field.dataset.scoreCol;
+        if(!s.rows[ri])return;
         s.rows[ri].scores[ci]=clampScore(field.value);
-        syncCommunityScoreSummary(field,ri);
-        $('statusText').textContent='点数を変更しました。Communityへの反映には「評価を更新」を押してください。';
-        if(window.parent!==window)window.parent.postMessage(
-          {type:'statsmaker:community-score-dirty'},location.origin);
+        if(communityMode){
+          syncCommunityScoreSummary(field,ri);
+          $('statusText').textContent='点数を変更しました。Communityへの反映には「評価を更新」を押してください。';
+          if(window.parent!==window)window.parent.postMessage(
+            {type:'statsmaker:community-score-dirty'},location.origin);
+        }else{
+          scheduleSave('');
+        }
       });
       el.addEventListener('change',e=>{
         const ri=+e.currentTarget.dataset.scoreRow,ci=+e.currentTarget.dataset.scoreCol;
