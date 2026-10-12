@@ -71,7 +71,7 @@ try{
     await home.locator('#sheetSelect').selectOption(i%2===0?spare.id:main.id);
   }
   await page.waitForTimeout(550);
-  const beforeReload=await home.locator('body').evaluate(key=>({
+  const beforeReload=await home.locator('body').evaluate((body,key)=>({
     raw:localStorage.getItem(key),writable:window.__statsMakerCanPersist?.(),
     title:window.__statsMakerGetLibrary?.()?.sheets?.[0]?.title
   }),KEY);
@@ -87,7 +87,7 @@ try{
     }
     throw Error('400 persisted score fields did not restore');
   });
-  let persisted=await home.locator('body').evaluate(key=>JSON.parse(localStorage.getItem(key)),KEY);
+  let persisted=await home.locator('body').evaluate((body,key)=>JSON.parse(localStorage.getItem(key)),KEY);
   assert.deepEqual(persisted.sheets[0].rows.map(r=>r.scores),main.rows.map(r=>r.scores));
   assert.equal(persisted.sheets.length,2);
   assert.equal(persisted.sheets[1].title,spare.title);
@@ -120,14 +120,14 @@ try{
     }
     throw Error('Import checkpoint missing');
   });
-  persisted=await home.locator('body').evaluate(key=>JSON.parse(localStorage.getItem(key)),KEY);
+  persisted=await home.locator('body').evaluate((body,key)=>JSON.parse(localStorage.getItem(key)),KEY);
   assert.equal(persisted.sheets[0].rows[0].image,image);
   assert.equal(persisted.sheets[0].rows.length,40);
 
   // Inject a quota error ONLY for the target Home key in this iframe. When
   // the second write fails, both the main bytes AND the earlier Undo
   // checkpoint must remain byte-for-byte unchanged.
-  const before=await home.locator('body').evaluate(({key,pre})=>({
+  const before=await home.locator('body').evaluate((body,{key,pre})=>({
     main:localStorage.getItem(key),undo:localStorage.getItem(pre)
   }),{key:KEY,pre:PRE});
   await home.locator('body').evaluate(()=>{
@@ -147,7 +147,7 @@ try{
     buffer:Buffer.from(JSON.stringify(alternative))
   });
   await home.locator('#statusText').filter({hasText:'読み込めません'}).waitFor({timeout:12000});
-  const after=await home.locator('body').evaluate(({key,pre})=>({
+  const after=await home.locator('body').evaluate((body,{key,pre})=>({
     main:localStorage.getItem(key),undo:localStorage.getItem(pre)
   }),{key:KEY,pre:PRE});
   assert.deepEqual(after,before,'Failed backup import changed main or previous Undo data');
@@ -160,7 +160,7 @@ try{
     name:'invalid.json',mimeType:'application/json',buffer:Buffer.from('{oops!')
   });
   await home.locator('#statusText').filter({hasText:'読み込めません'}).waitFor({timeout:12000});
-  assert.deepEqual(await home.locator('body').evaluate(({key,pre})=>({
+  assert.deepEqual(await home.locator('body').evaluate((body,{key,pre})=>({
     main:localStorage.getItem(key),undo:localStorage.getItem(pre)
   }),{key:KEY,pre:PRE}),before);
 
