@@ -1,0 +1,46 @@
+name: R37 P2 Visibility and Share Privacy QA
+on:
+  pull_request:
+    paths:
+      - "worker/index.js"
+      - "worker/seo.js"
+      - "cloud/discover.js"
+      - "discover.html"
+      - "scripts/r26-edge-test.mjs"
+      - "scripts/r37-visibility-edge-qa.mjs"
+      - "scripts/r37-visibility-ui-qa.mjs"
+      - ".github/workflows/r37-visibility-privacy-qa.yml"
+      - "ROADMAP_R31_PLUS.md"
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  scope-and-revocation:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Worker visibility and public-only SEO
+        run: |
+          node --check worker/index.js
+          node --check cloud/discover.js
+          node --check scripts/r37-visibility-edge-qa.mjs
+          node --check scripts/r37-visibility-ui-qa.mjs
+          node scripts/r26-edge-test.mjs
+          node scripts/r34-seo-edge-test.mjs
+          node scripts/r37-visibility-edge-qa.mjs
+          npm run build:cloudflare
+          grep -q 'cloud/discover.js?v=r37vis1' dist/discover.html
+      - name: Isolated browser Public, Unlisted, Private verification
+        run: |
+          npm install --no-save playwright@1.56.1
+          npx playwright install --with-deps chromium
+          python3 -m http.server 4173 --bind 127.0.0.1 --directory dist >/tmp/r37-p2-http.log 2>&1 &
+          for i in $(seq 1 20); do
+            if curl -fsS http://127.0.0.1:4173/discover.html >/dev/null; then break; fi
+            sleep 1
+          done
+          BASE_URL=http://127.0.0.1:4173 node scripts/r37-visibility-ui-qa.mjs
