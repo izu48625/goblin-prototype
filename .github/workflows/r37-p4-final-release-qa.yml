@@ -1,0 +1,143 @@
+name: R37 P4 Final Release Regression Gate
+
+on:
+  pull_request:
+    paths:
+      - "index.html"
+      - "base/**"
+      - "app/**"
+      - "cloud/**"
+      - "worker/**"
+      - "ja/**"
+      - "en/**"
+      - "scripts/**"
+      - "discover.html"
+      - "public.html"
+      - "rate.html"
+      - "my.html"
+      - "wrangler.jsonc"
+      - "ROADMAP_R31_PLUS.md"
+      - "R37_P4_RELEASE_GATE.md"
+      - ".github/workflows/r37-p4-final-release-qa.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  contracts:
+    name: Local-only API, data and privacy contracts
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+      - name: Check source syntax without network writes
+        run: |
+          node --check base/js/app.js
+          node --check app/src/core/store.js
+          node --check app/src/core/export.js
+          node --check app/src/editor/editor.js
+          node --check cloud/discover.js
+          node --check cloud/public.js
+          node --check worker/index.js
+          node --check scripts/r37-visibility-edge-qa.mjs
+      - name: Run existing release contract suites
+        run: |
+          node scripts/r26-edge-test.mjs
+          node scripts/r26-gateway-test.mjs
+          node scripts/r26-client-gateway-test.mjs
+          node scripts/r27-community-home-test.mjs
+          node scripts/r27-community-visual-test.mjs
+          node scripts/r27-remix-copy-test.mjs
+          node scripts/r29-backup-restore-test.mjs
+          node scripts/r29-source-link-safety-test.mjs
+          node scripts/r30-storage-and-max-data-qa.mjs
+          node scripts/r34-seo-edge-test.mjs
+          node scripts/r37-visibility-edge-qa.mjs
+          node scripts/r35-legal-contact-qa.mjs
+          node scripts/r35-report-qa.mjs
+          node scripts/r31-ad-inventory-audit.mjs
+      - name: Build and inspect deployable bundle
+        run: |
+          npm run build:cloudflare
+          for path in index.html base/index.html discover.html public.html my.html rate.html app/editor.html ja/index.html en/index.html ja/legal.html en/legal.html robots.txt; do
+            test -s "dist/$path"
+          done
+          test ! -e dist/R35_CONTACT_MIGRATION.sql
+          test ! -e dist/R37_DATA_SECURITY_AUDIT.md
+          test ! -e dist/.github
+
+  local-first-and-graphics:
+    name: 40x10, JSON, ten PNGs and WebKit
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+      - name: Build isolated static distribution
+        run: npm run build:cloudflare
+      - name: Install headless test browsers
+        run: |
+          npm install --no-save playwright@1.56.1
+          npx playwright install --with-deps chromium webkit
+      - name: Serve only local static files
+        run: |
+          python3 -m http.server 4173 --bind 127.0.0.1 --directory dist >/tmp/r37-p4-local.log 2>&1 &
+          for i in $(seq 1 30); do
+            if curl -fsS http://127.0.0.1:4173/index.html >/dev/null; then exit 0; fi
+            sleep 1
+          done
+          exit 1
+      - name: Isolated data and visual regression
+        env:
+          BASE_URL: http://127.0.0.1:4173
+        run: |
+          node scripts/r37-local-40x10-endurance-qa.mjs
+          node scripts/r37-p3-backup-multitab-qa.mjs
+          node scripts/r29-ten-launcher-qa.mjs
+          node scripts/r36-ten-graph-label-png-qa.mjs
+          node scripts/r36-mobile-input-modals-qa.mjs
+          node scripts/r36-webkit-iphone-share-qa.mjs
+          node scripts/r29-mobile-backup-ui-test.mjs
+
+  public-sharing-and-navigation:
+    name: Publish, visibility, Community, SEO and JA/EN
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+      - name: Build isolated static distribution
+        run: npm run build:cloudflare
+      - name: Install headless Chromium
+        run: |
+          npm install --no-save playwright@1.56.1
+          npx playwright install --with-deps chromium
+      - name: Serve only local static files
+        run: |
+          python3 -m http.server 4173 --bind 127.0.0.1 --directory dist >/tmp/r37-p4-public.log 2>&1 &
+          for i in $(seq 1 30); do
+            if curl -fsS http://127.0.0.1:4173/index.html >/dev/null; then exit 0; fi
+            sleep 1
+          done
+          exit 1
+      - name: Mocked publish, Discover, legal and privacy regression
+        env:
+          BASE_URL: http://127.0.0.1:4173
+        run: |
+          node scripts/r28-publish-lifecycle-test.mjs
+          node scripts/r37-visibility-ui-qa.mjs
+          node scripts/r31-myworks-simple-ui-qa.mjs
+          node scripts/r34-landing-compact-qa.mjs
+          node scripts/r35-support-nav-qa.mjs
+          node scripts/r33-analytics-browser-qa.mjs
+          node scripts/r31-ad-layout-browser-qa.mjs
+          node scripts/r29-home-backup-undo-qa.mjs
+          node scripts/r30-home-corrupt-recovery-qa.mjs
