@@ -26,7 +26,7 @@ try{
       }
       throw new Error('Home not ready');
     });
-    const fonts=await home.locator('body').evaluate(selectors=>Object.fromEntries(
+    const fonts=await home.locator('body').evaluate((body,selectors)=>Object.fromEntries(
       selectors.map(selector=>{
         const el=document.querySelector(selector);
         return [selector,el?parseFloat(getComputedStyle(el).fontSize):null];
