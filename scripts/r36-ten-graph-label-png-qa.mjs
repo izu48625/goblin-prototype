@@ -45,6 +45,7 @@ try{
         }));
         project.data.series=[{id:'s1',name:'テスト',values:Array(10).fill(82)}];
       }
+      if(type==='stat-card')project.data.name=project.meta.title;
       if(type==='ranking-card'){
         project.data.items=Array.from({length:10},(_,i)=>({
           id:'rank'+i,name:'比較対象 '+i+' '+('日本語英語混在'.repeat(3)),
@@ -64,7 +65,7 @@ try{
       const viz=getVisualization(type);
       if(!viz)throw Error('missing graph '+type);
       await viz.render(project,root);
-      const title=root.querySelector('.viz-title');
+      const title=root.querySelector('.viz-title,.stat-name');
       if(!title)throw Error('missing title '+type);
       const tr=title.getBoundingClientRect(),visual=root.querySelector('.visual').getBoundingClientRect();
       if(tr.left<visual.left-2||tr.right>visual.right+2||tr.bottom>visual.bottom+2)
