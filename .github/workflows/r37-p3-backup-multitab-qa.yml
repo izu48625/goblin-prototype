@@ -1,0 +1,42 @@
+name: R37 P3 Local Backup, Quota and Multi-tab QA
+on:
+  pull_request:
+    paths:
+      - "base/js/**"
+      - "base/index.html"
+      - "index.html"
+      - "scripts/r37-p3-backup-multitab-qa.mjs"
+      - "R37_P3_STABILITY_AUDIT.md"
+      - ".github/workflows/r37-p3-backup-multitab-qa.yml"
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  local-first-safety:
+    runs-on: ubuntu-latest
+    timeout-minutes: 22
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Existing capacity and malformed storage regression
+        run: |
+          node --check base/js/app.js
+          node --check base/js/i18n.js
+          node --check scripts/r37-p3-backup-multitab-qa.mjs
+          node scripts/r30-storage-and-max-data-qa.mjs
+          node scripts/r29-backup-restore-test.mjs
+          npm run build:cloudflare
+      - name: Isolated mobile Chrome backup, quota and stale tab test
+        run: |
+          npm install --no-save playwright@1.56.1
+          npx playwright install --with-deps chromium webkit
+          python3 -m http.server 4173 --bind 127.0.0.1 --directory dist >/tmp/r37-p3.log 2>&1 &
+          for i in $(seq 1 20); do
+            if curl -fsS http://127.0.0.1:4173/index.html >/dev/null; then break; fi
+            sleep 1
+          done
+          BASE_URL=http://127.0.0.1:4173 node scripts/r37-p3-backup-multitab-qa.mjs
+          BASE_URL=http://127.0.0.1:4173 node scripts/r36-ten-graph-label-png-qa.mjs
+          BASE_URL=http://127.0.0.1:4173 node scripts/r36-webkit-iphone-share-qa.mjs
