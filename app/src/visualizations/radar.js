@@ -28,6 +28,23 @@ function dataPolygon(axes,values,cx,cy,r){
   }).join(" ");
 }
 
+// Fit SVG axis names within the 1000-wide viewBox without changing
+// saved project labels. CJK glyphs need roughly one em, Latin about .6em.
+function compactAxisLabel(value,maxWidth,fontSize=30){
+  const chars=[...String(value||"")];
+  const glyph=ch=>/[\u1100-\u11ff\u2e80-\u9fff\uac00-\ud7af\uff00-\uffef]/u.test(ch)?fontSize:fontSize*.62;
+  const total=chars.reduce((n,ch)=>n+glyph(ch),0);
+  if(total<=maxWidth)return chars.join("");
+  const ellipsis="…",budget=Math.max(0,maxWidth-glyph(ellipsis));
+  let used=0,out="";
+  for(const ch of chars){
+    const w=glyph(ch);
+    if(used+w>budget)break;
+    out+=ch;used+=w;
+  }
+  return out?out+ellipsis:ellipsis;
+}
+
 export const radarChart={
   id:"radar",
   labelKey:"viz.radar",
@@ -120,7 +137,13 @@ export const radarChart={
           Math.cos(a)>.2?"start":Math.cos(a)<-.2?"end":"middle"
         );
         text.setAttribute("dominant-baseline","middle");
-        text.textContent=axis.label||`A${i+1}`;
+        const fullName=String(axis.label||`A${i+1}`);
+        const anchor=text.getAttribute("text-anchor");
+        const available=anchor==="start"?1000-labelPos.x-22:
+          anchor==="end"?labelPos.x-22:
+          2*Math.min(labelPos.x-22,1000-labelPos.x-22);
+        text.textContent=compactAxisLabel(fullName,Math.max(32,available));
+        text.setAttribute("aria-label",fullName);
         svg.appendChild(text);
       }
     });
