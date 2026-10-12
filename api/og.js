@@ -101,6 +101,9 @@ function renderSvg(card){
 }
 
 module.exports=async function handler(request,response){
+  // Legacy endpoint can be called directly, without Cloudflare's visibility gate.
+  // Never allow a previously public image to outlive a visibility revocation in CDN cache.
+  response.setHeader('Cache-Control','private, no-store');
   try{
     const {fetchTopic,safeTopicId,topicCardData}=await import('../server/og-data.mjs');
     const proto=String(request.headers?.['x-forwarded-proto']||'https').split(',')[0].trim();
@@ -108,16 +111,13 @@ module.exports=async function handler(request,response){
     const url=new URL(request.url||'/api/og',`${proto}://${host}`);
     const id=safeTopicId(url.searchParams.get('id'));
     const topic=id?await fetchTopic(id):null;
-    const card=topic?topicCardData(topic):{
-      title:'Stats Maker',
-      description:'Create, compare and share scored rankings.',
-      category:'STATS',
-      language:'en',
-      targets:'—',
-      metrics:'—',
-      scale:100,
-      ranking:[]
-    };
+    if(!topic){
+      response.statusCode=404;
+      response.setHeader('Content-Type','text/plain; charset=utf-8');
+      response.end('Not found');
+      return;
+    }
+    const card=topicCardData(topic);
 
     const svg=renderSvg(card);
     const png=await sharp(Buffer.from(svg))
@@ -126,12 +126,11 @@ module.exports=async function handler(request,response){
 
     response.statusCode=200;
     response.setHeader('Content-Type','image/png');
-    response.setHeader('Cache-Control','public, s-maxage=3600, stale-while-revalidate=86400');
     response.setHeader('Content-Length',String(png.length));
     response.end(png);
   }catch(error){
     console.error('[Stats Maker OGP] sharp renderer failed',error);
-    response.statusCode=500;
+    response.statusCode=503;
     response.setHeader('Content-Type','text/plain; charset=utf-8');
     response.end('Failed to generate Stats Maker OG image');
   }
