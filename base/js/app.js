@@ -30,6 +30,10 @@
   // If an existing saved library is unreadable, preserve its raw bytes.
   // A blank in-memory sheet must never silently replace it on autosave.
   let storageRecoveryRequired=false;
+  // Only replace browser data if it still matches the bytes this tab loaded
+  // or last committed. Otherwise an old tab can erase newer edits.
+  let lastStoredHomeRaw=null;
+  let otherTabChangedStorage=false;
   let library = loadLibrary();
   let saveTimer = null;
 
@@ -39,7 +43,9 @@
 
   function loadLibrary(){
     try{
-      const raw = communityMode?null:(localStorage.getItem(STORAGE_KEY) || LEGACY_STORAGE_KEYS.map(k=>localStorage.getItem(k)).find(Boolean));
+      const primaryRaw=communityMode?null:localStorage.getItem(STORAGE_KEY);
+      lastStoredHomeRaw=primaryRaw;
+      const raw = communityMode?null:(primaryRaw || LEGACY_STORAGE_KEYS.map(k=>localStorage.getItem(k)).find(Boolean));
       if(raw){
         const parsed = JSON.parse(raw);
         if(parsed && Array.isArray(parsed.sheets) && parsed.sheets.length){
@@ -100,6 +106,14 @@
 
   function clone(obj){return JSON.parse(JSON.stringify(obj))}
 
+  function assertStorageCurrent(){
+    if(communityMode)return;
+    if(otherTabChangedStorage || localStorage.getItem(STORAGE_KEY)!==lastStoredHomeRaw){
+      otherTabChangedStorage=true;
+      throw new Error('Home data changed in another tab; reload only after exporting this tab');
+    }
+  }
+
   function scheduleSave(message=t('save.auto')){
     clearTimeout(saveTimer);
     $('saveBadge').textContent=t('save.saving');
@@ -110,12 +124,17 @@
         if(storageRecoveryRequired && !communityMode){
           throw new Error('Unreadable Home storage; refusing to overwrite saved raw bytes');
         }
-        if(!communityMode)localStorage.setItem(STORAGE_KEY,JSON.stringify(library));
+        assertStorageCurrent();
+        if(!communityMode){
+          const raw=JSON.stringify(library);
+          localStorage.setItem(STORAGE_KEY,raw);
+          lastStoredHomeRaw=raw;
+        }
         $('saveBadge').textContent=communityMode?'編集中（投稿前）':t('save.saved');
         if(message)$('statusText').textContent=message;
       }catch(e){
         $('saveBadge').textContent=t('save.failed');
-        $('statusText').textContent=t(storageRecoveryRequired?'save.corrupt':'save.quota');
+        $('statusText').textContent=t(storageRecoveryRequired?'save.corrupt':otherTabChangedStorage?'save.conflict':'save.quota');
       }
     },220);
   }
@@ -326,16 +345,32 @@
     return input;
   }
   function applyImportLibrary(incoming){
-    // A deliberate restore may replace damaged storage only after preserving
-    // its exact raw bytes separately. Failed backups/quota abort the import.
+    // Preserve the active data and previous Undo checkpoint if either write
+    // fails (most notably QuotaExceededError). Never replace another tab's
+    // newer save during an import or an Undo.
+    assertStorageCurrent();
+    const oldCheckpoint=localStorage.getItem(PRE_RESTORE_KEY);
+    const incomingRaw=JSON.stringify(incoming);
     if(storageRecoveryRequired&&!communityMode){
       const damaged=localStorage.getItem(STORAGE_KEY);
       if(damaged!==null && localStorage.getItem(DAMAGED_RAW_KEY)===null){
         localStorage.setItem(DAMAGED_RAW_KEY,damaged);
       }
     }
-    localStorage.setItem(PRE_RESTORE_KEY,JSON.stringify(library));
-    localStorage.setItem(STORAGE_KEY,JSON.stringify(incoming));
+    try{
+      localStorage.setItem(PRE_RESTORE_KEY,JSON.stringify(library));
+      assertStorageCurrent();
+      localStorage.setItem(STORAGE_KEY,incomingRaw);
+    }catch(error){
+      try{
+        if(oldCheckpoint===null)localStorage.removeItem(PRE_RESTORE_KEY);
+        else localStorage.setItem(PRE_RESTORE_KEY,oldCheckpoint);
+      }catch(rollbackError){
+        console.error('Could not restore the previous Undo checkpoint',rollbackError);
+      }
+      throw error;
+    }
+    if(!communityMode)lastStoredHomeRaw=incomingRaw;
     storageRecoveryRequired=false;
     library=incoming;
     closeImportDialog();
@@ -353,7 +388,7 @@
       applyImportLibrary(original);
       $('statusText').textContent=t('backup.undoSuccess');
     }catch{
-      $('statusText').textContent=t('backup.invalid');
+      $('statusText').textContent=t(otherTabChangedStorage?'save.conflict':'backup.invalid');
     }
   }
   function openImportDialog(){
@@ -377,7 +412,7 @@
       $('statusText').textContent=t('backup.restored');
     }catch(e){
       console.warn('Home backup restore blocked',e);
-      $('statusText').textContent=t('backup.invalid');
+      $('statusText').textContent=t(otherTabChangedStorage?'save.conflict':'backup.invalid');
     }
   }
 
@@ -2441,6 +2476,15 @@
     if(liveCommunityTopicId())refreshEditorCommunitySummary(false);
   });
 
+  window.addEventListener('storage',event=>{
+    if(!communityMode && event.key===STORAGE_KEY &&
+       event.newValue!==lastStoredHomeRaw){
+      otherTabChangedStorage=true;
+      $('saveBadge').textContent=t('save.failed');
+      $('statusText').textContent=t('save.conflict');
+    }
+  });
+
   window.addEventListener('statsmaker:languagechange',()=>{
     window.SM_I18N?.applyTranslations();
     renderAll();
@@ -2463,7 +2507,7 @@
   // R10 bridge for source-linked visual extensions.
   window.__statsMakerGetActiveSheet = () => clone(activeSheet());
   window.__statsMakerGetLibrary = () => clone(library);
-  window.__statsMakerCanPersist = () => !storageRecoveryRequired;
+  window.__statsMakerCanPersist = () => !storageRecoveryRequired && !otherTabChangedStorage;
   window.__statsMakerCreateFreshSheet = createFreshSheet;
   window.__statsMakerMountCommunitySheet = incoming => {
     if(!communityMode || incoming?.sourceTopicId!==communityTopicId ||
