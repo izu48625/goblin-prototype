@@ -25,10 +25,34 @@ try{
     {waitUntil:'domcontentloaded',timeout:60000});
   const home=page.frameLocator('#basicFrame');
   await home.locator('#titleInput').waitFor({state:'visible',timeout:30000});
+  await home.locator('body').evaluate(async()=>{
+    for(let i=0;i<100;i++){
+      if(typeof window.__statsMakerGetActiveSheet==='function' &&
+         typeof window.__statsMakerCanPersist==='function')return;
+      await new Promise(resolve=>setTimeout(resolve,100));
+    }
+    throw new Error('Home runtime did not initialize before publish QA');
+  });
   await home.locator('#titleInput').fill('R28 QA UNLISTED SAMPLE');
   await home.locator('.nameInput').first().fill('TEST PERSON');
-  await home.locator('[data-score-row="0"][data-score-col="0"]').fill('82');
-  await home.locator('[data-score-row="0"][data-score-col="0"]').press('Tab');
+  const input=home.locator('[data-score-row="0"][data-score-col="0"]');
+  await input.fill('82');
+  // R36: verify the input listener commits to Home state BEFORE blur.
+  // A rapid publish click or Safari keyboard dismissal must not lose the score.
+  const beforeBlur=await home.locator('body').evaluate(()=>({
+    score:window.__statsMakerGetActiveSheet()?.rows?.[0]?.scores?.[0],
+    isR36:[...document.scripts].some(script=>script.src.includes('js/app.js?v=r36input1'))
+  }));
+  // PR workflows may test the already-deployed R35 app before this branch
+  // goes live. Require the stronger pre-blur invariant as soon as the new
+  // R36 app.js asset is actually served; isolated PR CI always uses R36.
+  if(beforeBlur.isR36){
+    assert.equal(beforeBlur.score,82,
+      'R36 Home score was not committed on input before blur');
+  }else{
+    console.log('R36 pre-blur assertion deferred until new Home asset deploy');
+  }
+  await input.press('Tab');
   await home.locator('body').evaluate(async()=>{
     for(let i=0;i<40;i++){
       const sheet=window.__statsMakerGetActiveSheet?.();

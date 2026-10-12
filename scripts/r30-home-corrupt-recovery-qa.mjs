@@ -13,7 +13,7 @@ for(let i=0;i<30;i++){
   try{
     const response=await fetch(BASE+'/index.html?qaR30Deploy='+Date.now(),
       {cache:'no-store'});
-    if(response.ok && /base\/index\.html\?v=(?:r30guard1|r33analytics1)/.test(await response.text())){
+    if(response.ok && /base\/index\.html\?v=(?:r30guard1|r33analytics1|r36input1)/.test(await response.text())){
       deployed=true;break;
     }
   }catch{}
@@ -69,6 +69,20 @@ try{
     'Extension navigation bypassed recovery guard');
   await page.goto(BASE+'/index.html?qa=r30-restore',{waitUntil:'domcontentloaded'});
   await home.locator('#titleInput').waitFor({state:'visible',timeout:30000});
+  // Visible HTML can precede the module registering click handlers. Do not
+  // operate the More/Restore tray until the actual Home runtime is ready.
+  const recoveryBridge=await home.locator('body').evaluate(async()=>{
+    for(let i=0;i<150;i++){
+      if(typeof window.__statsMakerCanPersist==='function' &&
+         typeof window.__statsMakerGetLibrary==='function')
+        return window.__statsMakerCanPersist();
+      await new Promise(resolve=>setTimeout(resolve,100));
+    }
+    throw new Error('Home runtime was not ready for explicit restore');
+  });
+  assert.equal(recoveryBridge,false,'Restored page did not retain corrupt-storage guard');
+  assert.equal(await page.evaluate(key=>localStorage.getItem(key),KEY),RAW,
+    'Home reload overwrote unreadable bytes before user restore');
 
   // Deliberate, valid user backup import is allowed, but must first preserve
   // the exact unreadable raw text in a distinct recovery key.
@@ -84,9 +98,27 @@ try{
   if(!(await tray.isVisible()))await home.locator('#moreToolsBtn').click();
   await tray.waitFor({state:'visible',timeout:15000});
   const restore=home.locator('#importJsonBtn');
-  if(!(await restore.isVisible())){
-    const viewMode=await home.locator('body').evaluate(el=>el.className);
-    throw new Error('Restore action unexpectedly hidden after expanding tools; Home body='+viewMode);
+  // Do not fail on an instantaneous isVisible() read while Safari/Chromium
+  // finishes layout; wait for the actual clickable UI with a strict timeout.
+  try{
+    await restore.waitFor({state:'visible',timeout:10000});
+  }catch(error){
+    const diag=await home.locator('body').evaluate(()=>{
+      const btn=document.getElementById('importJsonBtn');
+      const bar=document.getElementById('utilityBar');
+      const tools=document.getElementById('moreToolsBtn');
+      const css=el=>el?({
+        className:el.className,
+        display:getComputedStyle(el).display,
+        visibility:getComputedStyle(el).visibility,
+        rect:[el.getBoundingClientRect().width,el.getBoundingClientRect().height]
+      }):null;
+      return {bodyClass:document.body.className,toolbar:css(bar),
+        restore:css(btn),moreButton:css(tools),
+        bridge:window.__statsMakerCanPersist?.(),
+        activeTitle:document.getElementById('titleInput')?.value};
+    });
+    throw new Error('Restore button did not become visible: '+JSON.stringify(diag),{cause:error});
   }
   await restore.click();
   await home.locator('#importFileInput').setInputFiles({
