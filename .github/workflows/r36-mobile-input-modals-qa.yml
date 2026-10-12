@@ -1,0 +1,36 @@
+name: R36 P2 iPhone Input and Modal QA
+on:
+  pull_request:
+    paths:
+      - "base/css/style.css"
+      - "base/index.html"
+      - "scripts/r36-mobile-input-modals-qa.mjs"
+      - ".github/workflows/r36-mobile-input-modals-qa.yml"
+      - "ROADMAP_R31_PLUS.md"
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  iphone-dialog-regression:
+    runs-on: ubuntu-latest
+    timeout-minutes: 12
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Build isolated Cloudflare static site
+        run: |
+          node --check scripts/r36-mobile-input-modals-qa.mjs
+          npm run build:cloudflare
+          grep -q 'style.css?v=r36p2mobile1' dist/base/index.html
+      - name: Run four mobile viewport browser checks without production data writes
+        run: |
+          npm install --no-save playwright@1.56.1
+          npx playwright install --with-deps chromium
+          python3 -m http.server 4173 --bind 127.0.0.1 --directory dist >/tmp/r36-p2-http.log 2>&1 &
+          for i in $(seq 1 20); do
+            if curl -fsS http://127.0.0.1:4173/index.html >/dev/null; then break; fi
+            sleep 1
+          done
+          BASE_URL=http://127.0.0.1:4173 node scripts/r36-mobile-input-modals-qa.mjs
