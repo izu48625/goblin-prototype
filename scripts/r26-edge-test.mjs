@@ -26,6 +26,11 @@ const savedFetch=globalThis.fetch;
 globalThis.fetch=async request=>{
   externalFetches++;
   const target=String(request);
+  if(target.includes('.supabase.co/rest/v1/topics?')){
+    const url=new URL(target);
+    assert.equal(url.searchParams.get('visibility'),'in.(public,unlisted)');
+    return Response.json([{id:'5ffb1644-b5f8-434f-b216-27012c90bbfe',visibility:'public'}]);
+  }
   if(target.includes('/api/og'))return new Response(new Uint8Array([137,80,78,71]),{status:200,headers:{'Content-Type':'image/png'}});
   throw new Error('Unexpected upstream call: '+target);
 };
@@ -43,20 +48,20 @@ try{
   assert.equal(health.status,200);
   assert.equal((await health.json()).release,'r26p4-prep');
 
-  const allowed=await worker.fetch(new Request('https://statsmaker.app/api/og?id=test', {headers:header}),env);
+  const allowed=await worker.fetch(new Request('https://statsmaker.app/api/og?id=5ffb1644-b5f8-434f-b216-27012c90bbfe', {headers:header}),env);
   assert.equal(allowed.status,200);
   assert.equal(allowed.headers.get('X-Stats-Maker-OG-Backend'),'vercel-stage1');
-  assert.equal(externalFetches,1);
+  assert.equal(externalFetches,2);
 
-  const denied=await worker.fetch(new Request('https://statsmaker.app/api/og?id=test', {headers:header}),env);
+  const denied=await worker.fetch(new Request('https://statsmaker.app/api/og?id=5ffb1644-b5f8-434f-b216-27012c90bbfe', {headers:header}),env);
   assert.equal(denied.status,429);
   assert.equal(denied.headers.get('Retry-After'),'60');
-  assert.equal(externalFetches,1,'blocked request must not reach OGP origin');
+  assert.equal(externalFetches,2,'blocked request must not reach OGP origin');
   assert.deepEqual(calls.og,[{key:'192.0.2.18'},{key:'192.0.2.18'}]);
 
   const shareDenied=await worker.fetch(new Request('https://statsmaker.app/p/5ffb1644-b5f8-434f-b216-27012c90bbfe',{headers:header}),env);
   assert.equal(shareDenied.status,429);
-  assert.equal(externalFetches,1,'blocked share must not reach Supabase');
+  assert.equal(externalFetches,2,'blocked share must not reach Supabase');
   assert.deepEqual(calls.share,[{key:'192.0.2.18'}]);
 
   const invalidMethod=await worker.fetch(new Request('https://statsmaker.app/api/og',{method:'POST',headers:header}),env);

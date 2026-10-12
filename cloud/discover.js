@@ -376,12 +376,12 @@
 
       const [{data:topics,error:topicError},{data:lineageRows,error:lineageError}]=await Promise.all([
         sb.from('topics')
-          .select('id,title,description,language_code,score_scale,weighted,published_at,snapshot_updated_at,snapshot,source_topic_id,show_community,allow_ratings')
+          .select('id,title,description,language_code,score_scale,weighted,published_at,snapshot_updated_at,snapshot,source_topic_id,show_community,allow_ratings,visibility')
           .eq('visibility','public')
           .order('published_at',{ascending:false})
           .limit(60),
         sb.from('topics')
-          .select('id,source_topic_id,snapshot')
+          .select('id,source_topic_id,snapshot,visibility')
           .eq('visibility','public')
           .not('source_topic_id','is',null)
           .limit(500)
@@ -391,9 +391,12 @@
       if(lineageError)console.warn('[Stats Maker] Discover lineage query failed',lineageError);
 
       // Discover remains strictly Public-only. Unlisted rows never enter state.works.
-      const publicTopics=(topics||[]).filter(topic=>topic&&topic.id);
+      // Defense in depth: never trust a list response's privacy scope solely
+      // because the request included eq('visibility','public').
+      const publicTopics=(topics||[]).filter(topic=>topic?.id&&topic.visibility==='public');
       const remixCounts=new Map();
       (lineageRows||[]).forEach(child=>{
+        if(child?.visibility!=='public')return;
         if(String(child?.snapshot?.lineage?.relation||'').toLowerCase()!=='remix')return;
         const sourceId=child.source_topic_id;
         if(!sourceId)return;
