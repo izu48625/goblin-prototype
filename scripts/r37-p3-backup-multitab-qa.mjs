@@ -71,8 +71,22 @@ try{
     await home.locator('#sheetSelect').selectOption(i%2===0?spare.id:main.id);
   }
   await page.waitForTimeout(550);
+  const beforeReload=await home.locator('body').evaluate(key=>({
+    raw:localStorage.getItem(key),writable:window.__statsMakerCanPersist?.(),
+    title:window.__statsMakerGetLibrary?.()?.sheets?.[0]?.title
+  }),KEY);
+  assert(beforeReload.raw,'100 edits unexpectedly removed the stored library');
+  assert.equal(beforeReload.writable,true,'HOME autosave was unexpectedly blocked before reload');
   await page.reload({waitUntil:'domcontentloaded'});
-  await home.locator('#titleInput').waitFor({state:'visible'});
+  await home.locator('#scoreTable .scoreInput').first().waitFor({state:'visible',timeout:30000});
+  await home.locator('body').evaluate(async()=>{
+    for(let i=0;i<100;i++){
+      if(document.querySelectorAll('#scoreTable .scoreInput').length===400 &&
+         typeof window.__statsMakerGetLibrary==='function')return;
+      await new Promise(r=>setTimeout(r,100));
+    }
+    throw Error('400 persisted score fields did not restore');
+  });
   let persisted=await home.locator('body').evaluate(key=>JSON.parse(localStorage.getItem(key)),KEY);
   assert.deepEqual(persisted.sheets[0].rows.map(r=>r.scores),main.rows.map(r=>r.scores));
   assert.equal(persisted.sheets.length,2);
