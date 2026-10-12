@@ -18,7 +18,7 @@ Run [R37 P4 Final Release Regression Gate](.github/workflows/r37-p4-final-releas
 | Long session and recoverability | 100 edits, 16 sheet switches, long text, embedded images, JSON import/export, invalid and legacy JSON, storage quota and Undo, stale tabs |
 | Ten graph types | launcher + source mapping, renderer native PNG, long JP labels, crowded Scatter |
 | iPhone-equivalent UI | viewport 320/390/430px, modal and keyboard sizing, WebKit native-PNG preview and share mock |
-| Sharing and permissions | URL-limited/Public/Private, post-revocation share and OG authorization, Public-only Discover and SEO |
+| Sharing and permissions | URL-limited/Public/Private, post-revocation share and OG authorization, Public-only Discover and SEO, direct legacy Vercel share/OG caching contracts |
 | Community and Remix | score identity, sorting invariants, ten visual snapshots, Remix lineage and isolated mock publishing |
 | Discovery and localization | Discover visibility, JA/EN introduction and navigation, help/terms/privacy/contact |
 | Privacy and operations | reporting/inquiry/RLS contracts, no GA4/real ad delivery, production-safe regression design |
@@ -35,6 +35,6 @@ Run [R37 P4 Final Release Regression Gate](.github/workflows/r37-p4-final-releas
 
 - Real iPhone OS share sheet and Photos save need a physical-device check; Playwright WebKit is not a hardware iPhone.
 - LocalStorage cannot prevent browser data clearing, lost devices or a sub-millisecond concurrent-tab race; advise periodic JSON backup.
-- External SNS caches and the legacy Vercel OG endpoint still require separate consideration.
+- Legacy Vercel OG/share source now uses no-store; revoked work images are denied before rendering. Direct Vercel production deployment and existing CDN/SNS cache eviction are **not verified** by local CI and still require separate checks. Already cached metadata/pixels cannot always be forcibly removed.
 - Search Console property verification and sitemap submission are pending the user/PC operation.
 - GA4 and AdSense remain inactive until explicit approval. A passing QA does not mean the application has been accepted for AdSense or legally reviewed by counsel.
