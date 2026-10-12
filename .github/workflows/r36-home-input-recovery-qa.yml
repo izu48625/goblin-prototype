@@ -28,7 +28,7 @@ jobs:
           node --check base/js/app.js
           node --check scripts/r28-publish-lifecycle-test.mjs
           node --check scripts/r30-home-corrupt-recovery-qa.mjs
-          npm ci
+          # Static build uses Node built-ins; this repo has no lockfile.
           npm run build:cloudflare
           grep -q 'base/index.html?v=r36input1' dist/index.html
           grep -q 'js/app.js?v=r36input1' dist/base/index.html
