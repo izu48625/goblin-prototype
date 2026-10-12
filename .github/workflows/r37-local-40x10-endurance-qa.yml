@@ -1,0 +1,40 @@
+name: R37 Local Storage 40x10 Endurance QA
+on:
+  pull_request:
+    paths:
+      - "base/js/**"
+      - "base/index.html"
+      - "index.html"
+      - "app/src/core/store.js"
+      - "app/src/core/export.js"
+      - "scripts/r37-local-40x10-endurance-qa.mjs"
+      - ".github/workflows/r37-local-40x10-endurance-qa.yml"
+      - "ROADMAP_R31_PLUS.md"
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  endurance:
+    runs-on: ubuntu-latest
+    timeout-minutes: 18
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Node-level capacity, corruption and import regression
+        run: |
+          node --check scripts/r37-local-40x10-endurance-qa.mjs
+          node scripts/r30-storage-and-max-data-qa.mjs
+          node scripts/r29-backup-restore-test.mjs
+          npm run build:cloudflare
+      - name: Isolated mobile browser 40x10 edit, reload and restore endurance
+        run: |
+          npm install --no-save playwright@1.56.1
+          npx playwright install --with-deps chromium
+          python3 -m http.server 4173 --bind 127.0.0.1 --directory dist >/tmp/r37-http.log 2>&1 &
+          for i in $(seq 1 20); do
+            if curl -fsS http://127.0.0.1:4173/index.html >/dev/null; then break; fi
+            sleep 1
+          done
+          BASE_URL=http://127.0.0.1:4173 node scripts/r37-local-40x10-endurance-qa.mjs
