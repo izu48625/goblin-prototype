@@ -6,6 +6,7 @@ on:
       - "base/index.html"
       - "index.html"
       - "scripts/r37-p3-backup-multitab-qa.mjs"
+      - "R37_P3_STABILITY_AUDIT.md"
       - ".github/workflows/r37-p3-backup-multitab-qa.yml"
   workflow_dispatch:
 permissions:
