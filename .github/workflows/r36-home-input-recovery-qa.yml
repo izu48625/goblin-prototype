@@ -30,8 +30,8 @@ jobs:
           node --check scripts/r30-home-corrupt-recovery-qa.mjs
           # Static build uses Node built-ins; this repo has no lockfile.
           npm run build:cloudflare
-          grep -q 'base/index.html?v=r36input1' dist/index.html
-          grep -q 'js/app.js?v=r36input1' dist/base/index.html
+          grep -q 'base/index.html?v=r37score1' dist/index.html
+          grep -q 'js/app.js?v=r37score1' dist/base/index.html
       - name: Isolated browser (no production writes)
         run: |
           npm install --no-save playwright@1.56.1

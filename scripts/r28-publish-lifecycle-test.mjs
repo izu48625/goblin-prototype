@@ -41,7 +41,7 @@ try{
   // A rapid publish click or Safari keyboard dismissal must not lose the score.
   const beforeBlur=await home.locator('body').evaluate(()=>({
     score:window.__statsMakerGetActiveSheet()?.rows?.[0]?.scores?.[0],
-    isR36:[...document.scripts].some(script=>script.src.includes('js/app.js?v=r36input1'))
+    isR36:[...document.scripts].some(script=>(script.src.includes('js/app.js?v=r36input1')||script.src.includes('js/app.js?v=r37score1')))
   }));
   // PR workflows may test the already-deployed R35 app before this branch
   // goes live. Require the stronger pre-blur invariant as soon as the new
