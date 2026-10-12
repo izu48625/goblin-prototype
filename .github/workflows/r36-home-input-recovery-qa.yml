@@ -30,7 +30,7 @@ jobs:
           node --check scripts/r30-home-corrupt-recovery-qa.mjs
           # Static build uses Node built-ins; this repo has no lockfile.
           npm run build:cloudflare
-          grep -q 'base/index.html?v=r37score1' dist/index.html
+          grep -q 'base/index.html?v=r37p3safe1' dist/index.html
           grep -q 'js/app.js?v=r37score1' dist/base/index.html
       - name: Isolated browser (no production writes)
         run: |
