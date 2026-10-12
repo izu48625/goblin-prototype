@@ -54,3 +54,5 @@ jobs:
           node-version: "22"
       - name: Verify deployed public work/SEO; never mutate production
         run: node scripts/r38-readonly-readiness-qa.mjs live
+      - name: Diagnose old Vercel direct-host revocation (observation only)
+        run: node scripts/r38-readonly-readiness-qa.mjs legacy
