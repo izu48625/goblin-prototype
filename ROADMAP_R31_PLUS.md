@@ -141,12 +141,18 @@ Heatmap / Waffle / Stat Board は現行のユーザー向け対象外。内部�
 - **R37 P1権限監査**：本番SupabaseのRLSとSELECT権限を読み取り専用で確認。Privateは所有者のみ、Public／Unlistedは閲覧可、個別採点・問い合わせ・通報の一般SELECT不可を確認（詳細：[監査メモ](R37_DATA_SECURITY_AUDIT.md)）。
 - **R37 P1結果**：40×10両スケールで各20回の採点変更、12回の切替、2シートの再読込・JSON復元・Undo復元が成功。GitHub Actions Chromiumの初期描画は100点531ms、10点384ms（実機の速度を保証しない）。破損JSON9種、容量不足、過去のバックアップ13形式の安全性テストも成功。連続採点で旧`renderAll()`が次の入力を消す不具合を修正。
 - **R37 P2（公開範囲・共有の安全性）**：PublicのみDiscover／検索サイトマップに掲載。UnlistedはURLを知る人のみ閲覧でき、Discoverに載せない。Privateは所有者以外のWeb/API閲覧を拒否。Supabase RLS・UI・Workerの共有URLとOG画像を照合し、Public/Unlisted→Private切替後はWorkerが現在の公開範囲を再確認してタイトル・OG画像を出さず、レスポンスを `no-store` にする。独立した隔離テストを追加。
-- **R37 P3〜P4**：大容量バックアップ／QuotaExceeded・長時間利用／性能上限、最終QAとR38への引き継ぎ。
+- **R37 P3〜P4（完了：2026-10-12）**：大容量バックアップ／QuotaExceeded・長時間利用／複数タブ、10種類のPNG／WebKit、公開・規約・日英UIの総合QA。PR #138／#139、監査資料 `R37_P3_STABILITY_AUDIT.md` と `R37_P4_RELEASE_GATE.md`。旧Vercelのソース修正とCloudflare本番Smokeは完了、実機と旧ホストの配信実態は別途確認。
 
 - Local-first、自動保存、Undo/Redo、複数シート、JSONバックアップ／復元、容量不足、破損復元の再検証。
 - 大量データの描画速度・メモリ使用量・重複保存防止。無料枠を超えない運用設計。
 
 ## R38 — AdSense審査準備・申請
+
+- **R38 P1（SEO・AdSense事前監査）**：日英紹介ページ、Public限定作品SEO、問い合わせ導線、HTMLの軽量性、公開サイトの読み取り専用監査を実施。詳細は `R38_ADSENSE_READINESS.md`。広告コードとGA4は引き続き無効。
+- Search Consoleのドメイン所有権確認・サイトマップ送信は**未実施**（ユーザーによるGoogleアカウント操作が必要）。
+- AdSense publisher IDは未確認のため、`ads.txt`や検証コードを仮の値で公開しない。申請・配信・Googleの設定変更は**本人の明示承認後のみ**。
+- EEA・英国・スイスへの広告配信にはGoogleの地域別CMP要件などを確認し、必要な同意管理を選ぶ。開発用広告プレビューを実配信と混同しない。
+- Googleの審査結果は保証できない。独自の公開作例、UGC管理、権利処理、実際の運営者情報の確定は運用上の残作業。
 
 - コンテンツ品質、規約、CMP、プライバシー、ads.txt、広告配置を監査し、本人の承認後だけ無料審査に申請。
 
