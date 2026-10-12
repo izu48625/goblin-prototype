@@ -34,7 +34,8 @@ try{
     },{key:KEY,seed:initial});
     const remote=[];
     await ctx.route('**/*.supabase.co/**',async route=>{
-      remote.push(route.request().url());await route.abort();
+      if(!['GET','HEAD','OPTIONS'].includes(route.request().method()))remote.push(route.request().url());
+      await route.abort();
     });
     const page=await ctx.newPage();
     page.on('dialog',d=>d.accept());
@@ -119,7 +120,6 @@ try{
       name:'r37-backup.json',mimeType:'application/json',
       buffer:Buffer.from(JSON.stringify({app:'Stats Maker',version:'1.0-A2',library:imported}))
     });
-    await home.locator('#titleInput').filter({hasText:'RESTORED'}).count().catch(()=>0);
     await home.locator('body').evaluate(async expected=>{
       for(let i=0;i<80;i++){
         if(document.querySelector('#titleInput')?.value===expected)return;
