@@ -14,6 +14,11 @@ export default async function handler(req,res){
   let topic=null;
   try{topic=id?await fetchTopic(id):null}catch(error){
     console.error('[Stats Maker OGP] share topic fetch failed',error);
+    res.statusCode=503;
+    res.setHeader('Content-Type','text/plain; charset=utf-8');
+    res.setHeader('Cache-Control','no-store');
+    res.end('Share temporarily unavailable');
+    return;
   }
 
   const exists=!!topic;
@@ -76,6 +81,7 @@ export default async function handler(req,res){
 
   res.statusCode=exists?200:404;
   res.setHeader('Content-Type','text/html; charset=utf-8');
-  res.setHeader('Cache-Control',exists?'public, s-maxage=300, stale-while-revalidate=3600':'no-store');
+  // Old share URLs must respect Public/Unlisted -> Private immediately on next request.
+  res.setHeader('Cache-Control','private, no-store');
   res.end(html);
 }
