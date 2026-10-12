@@ -37,7 +37,7 @@ export default async function handler(req,res){
   const appUrl=exists?publicPageUrl(id):'https://izu48625.github.io/goblin-prototype/';
   const shareUrl=origin&&id?`${origin}/p/${encodeURIComponent(id)}`:appUrl;
   const version=encodeURIComponent(String(card.updatedAt||Date.now()));
-  const imageUrl=origin&&id?`${origin}/api/og?id=${encodeURIComponent(id)}&v=${version}`:'';
+  const imageUrl=origin&&exists?`${origin}/api/og?id=${encodeURIComponent(id)}&v=${version}`:'';
 
   const html=`<!doctype html>
 <html lang="${escapeHtml(card.language||'ja')}">
