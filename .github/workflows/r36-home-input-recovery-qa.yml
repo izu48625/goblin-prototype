@@ -1,0 +1,45 @@
+name: R36 Home Input and Recovery Regression
+
+on:
+  pull_request:
+    paths:
+      - "index.html"
+      - "base/index.html"
+      - "base/js/app.js"
+      - "scripts/r28-publish-lifecycle-test.mjs"
+      - "scripts/r30-home-corrupt-recovery-qa.mjs"
+      - ".github/workflows/r36-home-input-recovery-qa.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  local-browser-safety:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Syntax and static asset preparation
+        run: |
+          node --check base/js/app.js
+          node --check scripts/r28-publish-lifecycle-test.mjs
+          node --check scripts/r30-home-corrupt-recovery-qa.mjs
+          npm ci
+          npm run build:cloudflare
+          grep -q 'base/index.html?v=r36input1' dist/index.html
+          grep -q 'js/app.js?v=r36input1' dist/base/index.html
+      - name: Isolated browser (no production writes)
+        run: |
+          npm install --no-save playwright@1.56.1
+          npx playwright install --with-deps chromium
+          python3 -m http.server 4173 --bind 127.0.0.1 --directory dist >/tmp/r36-static.log 2>&1 &
+          for i in $(seq 1 20); do
+            if curl -fsS http://127.0.0.1:4173/index.html >/dev/null; then break; fi
+            sleep 1
+          done
+          BASE_URL=http://127.0.0.1:4173 node scripts/r28-publish-lifecycle-test.mjs
+          BASE_URL=http://127.0.0.1:4173 node scripts/r30-home-corrupt-recovery-qa.mjs
