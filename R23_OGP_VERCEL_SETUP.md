@@ -1,4 +1,6 @@
-# Stats Maker R23 P3 — Vercel OGP
+# Stats Maker R23 P3 — Vercel OGP (historical setup)
+
+> R38 P2 update (2026-10-12): The official share URL is now `https://statsmaker.app/p/<topic-id>` from both the custom domain and GitHub Pages. The separate Vercel host remains a rendering backend for Cloudflare but **must not be used for newly generated share URLs**. Its direct endpoints have a separate deployment/cache state; older copied social URLs and third-party caches can remain. This file documents the old architecture rather than the new canonical URL.
 
 ## Production architecture
 

@@ -1,0 +1,59 @@
+name: R38 P2 Canonical Share Origin QA
+on:
+  pull_request:
+    paths:
+      - "cloud/runtime-config.js"
+      - "public.html"
+      - "scripts/r38-canonical-share-qa.mjs"
+      - ".github/workflows/r38-canonical-share-qa.yml"
+  push:
+    branches: [main]
+    paths:
+      - "cloud/runtime-config.js"
+      - "public.html"
+      - "scripts/r38-canonical-share-qa.mjs"
+      - ".github/workflows/r38-canonical-share-qa.yml"
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  canonical-no-writes:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+      - name: Browser host and official share URL behavior
+        run: |
+          node --check cloud/runtime-config.js
+          node --check scripts/r38-canonical-share-qa.mjs
+          node scripts/r38-canonical-share-qa.mjs
+          npm run build:cloudflare
+          grep -q 'r38p2canonical1' dist/public.html
+  read-only-deployment:
+    if: github.event_name != 'pull_request'
+    needs: canonical-no-writes
+    runs-on: ubuntu-latest
+    timeout-minutes: 8
+    steps:
+      - name: Confirm custom-domain and GitHub Pages static asset release
+        shell: bash
+        run: |
+          set -euo pipefail
+          for url in https://statsmaker.app/public.html https://izu48625.github.io/goblin-prototype/public.html; do
+            ok=0
+            for attempt in $(seq 1 30); do
+              if curl -fsSL --max-time 12 "$url" | grep -q 'r38p2canonical1'; then
+                ok=1
+                break
+              fi
+              sleep 5
+            done
+            if [ "$ok" != "1" ]; then
+              echo "::error::Updated public sharing asset not deployed: $url"
+              exit 1
+            fi
+            echo "CANONICAL SHARE DEPLOY PASS: $url"
+          done
