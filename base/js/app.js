@@ -380,6 +380,11 @@
     const button=$('undoLastRestoreBtn');
     if(button)button.classList.toggle('hidden',!localStorage.getItem(PRE_RESTORE_KEY));
   }
+  function importFailureMessage(error){
+    if(otherTabChangedStorage)return t('save.conflict');
+    if(error?.name==='QuotaExceededError')return t('save.quota');
+    return t('backup.invalid');
+  }
   function undoLastRestore(){
     if(!localStorage.getItem(PRE_RESTORE_KEY))return;
     if(!window.confirm(t('backup.undoConfirm')))return;
@@ -387,8 +392,8 @@
       const original=prepareImportLibrary(JSON.parse(localStorage.getItem(PRE_RESTORE_KEY)));
       applyImportLibrary(original);
       $('statusText').textContent=t('backup.undoSuccess');
-    }catch{
-      $('statusText').textContent=t(otherTabChangedStorage?'save.conflict':'backup.invalid');
+    }catch(error){
+      $('statusText').textContent=importFailureMessage(error);
     }
   }
   function openImportDialog(){
@@ -412,7 +417,7 @@
       $('statusText').textContent=t('backup.restored');
     }catch(e){
       console.warn('Home backup restore blocked',e);
-      $('statusText').textContent=t(otherTabChangedStorage?'save.conflict':'backup.invalid');
+      $('statusText').textContent=importFailureMessage(e);
     }
   }
 
@@ -2493,7 +2498,11 @@
 
   renderAll();
   window.SM_I18N?.applyTranslations();
-  scheduleSave('');
+  // Opening a second tab must not alter updatedAt or create a fake conflict
+  // in another tab. Only first-run/legacy migration needs a startup save.
+  if(communityMode || lastStoredHomeRaw===null || storageRecoveryRequired)
+    scheduleSave('');
+  else $('saveBadge').textContent=t('save.saved');
 
   // R19 P1: returning from an owned public page can restore the matching
   // local sheet and reopen Publish settings in this same browser session.
