@@ -1947,3 +1947,47 @@
 }
 /* The global 44px language/HOME bar sits above the 54px editor header. */
 body.hasGlobalLocaleBar #moreMenu{top:98px}
+
+
+/* R36 P2.2: labels stay within the exported canvas, including long Japanese
+   titles and labels. Keep original strings in project data; clip only display. */
+.visual .viz-title{
+  min-width:0;
+  max-width:100%;
+  overflow-wrap:anywhere;
+  word-break:normal;
+  line-height:1.08;
+  display:-webkit-box;
+  -webkit-box-orient:vertical;
+  -webkit-line-clamp:2;
+  overflow:hidden;
+}
+.visual .viz-subtitle{
+  min-width:0;
+  max-width:100%;
+  overflow-wrap:anywhere;
+  display:-webkit-box;
+  -webkit-box-orient:vertical;
+  -webkit-line-clamp:2;
+  overflow:hidden;
+}
+.visual .ranking-head > div:first-child,
+.visual .bar-head > div:first-child,
+.visual .radar-head > div:first-child{min-width:0;max-width:100%;}
+.visual .bar-name,.visual .dot-name,.visual .dot-cat,.visual .range-name,
+.visual .ring-center small,.visual .stat-label,.visual .tier-chip span,
+.visual .quad-point-name{
+  min-width:0;
+  max-width:100%;
+  overflow:hidden;
+  text-overflow:ellipsis;
+  white-space:nowrap;
+}
+.visual .bar-label-wrap > div{min-width:0;flex:1;}
+.visual .dot-row > div:first-child,
+.visual .range-row > .range-name{min-width:0;}
+.visual .tier-chip{max-width:100%;min-width:0;}
+.visual .tier-chip span{display:inline-block;vertical-align:middle;max-width:18cqw;}
+.visual .ring-center{max-width:100%;overflow:hidden;}
+.visual .ring-center small{display:block;}
+.visual .scatter-svg,.visual .radar-svg{max-width:100%;}
