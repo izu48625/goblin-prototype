@@ -834,7 +834,9 @@
     // In Community mode, live summary updates must NOT remount score inputs:
     // doing so can swallow a mobile keyboard edit when focus moves to the next cell.
     const syncCommunityScoreSummary=(field,ri)=>{
-      if(!communityMode)return;
+      // Used by Home too: update the active row without replacing input nodes.
+      // Replacing the table on blur can discard the next iPhone keyboard edit.
+      
       const row=s.rows[ri],tableRow=field.closest('tr');
       if(!row||!tableRow)return;
       const value=avg(row),progress=rowProgress(row);
@@ -891,8 +893,14 @@
           scheduleSave('');
           return;
         }
-        // Important: editing a score never reorders the table.
-        renderAll();
+        // R37: do not remount 400 score inputs as focus moves between cells.
+        // The previous renderAll() on blur could remove the newly focused
+        // input before Safari (or a quick keyboard edit) committed its value.
+        // Update row averages/grades and dependent panels in place instead.
+        syncCommunityScoreSummary(e.currentTarget,ri);
+        renderOverview();
+        renderFitTable();
+        renderSidebar();
         scheduleSave('');
       });
     });
