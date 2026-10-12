@@ -1,0 +1,36 @@
+name: R36 P3 iPhone Safari WebKit Export QA
+on:
+  pull_request:
+    paths:
+      - "app/**"
+      - "scripts/r36-webkit-iphone-share-qa.mjs"
+      - ".github/workflows/r36-webkit-iphone-share-qa.yml"
+      - "ROADMAP_R31_PLUS.md"
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  webkit-export-safety:
+    runs-on: ubuntu-latest
+    timeout-minutes: 16
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Lint and compile production static files
+        run: |
+          node --check scripts/r36-webkit-iphone-share-qa.mjs
+          npm run build:cloudflare
+          grep -q 'src/editor-entry.js?v=r36graph1' dist/app/editor.html
+          grep -q 'exportPreview' dist/app/src/core/export.js
+      - name: Run iPhone WebKit PNG editor and share UX
+        run: |
+          npm install --no-save playwright@1.56.1
+          npx playwright install --with-deps webkit
+          python3 -m http.server 4173 --bind 127.0.0.1 --directory dist >/tmp/r36-p3-http.log 2>&1 &
+          for i in $(seq 1 20); do
+            if curl -fsS http://127.0.0.1:4173/index.html >/dev/null; then break; fi
+            sleep 1
+          done
+          BASE_URL=http://127.0.0.1:4173 node scripts/r36-webkit-iphone-share-qa.mjs
