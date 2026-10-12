@@ -143,6 +143,31 @@ async function liveAudit(){
   assert(rawViewer.html.includes('name="robots" content="noindex,follow"'));
   console.log('R38 LIVE READ-ONLY bilingual SEO and Public-only work audit PASS');
 }
+async function legacyReadOnlyProbe(){
+  const base='https://stats-maker-ogp.vercel.app';
+  const revoked='00000000-0000-4000-8000-000000000000';
+  for(const path of ['/p/'+revoked,'/api/og?id='+revoked]){
+    try{
+      const controller=new AbortController();
+      const timeout=setTimeout(()=>controller.abort(),15000);
+      let response;
+      try{
+        response=await fetch(base+path,{redirect:'manual',
+          headers:{'User-Agent':'StatsMaker-R38-ReadOnly-QA/1.0'},
+          cache:'no-store',signal:controller.signal});
+      }finally{clearTimeout(timeout)}
+      const cache=response.headers.get('Cache-Control')||'';
+      const compliant=response.status===404&&/no-store/i.test(cache);
+      // Observation only: a separate Vercel deployment and external social
+      // caches are outside this GitHub/Cloudflare release gate.
+      banner('LEGACY_DIRECT_HOST_'+(compliant?'PASS':'NEEDS_REVIEW'),
+        {path,status:response.status,cache,compliant});
+    }catch(error){
+      banner('LEGACY_DIRECT_HOST_UNVERIFIED',{path,error:String(error)});
+    }
+  }
+}
 if(mode==='local')await localAudit();
 else if(mode==='live')await liveAudit();
+else if(mode==='legacy')await legacyReadOnlyProbe();
 else throw Error('Unknown audit mode '+mode);
