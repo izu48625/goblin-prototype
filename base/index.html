@@ -6,7 +6,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
   <meta name="theme-color" content="#07101f">
   <title>Stats Maker</title>
-  <link rel="stylesheet" href="css/style.css?v=r38p5historic1">
+  <link rel="stylesheet" href="css/style.css?v=r38p6scale1">
   <link rel="stylesheet" href="css/community-mode.css?v=r27h1">
   <link rel="stylesheet" href="../cloud/global-locale.css?v=r38p3about1">
 <link rel="stylesheet" href="../cloud/ad-layout.css?v=r32ad1">
@@ -102,6 +102,7 @@
             <button id="addRowBtn" class="btn small" type="button" data-i18n="action.addRow">＋ 行追加</button>
             <button id="addColBtn" class="btn small" type="button" data-i18n="action.addMetric">＋ 項目</button>
             <button id="scoreSettingsBtn" class="btn small" type="button" data-i18n="action.scoringSettings">採点設定</button>
+            <span id="currentScaleBadge" class="currentScaleBadge" role="status" aria-live="polite">100点満点</span>
             <button id="moreToolsBtn" class="btn small" type="button" data-i18n="action.more">その他</button>
           </div>
         </div>
@@ -113,6 +114,11 @@
           <span class="scaleLabel" data-i18n="scoring.score">点数</span>
           <button id="scale100Btn" class="scaleBtn" type="button" data-i18n="scoring.100">100点</button>
           <button id="scale10Btn" class="scaleBtn" type="button" data-i18n="scoring.10">10点</button>
+        </div>
+        <div id="scaleMismatchHint" class="scaleMismatchHint hidden" role="status">
+          <span data-i18n="scoring.lowScoreHint">現在100点満点です。8点は100点中の8点として扱われ、低評価の色になります。</span>
+          <button id="rebase10Btn" class="scaleRebaseBtn" type="button" data-i18n="scoring.keepValues10">数値を変えずに10点満点へ変更</button>
+          <small data-i18n="scoring.normalConvert">通常の「10点」切替は8点を0.8点に換算します。</small>
         </div>
         <div class="weightToggle" aria-label="重み付け" data-i18n-aria="weight.title">
           <span class="weightToggleLabel" data-i18n="weight.short">重み</span>
@@ -431,8 +437,8 @@
 <script src="../cloud/supabase.js?v=r25p4"></script>
 <script src="../cloud/publish-model.js?v=r25p4"></script>
 <script src="../cloud/community-gateway.js?v=r26p3"></script>
-<script src="js/i18n.js?v=r38p3name1"></script>
-<script src="js/app.js?v=r38p5historic1"></script>
+<script src="js/i18n.js?v=r38p6scale1"></script>
+<script src="js/app.js?v=r38p6scale1"></script>
 <script src="js/publish-guard.js?v=r25p4"></script>
 <script>
 window.addEventListener("statsmaker:languagechange",event=>{
