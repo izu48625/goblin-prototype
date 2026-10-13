@@ -13,6 +13,7 @@ on:
       - "ja/**"
       - "en/**"
       - "scripts/r38-p3-ui-regression-qa.mjs"
+      - "scripts/r38-p6-scale-mode-qa.mjs"
       - ".github/workflows/r38-p3-ui-regression.yml"
   push:
     branches: [main]
@@ -28,6 +29,7 @@ on:
       - "ja/**"
       - "en/**"
       - "scripts/r38-p3-ui-regression-qa.mjs"
+      - "scripts/r38-p6-scale-mode-qa.mjs"
       - ".github/workflows/r38-p3-ui-regression.yml"
   workflow_dispatch:
 permissions:
@@ -47,6 +49,7 @@ jobs:
           node --check base/js/i18n.js
           node --check cloud/global-locale.js
           node --check scripts/r38-p3-ui-regression-qa.mjs
+          node --check scripts/r38-p6-scale-mode-qa.mjs
           npm run build:cloudflare
       - name: Install isolated browser
         run: |
@@ -66,3 +69,5 @@ jobs:
         run: |
           node scripts/r38-p3-ui-regression-qa.mjs
           BROWSER_ENGINE=webkit node scripts/r38-p3-ui-regression-qa.mjs
+          node scripts/r38-p6-scale-mode-qa.mjs
+          BROWSER_ENGINE=webkit node scripts/r38-p6-scale-mode-qa.mjs
