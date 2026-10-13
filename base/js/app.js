@@ -213,17 +213,19 @@
     if(p>=50)return 'heat-d';
     return 'heat-e';
   }
-  // R38 P5: the original warm rose / green / blue score family.
-  // Inline on editable cells as well as in CSS, so the color remains visible
-  // even if a browser retains an older secondary stylesheet.
+  // R38 P7: EXACT original RGBA values from Stats Maker V0.14
+  // (historical GitHub commit 9578d4c77ae4d6c2dc2a4ca76f9fe9da3f09b0d5).
+  // The previous opaque approximations changed the photo's subtle tint.
+  // An explicit cell style retains the original translucency and prevents
+  // stale lower-priority stylesheet rules from hiding the color.
   const scoreTileColors=Object.freeze({
-    'heat-ss':'#8a4b75', // 95–100%, pink / rose
-    'heat-s':'#66505f',  // 90–94%, muted warm mauve
-    'heat-a':'#40655a',  // 80–89%, green
-    'heat-b':'#35646a',  // 70–79%, teal
-    'heat-c':'#365278',  // 60–69%, blue
-    'heat-d':'#2f415f',  // 50–59%, blue slate
-    'heat-e':'#283449'   // under 50%, dark neutral
+    'heat-ss':'rgba(255,107,125,.18)', // 95–100%
+    'heat-s':'rgba(243,154,98,.17)',  // 90–94%
+    'heat-a':'rgba(242,200,96,.14)',  // 80–89%
+    'heat-b':'rgba(84,180,178,.13)',  // 70–79%
+    'heat-c':'rgba(87,145,211,.12)',  // 60–69%
+    'heat-d':'rgba(81,128,178,.10)',  // 50–59%
+    'heat-e':'rgba(84,102,128,.08)'   // 0–49%
   });
   function scoreTileColor(v){return scoreTileColors[heatClass(v)]||'';}
   function esc(s){

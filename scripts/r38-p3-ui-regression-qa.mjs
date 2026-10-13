@@ -25,12 +25,12 @@ try{
   // old cache version, so actual visitors loaded stale CSS despite passing
   // isolated tests with an empty browser cache.
   const iframeSource=await page.locator('#basicFrame').getAttribute('src');
-  assert(iframeSource?.includes('base/index.html?v=r38p6scale1'),
+  assert(iframeSource?.includes('base/index.html?v=r38p7rgba1'),
     'Home iframe document still uses a stale cache key');
   const home=page.frameLocator('#basicFrame');
   await home.locator('#titleInput').waitFor({state:'visible',timeout:30000});
   const cssSource=await home.locator('link[href^="css/style.css"]').getAttribute('href');
-  assert.equal(cssSource,'css/style.css?v=r38p6scale1',
+  assert.equal(cssSource,'css/style.css?v=r38p7rgba1',
     'Home document still references cached old score-cell CSS');
   await home.locator('#scoreTable .scoreInput').first().waitFor({state:'visible'});
   await home.locator('#scoreSettingsBtn').click();
@@ -49,7 +49,7 @@ try{
   assert.deepEqual(colors.map(x=>x.klass.split(' ').at(-1)),
     ['heat-ss','heat-s','heat-a','heat-c']);
   assert.deepEqual(colors.map(x=>x.background),
-    ['rgb(138, 75, 117)','rgb(102, 80, 95)','rgb(64, 101, 90)','rgb(54, 82, 120)']);
+    ['rgba(255, 107, 125, 0.18)','rgba(243, 154, 98, 0.17)','rgba(242, 200, 96, 0.14)','rgba(87, 145, 211, 0.12)']);
   assert.equal(new Set(colors.map(x=>x.background)).size,4,'Colored score tiles disappeared');
   const inline=await home.locator('#scoreTable td.scoreCell').evaluateAll(tds=>
     tds.slice(0,4).map(td=>td.style.backgroundColor));
@@ -59,9 +59,9 @@ try{
   const [pink,warm,green,blue]=colors.map(x=>channel(x.background));
   assert(pink[0]>pink[1]+35,'SS tile is not pink');
   assert(warm[0]>warm[1]+12,'S tile is not warm gray');
-  assert(green[1]>green[0]+25,'A tile is not visibly green');
-  assert(blue[2]>blue[1]+25,'C tile is not visibly blue');
-  console.log('R38 P5 10-point historic pink/taupe/green/blue palette PASS',colors);
+  assert(green[0]>green[1] && green[1]>green[2], 'Original A tile lost warm golden tint');
+  assert(blue[2]>blue[1]+25,'Original C tile lost blue tint');
+  console.log('R38 P7 10-point source-exact RGBA palette PASS',colors);
 
   // User's reference photograph showed 97/94/84, not a blue-purple scale.
   await home.locator('#scoreSettingsBtn').click();

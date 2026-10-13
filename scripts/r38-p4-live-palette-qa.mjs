@@ -1,10 +1,10 @@
 import assert from 'node:assert/strict';
 import {readFile} from 'node:fs/promises';
-const KEY='r38p6scale1';
+const KEY='r38p7rgba1';
 const HOME='base/index.html?v='+KEY;
 const STYLE='css/style.css?v='+KEY;
 const expectedColors=[
-  '#283449','#2f415f','#365278','#35646a','#40655a','#66505f','#8a4b75'
+  'rgba(84,102,128,.08)','rgba(81,128,178,.10)','rgba(87,145,211,.12)','rgba(84,180,178,.13)','rgba(242,200,96,.14)','rgba(243,154,98,.17)','rgba(255,107,125,.18)'
 ];
 const local=[['index.html',HOME],['base/index.html',STYLE],['base/index.html','js/app.js?v='+KEY]];
 for(const [path,needle] of local){
