@@ -1718,19 +1718,19 @@ html[lang="en"] .rankModeBtn{
    Specificity deliberately exceeds .scoreCell/.avgCell and old td rules.
    These are data-cell highlights, NOT the retired Heatmap graph extension. */
 #scoreTable td.scoreCell.heat-e, #scoreTable td.avgCell.heat-e,
-.fitTable td.fitScoreCell.heat-e, .fitTable td.fitAverageCell.heat-e{background:#263348}
+.fitTable td.fitScoreCell.heat-e, .fitTable td.fitAverageCell.heat-e{background:#303f5e}
 #scoreTable td.scoreCell.heat-d, #scoreTable td.avgCell.heat-d,
-.fitTable td.fitScoreCell.heat-d, .fitTable td.fitAverageCell.heat-d{background:#294565}
+.fitTable td.fitScoreCell.heat-d, .fitTable td.fitAverageCell.heat-d{background:#345179}
 #scoreTable td.scoreCell.heat-c, #scoreTable td.avgCell.heat-c,
-.fitTable td.fitScoreCell.heat-c, .fitTable td.fitAverageCell.heat-c{background:#295678}
+.fitTable td.fitScoreCell.heat-c, .fitTable td.fitAverageCell.heat-c{background:#2f628f}
 #scoreTable td.scoreCell.heat-b, #scoreTable td.avgCell.heat-b,
-.fitTable td.fitScoreCell.heat-b, .fitTable td.fitAverageCell.heat-b{background:#2b598a}
+.fitTable td.fitScoreCell.heat-b, .fitTable td.fitAverageCell.heat-b{background:#2f6ea9}
 #scoreTable td.scoreCell.heat-a, #scoreTable td.avgCell.heat-a,
-.fitTable td.fitScoreCell.heat-a, .fitTable td.fitAverageCell.heat-a{background:#494c86}
+.fitTable td.fitScoreCell.heat-a, .fitTable td.fitAverageCell.heat-a{background:#69478d}
 #scoreTable td.scoreCell.heat-s, #scoreTable td.avgCell.heat-s,
-.fitTable td.fitScoreCell.heat-s, .fitTable td.fitAverageCell.heat-s{background:#664677}
+.fitTable td.fitScoreCell.heat-s, .fitTable td.fitAverageCell.heat-s{background:#86409c}
 #scoreTable td.scoreCell.heat-ss, #scoreTable td.avgCell.heat-ss,
-.fitTable td.fitScoreCell.heat-ss, .fitTable td.fitAverageCell.heat-ss{background:#794481}
+.fitTable td.fitScoreCell.heat-ss, .fitTable td.fitAverageCell.heat-ss{background:#974e97}
 
 /* A missing or untouched title is fixed inside Publish before any upload. */
 .publishTitleGuard{
