@@ -26,12 +26,12 @@ try{
   // old cache version, so actual visitors loaded stale CSS despite passing
   // isolated tests with an empty browser cache.
   const iframeSource=await page.locator('#basicFrame').getAttribute('src');
-  assert(iframeSource?.includes('base/index.html?v=r38p9layer1'),
+  assert(iframeSource?.includes('base/index.html?v=r38p10g5d1'),
     'Home iframe document still uses a stale cache key');
   const home=page.frameLocator('#basicFrame');
   await home.locator('#titleInput').waitFor({state:'visible',timeout:30000});
   const cssSource=await home.locator('link[href^="css/style.css"]').getAttribute('href');
-  assert.equal(cssSource,'css/style.css?v=r38p9layer1',
+  assert.equal(cssSource,'css/style.css?v=r38p10g5d1',
     'Home document still references cached old score-cell CSS');
   await home.locator('#scoreTable .scoreInput').first().waitFor({state:'visible'});
   await home.locator('#scoreSettingsBtn').click();
@@ -45,15 +45,15 @@ try{
   // R38 P9: verify the actual transparent layer, stable backing, and pixels.
   const expectedRaw=[
     'rgba(218,94,159,.52)',
-    'rgba(169,144,143,.42)',
-    'rgba(100,167,131,.48)',
-    'rgba(76,135,198,.38)'
+    'rgba(168,80,34,.49)',
+    'rgba(94,116,35,.48)',
+    'rgba(45,100,156,.34)'
   ];
   const expectedCss=[
     'rgba(218, 94, 159, 0.52)',
-    'rgba(169, 144, 143, 0.42)',
-    'rgba(100, 167, 131, 0.48)',
-    'rgba(76, 135, 198, 0.38)'
+    'rgba(168, 80, 34, 0.49)',
+    'rgba(94, 116, 35, 0.48)',
+    'rgba(45, 100, 156, 0.34)'
   ];
   const colors=await home.locator('#scoreTable').evaluate(el=>
     [...el.querySelectorAll('tbody tr:first-child td.scoreCell')].slice(0,4)
@@ -74,7 +74,20 @@ try{
     assert(colors[i].layer.includes(expectedCss[i]),
       'transparent grade overlay not applied to background image');
   }
-  console.log('R38 P9 10-point deep-translucent CSS layer PASS',colors);
+  // The selected G5 mood must be smoky orange, olive yellow-green and blue,
+  // with SS unchanged from R38 P9: verify composite hue and real alpha.
+  const channels=(rgba,base=[16,27,48])=>{
+    const match=rgba.match(/^rgba\((\d+),(\d+),(\d+),\.(\d+)\)$/);
+    assert(match,'bad transparent tint '+rgba);
+    const opacity=Number('0.'+match[4]);
+    return [1,2,3].map((pos,i)=>Math.round(Number(match[pos])*opacity+base[i]*(1-opacity)));
+  };
+  const [ssColor,sColor,aColor,cColor]=expectedRaw.map(c=>channels(c));
+  assert.deepEqual(ssColor,[121,62,106],'SS red-purple must be unchanged');
+  assert(sColor[0]>sColor[1]+25 && sColor[1]>sColor[2]+5,'S must be dark muted orange');
+  assert(aColor[1]>aColor[0]+12 && aColor[0]>aColor[2]+5,'A must be olive yellow-green');
+  assert(cColor[2]>cColor[1]+25 && cColor[1]>cColor[0]+15,'C must be dusky blue');
+  console.log('R38 P10 G5 darker translucent CSS layer PASS',colors);
 
   const pixelRGB=async locator=>{
     const png=await locator.screenshot({animations:'disabled'});
@@ -83,7 +96,7 @@ try{
     const offset=(y*info.width+x)*info.channels;
     return [...data.subarray(offset,offset+3)];
   };
-  const expectedPixels=[[121,62,106],[80,76,88],[56,94,88],[39,68,105]];
+  const expectedPixels=[[121,62,106],[90,53,41],[53,70,42],[26,52,85]];
   const rgbClose=(a,b)=>a.length===b.length&&a.every((n,i)=>Math.abs(n-b[i])<=3);
 
   await home.locator('#scoreSettingsBtn').click();
@@ -103,14 +116,14 @@ try{
   assert.deepEqual(reference.map(x=>x.grade),['heat-ss','heat-s','heat-a','heat-c']);
   assert.deepEqual(reference.map(x=>x.tint),expectedRaw);
   assert(reference.every(x=>x.backing==='rgb(16, 27, 48)'));
-  console.log('R38 P9 source photo 97/94/88/67 overlay PASS',reference);
+  console.log('R38 P10 G5 97/94/88/67 overlay PASS',reference);
   const avg=await home.locator('#scoreTable tbody tr:first-child td.avgCell').evaluate(el=>({
     className:el.className,
     backing:getComputedStyle(el).backgroundColor,
     layer:getComputedStyle(el).backgroundImage
   }));
   assert(avg.className.includes('heat-a') && avg.backing==='rgb(16, 27, 48)'
-    && avg.layer.includes('rgba(100, 167, 131, 0.48)'),
+    && avg.layer.includes('rgba(94, 116, 35, 0.48)'),
     'average cell failed to inherit identical translucent A shading');
 
   // Measure real rendered pixel colors at identical positions. Don't confuse
@@ -128,7 +141,7 @@ try{
         ': '+actual+' expected '+expectedPixels[i]);
       samples.push(actual);
     }
-    console.log('R38 P9 layered RGBA screenshot pixel parity PASS',
+    console.log('R38 P10 G5 screenshot pixel parity PASS',
       process.env.BROWSER_ENGINE||'chromium',width,samples);
   }
   await page.setViewportSize({width:390,height:844});
