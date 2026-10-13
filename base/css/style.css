@@ -1781,3 +1781,29 @@ html[lang="en"] .rankModeBtn{
   font:800 16px/1.25 system-ui,-apple-system,sans-serif
 }
 .publishTitleGuard input:focus-visible{outline:2px solid #ffc478;outline-offset:2px}
+
+/* R38 P6: make the denominator visible without opening hidden settings.
+   Prevent 8/100 from being mistaken for 8/10; never silently regrade data. */
+.currentScaleBadge{
+  display:inline-flex;align-items:center;justify-content:center;
+  min-height:30px;box-sizing:border-box;padding:0 7px;
+  border:1px solid #557cbb;border-radius:8px;
+  background:#183353;color:#c8e1ff;
+  font-size:10px;font-weight:900;white-space:nowrap;
+}
+.scaleMismatchHint{
+  display:flex;align-items:center;flex-wrap:wrap;gap:8px;
+  padding:9px 11px;margin:7px 0;
+  border:1px solid #a77b47;border-radius:9px;
+  background:#30291e;color:#f7e6cb;font-size:12px;line-height:1.45;
+}
+.scaleMismatchHint .scaleRebaseBtn{
+  min-height:42px;padding:8px 12px;border-radius:8px;
+  background:#275b4f;border:1px solid #67ba9c;color:#fff;
+  font-size:12px;font-weight:900;cursor:pointer;
+}
+.scaleMismatchHint small{color:#e2c8a2;font-size:11px}
+@media(max-width:760px){
+  .currentScaleBadge{min-height:40px;padding:0 10px;font-size:12px}
+  .scaleMismatchHint .scaleRebaseBtn{width:100%}
+}
