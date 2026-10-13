@@ -1,6 +1,7 @@
 import assert from 'node:assert/strict';
 import {readFile} from 'node:fs/promises';
 import {chromium,webkit} from 'playwright';
+import sharp from 'sharp';
 
 const BASE=(process.env.BASE_URL||'http://127.0.0.1:4173').replace(/\/$/,'');
 const raw=await readFile(new URL('./r28-publish-lifecycle-test.mjs',import.meta.url),'utf8');
@@ -25,12 +26,12 @@ try{
   // old cache version, so actual visitors loaded stale CSS despite passing
   // isolated tests with an empty browser cache.
   const iframeSource=await page.locator('#basicFrame').getAttribute('src');
-  assert(iframeSource?.includes('base/index.html?v=r38p7photo2'),
+  assert(iframeSource?.includes('base/index.html?v=r38p8rgb1'),
     'Home iframe document still uses a stale cache key');
   const home=page.frameLocator('#basicFrame');
   await home.locator('#titleInput').waitFor({state:'visible',timeout:30000});
   const cssSource=await home.locator('link[href^="css/style.css"]').getAttribute('href');
-  assert.equal(cssSource,'css/style.css?v=r38p7photo2',
+  assert.equal(cssSource,'css/style.css?v=r38p8rgb1',
     'Home document still references cached old score-cell CSS');
   await home.locator('#scoreTable .scoreInput').first().waitFor({state:'visible'});
   await home.locator('#scoreSettingsBtn').click();
@@ -49,20 +50,31 @@ try{
   assert.deepEqual(colors.map(x=>x.klass.split(' ').at(-1)),
     ['heat-ss','heat-s','heat-a','heat-c']);
   assert.deepEqual(colors.map(x=>x.background),
-    ['rgba(241, 112, 173, 0.24)','rgba(189, 169, 155, 0.3)','rgba(144, 191, 162, 0.34)','rgba(87, 145, 211, 0.2)']);
+    ['rgb(118, 78, 114)','rgb(99, 90, 101)','rgb(82, 109, 102)','rgb(48, 82, 114)']);
   assert.equal(new Set(colors.map(x=>x.background)).size,4,'Colored score tiles disappeared');
   const inline=await home.locator('#scoreTable td.scoreCell').evaluateAll(tds=>
     tds.slice(0,4).map(td=>td.style.backgroundColor));
   assert.deepEqual(inline,colors.map(x=>x.background),
     'Actual Home score tiles must have explicit hues, not stylesheet-only colors');
   const channel=rgb=>rgb.match(/[0-9]+/g).map(Number);
-  const [pink,warm,green,blue]=colors.map(x=>channel(x.background));
-  assert(pink[0]>pink[1]+25 && pink[2]>pink[1]+12,'SS tile lost dusty rose hue');
-  assert(Math.abs(warm[0]-warm[1])<30 && warm[2]>130,'S tile lost muted warm-gray hue');
-  assert(green[1]>green[0]+25 && green[2]>green[0]+10, 'A tile lost photo-matched sage/green hue');
-  assert(blue[2]>blue[1]+25,'C tile lost blue tint');
-  console.log('R38 P7b 10-point photo-matched RGBA palette PASS',colors);
+  const [rose,gray,sage,blue]=colors.map(x=>channel(x.background));
+  assert(rose[0]>rose[1]+30&&rose[2]>rose[1]+30,'SS lost rose-purple hue');
+  assert(Math.abs(gray[0]-gray[2])<5&&gray[0]>gray[1],'S lost warm gray hue');
+  assert(sage[1]>sage[0]+20&&sage[1]>sage[2],'A lost sage-green hue');
+  assert(blue[2]>blue[1]+25,'C lost blue hue');
+  console.log('R38 P8 fixed sRGB 10-point scores PASS',colors);
 
+  // Unlike checking computed rgba() only, sample actual screenshot RGB pixels.
+  // A 12px inset is free of cell borders and the centered number glyph.
+  const pixelRGB=async locator=>{
+    const png=await locator.screenshot({animations:'disabled'});
+    const {data,info}=await sharp(png).removeAlpha().raw().toBuffer({resolveWithObject:true});
+    const x=Math.min(12,info.width-2),y=Math.min(8,info.height-2);
+    const offset=(y*info.width+x)*info.channels;
+    return [...data.subarray(offset,offset+3)];
+  };
+  const expectedPixels=[[118,78,114],[99,90,101],[82,109,102],[48,82,114]];
+  const rgbClose=(a,b)=>a.length===b.length&&a.every((n,i)=>Math.abs(n-b[i])<=2);
   // User's reference photograph showed 97/94/88, not a blue-purple scale.
   await home.locator('#scoreSettingsBtn').click();
   await home.locator('#scale100Btn').click();
@@ -88,7 +100,26 @@ try{
       .map(td=>getComputedStyle(td).backgroundColor));
   assert.deepEqual(desktop,colors.map(x=>x.background),
     'Desktop palette differs from original mobile/old-photo score bands');
-  console.log('R38 P7b desktop palette matches mobile PASS',desktop);
+  console.log('R38 P8 desktop CSS matches mobile PASS',desktop);
+
+  // Physical screenshot pixel parity at PC / iPhone / compact iPhone sizes.
+  // Test in both Chromium and WebKit by invoking this suite per engine.
+  for(const width of [1365,390,320]){
+    await page.setViewportSize({width,height:844});
+    const samples=[];
+    for(let i=0;i<4;i++){
+      const input=home.locator('[data-score-row="0"][data-score-col="0"]');
+      await input.fill(String(referenceValues[i]));
+      await home.locator('#titleInput').click();
+      const actual=await pixelRGB(home.locator('#scoreTable tbody tr:first-child td.scoreCell').first());
+      assert(rgbClose(actual,expectedPixels[i]),
+        'Screenshot pixel does not match fixed sRGB at '+width+
+        ', score '+referenceValues[i]+': '+actual+' != '+expectedPixels[i]);
+      samples.push(actual);
+    }
+    console.log('R38 P8 screenshot pixels (not merely CSS tokens) PASS',
+      process.env.BROWSER_ENGINE||'chromium',width,samples);
+  }
   await page.setViewportSize({width:390,height:844});
 
   const nav=page.locator('.globalLocaleBar');
