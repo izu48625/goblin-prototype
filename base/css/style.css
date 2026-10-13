@@ -114,13 +114,13 @@
     .rowDelete{border:0;background:transparent;color:#64758e;width:31px;height:31px;border-radius:7px}
     .rowDelete:hover{background:#2a1a25;color:#ff8d9b}
     .emptyAddRow{padding:7px;border-top:1px solid var(--line);background:#0d1728}
-    .heat-e{background:rgba(84,102,128,.08)}
-    .heat-d{background:rgba(81,128,178,.10)}
-    .heat-c{background:rgba(87,145,211,.12)}
-    .heat-b{background:rgba(84,180,178,.13)}
-    .heat-a{background:rgba(242,200,96,.14)}
-    .heat-s{background:rgba(243,154,98,.17)}
-    .heat-ss{background:rgba(255,107,125,.18)}
+    .heat-e{background:rgba(84,102,128,.10)}
+    .heat-d{background:rgba(81,128,178,.16)}
+    .heat-c{background:rgba(87,145,211,.20)}
+    .heat-b{background:rgba(84,180,178,.27)}
+    .heat-a{background:rgba(144,191,162,.34)}
+    .heat-s{background:rgba(189,169,155,.30)}
+    .heat-ss{background:rgba(241,112,173,.24)}
 
     /* Side */
     .side{display:grid;gap:9px;position:sticky;top:9px}
@@ -1714,59 +1714,60 @@ html[lang="en"] .rankModeBtn{
   }
 }
 
-/* R38 P7: ORIGINAL Stats Maker V0.14 translucent table palette.
-   Exact rgba values recovered from historical git commit
-   9578d4c77ae4d6c2dc2a4ca76f9fe9da3f09b0d5, not opaque guesses.
-   These are background tints (including the original alpha), not the
-   removed Heatmap graph extension. Same values applied by Home JS. */
+/* R38 P7b photo-matched palette: the user's original V1.0-A2 source
+   shared identical RGBA colors with R38 P7, but the captured monitor photo
+   looks lighter and more green/sage than current mobile Safari.
+   These deliberately tuned translucent score backgrounds target the photo,
+   not historical pixel-exact fidelity. Score thresholds and data are unchanged.
+   Keep these values synchronized with JS's scoreTileColors. */
 /* Under 50%: dark slate */
 #scoreTable td.scoreCell.heat-e,
 #scoreTable td.avgCell.heat-e,
 .fitTable td.fitScoreCell.heat-e,
 .fitTable td.fitAverageCell.heat-e,
-.overviewMetric.heat-e{background-color:rgba(84,102,128,.08)}
+.overviewMetric.heat-e{background-color:rgba(84,102,128,.10)}
 
 /* 50–59%: slate blue */
 #scoreTable td.scoreCell.heat-d,
 #scoreTable td.avgCell.heat-d,
 .fitTable td.fitScoreCell.heat-d,
 .fitTable td.fitAverageCell.heat-d,
-.overviewMetric.heat-d{background-color:rgba(81,128,178,.10)}
+.overviewMetric.heat-d{background-color:rgba(81,128,178,.16)}
 
 /* 60–69%: blue */
 #scoreTable td.scoreCell.heat-c,
 #scoreTable td.avgCell.heat-c,
 .fitTable td.fitScoreCell.heat-c,
 .fitTable td.fitAverageCell.heat-c,
-.overviewMetric.heat-c{background-color:rgba(87,145,211,.12)}
+.overviewMetric.heat-c{background-color:rgba(87,145,211,.20)}
 
 /* 70–79%: turquoise */
 #scoreTable td.scoreCell.heat-b,
 #scoreTable td.avgCell.heat-b,
 .fitTable td.fitScoreCell.heat-b,
 .fitTable td.fitAverageCell.heat-b,
-.overviewMetric.heat-b{background-color:rgba(84,180,178,.13)}
+.overviewMetric.heat-b{background-color:rgba(84,180,178,.27)}
 
-/* 80–89%: muted green */
+/* 80–89%: muted sage green */
 #scoreTable td.scoreCell.heat-a,
 #scoreTable td.avgCell.heat-a,
 .fitTable td.fitScoreCell.heat-a,
 .fitTable td.fitAverageCell.heat-a,
-.overviewMetric.heat-a{background-color:rgba(242,200,96,.14)}
+.overviewMetric.heat-a{background-color:rgba(144,191,162,.34)}
 
-/* 90–94%: warm mauve / taupe */
+/* 90–94%: warm gray */
 #scoreTable td.scoreCell.heat-s,
 #scoreTable td.avgCell.heat-s,
 .fitTable td.fitScoreCell.heat-s,
 .fitTable td.fitAverageCell.heat-s,
-.overviewMetric.heat-s{background-color:rgba(243,154,98,.17)}
+.overviewMetric.heat-s{background-color:rgba(189,169,155,.30)}
 
 /* 95–100%: old-style rose / pink */
 #scoreTable td.scoreCell.heat-ss,
 #scoreTable td.avgCell.heat-ss,
 .fitTable td.fitScoreCell.heat-ss,
 .fitTable td.fitAverageCell.heat-ss,
-.overviewMetric.heat-ss{background-color:rgba(255,107,125,.18)}
+.overviewMetric.heat-ss{background-color:rgba(241,112,173,.24)}
 
 /* A missing or untouched title is fixed inside Publish before any upload. */
 .publishTitleGuard{

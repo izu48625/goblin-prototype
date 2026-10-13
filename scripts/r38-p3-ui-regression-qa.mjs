@@ -25,12 +25,12 @@ try{
   // old cache version, so actual visitors loaded stale CSS despite passing
   // isolated tests with an empty browser cache.
   const iframeSource=await page.locator('#basicFrame').getAttribute('src');
-  assert(iframeSource?.includes('base/index.html?v=r38p7rgba1'),
+  assert(iframeSource?.includes('base/index.html?v=r38p7photo2'),
     'Home iframe document still uses a stale cache key');
   const home=page.frameLocator('#basicFrame');
   await home.locator('#titleInput').waitFor({state:'visible',timeout:30000});
   const cssSource=await home.locator('link[href^="css/style.css"]').getAttribute('href');
-  assert.equal(cssSource,'css/style.css?v=r38p7rgba1',
+  assert.equal(cssSource,'css/style.css?v=r38p7photo2',
     'Home document still references cached old score-cell CSS');
   await home.locator('#scoreTable .scoreInput').first().waitFor({state:'visible'});
   await home.locator('#scoreSettingsBtn').click();
@@ -49,7 +49,7 @@ try{
   assert.deepEqual(colors.map(x=>x.klass.split(' ').at(-1)),
     ['heat-ss','heat-s','heat-a','heat-c']);
   assert.deepEqual(colors.map(x=>x.background),
-    ['rgba(255, 107, 125, 0.18)','rgba(243, 154, 98, 0.17)','rgba(242, 200, 96, 0.14)','rgba(87, 145, 211, 0.12)']);
+    ['rgba(241, 112, 173, 0.24)','rgba(189, 169, 155, 0.3)','rgba(144, 191, 162, 0.34)','rgba(87, 145, 211, 0.2)']);
   assert.equal(new Set(colors.map(x=>x.background)).size,4,'Colored score tiles disappeared');
   const inline=await home.locator('#scoreTable td.scoreCell').evaluateAll(tds=>
     tds.slice(0,4).map(td=>td.style.backgroundColor));
@@ -57,17 +57,17 @@ try{
     'Actual Home score tiles must have explicit hues, not stylesheet-only colors');
   const channel=rgb=>rgb.match(/[0-9]+/g).map(Number);
   const [pink,warm,green,blue]=colors.map(x=>channel(x.background));
-  assert(pink[0]>pink[1]+35,'SS tile is not pink');
-  assert(warm[0]>warm[1]+12,'S tile is not warm gray');
-  assert(green[0]>green[1] && green[1]>green[2], 'Original A tile lost warm golden tint');
-  assert(blue[2]>blue[1]+25,'Original C tile lost blue tint');
-  console.log('R38 P7 10-point source-exact RGBA palette PASS',colors);
+  assert(pink[0]>pink[1]+25 && pink[2]>pink[1]+12,'SS tile lost dusty rose hue');
+  assert(Math.abs(warm[0]-warm[1])<30 && warm[2]>130,'S tile lost muted warm-gray hue');
+  assert(green[1]>green[0]+25 && green[2]>green[0]+10, 'A tile lost photo-matched sage/green hue');
+  assert(blue[2]>blue[1]+25,'C tile lost blue tint');
+  console.log('R38 P7b 10-point photo-matched RGBA palette PASS',colors);
 
-  // User's reference photograph showed 97/94/84, not a blue-purple scale.
+  // User's reference photograph showed 97/94/88, not a blue-purple scale.
   await home.locator('#scoreSettingsBtn').click();
   await home.locator('#scale100Btn').click();
   await home.locator('#scoreSettingsBtn').click();
-  const referenceValues=[97,94,84,67];
+  const referenceValues=[97,94,88,67];
   for(let i=0;i<referenceValues.length;i++)
     await home.locator('[data-score-row="0"][data-score-col="'+i+'"]')
       .fill(String(referenceValues[i]));
@@ -79,7 +79,7 @@ try{
   assert.deepEqual(historic.map(x=>x.klass.split(' ').at(-1)),
     ['heat-ss','heat-s','heat-a','heat-c']);
   assert.deepEqual(historic.map(x=>x.color),colors.map(x=>x.background));
-  console.log('R38 P5 old-photo 97/94/84/67 color reference PASS',historic);
+  console.log('R38 P7b photo-reference 97/94/88/67 color PASS',historic);
   // The supplied earlier screenshot was desktop. Verify both viewports use
   // identical colored cells instead of only checking the mobile CSS.
   await page.setViewportSize({width:1365,height:820});
@@ -88,7 +88,7 @@ try{
       .map(td=>getComputedStyle(td).backgroundColor));
   assert.deepEqual(desktop,colors.map(x=>x.background),
     'Desktop palette differs from original mobile/old-photo score bands');
-  console.log('R38 P5 desktop palette matches old-photo grades PASS',desktop);
+  console.log('R38 P7b desktop palette matches mobile PASS',desktop);
   await page.setViewportSize({width:390,height:844});
 
   const nav=page.locator('.globalLocaleBar');
