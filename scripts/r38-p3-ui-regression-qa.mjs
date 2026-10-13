@@ -20,8 +20,17 @@ try{
   });
   const page=await context.newPage();
   await page.goto(BASE+'/index.html',{waitUntil:'domcontentloaded'});
+  // Catch the previous regression: the outer index iframe URL stayed at an
+  // old cache version, so actual visitors loaded stale CSS despite passing
+  // isolated tests with an empty browser cache.
+  const iframeSource=await page.locator('#basicFrame').getAttribute('src');
+  assert(iframeSource?.includes('base/index.html?v=r38p4palette1'),
+    'Home iframe document still uses a stale cache key');
   const home=page.frameLocator('#basicFrame');
   await home.locator('#titleInput').waitFor({state:'visible',timeout:30000});
+  const cssSource=await home.locator('link[href^="css/style.css"]').getAttribute('href');
+  assert.equal(cssSource,'css/style.css?v=r38p4palette1',
+    'Home document still references cached old score-cell CSS');
   await home.locator('#scoreTable .scoreInput').first().waitFor({state:'visible'});
   await home.locator('#scoreSettingsBtn').click();
   await home.locator('#scale10Btn').click();
@@ -39,7 +48,7 @@ try{
   assert.deepEqual(colors.map(x=>x.klass.split(' ').at(-1)),
     ['heat-ss','heat-s','heat-b','heat-e']);
   assert.deepEqual(colors.map(x=>x.background),
-    ['rgb(121, 68, 129)','rgb(102, 70, 119)','rgb(43, 89, 138)','rgb(38, 51, 72)']);
+    ['rgb(151, 78, 151)','rgb(134, 64, 156)','rgb(47, 110, 169)','rgb(48, 63, 94)']);
   assert.equal(new Set(colors.map(x=>x.background)).size,4,'Colored score tiles disappeared');
   console.log('R38 P3 colored 10-point score tile QA PASS',colors);
 
