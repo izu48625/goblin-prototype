@@ -1,10 +1,10 @@
 import assert from 'node:assert/strict';
 import {readFile} from 'node:fs/promises';
-const KEY='r38p9layer1';
+const KEY='r38p10g5d1';
 const HOME='base/index.html?v='+KEY;
 const STYLE='css/style.css?v='+KEY;
 const expectedColors=[
-  'rgba(83,105,137,.19)','rgba(72,112,171,.30)','rgba(76,135,198,.38)','rgba(73,164,156,.43)','rgba(100,167,131,.48)','rgba(169,144,143,.42)','rgba(218,94,159,.52)'
+  'rgba(71,87,114,.17)','rgba(51,82,135,.27)','rgba(45,100,156,.34)','rgba(55,119,100,.36)','rgba(94,116,35,.48)','rgba(168,80,34,.49)','rgba(218,94,159,.52)'
 ];
 const local=[['index.html',HOME],['base/index.html',STYLE],['base/index.html','js/app.js?v='+KEY]];
 for(const [path,needle] of local){
@@ -13,7 +13,7 @@ for(const [path,needle] of local){
 }
 const localCss=await readFile(new URL('../base/css/style.css',import.meta.url),'utf8');
 for(const color of expectedColors)assert(localCss.includes('--score-tile-overlay:'+color),color+' missing');
-console.log('R38 P9 layered translucency source-chain PASS');
+console.log('R38 P10 G5 dark score palette source-chain PASS');
 if(process.argv[2]!=='live')process.exit(0);
 
 // No browser storage, Supabase credentials, user works or POST requests.
@@ -37,7 +37,7 @@ for(const host of hosts){
   let success=false,last='';
   for(let attempt=0;attempt<30&&!success;attempt++){
     try{
-      const root=await fetchText(host.base+'/?paletteQA=r38p9-'+attempt);
+      const root=await fetchText(host.base+'/?paletteQA=r38p10-'+attempt);
       assert(root.includes(HOME),'stale outer shell -> Home iframe');
       const home=await fetchText(host.base+'/base/index.html?v='+KEY);
       assert(home.includes(STYLE),'stale Home HTML -> CSS');
@@ -48,15 +48,15 @@ for(const host of hosts){
       assert(css.includes('#scoreTable td.scoreCell.heat-ss'),'missing score cells');
       for(const color of expectedColors)
         assert(css.includes('--score-tile-overlay:'+color),'missing color '+color);
-      console.log('R38 P9 LIVE asset chain PASS',host.name,host.base,
+      console.log('R38 P10 LIVE asset chain PASS',host.name,host.base,
         {outerBytes:root.length,homeBytes:home.length,cssBytes:css.length});
       success=true;
     }catch(error){
       last=String(error);
-      console.log('R38 P9 LIVE awaiting asset deployment',host.name,attempt+1,last);
+      console.log('R38 P10 LIVE awaiting asset deployment',host.name,attempt+1,last);
       if(attempt<29)await wait(5000);
     }
   }
   assert(success,host.name+' never served new complete palette asset chain: '+last);
 }
-console.log('R38 P9 production and Pages freshness PASS; no real data touched');
+console.log('R38 P10 production and Pages freshness PASS; no real data touched');
