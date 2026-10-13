@@ -26,12 +26,12 @@ try{
   // old cache version, so actual visitors loaded stale CSS despite passing
   // isolated tests with an empty browser cache.
   const iframeSource=await page.locator('#basicFrame').getAttribute('src');
-  assert(iframeSource?.includes('base/index.html?v=r38p11glass1'),
+  assert(iframeSource?.includes('base/index.html?v=r38p12alpha1'),
     'Home iframe document still uses a stale cache key');
   const home=page.frameLocator('#basicFrame');
   await home.locator('#titleInput').waitFor({state:'visible',timeout:30000});
   const cssSource=await home.locator('link[href^="css/style.css"]').getAttribute('href');
-  assert.equal(cssSource,'css/style.css?v=r38p11glass1',
+  assert.equal(cssSource,'css/style.css?v=r38p12alpha1',
     'Home document still references cached old score-cell CSS');
   await home.locator('#scoreTable .scoreInput').first().waitFor({state:'visible'});
   await home.locator('#scoreSettingsBtn').click();
@@ -42,7 +42,7 @@ try{
     await home.locator('[data-score-row="0"][data-score-col="'+i+'"]').fill(String(values[i]));
   await home.locator('#titleInput').click(); // Commit the final score's change event.
   await page.waitForTimeout(300); // CSS color transition settles before exact RGB comparison.
-  // R38 P9: verify the actual transparent layer, stable backing, and pixels.
+  // R38 P12: validate a REAL translucent cell background and its real pixels.
   const expectedRaw=[
     'rgba(218,94,159,.52)',
     'rgba(168,80,34,.49)',
@@ -69,10 +69,10 @@ try{
   assert.deepEqual(colors.map(x=>x.tint),expectedRaw,
     'score tiles lost actual inline translucent RGBA');
   for(let i=0;i<4;i++){
-    assert.equal(colors[i].backing,'rgb(16, 27, 48)',
-      'tile backing is not the unified dark layer');
-    assert(colors[i].layer.includes(expectedCss[i]),
-      'transparent grade overlay not applied to background image');
+    assert.equal(colors[i].backing,expectedCss[i],
+      'graded tile must have genuine RGBA background, not an opaque backing');
+    assert.equal(colors[i].layer,'none',
+      'graded tile must not use a faux transparent gradient');
   }
   // The selected G5 mood must be smoky orange, olive yellow-green and blue,
   // with SS unchanged from R38 P9: verify composite hue and real alpha.
@@ -87,15 +87,15 @@ try{
   assert(sColor[0]>sColor[1]+25 && sColor[1]>sColor[2]+5,'S must be dark muted orange');
   assert(aColor[1]>aColor[0]+12 && aColor[0]>aColor[2]+5,'A must be olive yellow-green');
   assert(cColor[2]>cColor[1]+25 && cColor[1]>cColor[0]+15,'C must be dusky blue');
-  assert(colors.every(x=>x.layer.includes('rgba(255, 255, 255, 0.145)')),
-    'scored tiles should contain a subtle glass reflection layer');
   const blank=await home.locator('#scoreTable tbody tr:nth-child(2) td.scoreCell').first().evaluate(td=>({
     hasGrade:[...td.classList].some(x=>x.startsWith('heat-')),
+    backing:getComputedStyle(td).backgroundColor,
     layer:getComputedStyle(td).backgroundImage
   }));
-  assert(!blank.hasGrade && !blank.layer.includes('rgba(255, 255, 255, 0.145)'),
-    'empty cells must stay unglazed and unchanged');
-  console.log('R38 P11 G5 translucent tint + scored-only glass sheen PASS',colors);
+  assert(!blank.hasGrade && blank.layer==='none' &&
+    blank.backing==='rgb(16, 27, 48)',
+    'empty score cells must keep the existing dark opaque background');
+  console.log('R38 P12 true G5 alpha, no gloss and safe blank cells PASS',colors);
 
   const cellPixelPair=async locator=>{
     const png=await locator.screenshot({animations:'disabled'});
@@ -127,20 +127,20 @@ try{
         layer:getComputedStyle(td).backgroundImage})));
   assert.deepEqual(reference.map(x=>x.grade),['heat-ss','heat-s','heat-a','heat-c']);
   assert.deepEqual(reference.map(x=>x.tint),expectedRaw);
-  assert(reference.every(x=>x.backing==='rgb(16, 27, 48)'));
-  console.log('R38 P10 G5 97/94/88/67 overlay PASS',reference);
+  assert(reference.every((x,i)=>x.backing===expectedCss[i] && x.layer==='none'));
+  console.log('R38 P12 97/94/88/67 true transparent backgrounds PASS',reference);
   const avg=await home.locator('#scoreTable tbody tr:first-child td.avgCell').evaluate(el=>({
     className:el.className,
     backing:getComputedStyle(el).backgroundColor,
     layer:getComputedStyle(el).backgroundImage
   }));
-  assert(avg.className.includes('heat-a') && avg.backing==='rgb(16, 27, 48)'
-    && avg.layer.includes('rgba(94, 116, 35, 0.48)'),
-    'average cell failed to inherit identical translucent A shading');
+  assert(avg.className.includes('heat-a') &&
+    avg.backing==='rgba(94, 116, 35, 0.48)' && avg.layer==='none',
+    'average cell must use the same real RGBA A tint without gloss');
 
-  // Verify actual composited glass pixels across desktop + narrow/mobile widths.
-  // Transparent RGBA is preserved; scores are visually brighter at the top,
-  // shaded at the foot, and near-identical across viewport sizes.
+  // The SAME RGBA is composited with the table, not an opaque per-cell fill.
+  // Check painted pixels against CSS alpha math, including absence of top shine.
+  const expectedPixelColors=expectedRaw.map(x=>channels(x));
   for(const width of [1365,390,320]){
     await page.setViewportSize({width,height:844});
     const samples=[];
@@ -149,20 +149,38 @@ try{
       await input.fill(String(referenceValues[i]));
       await home.locator('#titleInput').click();
       const actual=await cellPixelPair(home.locator('#scoreTable tbody tr:first-child td.scoreCell').first());
+      assert(rgbClose(actual.top,expectedPixelColors[i]),
+        'RGBA composite did not match its dark table underlay at '+width+
+        ', score '+referenceValues[i]+': '+actual.top+' vs '+expectedPixelColors[i]);
+      assert(rgbClose(actual.bottom,actual.top),
+        'Unexpected shine/gradient remains at '+width+', score '+
+        referenceValues[i]+': top '+actual.top+' bottom '+actual.bottom);
       if(width===1365)baselineTopRGB[i]=actual.top;
       else assert(rgbClose(actual.top,baselineTopRGB[i]),
-        'Mobile/desktop glass pixel mismatch at '+width+' score '+referenceValues[i]+
-        ': '+actual.top+' expected '+baselineTopRGB[i]);
-      const bright=actual.top.reduce((a,b)=>a+b,0);
-      const shade=actual.bottom.reduce((a,b)=>a+b,0);
-      assert(bright>shade+14,
-        'Tile lacks glass lighting depth at '+width+' score '+referenceValues[i]+
-        ': top '+actual.top+' bottom '+actual.bottom);
+        'PC/mobile alpha composite mismatch at '+width+', score '+referenceValues[i]);
       samples.push(actual);
     }
-    console.log('R38 P11 G5 glass pixel lighting and viewport parity PASS',
+    console.log('R38 P12 direct alpha pixels and no-gloss PC/mobile PASS',
       process.env.BROWSER_ENGINE||'chromium',width,samples);
   }
+  // Same SS tint on alternate rows must reveal the darker/lighter table
+  // underlay, demonstrating real see-through compositing rather than a
+  // flattened one-color screenshot. Restore test rows afterward.
+  await page.setViewportSize({width:390,height:844});
+  await home.locator('[data-score-row="0"][data-score-col="0"]').fill('97');
+  await home.locator('[data-score-row="1"][data-score-col="0"]').fill('97');
+  await home.locator('#titleInput').click();
+  await page.waitForTimeout(250);
+  const odd=await cellPixelPair(home.locator('#scoreTable tbody tr:first-child td.scoreCell').first());
+  const even=await cellPixelPair(home.locator('#scoreTable tbody tr:nth-child(2) td.scoreCell').first());
+  const diff=odd.top.map((v,i)=>Math.abs(v-even.top[i]));
+  assert(diff.some(v=>v>=2) && diff.every(v=>v<=6),
+    'Same RGBA score should reveal subtle table-row surface contrast: '+
+    odd.top+' vs '+even.top);
+  await home.locator('[data-score-row="1"][data-score-col="0"]').fill('');
+  await home.locator('#titleInput').click();
+  console.log('R38 P12 actual see-through row-compositing PASS',odd.top,even.top);
+
   await page.setViewportSize({width:390,height:844});
 
   const nav=page.locator('.globalLocaleBar');

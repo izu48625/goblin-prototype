@@ -1728,32 +1728,49 @@ html[lang="en"] .rankModeBtn{
    It remains visibly layered but the final rendered color is stable across
    PC/phone responsive layouts and Chromium/WebKit (assuming matching display
    color calibration). Grade thresholds, values and storage are untouched. */
-/* R38 P11: retain G5 hue and genuine translucent grade tints, but replace
-   the flat-looking uniform RGBA plane with a subtle glass light-falloff.
-   The darker #101b30 substrate is unchanged for consistent PC / iPhone
-   blending. Only SCORED cells receive the sheen; blank cells stay plain.
-   No score thresholds, data, input behavior or layouts are touched. */
+/* R38 P12: REAL translucent G5 scoring, not shiny/painted glass.
+   The score cell itself no longer owns a solid #101b30 backing or opaque
+   reflection gradient. It paints only its actual rgba tint, so its underlying
+   table/overview surface genuinely shows through. Keep the selected G5 hue
+   values, score thresholds, numeric data and the live --score-tile-overlay
+   updates untouched. No gloss, highlight, backdrop-filter or inset shadow.
+   Subtle row-surface contrast is placed BEHIND tinted tiles; unscored
+   cells retain their previous opaque background and remain unchanged. */
+#scoreTable,
+.fitTable{
+  background-color:#101b30;
+}
+#scoreTable tbody tr,
+.fitTable tbody tr{
+  background-color:#101b30;
+}
+#scoreTable tbody tr:nth-child(even),
+.fitTable tbody tr:nth-child(even){
+  background-color:#132036;
+}
+/* Give overview cards the same backing rather than letting the grid border
+   color show through the transparent metric cells. */
+.overviewMetrics{
+  background-color:#101b30;
+}
 #scoreTable td.scoreCell,
 #scoreTable td.avgCell,
 .fitTable td.fitScoreCell,
 .fitTable td.fitAverageCell,
 .overviewMetric{
   background-color:#101b30;
-  background-image:linear-gradient(var(--score-tile-overlay,transparent),var(--score-tile-overlay,transparent));
-  background-repeat:no-repeat;
-  background-size:100% 100%;
+  background-image:none;
+  box-shadow:none;
 }
-/* A gently illuminated top edge and a shaded foot create depth without
-   replacing the translucent original G5 color layer or changing its hue. */
+/* Only scored cells expose the true RGBA surface of the table beneath. */
 #scoreTable td.scoreCell:is(.heat-e,.heat-d,.heat-c,.heat-b,.heat-a,.heat-s,.heat-ss),
 #scoreTable td.avgCell:is(.heat-e,.heat-d,.heat-c,.heat-b,.heat-a,.heat-s,.heat-ss),
 .fitTable td.fitScoreCell:is(.heat-e,.heat-d,.heat-c,.heat-b,.heat-a,.heat-s,.heat-ss),
 .fitTable td.fitAverageCell:is(.heat-e,.heat-d,.heat-c,.heat-b,.heat-a,.heat-s,.heat-ss),
 .overviewMetric:is(.heat-e,.heat-d,.heat-c,.heat-b,.heat-a,.heat-s,.heat-ss){
-  background-image:
-    linear-gradient(170deg,rgba(255,255,255,.145) 0%,rgba(255,255,255,.045) 27%,transparent 53%,rgba(0,0,0,.16) 100%),
-    linear-gradient(var(--score-tile-overlay,transparent),var(--score-tile-overlay,transparent));
-  box-shadow:inset 0 1px 0 rgba(255,255,255,.12),inset 0 -1px 0 rgba(0,0,0,.17);
+  background-color:var(--score-tile-overlay, transparent);
+  background-image:none;
+  box-shadow:none;
 }
 /* Rank tints are RGBA, not flattened RGB. CSS and JS keep the same palette. */
 #scoreTable td.scoreCell.heat-e,
