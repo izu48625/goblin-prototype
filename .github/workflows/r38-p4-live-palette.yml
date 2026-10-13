@@ -32,8 +32,8 @@ jobs:
           node --check scripts/r38-p4-live-palette-qa.mjs
           node scripts/r38-p4-live-palette-qa.mjs
           npm run build:cloudflare
-          grep -q 'base/index.html?v=r38p7photo2' dist/index.html
-          grep -q 'css/style.css?v=r38p7photo2' dist/base/index.html
+          grep -q 'base/index.html?v=r38p8rgb1' dist/index.html
+          grep -q 'css/style.css?v=r38p8rgb1' dist/base/index.html
   deployed-chain:
     if: github.event_name != 'pull_request'
     needs: source-chain
