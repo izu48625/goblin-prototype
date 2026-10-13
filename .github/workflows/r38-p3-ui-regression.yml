@@ -51,7 +51,7 @@ jobs:
       - name: Install isolated browser
         run: |
           npm install --no-save playwright@1.56.1
-          npx playwright install --with-deps chromium
+          npx playwright install --with-deps chromium webkit
       - name: Serve static build without production DB access
         run: |
           python3 -m http.server 4173 --bind 127.0.0.1 --directory dist >/tmp/r38p3.log 2>&1 &
@@ -63,4 +63,6 @@ jobs:
       - name: QA score colors, responsive language link, blocked unnamed publish
         env:
           BASE_URL: http://127.0.0.1:4173
-        run: node scripts/r38-p3-ui-regression-qa.mjs
+        run: |
+          node scripts/r38-p3-ui-regression-qa.mjs
+          BROWSER_ENGINE=webkit node scripts/r38-p3-ui-regression-qa.mjs
