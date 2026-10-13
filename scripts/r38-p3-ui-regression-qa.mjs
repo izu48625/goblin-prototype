@@ -54,7 +54,7 @@ try{
     tds.slice(0,4).map(td=>td.style.backgroundColor));
   assert.deepEqual(inline,colors.map(x=>x.background),
     'Actual Home score tiles must have explicit hues, not stylesheet-only colors');
-  const channel=rgb=>rgb.match(/\\d+/g).map(Number);
+  const channel=rgb=>rgb.match(/[0-9]+/g).map(Number);
   const [pink,warm,green,blue]=colors.map(x=>channel(x.background));
   assert(pink[0]>pink[1]+35,'SS tile is not pink');
   assert(warm[0]>warm[1]+12,'S tile is not warm gray');
