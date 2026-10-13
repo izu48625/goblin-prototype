@@ -26,12 +26,12 @@ try{
   // old cache version, so actual visitors loaded stale CSS despite passing
   // isolated tests with an empty browser cache.
   const iframeSource=await page.locator('#basicFrame').getAttribute('src');
-  assert(iframeSource?.includes('base/index.html?v=r38p8rgb1'),
+  assert(iframeSource?.includes('base/index.html?v=r38p9layer1'),
     'Home iframe document still uses a stale cache key');
   const home=page.frameLocator('#basicFrame');
   await home.locator('#titleInput').waitFor({state:'visible',timeout:30000});
   const cssSource=await home.locator('link[href^="css/style.css"]').getAttribute('href');
-  assert.equal(cssSource,'css/style.css?v=r38p8rgb1',
+  assert.equal(cssSource,'css/style.css?v=r38p9layer1',
     'Home document still references cached old score-cell CSS');
   await home.locator('#scoreTable .scoreInput').first().waitFor({state:'visible'});
   await home.locator('#scoreSettingsBtn').click();
@@ -42,30 +42,40 @@ try{
     await home.locator('[data-score-row="0"][data-score-col="'+i+'"]').fill(String(values[i]));
   await home.locator('#titleInput').click(); // Commit the final score's change event.
   await page.waitForTimeout(300); // CSS color transition settles before exact RGB comparison.
-  const colors=await home.locator('#scoreTable').evaluate(el=>{
-    const tds=[...el.querySelectorAll('tbody tr:first-child td.scoreCell')];
-    return tds.slice(0,4).map(td=>({klass:td.className,
-      background:getComputedStyle(td).backgroundColor,value:td.querySelector('input')?.value}));
-  });
+  // R38 P9: verify the actual transparent layer, stable backing, and pixels.
+  const expectedRaw=[
+    'rgba(218,94,159,.52)',
+    'rgba(169,144,143,.42)',
+    'rgba(100,167,131,.48)',
+    'rgba(76,135,198,.38)'
+  ];
+  const expectedCss=[
+    'rgba(218, 94, 159, 0.52)',
+    'rgba(169, 144, 143, 0.42)',
+    'rgba(100, 167, 131, 0.48)',
+    'rgba(76, 135, 198, 0.38)'
+  ];
+  const colors=await home.locator('#scoreTable').evaluate(el=>
+    [...el.querySelectorAll('tbody tr:first-child td.scoreCell')].slice(0,4)
+      .map(td=>({
+        klass:td.className,
+        tint:td.style.getPropertyValue('--score-tile-overlay'),
+        backing:getComputedStyle(td).backgroundColor,
+        layer:getComputedStyle(td).backgroundImage,
+        value:td.querySelector('input')?.value
+      })));
   assert.deepEqual(colors.map(x=>x.klass.split(' ').at(-1)),
     ['heat-ss','heat-s','heat-a','heat-c']);
-  assert.deepEqual(colors.map(x=>x.background),
-    ['rgb(118, 78, 114)','rgb(99, 90, 101)','rgb(82, 109, 102)','rgb(48, 82, 114)']);
-  assert.equal(new Set(colors.map(x=>x.background)).size,4,'Colored score tiles disappeared');
-  const inline=await home.locator('#scoreTable td.scoreCell').evaluateAll(tds=>
-    tds.slice(0,4).map(td=>td.style.backgroundColor));
-  assert.deepEqual(inline,colors.map(x=>x.background),
-    'Actual Home score tiles must have explicit hues, not stylesheet-only colors');
-  const channel=rgb=>rgb.match(/[0-9]+/g).map(Number);
-  const [rose,gray,sage,blue]=colors.map(x=>channel(x.background));
-  assert(rose[0]>rose[1]+30&&rose[2]>rose[1]+30,'SS lost rose-purple hue');
-  assert(Math.abs(gray[0]-gray[2])<5&&gray[0]>gray[1],'S lost warm gray hue');
-  assert(sage[1]>sage[0]+20&&sage[1]>sage[2],'A lost sage-green hue');
-  assert(blue[2]>blue[1]+25,'C lost blue hue');
-  console.log('R38 P8 fixed sRGB 10-point scores PASS',colors);
+  assert.deepEqual(colors.map(x=>x.tint),expectedRaw,
+    'score tiles lost actual inline translucent RGBA');
+  for(let i=0;i<4;i++){
+    assert.equal(colors[i].backing,'rgb(16, 27, 48)',
+      'tile backing is not the unified dark layer');
+    assert(colors[i].layer.includes(expectedCss[i]),
+      'transparent grade overlay not applied to background image');
+  }
+  console.log('R38 P9 10-point deep-translucent CSS layer PASS',colors);
 
-  // Unlike checking computed rgba() only, sample actual screenshot RGB pixels.
-  // A 12px inset is free of cell borders and the centered number glyph.
   const pixelRGB=async locator=>{
     const png=await locator.screenshot({animations:'disabled'});
     const {data,info}=await sharp(png).removeAlpha().raw().toBuffer({resolveWithObject:true});
@@ -73,9 +83,9 @@ try{
     const offset=(y*info.width+x)*info.channels;
     return [...data.subarray(offset,offset+3)];
   };
-  const expectedPixels=[[118,78,114],[99,90,101],[82,109,102],[48,82,114]];
-  const rgbClose=(a,b)=>a.length===b.length&&a.every((n,i)=>Math.abs(n-b[i])<=2);
-  // User's reference photograph showed 97/94/88, not a blue-purple scale.
+  const expectedPixels=[[121,62,106],[80,76,88],[56,94,88],[39,68,105]];
+  const rgbClose=(a,b)=>a.length===b.length&&a.every((n,i)=>Math.abs(n-b[i])<=3);
+
   await home.locator('#scoreSettingsBtn').click();
   await home.locator('#scale100Btn').click();
   await home.locator('#scoreSettingsBtn').click();
@@ -84,26 +94,27 @@ try{
     await home.locator('[data-score-row="0"][data-score-col="'+i+'"]')
       .fill(String(referenceValues[i]));
   await home.locator('#titleInput').click();
-  const historic=await home.locator('#scoreTable').evaluate(el=>
+  const reference=await home.locator('#scoreTable').evaluate(el=>
     [...el.querySelectorAll('tbody tr:first-child td.scoreCell')].slice(0,4)
-      .map(td=>({value:td.querySelector('input').value,
-        color:td.style.backgroundColor,klass:td.className})));
-  assert.deepEqual(historic.map(x=>x.klass.split(' ').at(-1)),
-    ['heat-ss','heat-s','heat-a','heat-c']);
-  assert.deepEqual(historic.map(x=>x.color),colors.map(x=>x.background));
-  console.log('R38 P7b photo-reference 97/94/88/67 color PASS',historic);
-  // The supplied earlier screenshot was desktop. Verify both viewports use
-  // identical colored cells instead of only checking the mobile CSS.
-  await page.setViewportSize({width:1365,height:820});
-  const desktop=await home.locator('#scoreTable').evaluate(el=>
-    [...el.querySelectorAll('tbody tr:first-child td.scoreCell')].slice(0,4)
-      .map(td=>getComputedStyle(td).backgroundColor));
-  assert.deepEqual(desktop,colors.map(x=>x.background),
-    'Desktop palette differs from original mobile/old-photo score bands');
-  console.log('R38 P8 desktop CSS matches mobile PASS',desktop);
+      .map(td=>({grade:td.classList[1],
+        tint:td.style.getPropertyValue('--score-tile-overlay'),
+        backing:getComputedStyle(td).backgroundColor,
+        layer:getComputedStyle(td).backgroundImage})));
+  assert.deepEqual(reference.map(x=>x.grade),['heat-ss','heat-s','heat-a','heat-c']);
+  assert.deepEqual(reference.map(x=>x.tint),expectedRaw);
+  assert(reference.every(x=>x.backing==='rgb(16, 27, 48)'));
+  console.log('R38 P9 source photo 97/94/88/67 overlay PASS',reference);
+  const avg=await home.locator('#scoreTable tbody tr:first-child td.avgCell').evaluate(el=>({
+    className:el.className,
+    backing:getComputedStyle(el).backgroundColor,
+    layer:getComputedStyle(el).backgroundImage
+  }));
+  assert(avg.className.includes('heat-a') && avg.backing==='rgb(16, 27, 48)'
+    && avg.layer.includes('rgba(100, 167, 131, 0.48)'),
+    'average cell failed to inherit identical translucent A shading');
 
-  // Physical screenshot pixel parity at PC / iPhone / compact iPhone sizes.
-  // Test in both Chromium and WebKit by invoking this suite per engine.
+  // Measure real rendered pixel colors at identical positions. Don't confuse
+  // getComputedStyle RGBA equivalence with final painted color equivalence.
   for(const width of [1365,390,320]){
     await page.setViewportSize({width,height:844});
     const samples=[];
@@ -113,11 +124,11 @@ try{
       await home.locator('#titleInput').click();
       const actual=await pixelRGB(home.locator('#scoreTable tbody tr:first-child td.scoreCell').first());
       assert(rgbClose(actual,expectedPixels[i]),
-        'Screenshot pixel does not match fixed sRGB at '+width+
-        ', score '+referenceValues[i]+': '+actual+' != '+expectedPixels[i]);
+        'Actual composited tile pixel differs at '+width+' score '+referenceValues[i]+
+        ': '+actual+' expected '+expectedPixels[i]);
       samples.push(actual);
     }
-    console.log('R38 P8 screenshot pixels (not merely CSS tokens) PASS',
+    console.log('R38 P9 layered RGBA screenshot pixel parity PASS',
       process.env.BROWSER_ENGINE||'chromium',width,samples);
   }
   await page.setViewportSize({width:390,height:844});

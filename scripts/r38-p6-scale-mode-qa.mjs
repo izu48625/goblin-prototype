@@ -27,7 +27,7 @@ try{
       .map(td=>({
         value:td.querySelector('input').value,
         grade:td.classList[1],
-        color:getComputedStyle(td).backgroundColor
+        color:getComputedStyle(td).backgroundImage
       })));
   const sample=[8,8,6,1];
   for(let i=0;i<4;i++)
@@ -50,8 +50,10 @@ try{
   const after=await score();
   assert.deepEqual(after.map(x=>x.value),sample.map(String));
   assert.deepEqual(after.map(x=>x.grade),['heat-a','heat-a','heat-c','heat-e']);
-  assert.deepEqual(after.map(x=>x.color),
-    ['rgb(82, 109, 102)','rgb(82, 109, 102)','rgb(48, 82, 114)','rgb(30, 48, 70)']);
+  const tints=['rgba(100, 167, 131, 0.48)','rgba(100, 167, 131, 0.48)',
+    'rgba(76, 135, 198, 0.38)','rgba(83, 105, 137, 0.19)'];
+  assert(after.every((entry,i)=>entry.color.includes(tints[i])),
+    'Score rebase lost a translucent overlay tint');
   const active=await home.locator('body').evaluate(()=>window.__statsMakerGetActiveSheet());
   assert.equal(active.scale,10);
   assert.deepEqual(active.rows[0].scores.slice(0,4).map(Number),sample);

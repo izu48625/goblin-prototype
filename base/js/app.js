@@ -213,18 +213,18 @@
     if(p>=50)return 'heat-d';
     return 'heat-e';
   }
-  // R38 P8: opaque fixed-sRGB grading colors keep actual pixels identical
-  // at desktop/mobile widths. The previous translucent rgba() value alone
-  // could not validate final on-screen pixels. Match CSS exactly; preserve
-  // 10/100 grading, persistence and public data contracts.
+  // R38 P9: deeper translucent RGBA tints on a stable CSS base layer.
+  // CSS uses background-image:linear-gradient(tint,tint) over #101b30,
+  // rather than rendering a solid hex or raw translucent background-color.
+  // Keep this palette synchronized with base/css/style.css.
   const scoreTileColors=Object.freeze({
-    'heat-ss':'#764e72', // 95–100%
-    'heat-s':'#635a65',  // 90–94%
-    'heat-a':'#526d66',  // 80–89%
-    'heat-b':'#3a6065',  // 70–79%
-    'heat-c':'#305272',  // 60–69%
-    'heat-d':'#294057',  // 50–59%
-    'heat-e':'#1e3046'   // 0–49%
+    'heat-ss':'rgba(218,94,159,.52)', // 95–100%
+    'heat-s':'rgba(169,144,143,.42)',  // 90–94%
+    'heat-a':'rgba(100,167,131,.48)',  // 80–89%
+    'heat-b':'rgba(73,164,156,.43)',  // 70–79%
+    'heat-c':'rgba(76,135,198,.38)',  // 60–69%
+    'heat-d':'rgba(72,112,171,.30)',  // 50–59%
+    'heat-e':'rgba(83,105,137,.19)'   // 0–49%
   });
   function scoreTileColor(v){return scoreTileColors[heatClass(v)]||'';}
   function esc(s){
@@ -805,10 +805,10 @@
 
       s.cols.forEach((_,ci)=>{
         const v=row.scores[ci];
-        h+=`<td class="scoreCell ${heatClass(v)}" style="background-color:${scoreTileColor(v)}"><input class="scoreInput" data-score-row="${index}" data-score-col="${ci}" type="number" inputmode="decimal" min="0" max="${s.scale||100}" step="${(s.scale||100)===10?'0.1':'1'}" value="${v==null?'':v}" placeholder="–"></td>`;
+        h+=`<td class="scoreCell ${heatClass(v)}" style="--score-tile-overlay:${scoreTileColor(v)}"><input class="scoreInput" data-score-row="${index}" data-score-col="${ci}" type="number" inputmode="decimal" min="0" max="${s.scale||100}" step="${(s.scale||100)===10?'0.1':'1'}" value="${v==null?'':v}" placeholder="–"></td>`;
       });
 
-      h+=`<td class="avgCell ${heatClass(a)}" style="background-color:${scoreTileColor(a)}"><span class="avgValue">${fmt(a)}</span><span class="grade">${grade(a)}</span></td>`;
+      h+=`<td class="avgCell ${heatClass(a)}" style="--score-tile-overlay:${scoreTileColor(a)}"><span class="avgValue">${fmt(a)}</span><span class="grade">${grade(a)}</span></td>`;
       const rp=rowProgress(row);
       h+=`<td class="deleteCell"><div class="rowActionWrap">
         <span class="progressPill ${rp.pct===100?'complete':''}" title="${esc(t('aria.progress'))}">${rp.done}/${rp.total}</span>
@@ -897,7 +897,7 @@
       const avgCell=tableRow.querySelector('.avgCell');
       if(avgCell){
         avgCell.className=`avgCell ${heatClass(value)}`;
-        avgCell.style.backgroundColor=scoreTileColor(value);
+        avgCell.style.setProperty('--score-tile-overlay',scoreTileColor(value)||'transparent');
         const amount=avgCell.querySelector('.avgValue');
         const rank=avgCell.querySelector('.grade');
         if(amount)amount.textContent=fmt(value);
@@ -912,7 +912,7 @@
       if(scoreCell){
         const score=row.scores[+field.dataset.scoreCol];
         scoreCell.className=`scoreCell ${heatClass(score)}`;
-        scoreCell.style.backgroundColor=scoreTileColor(score);
+        scoreCell.style.setProperty('--score-tile-overlay',scoreTileColor(score)||'transparent');
       }
     };
 
