@@ -1,6 +1,6 @@
 import assert from 'node:assert/strict';
 import {readFile} from 'node:fs/promises';
-import {chromium} from 'playwright';
+import {chromium,webkit} from 'playwright';
 
 const BASE=(process.env.BASE_URL||'http://127.0.0.1:4173').replace(/\/$/,'');
 const raw=await readFile(new URL('./r28-publish-lifecycle-test.mjs',import.meta.url),'utf8');
@@ -8,7 +8,8 @@ const mockLine=raw.match(/^const mockSdk=(".+");$/m);
 assert(mockLine,'R28 isolated mocked Supabase SDK fixture missing');
 const mockSdk=JSON.parse(mockLine[1]);
 
-const browser=await chromium.launch({headless:true});
+const engine=process.env.BROWSER_ENGINE==='webkit'?webkit:chromium;
+const browser=await engine.launch({headless:true});
 try{
   const context=await browser.newContext({viewport:{width:390,height:844},locale:'ja-JP'});
   const realWrites=[];
@@ -79,6 +80,16 @@ try{
     ['heat-ss','heat-s','heat-a','heat-c']);
   assert.deepEqual(historic.map(x=>x.color),colors.map(x=>x.background));
   console.log('R38 P5 old-photo 97/94/84/67 color reference PASS',historic);
+  // The supplied earlier screenshot was desktop. Verify both viewports use
+  // identical colored cells instead of only checking the mobile CSS.
+  await page.setViewportSize({width:1365,height:820});
+  const desktop=await home.locator('#scoreTable').evaluate(el=>
+    [...el.querySelectorAll('tbody tr:first-child td.scoreCell')].slice(0,4)
+      .map(td=>getComputedStyle(td).backgroundColor));
+  assert.deepEqual(desktop,colors.map(x=>x.background),
+    'Desktop palette differs from original mobile/old-photo score bands');
+  console.log('R38 P5 desktop palette matches old-photo grades PASS',desktop);
+  await page.setViewportSize({width:390,height:844});
 
   const nav=page.locator('.globalLocaleBar');
   assert.equal(await nav.locator('.globalIntroBtn').count(),1);
