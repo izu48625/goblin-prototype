@@ -51,7 +51,7 @@ try{
   assert.deepEqual(after.map(x=>x.value),sample.map(String));
   assert.deepEqual(after.map(x=>x.grade),['heat-a','heat-a','heat-c','heat-e']);
   assert.deepEqual(after.map(x=>x.color),
-    ['rgba(242, 200, 96, 0.14)','rgba(242, 200, 96, 0.14)','rgba(87, 145, 211, 0.12)','rgba(84, 102, 128, 0.08)']);
+    ['rgba(144, 191, 162, 0.34)','rgba(144, 191, 162, 0.34)','rgba(87, 145, 211, 0.2)','rgba(84, 102, 128, 0.1)']);
   const active=await home.locator('body').evaluate(()=>window.__statsMakerGetActiveSheet());
   assert.equal(active.scale,10);
   assert.deepEqual(active.rows[0].scores.slice(0,4).map(Number),sample);
