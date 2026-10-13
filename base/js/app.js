@@ -213,19 +213,18 @@
     if(p>=50)return 'heat-d';
     return 'heat-e';
   }
-  // R38 P7: EXACT original RGBA values from Stats Maker V0.14
-  // (historical GitHub commit 9578d4c77ae4d6c2dc2a4ca76f9fe9da3f09b0d5).
-  // The previous opaque approximations changed the photo's subtle tint.
-  // An explicit cell style retains the original translucency and prevents
-  // stale lower-priority stylesheet rules from hiding the color.
+  // R38 P7b: photograph-inspired score hues for V1.0-A2 visual parity.
+  // Unlike the R38 P7 source-exact values, these are intentionally tuned to
+  // better match the user's captured monitor image on current mobile screens.
+  // Preserve grade thresholds and data. Keep CSS and inline colors in sync.
   const scoreTileColors=Object.freeze({
-    'heat-ss':'rgba(255,107,125,.18)', // 95–100%
-    'heat-s':'rgba(243,154,98,.17)',  // 90–94%
-    'heat-a':'rgba(242,200,96,.14)',  // 80–89%
-    'heat-b':'rgba(84,180,178,.13)',  // 70–79%
-    'heat-c':'rgba(87,145,211,.12)',  // 60–69%
-    'heat-d':'rgba(81,128,178,.10)',  // 50–59%
-    'heat-e':'rgba(84,102,128,.08)'   // 0–49%
+    'heat-ss':'rgba(241,112,173,.24)', // 95–100%
+    'heat-s':'rgba(189,169,155,.30)',  // 90–94%
+    'heat-a':'rgba(144,191,162,.34)',  // 80–89%
+    'heat-b':'rgba(84,180,178,.27)',  // 70–79%
+    'heat-c':'rgba(87,145,211,.20)',  // 60–69%
+    'heat-d':'rgba(81,128,178,.16)',  // 50–59%
+    'heat-e':'rgba(84,102,128,.10)'   // 0–49%
   });
   function scoreTileColor(v){return scoreTileColors[heatClass(v)]||'';}
   function esc(s){
