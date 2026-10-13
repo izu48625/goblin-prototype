@@ -1,0 +1,48 @@
+name: R38 P4 Live Home Palette Cache Gate
+on:
+  pull_request:
+    paths:
+      - "index.html"
+      - "base/index.html"
+      - "base/css/style.css"
+      - "scripts/r38-p4-live-palette-qa.mjs"
+      - ".github/workflows/r38-p4-live-palette.yml"
+  push:
+    branches: [main]
+    paths:
+      - "index.html"
+      - "base/index.html"
+      - "base/css/style.css"
+      - "scripts/r38-p4-live-palette-qa.mjs"
+      - ".github/workflows/r38-p4-live-palette.yml"
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  source-chain:
+    runs-on: ubuntu-latest
+    timeout-minutes: 6
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Validate cache keys and palette without writing user data
+        run: |
+          node --check scripts/r38-p4-live-palette-qa.mjs
+          node scripts/r38-p4-live-palette-qa.mjs
+          npm run build:cloudflare
+          grep -q 'base/index.html?v=r38p4palette1' dist/index.html
+          grep -q 'css/style.css?v=r38p4palette1' dist/base/index.html
+  deployed-chain:
+    if: github.event_name != 'pull_request'
+    needs: source-chain
+    runs-on: ubuntu-latest
+    timeout-minutes: 9
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Verify live Cloudflare and GitHub Pages actually serve latest palette
+        run: node scripts/r38-p4-live-palette-qa.mjs live

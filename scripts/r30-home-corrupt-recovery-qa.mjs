@@ -1,4 +1,5 @@
 import assert from 'node:assert/strict';
+import {readFile} from 'node:fs/promises';
 import {chromium} from 'playwright';
 
 const BASE=process.env.BASE_URL||'https://statsmaker.app';
@@ -6,14 +7,18 @@ const KEY='statsMakerV014Library';
 const DAMAGED='statsMakerV014UnreadableRawBackup';
 const RAW='{"sheets":[INVALID-R30-RECOVERY-FIXTURE]}';
 
-// The production smoke may begin while Cloudflare is still deploying the
-// new content-only release. Detect the expected frontend cache-bust marker.
+// The production smoke may begin while Cloudflare is still deploying. Read
+// the exact cache marker from this checkout instead of hardcoding historical
+// markers: future Home asset changes must fail until the *new* build deploys.
+const shell=await readFile(new URL('../index.html',import.meta.url),'utf8');
+const expectedHomeMarker=shell.match(/base\/index\.html\?v=r[a-z0-9]+/i)?.[0];
+assert(expectedHomeMarker,'Missing versioned Home iframe asset in index.html');
 let deployed=false;
 for(let i=0;i<30;i++){
   try{
     const response=await fetch(BASE+'/index.html?qaR30Deploy='+Date.now(),
       {cache:'no-store'});
-    if(response.ok && /base\/index\.html\?v=(?:r30guard1|r33analytics1|r36input1|r37score1|r37p3safe1)/.test(await response.text())){
+    if(response.ok && (await response.text()).includes(expectedHomeMarker)){
       deployed=true;break;
     }
   }catch{}
