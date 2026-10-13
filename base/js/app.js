@@ -213,6 +213,19 @@
     if(p>=50)return 'heat-d';
     return 'heat-e';
   }
+  // R38 P5: the original warm rose / green / blue score family.
+  // Inline on editable cells as well as in CSS, so the color remains visible
+  // even if a browser retains an older secondary stylesheet.
+  const scoreTileColors=Object.freeze({
+    'heat-ss':'#8a4b75', // 95–100%, pink / rose
+    'heat-s':'#66505f',  // 90–94%, muted warm mauve
+    'heat-a':'#40655a',  // 80–89%, green
+    'heat-b':'#35646a',  // 70–79%, teal
+    'heat-c':'#365278',  // 60–69%, blue
+    'heat-d':'#2f415f',  // 50–59%, blue slate
+    'heat-e':'#283449'   // under 50%, dark neutral
+  });
+  function scoreTileColor(v){return scoreTileColors[heatClass(v)]||'';}
   function esc(s){
     return String(s).replace(/[&<>"']/g,ch=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[ch]));
   }
@@ -791,10 +804,10 @@
 
       s.cols.forEach((_,ci)=>{
         const v=row.scores[ci];
-        h+=`<td class="scoreCell ${heatClass(v)}"><input class="scoreInput" data-score-row="${index}" data-score-col="${ci}" type="number" inputmode="decimal" min="0" max="${s.scale||100}" step="${(s.scale||100)===10?'0.1':'1'}" value="${v==null?'':v}" placeholder="–"></td>`;
+        h+=`<td class="scoreCell ${heatClass(v)}" style="background-color:${scoreTileColor(v)}"><input class="scoreInput" data-score-row="${index}" data-score-col="${ci}" type="number" inputmode="decimal" min="0" max="${s.scale||100}" step="${(s.scale||100)===10?'0.1':'1'}" value="${v==null?'':v}" placeholder="–"></td>`;
       });
 
-      h+=`<td class="avgCell ${heatClass(a)}"><span class="avgValue">${fmt(a)}</span><span class="grade">${grade(a)}</span></td>`;
+      h+=`<td class="avgCell ${heatClass(a)}" style="background-color:${scoreTileColor(a)}"><span class="avgValue">${fmt(a)}</span><span class="grade">${grade(a)}</span></td>`;
       const rp=rowProgress(row);
       h+=`<td class="deleteCell"><div class="rowActionWrap">
         <span class="progressPill ${rp.pct===100?'complete':''}" title="${esc(t('aria.progress'))}">${rp.done}/${rp.total}</span>
@@ -883,6 +896,7 @@
       const avgCell=tableRow.querySelector('.avgCell');
       if(avgCell){
         avgCell.className=`avgCell ${heatClass(value)}`;
+        avgCell.style.backgroundColor=scoreTileColor(value);
         const amount=avgCell.querySelector('.avgValue');
         const rank=avgCell.querySelector('.grade');
         if(amount)amount.textContent=fmt(value);
@@ -894,7 +908,11 @@
         pill.classList.toggle('complete',progress.pct===100);
       }
       const scoreCell=field.closest('.scoreCell');
-      if(scoreCell)scoreCell.className=`scoreCell ${heatClass(row.scores[+field.dataset.scoreCol])}`;
+      if(scoreCell){
+        const score=row.scores[+field.dataset.scoreCol];
+        scoreCell.className=`scoreCell ${heatClass(score)}`;
+        scoreCell.style.backgroundColor=scoreTileColor(score);
+      }
     };
 
     document.querySelectorAll('[data-score-row]').forEach(el=>{
