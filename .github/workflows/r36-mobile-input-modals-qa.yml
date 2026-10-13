@@ -23,7 +23,7 @@ jobs:
         run: |
           node --check scripts/r36-mobile-input-modals-qa.mjs
           npm run build:cloudflare
-          grep -Eq 'style.css\?v=r(36p2mobile1|38p3color1|38p4palette1)' dist/base/index.html
+          grep -Eq 'style.css\?v=r(36p2mobile1|38p3color1|38p4palette1|38p5historic1)' dist/base/index.html
       - name: Run four mobile viewport browser checks without production data writes
         run: |
           npm install --no-save playwright@1.56.1
