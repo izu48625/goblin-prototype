@@ -1713,3 +1713,35 @@ html[lang="en"] .rankModeBtn{
     scroll-margin-block:72px;
   }
 }
+
+/* R38 P3: bring back readable score-based tile colors on the Home grid.
+   Specificity deliberately exceeds .scoreCell/.avgCell and old td rules.
+   These are data-cell highlights, NOT the retired Heatmap graph extension. */
+#scoreTable td.scoreCell.heat-e, #scoreTable td.avgCell.heat-e,
+.fitTable td.fitScoreCell.heat-e, .fitTable td.fitAverageCell.heat-e{background:#263348}
+#scoreTable td.scoreCell.heat-d, #scoreTable td.avgCell.heat-d,
+.fitTable td.fitScoreCell.heat-d, .fitTable td.fitAverageCell.heat-d{background:#294565}
+#scoreTable td.scoreCell.heat-c, #scoreTable td.avgCell.heat-c,
+.fitTable td.fitScoreCell.heat-c, .fitTable td.fitAverageCell.heat-c{background:#295678}
+#scoreTable td.scoreCell.heat-b, #scoreTable td.avgCell.heat-b,
+.fitTable td.fitScoreCell.heat-b, .fitTable td.fitAverageCell.heat-b{background:#2b598a}
+#scoreTable td.scoreCell.heat-a, #scoreTable td.avgCell.heat-a,
+.fitTable td.fitScoreCell.heat-a, .fitTable td.fitAverageCell.heat-a{background:#494c86}
+#scoreTable td.scoreCell.heat-s, #scoreTable td.avgCell.heat-s,
+.fitTable td.fitScoreCell.heat-s, .fitTable td.fitAverageCell.heat-s{background:#664677}
+#scoreTable td.scoreCell.heat-ss, #scoreTable td.avgCell.heat-ss,
+.fitTable td.fitScoreCell.heat-ss, .fitTable td.fitAverageCell.heat-ss{background:#794481}
+
+/* A missing or untouched title is fixed inside Publish before any upload. */
+.publishTitleGuard{
+  display:grid;gap:8px;margin:0 0 13px;padding:12px;
+  border:1px solid #bc8750;border-radius:10px;
+  background:#2b211c;color:#ffe4b7;font-size:12px;line-height:1.5
+}
+.publishTitleGuard label{font-weight:850}
+.publishTitleGuard input{
+  width:100%;min-height:44px;padding:9px 11px;box-sizing:border-box;
+  border:1px solid #c69661;border-radius:8px;background:#101c30;color:#fff;
+  font:800 16px/1.25 system-ui,-apple-system,sans-serif
+}
+.publishTitleGuard input:focus-visible{outline:2px solid #ffc478;outline-offset:2px}
