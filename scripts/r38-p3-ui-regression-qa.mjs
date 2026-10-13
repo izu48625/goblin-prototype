@@ -24,18 +24,18 @@ try{
   // old cache version, so actual visitors loaded stale CSS despite passing
   // isolated tests with an empty browser cache.
   const iframeSource=await page.locator('#basicFrame').getAttribute('src');
-  assert(iframeSource?.includes('base/index.html?v=r38p4palette1'),
+  assert(iframeSource?.includes('base/index.html?v=r38p5historic1'),
     'Home iframe document still uses a stale cache key');
   const home=page.frameLocator('#basicFrame');
   await home.locator('#titleInput').waitFor({state:'visible',timeout:30000});
   const cssSource=await home.locator('link[href^="css/style.css"]').getAttribute('href');
-  assert.equal(cssSource,'css/style.css?v=r38p4palette1',
+  assert.equal(cssSource,'css/style.css?v=r38p5historic1',
     'Home document still references cached old score-cell CSS');
   await home.locator('#scoreTable .scoreInput').first().waitFor({state:'visible'});
   await home.locator('#scoreSettingsBtn').click();
   await home.locator('#scale10Btn').click();
   await home.locator('#scoreSettingsBtn').click();
-  const values=[10,9,7,3];
+  const values=[10,9,8,6];
   for(let i=0;i<values.length;i++)
     await home.locator('[data-score-row="0"][data-score-col="'+i+'"]').fill(String(values[i]));
   await home.locator('#titleInput').click(); // Commit the final score's change event.
@@ -46,11 +46,39 @@ try{
       background:getComputedStyle(td).backgroundColor,value:td.querySelector('input')?.value}));
   });
   assert.deepEqual(colors.map(x=>x.klass.split(' ').at(-1)),
-    ['heat-ss','heat-s','heat-b','heat-e']);
+    ['heat-ss','heat-s','heat-a','heat-c']);
   assert.deepEqual(colors.map(x=>x.background),
-    ['rgb(151, 78, 151)','rgb(134, 64, 156)','rgb(47, 110, 169)','rgb(48, 63, 94)']);
+    ['rgb(138, 75, 117)','rgb(102, 80, 95)','rgb(64, 101, 90)','rgb(54, 82, 120)']);
   assert.equal(new Set(colors.map(x=>x.background)).size,4,'Colored score tiles disappeared');
-  console.log('R38 P3 colored 10-point score tile QA PASS',colors);
+  const inline=await home.locator('#scoreTable td.scoreCell').evaluateAll(tds=>
+    tds.slice(0,4).map(td=>td.style.backgroundColor));
+  assert.deepEqual(inline,colors.map(x=>x.background),
+    'Actual Home score tiles must have explicit hues, not stylesheet-only colors');
+  const channel=rgb=>rgb.match(/\\d+/g).map(Number);
+  const [pink,warm,green,blue]=colors.map(x=>channel(x.background));
+  assert(pink[0]>pink[1]+35,'SS tile is not pink');
+  assert(warm[0]>warm[1]+12,'S tile is not warm gray');
+  assert(green[1]>green[0]+25,'A tile is not visibly green');
+  assert(blue[2]>blue[1]+25,'C tile is not visibly blue');
+  console.log('R38 P5 10-point historic pink/taupe/green/blue palette PASS',colors);
+
+  // User's reference photograph showed 97/94/84, not a blue-purple scale.
+  await home.locator('#scoreSettingsBtn').click();
+  await home.locator('#scale100Btn').click();
+  await home.locator('#scoreSettingsBtn').click();
+  const referenceValues=[97,94,84,67];
+  for(let i=0;i<referenceValues.length;i++)
+    await home.locator('[data-score-row="0"][data-score-col="'+i+'"]')
+      .fill(String(referenceValues[i]));
+  await home.locator('#titleInput').click();
+  const historic=await home.locator('#scoreTable').evaluate(el=>
+    [...el.querySelectorAll('tbody tr:first-child td.scoreCell')].slice(0,4)
+      .map(td=>({value:td.querySelector('input').value,
+        color:td.style.backgroundColor,klass:td.className})));
+  assert.deepEqual(historic.map(x=>x.klass.split(' ').at(-1)),
+    ['heat-ss','heat-s','heat-a','heat-c']);
+  assert.deepEqual(historic.map(x=>x.color),colors.map(x=>x.background));
+  console.log('R38 P5 old-photo 97/94/84/67 color reference PASS',historic);
 
   const nav=page.locator('.globalLocaleBar');
   assert.equal(await nav.locator('.globalIntroBtn').count(),1);
