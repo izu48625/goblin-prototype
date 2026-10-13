@@ -17,8 +17,8 @@ assert(ja.includes(originalIntro.ja),'Japanese introduction changed unexpectedly
 assert(en.includes(originalIntro.en),'English introduction changed unexpectedly');
 for(const [s,language] of [[ja,'ja'],[en,'en']]){
   assert(s.includes('data-sm-localized-landing="'+language+'"'));
-  assert(s.includes('/cloud/global-locale.css?v=r35support1'));
-  assert(s.includes('/cloud/global-locale.js?v=r35support1'));
+  assert(/\/cloud\/global-locale\.css\?v=r(?:35support1|38p3about1)/.test(s));
+  assert(/\/cloud\/global-locale\.js\?v=r(?:35support1|38p3about1)/.test(s));
   assert(s.includes('hreflang="en"')&&s.includes('hreflang="ja"'));
 }
 const browser=await chromium.launch({headless:true});

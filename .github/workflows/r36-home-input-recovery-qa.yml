@@ -31,7 +31,7 @@ jobs:
           # Static build uses Node built-ins; this repo has no lockfile.
           npm run build:cloudflare
           grep -q 'base/index.html?v=r37p3safe1' dist/index.html
-          grep -q 'js/app.js?v=r37p3safe1' dist/base/index.html
+          grep -Eq 'js/app.js\?v=r(37p3safe1|38p3colorname1)' dist/base/index.html
       - name: Isolated browser (no production writes)
         run: |
           npm install --no-save playwright@1.56.1

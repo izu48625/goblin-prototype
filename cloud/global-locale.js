@@ -55,6 +55,13 @@
       discover.title=lang==='ja'?'公開作品を探す':'Explore published works';
       discover.setAttribute('aria-label',lang==='ja'?'Discoverを開く':'Open Discover');
     }
+    const intro=bar.querySelector('.globalIntroBtn');
+    if(intro){
+      intro.textContent=lang==='ja'?'紹介':'About';
+      intro.title=lang==='ja'?'STATS MAKERの紹介ページ':'About Stats Maker';
+      intro.setAttribute('aria-label',intro.title);
+      intro.href=previewUrl(new URL('/'+lang+'/',location.origin).href);
+    }
     const home=bar.querySelector('.globalHomeBtn');
     if(home){
       home.title=lang==='ja'?'ホームへ':'Home';
@@ -140,7 +147,7 @@
     bar=document.createElement('div');
     bar.className='globalLocaleBar';
     bar.setAttribute('role','group');
-    bar.innerHTML='<nav class="globalNavLinks" aria-label="Site navigation"><a class="globalHomeBtn" href="index.html?fresh=1" aria-label="ホームを開く">HOME</a><a class="globalDiscoverBtn" href="discover.html" aria-label="Discoverを開く">Discover</a><details class="globalSupportMenu"><summary>ヘルプ</summary><div class="globalSupportPanel"><a data-global-support="terms" href="/ja/legal.html#terms">利用規約</a><a data-global-support="privacy" href="/ja/legal.html#privacy">プライバシー</a><a data-global-support="contact" href="/ja/legal.html#contact">お問い合わせ</a></div></details></nav><div class="globalLocaleControls"><span class="globalLocaleLabel">表示言語</span><div class="globalLocaleSwitch"><button type="button" data-global-lang="ja" aria-label="日本語">JA</button><button type="button" data-global-lang="en" aria-label="English">EN</button></div></div>';
+    bar.innerHTML='<nav class="globalNavLinks" aria-label="Site navigation"><a class="globalHomeBtn" href="index.html?fresh=1" aria-label="ホームを開く">HOME</a><a class="globalDiscoverBtn" href="discover.html" aria-label="Discoverを開く">Discover</a><a class="globalIntroBtn" href="/ja/" aria-label="STATS MAKERの紹介ページ">紹介</a><details class="globalSupportMenu"><summary>ヘルプ</summary><div class="globalSupportPanel"><a data-global-support="terms" href="/ja/legal.html#terms">利用規約</a><a data-global-support="privacy" href="/ja/legal.html#privacy">プライバシー</a><a data-global-support="contact" href="/ja/legal.html#contact">お問い合わせ</a></div></details></nav><div class="globalLocaleControls"><span class="globalLocaleLabel">表示言語</span><div class="globalLocaleSwitch"><button type="button" data-global-lang="ja" aria-label="日本語">JA</button><button type="button" data-global-lang="en" aria-label="English">EN</button></div></div>';
     document.body.prepend(bar);
     bar.querySelector('.globalHomeBtn').href=previewUrl(new URL(landingLang()?'/index.html?lang='+current():homePath(),location.href).href);
     bar.querySelector('.globalDiscoverBtn').href=previewUrl(new URL(landingLang()?'/discover.html?lang='+current():(legalLang()?'/discover.html':(location.pathname.startsWith('/app/')?'../discover.html':'discover.html')),location.href).href);
