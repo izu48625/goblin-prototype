@@ -33,6 +33,8 @@ try{
   for(let i=0;i<4;i++)
     await home.locator('[data-score-row="0"][data-score-col="'+i+'"]').fill(String(sample[i]));
   await home.locator('#titleInput').click();
+  // Background transitions take 120 ms; never compare mid-animation.
+  await page.waitForTimeout(300);
   const before=await score();
   assert.deepEqual(before.map(x=>x.value),sample.map(String));
   assert(before.every(x=>x.grade==='heat-e'), 'Initial 8 is 8/100, not 8/10');
