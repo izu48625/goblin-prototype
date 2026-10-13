@@ -29,6 +29,7 @@ try{
   const values=[10,9,7,3];
   for(let i=0;i<values.length;i++)
     await home.locator('[data-score-row="0"][data-score-col="'+i+'"]').fill(String(values[i]));
+  await home.locator('#titleInput').click(); // Commit the final score's change event.
   const colors=await home.locator('#scoreTable').evaluate(el=>{
     const tds=[...el.querySelectorAll('tbody tr:first-child td.scoreCell')];
     return tds.slice(0,4).map(td=>({klass:td.className,
