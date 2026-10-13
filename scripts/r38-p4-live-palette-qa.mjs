@@ -1,6 +1,6 @@
 import assert from 'node:assert/strict';
 import {readFile} from 'node:fs/promises';
-const KEY='r38p5historic1';
+const KEY='r38p6scale1';
 const HOME='base/index.html?v='+KEY;
 const STYLE='css/style.css?v='+KEY;
 const expectedColors=[

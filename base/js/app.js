@@ -931,6 +931,7 @@
         // Keep the tile, average and progress visibly in sync on each input
         // without remounting the editor or interrupting a mobile keyboard.
         syncCommunityScoreSummary(field,ri);
+        refreshScaleWarning();
         if(communityMode){
           $('statusText').textContent='点数を変更しました。Communityへの反映には「評価を更新」を押してください。';
           if(window.parent!==window)window.parent.postMessage(
@@ -1453,10 +1454,34 @@
     scheduleSave(t('weight.updated'));
   }
 
+  function canUseScoresAsTen(){
+    const sheet=activeSheet();
+    if(communityMode||(sheet.scale||100)!==100)return false;
+    const scored=sheet.rows.flatMap(row=>row.scores.filter(v=>v!=null));
+    return scored.length>0 && scored.every(v=>
+      Number.isFinite(Number(v)) && Number(v)>=0 && Number(v)<=10);
+  }
+  function refreshScaleWarning(){
+    const scale=activeSheet().scale||100;
+    const badge=$('currentScaleBadge');
+    if(badge)badge.textContent=t('scoring.currentScale',{scale});
+    const hint=$('scaleMismatchHint');
+    if(hint)hint.classList.toggle('hidden',!canUseScoresAsTen());
+  }
+  function reinterpretAsTen(){
+    // Explicit recovery for numbers entered as 8/10 into the default
+    // 100-point sheet. Unlike changeScale(10), 8 stays 8, never 0.8.
+    // Do not guess this intent for the user or alter saved sheets on load.
+    if(!canUseScoresAsTen())return;
+    activeSheet().scale=10;
+    renderAll();
+    scheduleSave(t('scoring.rebased10'));
+  }
   function renderScaleMode(){
     const scale=activeSheet().scale||100;
     $('scale100Btn').classList.toggle('active',scale===100);
     $('scale10Btn').classList.toggle('active',scale===10);
+    refreshScaleWarning();
   }
 
   function changeScale(nextScale){
@@ -2456,6 +2481,7 @@
   $('zoomInBtn').addEventListener('click',()=>adjustFitZoom(0.1));
   $('scale100Btn').addEventListener('click',()=>changeScale(100));
   $('scale10Btn').addEventListener('click',()=>changeScale(10));
+  $('rebase10Btn').addEventListener('click',reinterpretAsTen);
   $('weightOffBtn').addEventListener('click',()=>setWeighted(false));
   $('weightOnBtn').addEventListener('click',()=>setWeighted(true));
   $('weightSettingsBtn').addEventListener('click',openWeightDialog);
