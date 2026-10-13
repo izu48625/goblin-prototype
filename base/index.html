@@ -370,6 +370,11 @@
       <button id="publishCloseBtn" class="iconCloseBtn" type="button" aria-label="Close">×</button>
     </div>
 
+    <div id="publishTitleGuard" class="publishTitleGuard hidden" role="alert" aria-live="polite">
+      <label for="publishTitleConfirmInput" data-i18n="publish.titleMissing">⚠️ 公開前に表題を入力してください。「新しいお題」のままでは公開できません。</label>
+      <input id="publishTitleConfirmInput" type="text" maxlength="120" autocomplete="off" placeholder="例：好きなキャラクターの総合評価" data-i18n-placeholder="publish.titleMissingPlaceholder" aria-required="true">
+    </div>
+
     <div id="publishSettingsPane" class="hidden">
       <div class="publishNotice publishGuestNotice" data-i18n="publish.guestNotice">ログインは不要です。公開した作品の編集はこのブラウザから行えます。ブラウザデータを消すと編集できなくなる場合があるため、元データのバックアップをおすすめします。</div>
       <div class="publishPreviewCard">
@@ -426,8 +431,8 @@
 <script src="../cloud/supabase.js?v=r25p4"></script>
 <script src="../cloud/publish-model.js?v=r25p4"></script>
 <script src="../cloud/community-gateway.js?v=r26p3"></script>
-<script src="js/i18n.js?v=r31simple1"></script>
-<script src="js/app.js?v=r37p3safe1"></script>
+<script src="js/i18n.js?v=r38p3name1"></script>
+<script src="js/app.js?v=r38p3colorname1"></script>
 <script src="js/publish-guard.js?v=r25p4"></script>
 <script>
 window.addEventListener("statsmaker:languagechange",event=>{
