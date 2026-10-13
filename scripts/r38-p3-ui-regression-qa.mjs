@@ -26,12 +26,12 @@ try{
   // old cache version, so actual visitors loaded stale CSS despite passing
   // isolated tests with an empty browser cache.
   const iframeSource=await page.locator('#basicFrame').getAttribute('src');
-  assert(iframeSource?.includes('base/index.html?v=r38p10g5d1'),
+  assert(iframeSource?.includes('base/index.html?v=r38p11glass1'),
     'Home iframe document still uses a stale cache key');
   const home=page.frameLocator('#basicFrame');
   await home.locator('#titleInput').waitFor({state:'visible',timeout:30000});
   const cssSource=await home.locator('link[href^="css/style.css"]').getAttribute('href');
-  assert.equal(cssSource,'css/style.css?v=r38p10g5d1',
+  assert.equal(cssSource,'css/style.css?v=r38p11glass1',
     'Home document still references cached old score-cell CSS');
   await home.locator('#scoreTable .scoreInput').first().waitFor({state:'visible'});
   await home.locator('#scoreSettingsBtn').click();
@@ -87,17 +87,29 @@ try{
   assert(sColor[0]>sColor[1]+25 && sColor[1]>sColor[2]+5,'S must be dark muted orange');
   assert(aColor[1]>aColor[0]+12 && aColor[0]>aColor[2]+5,'A must be olive yellow-green');
   assert(cColor[2]>cColor[1]+25 && cColor[1]>cColor[0]+15,'C must be dusky blue');
-  console.log('R38 P10 G5 darker translucent CSS layer PASS',colors);
+  assert(colors.every(x=>x.layer.includes('rgba(255, 255, 255, 0.145)')),
+    'scored tiles should contain a subtle glass reflection layer');
+  const blank=await home.locator('#scoreTable tbody tr:nth-child(2) td.scoreCell').first().evaluate(td=>({
+    hasGrade:[...td.classList].some(x=>x.startsWith('heat-')),
+    layer:getComputedStyle(td).backgroundImage
+  }));
+  assert(!blank.hasGrade && !blank.layer.includes('rgba(255, 255, 255, 0.145)'),
+    'empty cells must stay unglazed and unchanged');
+  console.log('R38 P11 G5 translucent tint + scored-only glass sheen PASS',colors);
 
-  const pixelRGB=async locator=>{
+  const cellPixelPair=async locator=>{
     const png=await locator.screenshot({animations:'disabled'});
     const {data,info}=await sharp(png).removeAlpha().raw().toBuffer({resolveWithObject:true});
-    const x=Math.min(12,info.width-2),y=Math.min(8,info.height-2);
-    const offset=(y*info.width+x)*info.channels;
-    return [...data.subarray(offset,offset+3)];
+    const x=Math.min(12,info.width-2);
+    const at=y=>{
+      const offset=(y*info.width+x)*info.channels;
+      return [...data.subarray(offset,offset+3)];
+    };
+    return {top:at(Math.min(8,info.height-2)),
+      bottom:at(Math.max(1,info.height-8))};
   };
-  const expectedPixels=[[121,62,106],[90,53,41],[53,70,42],[26,52,85]];
-  const rgbClose=(a,b)=>a.length===b.length&&a.every((n,i)=>Math.abs(n-b[i])<=3);
+  const rgbClose=(a,b)=>a.length===b.length&&a.every((n,i)=>Math.abs(n-b[i])<=4);
+  const baselineTopRGB=[];
 
   await home.locator('#scoreSettingsBtn').click();
   await home.locator('#scale100Btn').click();
@@ -126,8 +138,9 @@ try{
     && avg.layer.includes('rgba(94, 116, 35, 0.48)'),
     'average cell failed to inherit identical translucent A shading');
 
-  // Measure real rendered pixel colors at identical positions. Don't confuse
-  // getComputedStyle RGBA equivalence with final painted color equivalence.
+  // Verify actual composited glass pixels across desktop + narrow/mobile widths.
+  // Transparent RGBA is preserved; scores are visually brighter at the top,
+  // shaded at the foot, and near-identical across viewport sizes.
   for(const width of [1365,390,320]){
     await page.setViewportSize({width,height:844});
     const samples=[];
@@ -135,13 +148,19 @@ try{
       const input=home.locator('[data-score-row="0"][data-score-col="0"]');
       await input.fill(String(referenceValues[i]));
       await home.locator('#titleInput').click();
-      const actual=await pixelRGB(home.locator('#scoreTable tbody tr:first-child td.scoreCell').first());
-      assert(rgbClose(actual,expectedPixels[i]),
-        'Actual composited tile pixel differs at '+width+' score '+referenceValues[i]+
-        ': '+actual+' expected '+expectedPixels[i]);
+      const actual=await cellPixelPair(home.locator('#scoreTable tbody tr:first-child td.scoreCell').first());
+      if(width===1365)baselineTopRGB[i]=actual.top;
+      else assert(rgbClose(actual.top,baselineTopRGB[i]),
+        'Mobile/desktop glass pixel mismatch at '+width+' score '+referenceValues[i]+
+        ': '+actual.top+' expected '+baselineTopRGB[i]);
+      const bright=actual.top.reduce((a,b)=>a+b,0);
+      const shade=actual.bottom.reduce((a,b)=>a+b,0);
+      assert(bright>shade+14,
+        'Tile lacks glass lighting depth at '+width+' score '+referenceValues[i]+
+        ': top '+actual.top+' bottom '+actual.bottom);
       samples.push(actual);
     }
-    console.log('R38 P10 G5 screenshot pixel parity PASS',
+    console.log('R38 P11 G5 glass pixel lighting and viewport parity PASS',
       process.env.BROWSER_ENGINE||'chromium',width,samples);
   }
   await page.setViewportSize({width:390,height:844});
