@@ -45,12 +45,22 @@ html.embeddedSiteFrame #editorHomeBtn{display:none!important}
   white-space:nowrap;font:900 12px/1 system-ui,-apple-system,sans-serif;
 }
 .globalDiscoverBtn:hover,.globalDiscoverBtn:focus-visible{background:#183451;border-color:#5e89b9;color:#fff}
+.globalIntroBtn{
+  display:inline-flex;align-items:center;justify-content:center;min-height:35px;
+  padding:0 11px;border:1px solid #2a496a;border-radius:9px;
+  background:#0f243a;color:#bfd5ef;text-decoration:none;
+  white-space:nowrap;font:900 12px/1 system-ui,-apple-system,sans-serif;
+}
+.globalIntroBtn:hover,.globalIntroBtn:focus-visible{
+  background:#183451;border-color:#5e89b9;color:#fff
+}
 @media(max-width:600px){
   .globalLocaleLabel{display:none}
   .globalLocaleBar{gap:5px;padding-left:8px;padding-right:8px}
   .globalNavLinks{gap:4px}
   .globalHomeBtn{min-width:60px;padding:0 9px}
   .globalDiscoverBtn{padding:0 9px}
+  .globalIntroBtn{padding:0 8px}
   .globalLocaleSwitch{padding:2px;gap:1px}
   .globalLocaleSwitch button{min-width:34px;min-height:31px;padding:3px 5px}
   html.embeddedSiteFrame .topActions{grid-template-columns:repeat(3,minmax(0,1fr))!important}
@@ -91,6 +101,7 @@ html.embeddedSiteFrame #editorHomeBtn{display:none!important}
   .globalNavLinks{gap:3px}
   .globalHomeBtn{min-width:51px;padding:0 6px;font-size:11px}
   .globalDiscoverBtn{padding:0 6px;font-size:11px}
+  .globalIntroBtn{padding:0 5px;font-size:11px}
   .globalSupportMenu>summary{padding:0 6px}
   .globalLocaleSwitch button{min-width:30px;padding:2px 4px;font-size:11px}
 }
