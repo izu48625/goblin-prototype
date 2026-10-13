@@ -2022,7 +2022,7 @@
   // R38 P3: unnamed starter sheets must not accidentally become Public works.
   // This check happens before authentication, model construction or DB writes.
   const isDefaultPublishTitle=value=>!String(value??'').trim() ||
-    /^(?:新しいお題|New Topic)(?:\\s+\\d+)?$/i.test(String(value).trim());
+    /^(?:新しいお題|New Topic)(?:\s+\d+)?$/i.test(String(value).trim());
   function showPublishTitleGuard(){
     const guard=$('publishTitleGuard'),input=$('publishTitleConfirmInput');
     if(!guard||!input)return;
