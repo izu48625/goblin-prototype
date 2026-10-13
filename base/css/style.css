@@ -1714,6 +1714,12 @@ html[lang="en"] .rankModeBtn{
   }
 }
 
+/* R38 P10: G5 dark olive / burnt orange / muted blue palette.
+   Preserve the red-purple SS shade from R38 P9; slightly darken all other
+   7-band score tints and shift S towards smoky burnt orange, A towards
+   muted olive yellow-green, and C towards dusky blue. These remain true
+   RGBA translucent layers over the unchanged shared #101b30 backing.
+   No changes to score thresholds, user data, layout or save/publish logic. */
 /* R38 P9: deep TRANSLUCENT color layers over the SAME dark cell backing.
    The old photo has rich, transparent purple, warm slate, sage and teal bands.
    The previous opaque hex colors flattened the look; earlier raw RGBA had
@@ -1737,32 +1743,32 @@ html[lang="en"] .rankModeBtn{
 #scoreTable td.avgCell.heat-e,
 .fitTable td.fitScoreCell.heat-e,
 .fitTable td.fitAverageCell.heat-e,
-.overviewMetric.heat-e{--score-tile-overlay:rgba(83,105,137,.19)}
+.overviewMetric.heat-e{--score-tile-overlay:rgba(71,87,114,.17)}
 #scoreTable td.scoreCell.heat-d,
 #scoreTable td.avgCell.heat-d,
 .fitTable td.fitScoreCell.heat-d,
 .fitTable td.fitAverageCell.heat-d,
-.overviewMetric.heat-d{--score-tile-overlay:rgba(72,112,171,.30)}
+.overviewMetric.heat-d{--score-tile-overlay:rgba(51,82,135,.27)}
 #scoreTable td.scoreCell.heat-c,
 #scoreTable td.avgCell.heat-c,
 .fitTable td.fitScoreCell.heat-c,
 .fitTable td.fitAverageCell.heat-c,
-.overviewMetric.heat-c{--score-tile-overlay:rgba(76,135,198,.38)}
+.overviewMetric.heat-c{--score-tile-overlay:rgba(45,100,156,.34)}
 #scoreTable td.scoreCell.heat-b,
 #scoreTable td.avgCell.heat-b,
 .fitTable td.fitScoreCell.heat-b,
 .fitTable td.fitAverageCell.heat-b,
-.overviewMetric.heat-b{--score-tile-overlay:rgba(73,164,156,.43)}
+.overviewMetric.heat-b{--score-tile-overlay:rgba(55,119,100,.36)}
 #scoreTable td.scoreCell.heat-a,
 #scoreTable td.avgCell.heat-a,
 .fitTable td.fitScoreCell.heat-a,
 .fitTable td.fitAverageCell.heat-a,
-.overviewMetric.heat-a{--score-tile-overlay:rgba(100,167,131,.48)}
+.overviewMetric.heat-a{--score-tile-overlay:rgba(94,116,35,.48)}
 #scoreTable td.scoreCell.heat-s,
 #scoreTable td.avgCell.heat-s,
 .fitTable td.fitScoreCell.heat-s,
 .fitTable td.fitAverageCell.heat-s,
-.overviewMetric.heat-s{--score-tile-overlay:rgba(169,144,143,.42)}
+.overviewMetric.heat-s{--score-tile-overlay:rgba(168,80,34,.49)}
 #scoreTable td.scoreCell.heat-ss,
 #scoreTable td.avgCell.heat-ss,
 .fitTable td.fitScoreCell.heat-ss,
