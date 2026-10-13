@@ -1714,23 +1714,59 @@ html[lang="en"] .rankModeBtn{
   }
 }
 
-/* R38 P3: bring back readable score-based tile colors on the Home grid.
-   Specificity deliberately exceeds .scoreCell/.avgCell and old td rules.
-   These are data-cell highlights, NOT the retired Heatmap graph extension. */
-#scoreTable td.scoreCell.heat-e, #scoreTable td.avgCell.heat-e,
-.fitTable td.fitScoreCell.heat-e, .fitTable td.fitAverageCell.heat-e{background:#303f5e}
-#scoreTable td.scoreCell.heat-d, #scoreTable td.avgCell.heat-d,
-.fitTable td.fitScoreCell.heat-d, .fitTable td.fitAverageCell.heat-d{background:#345179}
-#scoreTable td.scoreCell.heat-c, #scoreTable td.avgCell.heat-c,
-.fitTable td.fitScoreCell.heat-c, .fitTable td.fitAverageCell.heat-c{background:#2f628f}
-#scoreTable td.scoreCell.heat-b, #scoreTable td.avgCell.heat-b,
-.fitTable td.fitScoreCell.heat-b, .fitTable td.fitAverageCell.heat-b{background:#2f6ea9}
-#scoreTable td.scoreCell.heat-a, #scoreTable td.avgCell.heat-a,
-.fitTable td.fitScoreCell.heat-a, .fitTable td.fitAverageCell.heat-a{background:#69478d}
-#scoreTable td.scoreCell.heat-s, #scoreTable td.avgCell.heat-s,
-.fitTable td.fitScoreCell.heat-s, .fitTable td.fitAverageCell.heat-s{background:#86409c}
-#scoreTable td.scoreCell.heat-ss, #scoreTable td.avgCell.heat-ss,
-.fitTable td.fitScoreCell.heat-ss, .fitTable td.fitAverageCell.heat-ss{background:#974e97}
+/* R38 P5 — restored *historic* score-hue order from the user's v16 photo:
+   high pink -> warm neutral -> green -> teal -> blue. This is table shading,
+   not the discontinued Heatmap visualization/template. It deliberately does
+   not use the newer blue-to-purple gradient of R38 P3/P4.
+   Home td also receives the identical inline color as a browser-cache guard. */
+/* Under 50%: dark slate */
+#scoreTable td.scoreCell.heat-e,
+#scoreTable td.avgCell.heat-e,
+.fitTable td.fitScoreCell.heat-e,
+.fitTable td.fitAverageCell.heat-e,
+.overviewMetric.heat-e{background-color:#283449}
+
+/* 50–59%: slate blue */
+#scoreTable td.scoreCell.heat-d,
+#scoreTable td.avgCell.heat-d,
+.fitTable td.fitScoreCell.heat-d,
+.fitTable td.fitAverageCell.heat-d,
+.overviewMetric.heat-d{background-color:#2f415f}
+
+/* 60–69%: blue */
+#scoreTable td.scoreCell.heat-c,
+#scoreTable td.avgCell.heat-c,
+.fitTable td.fitScoreCell.heat-c,
+.fitTable td.fitAverageCell.heat-c,
+.overviewMetric.heat-c{background-color:#365278}
+
+/* 70–79%: turquoise */
+#scoreTable td.scoreCell.heat-b,
+#scoreTable td.avgCell.heat-b,
+.fitTable td.fitScoreCell.heat-b,
+.fitTable td.fitAverageCell.heat-b,
+.overviewMetric.heat-b{background-color:#35646a}
+
+/* 80–89%: muted green */
+#scoreTable td.scoreCell.heat-a,
+#scoreTable td.avgCell.heat-a,
+.fitTable td.fitScoreCell.heat-a,
+.fitTable td.fitAverageCell.heat-a,
+.overviewMetric.heat-a{background-color:#40655a}
+
+/* 90–94%: warm mauve / taupe */
+#scoreTable td.scoreCell.heat-s,
+#scoreTable td.avgCell.heat-s,
+.fitTable td.fitScoreCell.heat-s,
+.fitTable td.fitAverageCell.heat-s,
+.overviewMetric.heat-s{background-color:#66505f}
+
+/* 95–100%: old-style rose / pink */
+#scoreTable td.scoreCell.heat-ss,
+#scoreTable td.avgCell.heat-ss,
+.fitTable td.fitScoreCell.heat-ss,
+.fitTable td.fitAverageCell.heat-ss,
+.overviewMetric.heat-ss{background-color:#8a4b75}
 
 /* A missing or untouched title is fixed inside Publish before any upload. */
 .publishTitleGuard{

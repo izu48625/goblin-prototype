@@ -1,19 +1,19 @@
 import assert from 'node:assert/strict';
 import {readFile} from 'node:fs/promises';
-const KEY='r38p4palette1';
+const KEY='r38p5historic1';
 const HOME='base/index.html?v='+KEY;
 const STYLE='css/style.css?v='+KEY;
 const expectedColors=[
-  '#303f5e','#345179','#2f628f','#2f6ea9','#69478d','#86409c','#974e97'
+  '#283449','#2f415f','#365278','#35646a','#40655a','#66505f','#8a4b75'
 ];
-const local=[['index.html',HOME],['base/index.html',STYLE]];
+const local=[['index.html',HOME],['base/index.html',STYLE],['base/index.html','js/app.js?v='+KEY]];
 for(const [path,needle] of local){
   const data=await readFile(new URL('../'+path,import.meta.url),'utf8');
   assert(data.includes(needle),path+' is not cache-busted: '+needle);
 }
 const localCss=await readFile(new URL('../base/css/style.css',import.meta.url),'utf8');
-for(const color of expectedColors)assert(localCss.includes('background:'+color),color+' missing');
-console.log('R38 P4 SOURCE asset-chain and vivid blue-purple palette checks PASS');
+for(const color of expectedColors)assert(localCss.includes('background-color:'+color),color+' missing');
+console.log('R38 P5 SOURCE asset-chain and old-photo rose/green/blue palette checks PASS');
 if(process.argv[2]!=='live')process.exit(0);
 
 // No browser storage, Supabase credentials, user works or POST requests.
@@ -37,14 +37,17 @@ for(const host of hosts){
   let success=false,last='';
   for(let attempt=0;attempt<30&&!success;attempt++){
     try{
-      const root=await fetchText(host.base+'/?paletteQA=r38p4-'+attempt);
+      const root=await fetchText(host.base+'/?paletteQA=r38p5-'+attempt);
       assert(root.includes(HOME),'stale outer shell -> Home iframe');
       const home=await fetchText(host.base+'/base/index.html?v='+KEY);
       assert(home.includes(STYLE),'stale Home HTML -> CSS');
+      assert(home.includes('js/app.js?v='+KEY),'stale Home HTML -> color JS');
       const css=await fetchText(host.base+'/base/css/style.css?v='+KEY);
+      const app=await fetchText(host.base+'/base/js/app.js?v='+KEY);
+      assert(app.includes('scoreTileColors'),'missing real per-cell JS colors');
       assert(css.includes('#scoreTable td.scoreCell.heat-ss'),'missing score cells');
       for(const color of expectedColors)
-        assert(css.includes('background:'+color),'missing color '+color);
+        assert(css.includes('background-color:'+color),'missing color '+color);
       console.log('R38 P4 LIVE asset chain PASS',host.name,host.base,
         {outerBytes:root.length,homeBytes:home.length,cssBytes:css.length});
       success=true;
