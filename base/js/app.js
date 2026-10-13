@@ -910,8 +910,10 @@
         const field=e.currentTarget,ri=+field.dataset.scoreRow,ci=+field.dataset.scoreCol;
         if(!s.rows[ri])return;
         s.rows[ri].scores[ci]=clampScore(field.value);
+        // Keep the tile, average and progress visibly in sync on each input
+        // without remounting the editor or interrupting a mobile keyboard.
+        syncCommunityScoreSummary(field,ri);
         if(communityMode){
-          syncCommunityScoreSummary(field,ri);
           $('statusText').textContent='点数を変更しました。Communityへの反映には「評価を更新」を押してください。';
           if(window.parent!==window)window.parent.postMessage(
             {type:'statsmaker:community-score-dirty'},location.origin);
