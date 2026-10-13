@@ -213,18 +213,18 @@
     if(p>=50)return 'heat-d';
     return 'heat-e';
   }
-  // R38 P7b: photograph-inspired score hues for V1.0-A2 visual parity.
-  // Unlike the R38 P7 source-exact values, these are intentionally tuned to
-  // better match the user's captured monitor image on current mobile screens.
-  // Preserve grade thresholds and data. Keep CSS and inline colors in sync.
+  // R38 P8: opaque fixed-sRGB grading colors keep actual pixels identical
+  // at desktop/mobile widths. The previous translucent rgba() value alone
+  // could not validate final on-screen pixels. Match CSS exactly; preserve
+  // 10/100 grading, persistence and public data contracts.
   const scoreTileColors=Object.freeze({
-    'heat-ss':'rgba(241,112,173,.24)', // 95–100%
-    'heat-s':'rgba(189,169,155,.30)',  // 90–94%
-    'heat-a':'rgba(144,191,162,.34)',  // 80–89%
-    'heat-b':'rgba(84,180,178,.27)',  // 70–79%
-    'heat-c':'rgba(87,145,211,.20)',  // 60–69%
-    'heat-d':'rgba(81,128,178,.16)',  // 50–59%
-    'heat-e':'rgba(84,102,128,.10)'   // 0–49%
+    'heat-ss':'#764e72', // 95–100%
+    'heat-s':'#635a65',  // 90–94%
+    'heat-a':'#526d66',  // 80–89%
+    'heat-b':'#3a6065',  // 70–79%
+    'heat-c':'#305272',  // 60–69%
+    'heat-d':'#294057',  // 50–59%
+    'heat-e':'#1e3046'   // 0–49%
   });
   function scoreTileColor(v){return scoreTileColors[heatClass(v)]||'';}
   function esc(s){
