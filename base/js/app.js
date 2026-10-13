@@ -2019,12 +2019,50 @@
     return user;
   }
 
+  // R38 P3: unnamed starter sheets must not accidentally become Public works.
+  // This check happens before authentication, model construction or DB writes.
+  const isDefaultPublishTitle=value=>!String(value??'').trim() ||
+    /^(?:新しいお題|New Topic)(?:\\s+\\d+)?$/i.test(String(value).trim());
+  function showPublishTitleGuard(){
+    const guard=$('publishTitleGuard'),input=$('publishTitleConfirmInput');
+    if(!guard||!input)return;
+    const missing=isDefaultPublishTitle(activeSheet().title);
+    guard.classList.toggle('hidden',!missing);
+    input.value=missing?'':activeSheet().title;
+  }
+  function validatePublishTitle(){
+    const guard=$('publishTitleGuard'),input=$('publishTitleConfirmInput');
+    const s=activeSheet();
+    if(guard&&!guard.classList.contains('hidden')){
+      const name=String(input?.value||'').trim();
+      if(isDefaultPublishTitle(name)){
+        setPublishStatus(t('publish.titleMissing'),'error');
+        input?.focus();
+        return false;
+      }
+      s.title=name;
+      $('titleInput').value=name;
+      renderSheetSelect();
+      scheduleSave('');
+      $('publishPreviewTitle').textContent=name;
+      guard.classList.add('hidden');
+    }
+    if(isDefaultPublishTitle(s.title)){
+      showPublishTitleGuard();
+      setPublishStatus(t('publish.titleMissing'),'error');
+      input?.focus();
+      return false;
+    }
+    return true;
+  }
+
   async function openPublishDialog(){
     const backdrop=$('publishDialogBackdrop');
     if(!backdrop)return;
     backdrop.classList.remove('hidden');
     $('publishResult')?.classList.add('hidden');
     setPublishStatus('');
+    showPublishTitleGuard();
     try{
       await refreshPublishAuth();
     }catch(error){
@@ -2073,6 +2111,7 @@
   }
 
   async function executePublish(){
+    if(!validatePublishTitle())return;
     try{
       const sb=window.SM_SUPABASE?.client;if(!sb)throw new Error('Supabase client is not ready');
       const user=await ensureCloudIdentity();if(!user)throw new Error(t('publish.guestStartFailed'));
