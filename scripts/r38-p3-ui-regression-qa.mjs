@@ -23,7 +23,9 @@ try{
   const home=page.frameLocator('#basicFrame');
   await home.locator('#titleInput').waitFor({state:'visible',timeout:30000});
   await home.locator('#scoreTable .scoreInput').first().waitFor({state:'visible'});
+  await home.locator('#scoreSettingsBtn').click();
   await home.locator('#scale10Btn').click();
+  await home.locator('#scoreSettingsBtn').click();
   const values=[10,9,7,3];
   for(let i=0;i<values.length;i++)
     await home.locator('[data-score-row="0"][data-score-col="'+i+'"]').fill(String(values[i]));
