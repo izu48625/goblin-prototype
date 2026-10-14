@@ -1,0 +1,35 @@
+name: R47 People-First SEO Guides QA
+on:
+  pull_request:
+    paths:
+      - 'ja/index.html'
+      - 'en/index.html'
+      - 'ja/chart-guide.html'
+      - 'en/chart-guide.html'
+      - 'ja/png-guide.html'
+      - 'en/png-guide.html'
+      - 'worker/seo.js'
+      - 'scripts/r47-seo-guides-qa.mjs'
+      - '.github/workflows/r47-seo-guides-qa.yml'
+  push:
+    branches: [main]
+    paths:
+      - 'ja/**'
+      - 'en/**'
+      - 'worker/seo.js'
+      - 'scripts/r47-seo-guides-qa.mjs'
+jobs:
+  guides-and-sitemap:
+    runs-on: ubuntu-latest
+    timeout-minutes: 8
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Verify Worker and test syntax
+        run: node --check worker/seo.js && node --check scripts/r47-seo-guides-qa.mjs
+      - name: Build Cloudflare static assets
+        run: npm run build:cloudflare
+      - name: Check localized guides, internal links and sitemap
+        run: node scripts/r47-seo-guides-qa.mjs
