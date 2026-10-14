@@ -312,6 +312,9 @@
     setConsent
   };
   function start(){
+    // GA4 is paused: no analytics listeners or consent UI in normal browsing.
+    // analyticsDebug=1 is only an offline, sanitized development aid.
+    if(!valid&&!debug)return;
     clickTracking();
     scrollTracking();
     if(valid||debug)observeLiveAds();

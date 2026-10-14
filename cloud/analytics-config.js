@@ -1,7 +1,5 @@
-/* R40: Owner-approved GA4 measurement ID. No Google script/network traffic
- * is started until the visitor explicitly accepts analytics in the consent UI.
- * AdSense remains NOT configured or enabled; G- IDs are public, not secrets. */
+/* R45 (2026-10-14): GA4 paused by owner. No consent UI, Google tag or GA4 transmission. The dormant opt-in code remains for possible later reactivation. AdSense is separate. */
 window.SM_ANALYTICS_CONFIG=Object.freeze({
-  enabled:true,
-  measurementId:'G-ZT8N1BVEL8'
+  enabled:false,
+  measurementId:''
 });

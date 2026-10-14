@@ -50,8 +50,8 @@ for(const [language,page,requirements] of [
 assert(remix.includes('scores:Array(cols.length).fill(null)'),'Remix must start without source scores');
 assert(remix.includes('sourceTopicId:topic.id'),'Remix source attribution must be retained');
 assert(publishModel.includes("relation:'remix'"),'Republished Remix must retain source relation');
-assert(analytics.includes('enabled:true')&&analytics.includes("measurementId:'G-ZT8N1BVEL8'"),'Owner-approved GA4 config missing');
-assert(ja.includes('「解析設定」')&&en.includes('“Analytics”'),'GA4 consent withdrawal notice must be present');
+assert(analytics.includes('enabled:false')&&analytics.includes("measurementId:''"),'GA4 must remain paused');
+assert(ja.includes('GA4は現在停止')&&en.includes('GA4 tracking is currently disabled'),'Privacy must explain paused GA4');
 assert(ads.includes("get('adPreview')==='1'"),'Ad slots remain developer-only previews');
 
 const key='a'.repeat(70)+'.'+'b'.repeat(70)+'.'+'c'.repeat(70);
