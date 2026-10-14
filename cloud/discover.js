@@ -335,6 +335,7 @@
   // searches and ranks the full Public population before applying its limit.
   const PAGE_SIZE=12;
   let searchTimer=null;
+  let skipCacheOnce=false;
 
   async function load(more=false,generation=state.generation){
     if(more&&(state.loading||!state.hasMore))return;
@@ -354,8 +355,9 @@
       moreBtn.classList.add('hidden');
     }
     try{
-      if(!sb)throw new Error('Supabase not ready');
-      const {data,error}=await sb.rpc('discover_public_works_v1',{
+      // Prefer same-origin Public-only cache gateway, never sends a user token.
+      // R40 RPC is the safe fallback if the Worker route is unavailable.
+      const args={
         p_query:state.query,
         p_category:state.category,
         p_view:state.view,
@@ -364,7 +366,35 @@
         p_offset:state.offset,
         p_limit:PAGE_SIZE,
         p_anchor:state.anchor
-      });
+      };
+      const bypass=skipCacheOnce;
+      skipCacheOnce=false;
+      let data,error=null;
+      try{
+        const params=new URLSearchParams({
+          query:args.p_query,category:args.p_category,view:args.p_view,
+          sort:args.p_sort,locale:args.p_locale,offset:String(args.p_offset),limit:String(PAGE_SIZE)
+        });
+        if(args.p_anchor)params.set('anchor',args.p_anchor);
+        if(bypass)params.set('fresh','1');
+        const response=await fetch('/api/discover?'+params.toString(),{
+          headers:{Accept:'application/json'},cache:'no-store'
+        });
+        if(response.status===429||response.status===400){
+          const rejected=new Error('Discover request rejected: '+response.status);
+          rejected.skipFallback=true;
+          throw rejected;
+        }
+        if(!response.ok)throw new Error('Discover gateway unavailable');
+        data=await response.json();
+      }catch(gatewayError){
+        // Never bypass the public gateway's abuse/validation response.
+        if(gatewayError?.skipFallback)throw gatewayError;
+        if(!sb)throw gatewayError;
+        const fallback=await sb.rpc('discover_public_works_v1',args);
+        data=fallback.data;
+        error=fallback.error;
+      }
       if(generation!==state.generation)return;
       if(error)throw error;
       if(!data||!Array.isArray(data.rows)||!Number.isFinite(Number(data.total))||
@@ -451,7 +481,7 @@
   });
 
   moreBtn.addEventListener('click',()=>{void load(true);});
-  refreshBtn.addEventListener('click',()=>reload());
+  refreshBtn.addEventListener('click',()=>{skipCacheOnce=true;reload();});
 
   setCopy();
   reload();

@@ -1,0 +1,67 @@
+name: R41 Isolated Counter DB QA
+on:
+  pull_request:
+    paths:
+      - 'R41_*.sql'
+      - 'scripts/r41-counter-fixture-qa.sql'
+      - '.github/workflows/r41-counter-db-qa.yml'
+  push:
+    branches: [main]
+    paths:
+      - 'R41_*.sql'
+      - 'scripts/r41-counter-fixture-qa.sql'
+jobs:
+  postgres-fixture:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    services:
+      postgres:
+        image: postgres:17
+        env:
+          POSTGRES_PASSWORD: test_only_not_a_production_secret
+          POSTGRES_USER: postgres
+          POSTGRES_DB: postgres
+        ports: ['5432:5432']
+        options: >-
+          --health-cmd "pg_isready -U postgres"
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+    env:
+      PGHOST: 127.0.0.1
+      PGPORT: '5432'
+      PGUSER: postgres
+      PGPASSWORD: test_only_not_a_production_secret
+      PGDATABASE: postgres
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install PostgreSQL client if needed
+        run: command -v psql || (sudo apt-get update -qq && sudo apt-get install -y postgresql-client)
+      - name: Real trigger lifecycle tests
+        run: psql -X -v ON_ERROR_STOP=1 -f scripts/r41-counter-fixture-qa.sql
+      - name: Concurrent rating submissions (16 clients)
+        shell: bash
+        run: |
+          set -euo pipefail
+          pids=()
+          for i in $(seq 1 16); do
+            id=$(printf '00000000-0000-4000-8000-%012d' "$((300+i))")
+            psql -X -v ON_ERROR_STOP=1 -c "insert into public.rating_sets(id,topic_id,status) values('$id','00000000-0000-4000-8000-000000000101','submitted');" >/dev/null &
+            pids+=("$!")
+          done
+          for pid in "${pids[@]}"; do wait "$pid"; done
+          psql -X -v ON_ERROR_STOP=1 -c "do \$\$begin if (select participants from private.discover_counters where topic_id='00000000-0000-4000-8000-000000000101')<>16 then raise exception 'concurrent INSERTs lost a delta';end if; end\$\$;"
+          echo 'R41 16 parallel writes + counter reconciliation PASS'
+      - name: Concurrent rating deletions (16 clients)
+        shell: bash
+        run: |
+          set -euo pipefail
+          pids=()
+          for i in $(seq 1 16); do
+            id=$(printf '00000000-0000-4000-8000-%012d' "$((300+i))")
+            psql -X -v ON_ERROR_STOP=1 -c "delete from public.rating_sets where id='$id';" >/dev/null &
+            pids+=("$!")
+          done
+          for pid in "${pids[@]}"; do wait "$pid"; done
+          psql -X -v ON_ERROR_STOP=1 -c "do \$\$begin if (select participants from private.discover_counters where topic_id='00000000-0000-4000-8000-000000000101')<>0 then raise exception 'concurrent DELETEs lost a delta';end if; end\$\$;"
+          echo 'R41 16 parallel deletes + counter reconciliation PASS'

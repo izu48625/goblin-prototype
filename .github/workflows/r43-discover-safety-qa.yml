@@ -1,0 +1,33 @@
+name: R41-R43 Discover Safety QA
+on:
+  pull_request:
+    paths:
+      - 'R41_*.sql'
+      - 'R42_*.sql'
+      - 'R43_*.sql'
+      - 'worker/discover-public.js'
+      - 'worker/index.js'
+      - 'cloud/discover.js'
+      - 'wrangler.jsonc'
+      - 'scripts/r43-discover-gateway-qa.mjs'
+      - '.github/workflows/r43-discover-safety-qa.yml'
+  push:
+    branches: [main]
+    paths:
+      - 'worker/discover-public.js'
+      - 'worker/index.js'
+      - 'cloud/discover.js'
+      - 'wrangler.jsonc'
+      - 'scripts/r43-discover-gateway-qa.mjs'
+jobs:
+  discover-safety:
+    runs-on: ubuntu-latest
+    timeout-minutes: 8
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - run: node --check worker/discover-public.js && node --check worker/index.js && node --check cloud/discover.js
+      - run: node scripts/r43-discover-gateway-qa.mjs
+      - run: node scripts/r40-discover-server-pagination-qa.mjs
