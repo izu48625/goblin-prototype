@@ -1,0 +1,23 @@
+name: R40 Discover server pagination QA
+on:
+  pull_request:
+  push:
+    branches: [main]
+jobs:
+  r40-discover:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - run: node --check cloud/discover.js
+      - run: node --check scripts/r40-discover-server-pagination-qa.mjs
+      - run: node scripts/r40-discover-server-pagination-qa.mjs
+      - name: Static SQL safety assertions
+        run: |
+          grep -q 'security invoker' R40_DISCOVER_PUBLIC_RPC.sql
+          grep -q "t.visibility='public'" R40_DISCOVER_PUBLIC_RPC.sql
+          grep -q "child.visibility='public'" R40_DISCOVER_PUBLIC_RPC.sql
+          grep -q 'drop function if exists' R40_DISCOVER_PUBLIC_RPC_ROLLBACK.sql
+          ! grep -Eqi 'security definer|delete from public\.topics|truncate public\.topics' R40_DISCOVER_PUBLIC_RPC.sql
