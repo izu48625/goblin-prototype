@@ -46,7 +46,8 @@ try{
     assert.equal(await page.locator('#rating-guide .grid article').count(),4,
       'Original score-method guide must have four useful steps');
     assert.equal(await page.locator('.hero h1').count(),1);
-    assert.equal(await page.locator('main details').count(),3);
+    assert.equal(await page.locator('main details').count(),4,
+      'Four practical FAQs, including optional Community rating, must remain readable');
     const geometry=await page.evaluate(()=>{
       const card=document.querySelector('.grid article');
       const bar=document.querySelector('.globalLocaleBar');
