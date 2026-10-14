@@ -34,3 +34,11 @@
 4. Anonymous API permissions and Supabase security advisor review.
 5. 1k/10k/100k isolation testing and 1/5/20 concurrent visitors in a non-production environment (cost review first).
 6. R43 CDN stale-revocation tests, including cache hit after Public→Private/Unlisted. No cache of unreleased content.
+
+## Continued implementation and regression (2026-10-14)
+- Added `R41_DISCOVER_RPC_COUNTER_CUTOVER.sql`: replaces both inline Public-remix descendant counts in the existing R40 Discover RPC with the privacy-guarded R41 reader. Signatures and API shape remain unchanged.
+- Fixed rollback ordering: restore the original R40 Discover RPC BEFORE dropping the new reader function.
+- Verified creation, cutover, and rollback within one transaction; R40 restored successfully.
+- Ran anon-role comparison of the original and counter-backed rankings for newest/popular/community/remix against all 11 existing Public works. All returned the same total (11) and identical ordered IDs.
+- This is NOT proof of concurrency-safe counter maintenance: trigger deadlocks, rating re-submissions, simultaneous Public/Private edits, deletes and cascades remain untested; full search projection and Cloudflare cache remain not implemented.
+- Production database and site remain unchanged by this PR. Keep as Draft.
