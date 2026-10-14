@@ -6,6 +6,17 @@ const text=path=>readFile(new URL('../'+path,import.meta.url),'utf8');
 const slugs=['chart-guide.html','png-guide.html'];
 const urls=slugs.flatMap(slug=>['ja','en'].map(lang=>'/'+lang+'/'+slug));
 const docs=[];
+const marketingPages=['index.html','discover.html',
+  ...['ja','en'].flatMap(lang=>['index.html','chart-guide.html','png-guide.html'].map(page=>lang+'/'+page))];
+for(const path of marketingPages){
+  const html=await text(path);
+  assert(!/(無料|架空|\\bfree\\b|\\bfictional\\b|\\bimaginary\\b|\\binvented\\b)/i.test(html),
+    'Avoid unwanted promotional wording or repetitive sample labels on '+path);
+}
+const sourceSeo=await text('worker/seo.js');
+assert(!/(自分でも無料|無料でグラフ|\\bfree charts\\b|charts for free)/i.test(sourceSeo),
+  'Public work SSR should not add pushy sales language');
+
 for(const lang of ['ja','en']){
   const home=await text(lang+'/index.html');
   // A coherent, genuinely localized search snippet must match the visible
