@@ -18,8 +18,10 @@ create table public.rating_sets (
 alter table public.topics enable row level security;
 create policy discover_public_only on public.topics for select to anon using (visibility='public');
 grant select on public.topics to anon;
+begin;
 \ir ../R41_DISCOVER_COUNTERS.sql
 \ir ../R41_DISCOVER_COUNTER_READERS.sql
+commit;
 
 insert into public.topics(id,visibility)
 values('00000000-0000-4000-8000-000000000101','public');
