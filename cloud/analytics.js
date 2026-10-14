@@ -166,8 +166,10 @@
       });
     }
   }
-  function notice(){
-    if(!valid||framed||consent!=='unset'||document.getElementById('sm-analytics-consent'))return;
+  function notice(force=false){
+    // The editor has its own sticky toolbar/overflow menu; show the notice
+    // only when a visitor explicitly opens Analytics in HELP on that screen.
+    if(!valid||framed||consent!=='unset'||document.getElementById('sm-analytics-consent')||(group()==='editor'&&!force))return;
     const container=document.createElement('section');
     container.id='sm-analytics-consent';
     container.setAttribute('role','region');
@@ -232,7 +234,7 @@
     button.addEventListener('click',()=>{
       document.querySelector('.globalSupportMenu')?.removeAttribute('open');
       consent='unset';
-      notice();
+      notice(true);
     });
     panel.append(button);
   }
