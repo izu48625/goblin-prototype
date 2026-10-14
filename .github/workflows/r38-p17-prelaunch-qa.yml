@@ -1,0 +1,129 @@
+name: R38 P17 Read-Only Prelaunch Acceptance
+
+on:
+  pull_request:
+    paths:
+      - "scripts/r38-p17-prelaunch-readonly-qa.mjs"
+      - ".github/workflows/r38-p17-prelaunch-qa.yml"
+      - "R38_P17_PRELAUNCH_CHECKLIST.md"
+      - "base/**"
+      - "cloud/**"
+      - "index.html"
+      - "public.html"
+      - "discover.html"
+      - "ja/**"
+      - "en/**"
+      - "worker/**"
+      - "robots.txt"
+  push:
+    branches: [main]
+    paths:
+      - "scripts/r38-p17-prelaunch-readonly-qa.mjs"
+      - ".github/workflows/r38-p17-prelaunch-qa.yml"
+      - "R38_P17_PRELAUNCH_CHECKLIST.md"
+      - "base/**"
+      - "cloud/**"
+      - "index.html"
+      - "public.html"
+      - "discover.html"
+      - "ja/**"
+      - "en/**"
+      - "worker/**"
+      - "robots.txt"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  sources-and-release-contracts:
+    name: Read-only source, SEO, privacy and public-view checks
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+      - name: Source syntax and immutable on-device data formats
+        run: |
+          node --check scripts/r38-p17-prelaunch-readonly-qa.mjs
+          node --check cloud/public.js
+          node --check base/js/app.js
+          node --check worker/seo.js
+          node scripts/r38-p17-prelaunch-readonly-qa.mjs local
+          node scripts/r38-readonly-readiness-qa.mjs local
+          node scripts/r37-p4-legacy-og-revocation-qa.mjs
+          node scripts/r37-visibility-edge-qa.mjs
+          node scripts/r35-legal-contact-qa.mjs
+          node scripts/r35-report-qa.mjs
+          node scripts/r34-seo-edge-test.mjs
+      - name: Verify deployable static content without activation
+        run: |
+          npm run build:cloudflare
+          test -s dist/index.html
+          test -s dist/base/index.html
+          test -s dist/public.html
+          test -s dist/ja/index.html
+          test -s dist/en/index.html
+          test -s dist/robots.txt
+          test ! -e dist/ads.txt
+
+  mobile-and-editor-regression:
+    name: iPhone-equivalent, 40x10, save and published scores (mock only)
+    runs-on: ubuntu-latest
+    timeout-minutes: 35
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+      - name: Build and install isolated headless browsers
+        run: |
+          npm run build:cloudflare
+          npm install --no-save playwright@1.56.1
+          npx playwright install --with-deps chromium webkit
+      - name: Serve local static app; never contact production Supabase
+        run: |
+          python3 -m http.server 4173 --bind 127.0.0.1 --directory dist >/tmp/r38-p17-static.log 2>&1 &
+          for i in $(seq 1 30); do
+            if curl -fsS http://127.0.0.1:4173/index.html >/dev/null; then exit 0; fi
+            sleep 1
+          done
+          exit 1
+      - name: 10/100-mode, color toggle, responsive public score scrolling
+        env:
+          BASE_URL: http://127.0.0.1:4173
+        run: |
+          node scripts/r38-p3-ui-regression-qa.mjs
+          BROWSER_ENGINE=webkit node scripts/r38-p3-ui-regression-qa.mjs
+          node scripts/r38-p15-public-score-qa.mjs
+          BROWSER_ENGINE=webkit node scripts/r38-p15-public-score-qa.mjs
+      - name: Save/resume, ten PNGs, touch-share and public access safety
+        env:
+          BASE_URL: http://127.0.0.1:4173
+        run: |
+          node scripts/r37-local-40x10-endurance-qa.mjs
+          node scripts/r37-p3-backup-multitab-qa.mjs
+          node scripts/r36-ten-graph-label-png-qa.mjs
+          node scripts/r36-webkit-iphone-share-qa.mjs
+          node scripts/r28-publish-lifecycle-test.mjs
+          node scripts/r37-visibility-ui-qa.mjs
+
+  live-read-only:
+    name: Deployed Cloudflare and Pages SEO/asset acceptance (GET only)
+    if: github.event_name != 'pull_request'
+    needs: [sources-and-release-contracts, mobile-and-editor-regression]
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+      - name: Compare actual public deployment and verify no private work is indexable
+        run: |
+          node scripts/r38-p17-prelaunch-readonly-qa.mjs live
+          node scripts/r38-readonly-readiness-qa.mjs live
+      - name: Observe direct old Vercel revocation; advisory only
+        run: node scripts/r38-readonly-readiness-qa.mjs legacy
