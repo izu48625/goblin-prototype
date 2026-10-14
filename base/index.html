@@ -6,7 +6,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
   <meta name="theme-color" content="#07101f">
   <title>Stats Maker</title>
-  <link rel="stylesheet" href="css/style.css?v=r38p13photo1">
+  <link rel="stylesheet" href="css/style.css?v=r38p14toggle1">
   <link rel="stylesheet" href="css/community-mode.css?v=r27h1">
   <link rel="stylesheet" href="../cloud/global-locale.css?v=r38p3about1">
 <link rel="stylesheet" href="../cloud/ad-layout.css?v=r32ad1">
@@ -139,6 +139,9 @@
           <option value="C" data-i18n="filter.cOrBelow">C以下</option>
           <option value="unrated" data-i18n="filter.unrated">未採点</option>
         </select>
+        <button id="scoreColorToggleBtn" class="scoreColorToggle is-on" type="button"
+          aria-pressed="true" aria-label="採点タイルの色を切り替える"
+          data-i18n-aria="filter.colorToggleAria">色 ON</button>
         <span id="filterCount" class="filterCount">0</span>
       </div>
 
@@ -437,8 +440,8 @@
 <script src="../cloud/supabase.js?v=r25p4"></script>
 <script src="../cloud/publish-model.js?v=r25p4"></script>
 <script src="../cloud/community-gateway.js?v=r26p3"></script>
-<script src="js/i18n.js?v=r38p6scale1"></script>
-<script src="js/app.js?v=r38p13photo1"></script>
+<script src="js/i18n.js?v=r38p14toggle1"></script>
+<script src="js/app.js?v=r38p14toggle1"></script>
 <script src="js/publish-guard.js?v=r25p4"></script>
 <script>
 window.addEventListener("statsmaker:languagechange",event=>{
