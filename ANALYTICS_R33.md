@@ -1,3 +1,9 @@
+# R40 GA4 activation update (2026-10-14)
+
+The owner supplied `G-ZT8N1BVEL8` and explicitly requested activation. GA4 is now configured, but loads only if the visitor accepts analytics; no Google tag is loaded before consent. AdSense is still disabled. Japanese and English introduction pages are included. The R33 notes below describe the **historical October 11 pre-activation state** and no longer represent the current GA4 status. Owner must still verify real-time data in their Analytics account after deployment.
+
+---
+
 # R33 無料アクセス解析・利用導線計測
 
 ## 現在の状態（2026-10-11：PC操作まで保留）

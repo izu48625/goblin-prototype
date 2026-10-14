@@ -1,8 +1,7 @@
-/* GA4 is DISABLED until the owner creates a free GA4 property, reviews
- * privacy/consent notices, and explicitly supplies a measurement ID.
- * A G-XXXXXXXXXX measurement ID is not a secret; never put API secrets here.
- * No tag/network requests are made when enabled=false. */
+/* R40: Owner-approved GA4 measurement ID. No Google script/network traffic
+ * is started until the visitor explicitly accepts analytics in the consent UI.
+ * AdSense remains NOT configured or enabled; G- IDs are public, not secrets. */
 window.SM_ANALYTICS_CONFIG=Object.freeze({
-  enabled:false,
-  measurementId:''
+  enabled:true,
+  measurementId:'G-ZT8N1BVEL8'
 });

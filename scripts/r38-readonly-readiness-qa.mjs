@@ -38,8 +38,9 @@ async function localAudit(){
   const robots=await read('robots.txt');
   assert(robots.includes('Sitemap: '+ORIGIN+'/sitemap.xml'));
   const analytics=await read('cloud/analytics-config.js');
-  assert(analytics.includes('enabled:false'),'GA4 was activated without approval');
-  assert(analytics.includes("measurementId:''"),'GA4 measurement ID supplied unexpectedly');
+  assert(analytics.includes('enabled:true')&&analytics.includes("measurementId:'G-ZT8N1BVEL8'"),'Owner-approved opt-in GA4 config missing');
+  const analyticsRuntime=await read('cloud/analytics.js');
+  assert(analyticsRuntime.includes("consent!=='granted'")&&analyticsRuntime.includes("consent==='unset'"),'Analytics must remain consent gated');
   const layout=await read('cloud/ad-layout.js');
   assert(layout.includes('adPreview=1'),'Ad placement must remain preview-only');
   const builder=await read('scripts/build-cloudflare.mjs');
