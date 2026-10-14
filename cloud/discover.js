@@ -217,7 +217,7 @@
   }
 
   function sortWorks(list){
-    const newest=(a,b)=>new Date(b.published_at||b.snapshot_updated_at||0)-new Date(a.published_at||a.snapshot_updated_at||0);
+    const newest=(a,b)=>new Date(b.published_at||b.snapshot_updated_at||0)-new Date(a.published_at||a.snapshot_updated_at||0)||String(a.id).localeCompare(String(b.id));
     const out=[...list];
     if(state.sort==='community'){
       out.sort((a,b)=>b.participants-a.participants||newest(a,b));
@@ -345,6 +345,38 @@
     moreBtn.classList.toggle('hidden',state.visible>=list.length);
   }
 
+  // Read all Public works in bounded requests. This avoids both the former
+  // 60-work discovery ceiling and the 500-row Remix lineage ceiling, while
+  // keeping the existing full-population sort and substring search semantics.
+  const PAGE_SIZE=200;
+  const TOPIC_FIELDS='id,title,description,language_code,score_scale,weighted,published_at,snapshot_updated_at,snapshot,source_topic_id,show_community,allow_ratings,visibility';
+
+  async function allPublicTopics(){
+    const result=[];
+    const ids=new Set();
+    let offset=0;
+    while(true){
+      const {data,error}=await sb.from('topics')
+        .select(TOPIC_FIELDS)
+        .eq('visibility','public')
+        .order('published_at',{ascending:false,nullsFirst:false})
+        .order('id',{ascending:true})
+        .range(offset,offset+PAGE_SIZE-1);
+      if(error)throw error;
+      const page=data||[];
+      // Defense in depth: never let a non-Public record enter either card
+      // data or popularity/lineage calculations.
+      for(const topic of page){
+        if(topic?.visibility!=='public'||!topic.id||ids.has(topic.id))continue;
+        ids.add(topic.id);
+        result.push(topic);
+      }
+      if(page.length<PAGE_SIZE)break;
+      offset+=PAGE_SIZE;
+    }
+    return result;
+  }
+
   async function participantCounts(topics){
     const map=new Map();
     const batchSize=8;
@@ -353,9 +385,14 @@
       const rows=await Promise.all(batch.map(async topic=>{
         try{
           const {data,error}=await sb.rpc('get_topic_participant_count',{p_topic_id:topic.id});
-          if(error)return [topic.id,0];
+          if(error)throw error;
           return [topic.id,Number(data||0)];
-        }catch{return [topic.id,0]}
+        }catch(error){
+          // Preserve the existing best-effort participant badge behavior
+          // when a per-topic count endpoint is temporarily unavailable.
+          console.warn('[Stats Maker] Discover participant count unavailable',topic.id,error);
+          return [topic.id,0];
+        }
       }));
       rows.forEach(([id,count])=>map.set(id,count));
     }
@@ -373,36 +410,14 @@
 
     try{
       if(!sb)throw new Error('Supabase not ready');
-
-      const [{data:topics,error:topicError},{data:lineageRows,error:lineageError}]=await Promise.all([
-        sb.from('topics')
-          .select('id,title,description,language_code,score_scale,weighted,published_at,snapshot_updated_at,snapshot,source_topic_id,show_community,allow_ratings,visibility')
-          .eq('visibility','public')
-          .order('published_at',{ascending:false})
-          .limit(60),
-        sb.from('topics')
-          .select('id,source_topic_id,snapshot,visibility')
-          .eq('visibility','public')
-          .not('source_topic_id','is',null)
-          .limit(500)
-      ]);
-
-      if(topicError)throw topicError;
-      if(lineageError)console.warn('[Stats Maker] Discover lineage query failed',lineageError);
-
-      // Discover remains strictly Public-only. Unlisted rows never enter state.works.
-      // Defense in depth: never trust a list response's privacy scope solely
-      // because the request included eq('visibility','public').
-      const publicTopics=(topics||[]).filter(topic=>topic?.id&&topic.visibility==='public');
+      const publicTopics=await allPublicTopics();
       const remixCounts=new Map();
-      (lineageRows||[]).forEach(child=>{
-        if(child?.visibility!=='public')return;
+      publicTopics.forEach(child=>{
         if(String(child?.snapshot?.lineage?.relation||'').toLowerCase()!=='remix')return;
         const sourceId=child.source_topic_id;
         if(!sourceId)return;
         remixCounts.set(sourceId,(remixCounts.get(sourceId)||0)+1);
       });
-
       const counts=await participantCounts(publicTopics);
       state.works=publicTopics.map(topic=>({
         ...topic,
@@ -416,6 +431,7 @@
       status.textContent=`${copy.error}\n${error?.message||String(error)}`;
       status.classList.remove('hidden');
       grid.classList.add('hidden');
+      moreBtn.classList.add('hidden');
     }finally{
       state.loading=false;
       refreshBtn.disabled=false;
