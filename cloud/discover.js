@@ -75,7 +75,12 @@
     sort:'newest',
     query:'',
     visible:12,
-    loading:false
+    loading:false,
+    total:0,
+    hasMore:false,
+    offset:0,
+    anchor:null,
+    generation:0
   };
 
   const esc=value=>String(value??'').replace(/[&<>"']/g,ch=>({
@@ -235,33 +240,14 @@
     return out;
   }
 
-  function filteredWorks(){
-    const terms=searchTerms(state.query);
-    let filtered=state.works;
-
-    if(state.view==='community'){
-      filtered=filtered.filter(isCommunityWork);
-    }
-
-    if(state.category!=='all'){
-      filtered=filtered.filter(topic=>categoryOf(topic)===state.category);
-    }
-
-    if(terms.length){
-      filtered=filtered.filter(topic=>{
-        const haystack=searchableText(topic);
-        return terms.every(term=>haystack.includes(term));
-      });
-    }
-
-    return sortWorks(filtered);
-  }
+  // Results are already searched and ranked across ALL Public works by the DB.
+  function filteredWorks(){return state.works;}
 
   function render(){
     const list=filteredWorks();
     const communityView=state.view==='community';
     sectionTitle.textContent=communityView?copy.communityWorks:copy.works;
-    resultMeta.textContent=communityView?copy.communityResult(list.length):copy.result(list.length);
+    resultMeta.textContent=communityView?copy.communityResult(state.total):copy.result(state.total);
 
     const visible=list.slice(0,state.visible);
     if(!visible.length){
@@ -342,115 +328,107 @@
 
     grid.classList.remove('hidden');
     status.classList.add('hidden');
-    moreBtn.classList.toggle('hidden',state.visible>=list.length);
+    moreBtn.classList.toggle('hidden',!state.hasMore);
   }
 
-  // Read all Public works in bounded requests. This avoids both the former
-  // 60-work discovery ceiling and the 500-row Remix lineage ceiling, while
-  // keeping the existing full-population sort and substring search semantics.
-  const PAGE_SIZE=200;
-  const TOPIC_FIELDS='id,title,description,language_code,score_scale,weighted,published_at,snapshot_updated_at,snapshot,source_topic_id,show_community,allow_ratings,visibility';
+  // One network call per 12-card page. The read-only SECURITY INVOKER RPC
+  // searches and ranks the full Public population before applying its limit.
+  const PAGE_SIZE=12;
+  let searchTimer=null;
 
-  async function allPublicTopics(){
-    const result=[];
-    const ids=new Set();
-    let offset=0;
-    while(true){
-      const {data,error}=await sb.from('topics')
-        .select(TOPIC_FIELDS)
-        .eq('visibility','public')
-        .order('published_at',{ascending:false,nullsFirst:false})
-        .order('id',{ascending:true})
-        .range(offset,offset+PAGE_SIZE-1);
-      if(error)throw error;
-      const page=data||[];
-      // Defense in depth: never let a non-Public record enter either card
-      // data or popularity/lineage calculations.
-      for(const topic of page){
-        if(topic?.visibility!=='public'||!topic.id||ids.has(topic.id))continue;
-        ids.add(topic.id);
-        result.push(topic);
-      }
-      if(page.length<PAGE_SIZE)break;
-      offset+=PAGE_SIZE;
-    }
-    return result;
-  }
-
-  async function participantCounts(topics){
-    const map=new Map();
-    const batchSize=8;
-    for(let i=0;i<topics.length;i+=batchSize){
-      const batch=topics.slice(i,i+batchSize);
-      const rows=await Promise.all(batch.map(async topic=>{
-        try{
-          const {data,error}=await sb.rpc('get_topic_participant_count',{p_topic_id:topic.id});
-          if(error)throw error;
-          return [topic.id,Number(data||0)];
-        }catch(error){
-          // Preserve the existing best-effort participant badge behavior
-          // when a per-topic count endpoint is temporarily unavailable.
-          console.warn('[Stats Maker] Discover participant count unavailable',topic.id,error);
-          return [topic.id,0];
-        }
-      }));
-      rows.forEach(([id,count])=>map.set(id,count));
-    }
-    return map;
-  }
-
-  async function load(){
-    if(state.loading)return;
+  async function load(more=false,generation=state.generation){
+    if(more&&(state.loading||!state.hasMore))return;
+    if(generation!==state.generation)return;
     state.loading=true;
     refreshBtn.disabled=true;
-    status.textContent=copy.loading;
-    status.classList.remove('hidden');
-    grid.classList.add('hidden');
-    moreBtn.classList.add('hidden');
-
-    try{
-      if(!sb)throw new Error('Supabase not ready');
-      const publicTopics=await allPublicTopics();
-      const remixCounts=new Map();
-      publicTopics.forEach(child=>{
-        if(String(child?.snapshot?.lineage?.relation||'').toLowerCase()!=='remix')return;
-        const sourceId=child.source_topic_id;
-        if(!sourceId)return;
-        remixCounts.set(sourceId,(remixCounts.get(sourceId)||0)+1);
-      });
-      const counts=await participantCounts(publicTopics);
-      state.works=publicTopics.map(topic=>({
-        ...topic,
-        participants:counts.get(topic.id)||0,
-        remixCount:remixCounts.get(topic.id)||0
-      }));
-      state.visible=12;
-      render();
-    }catch(error){
-      console.error('[Stats Maker] Discover load failed',error);
-      status.textContent=`${copy.error}\n${error?.message||String(error)}`;
+    moreBtn.disabled=true;
+    if(!more){
+      state.works=[];
+      state.total=0;
+      state.offset=0;
+      state.anchor=null;
+      state.hasMore=false;
+      status.textContent=copy.loading;
       status.classList.remove('hidden');
       grid.classList.add('hidden');
       moreBtn.classList.add('hidden');
-    }finally{
-      state.loading=false;
-      refreshBtn.disabled=false;
     }
+    try{
+      if(!sb)throw new Error('Supabase not ready');
+      const {data,error}=await sb.rpc('discover_public_works_v1',{
+        p_query:state.query,
+        p_category:state.category,
+        p_view:state.view,
+        p_sort:state.sort,
+        p_locale:locale,
+        p_offset:state.offset,
+        p_limit:PAGE_SIZE,
+        p_anchor:state.anchor
+      });
+      if(generation!==state.generation)return;
+      if(error)throw error;
+      if(!data||!Array.isArray(data.rows)||!Number.isFinite(Number(data.total))||
+          !Number.isInteger(Number(data.total))||Number(data.total)<0||
+          data.rows.length>PAGE_SIZE||typeof data.has_more!=='boolean'||
+          !data.anchor)throw new Error('Invalid Discover response');
+      // Even a compromised / misconfigured response cannot leak non-Public data.
+      if(data.rows.some(topic=>!topic?.id||topic.visibility!=='public')){
+        throw new Error('Discover received a non-Public record');
+      }
+      const known=new Set(state.works.map(topic=>topic.id));
+      const unique=data.rows.filter(topic=>{
+        if(known.has(topic.id))return false;
+        known.add(topic.id);
+        return true;
+      });
+      state.works=more?state.works.concat(unique):unique;
+      state.offset+=data.rows.length;
+      state.total=Number(data.total);
+      state.anchor=data.anchor;
+      state.hasMore=data.has_more&&data.rows.length>0;
+      state.visible=state.works.length;
+      render();
+    }catch(error){
+      if(generation!==state.generation)return;
+      console.error('[Stats Maker] Discover load failed',error);
+      status.textContent=copy.error;
+      status.classList.remove('hidden');
+      if(!more){
+        grid.classList.add('hidden');
+        moreBtn.classList.add('hidden');
+      }else{
+        grid.classList.remove('hidden');
+        moreBtn.classList.toggle('hidden',!state.hasMore);
+      }
+    }finally{
+      if(generation===state.generation){
+        state.loading=false;
+        refreshBtn.disabled=false;
+        moreBtn.disabled=false;
+      }
+    }
+  }
+
+  function reload(delay=0){
+    clearTimeout(searchTimer);
+    // Switch tab headings immediately even before the network response.
+    sectionTitle.textContent=state.view==='community'?copy.communityWorks:copy.works;
+    const generation=++state.generation;
+    if(delay)searchTimer=setTimeout(()=>load(false,generation),delay);
+    else void load(false,generation);
   }
 
   searchInput.addEventListener('input',()=>{
     state.query=searchInput.value;
-    state.visible=12;
-    render();
+    reload(250);
   });
 
   document.querySelectorAll('.browseTab').forEach(button=>{
     button.addEventListener('click',()=>{
       state.view=button.dataset.view==='community'?'community':'all';
       window.SM_ANALYTICS?.event('discover_filter',{filter_type:state.view});
-      state.visible=12;
       document.querySelectorAll('.browseTab').forEach(btn=>btn.classList.toggle('active',btn===button));
-      render();
+      reload();
     });
   });
 
@@ -459,27 +437,22 @@
       const requested=button.dataset.category||'all';
       state.category=categories.includes(requested)?requested:'all';
       window.SM_ANALYTICS?.event('discover_filter',{filter_type:'category'});
-      state.visible=12;
       document.querySelectorAll('.categoryBtn').forEach(btn=>btn.classList.toggle('active',btn===button));
-      render();
+      reload();
     });
   });
 
   document.querySelectorAll('.sortBtn').forEach(button=>{
     button.addEventListener('click',()=>{
       state.sort=button.dataset.sort||'newest';
-      state.visible=12;
       document.querySelectorAll('.sortBtn').forEach(btn=>btn.classList.toggle('active',btn===button));
-      render();
+      reload();
     });
   });
 
-  moreBtn.addEventListener('click',()=>{
-    state.visible+=12;
-    render();
-  });
-  refreshBtn.addEventListener('click',load);
+  moreBtn.addEventListener('click',()=>{void load(true);});
+  refreshBtn.addEventListener('click',()=>reload());
 
   setCopy();
-  await load();
+  reload();
 })();
