@@ -26,12 +26,12 @@ try{
   // old cache version, so actual visitors loaded stale CSS despite passing
   // isolated tests with an empty browser cache.
   const iframeSource=await page.locator('#basicFrame').getAttribute('src');
-  assert(iframeSource?.includes('base/index.html?v=r38p14toggle1'),
+  assert(iframeSource?.includes('base/index.html?v=r38p15scores1'),
     'Home iframe document still uses a stale cache key');
   const home=page.frameLocator('#basicFrame');
   await home.locator('#titleInput').waitFor({state:'visible',timeout:30000});
   const cssSource=await home.locator('link[href^="css/style.css"]').getAttribute('href');
-  assert.equal(cssSource,'css/style.css?v=r38p14toggle1',
+  assert.equal(cssSource,'css/style.css?v=r38p15scores1',
     'Home document still references cached old score-cell CSS');
   await home.locator('#scoreTable .scoreInput').first().waitFor({state:'visible'});
   await home.locator('#scoreSettingsBtn').click();
@@ -196,6 +196,8 @@ try{
   // R38 P14: screenshot-matched palette is default ON. A single toggle next
   // to the "All" grade filter neutralizes table/average/fit/overview displays
   // without touching score values, grade classes or the sheet's stored JSON.
+  assert.equal(await home.locator('#gradeFilter').count(),0,'retired All dropdown must be removed');
+  assert.equal(await home.locator('#filterCount').count(),0,'retired row count must be removed');
   const toggle=home.locator('#scoreColorToggleBtn');
   await toggle.waitFor({state:'visible'});
   assert.equal(await toggle.getAttribute('aria-pressed'),'true');
@@ -229,14 +231,14 @@ try{
   for(const width of [1365,390,320]){
     await page.setViewportSize({width,height:844});
     const geometry=await home.locator('.filterBar').evaluate(el=>{
-      const select=el.querySelector('#gradeFilter').getBoundingClientRect();
+      const search=el.querySelector('#searchInput').getBoundingClientRect();
       const toggle=el.querySelector('#scoreColorToggleBtn').getBoundingClientRect();
       const container=el.getBoundingClientRect();
-      return {selectRight:select.right,toggleLeft:toggle.left,toggleRight:toggle.right,
+      return {searchRight:search.right,toggleLeft:toggle.left,toggleRight:toggle.right,
         filterRight:container.right,buttonHeight:toggle.height};
     });
-    assert(geometry.toggleLeft>=geometry.selectRight-1,
-      'Color switch must stay to the right of All filter at '+width);
+    assert(geometry.toggleLeft>=geometry.searchRight-1,
+      'Color switch must stay to the right of search at '+width);
     assert(geometry.toggleRight<=geometry.filterRight+1 && geometry.buttonHeight>=30,
       'Color switch exceeds filter row or is too short at '+width);
     await toggle.click();

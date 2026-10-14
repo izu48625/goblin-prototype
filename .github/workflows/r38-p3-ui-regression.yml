@@ -4,6 +4,9 @@ on:
     paths:
       - "base/**"
       - "cloud/global-locale.*"
+      - "cloud/public.js"
+      - "cloud/public.css"
+      - "public.html"
       - "index.html"
       - "discover.html"
       - "my.html"
@@ -14,12 +17,16 @@ on:
       - "en/**"
       - "scripts/r38-p3-ui-regression-qa.mjs"
       - "scripts/r38-p6-scale-mode-qa.mjs"
+      - "scripts/r38-p15-public-score-qa.mjs"
       - ".github/workflows/r38-p3-ui-regression.yml"
   push:
     branches: [main]
     paths:
       - "base/**"
       - "cloud/global-locale.*"
+      - "cloud/public.js"
+      - "cloud/public.css"
+      - "public.html"
       - "index.html"
       - "discover.html"
       - "my.html"
@@ -30,6 +37,7 @@ on:
       - "en/**"
       - "scripts/r38-p3-ui-regression-qa.mjs"
       - "scripts/r38-p6-scale-mode-qa.mjs"
+      - "scripts/r38-p15-public-score-qa.mjs"
       - ".github/workflows/r38-p3-ui-regression.yml"
   workflow_dispatch:
 permissions:
@@ -50,6 +58,8 @@ jobs:
           node --check cloud/global-locale.js
           node --check scripts/r38-p3-ui-regression-qa.mjs
           node --check scripts/r38-p6-scale-mode-qa.mjs
+          node --check cloud/public.js
+          node --check scripts/r38-p15-public-score-qa.mjs
           npm run build:cloudflare
       - name: Install isolated browser
         run: |
@@ -71,3 +81,5 @@ jobs:
           BROWSER_ENGINE=webkit node scripts/r38-p3-ui-regression-qa.mjs
           node scripts/r38-p6-scale-mode-qa.mjs
           BROWSER_ENGINE=webkit node scripts/r38-p6-scale-mode-qa.mjs
+          node scripts/r38-p15-public-score-qa.mjs
+          BROWSER_ENGINE=webkit node scripts/r38-p15-public-score-qa.mjs

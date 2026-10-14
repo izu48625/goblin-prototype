@@ -207,3 +207,49 @@ a{color:inherit}
 
 /* R35 P2: legal contact links retain compact visitor footer. */
 .footerLinks{flex-wrap:wrap}
+
+/* R38 P15: readable published score cards on small screens. The original
+   desktop table and exact row/criterion order are preserved. */
+.publicScoreCards{display:none}
+@media(max-width:760px){
+  .creatorScoreTable{display:none}
+  .publicScoreCards{display:grid;grid-template-columns:minmax(0,1fr);gap:11px}
+  .publicScoreCard{
+    min-width:0;padding:13px;
+    border:1px solid #355171;border-radius:12px;
+    background:#0c1a2d;
+  }
+  .publicScoreCardHeader{
+    display:flex;align-items:center;justify-content:space-between;
+    gap:10px;min-width:0;
+    padding-bottom:11px;margin-bottom:10px;
+    border-bottom:1px solid #2b425f;
+  }
+  .publicScoreCard h3{
+    min-width:0;overflow-wrap:anywhere;
+    margin:0;font-size:15px;line-height:1.45;font-weight:900;color:#ecf4ff;
+  }
+  .publicScoreCardAvg{
+    flex:0 0 auto;min-width:74px;padding:7px 9px;
+    border-radius:9px;border:1px solid #3e5b85;
+    background:#152b47;text-align:center;
+    display:grid;gap:2px;
+  }
+  .publicScoreCardAvg span{font-size:10px;color:#a0b8da;font-weight:800}
+  .publicScoreCardAvg strong{font-size:19px;line-height:1.2;color:#dceaff;font-weight:950;font-variant-numeric:tabular-nums}
+  .publicScoreCardMetrics{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px;margin:0;padding:0}
+  .publicMetricPair{
+    min-width:0;min-height:66px;
+    display:flex;flex-direction:column;justify-content:space-between;
+    gap:7px;padding:10px;
+    border:1px solid #2a4161;border-radius:9px;background:#101f34;
+  }
+  .publicMetricLabel{min-width:0;margin:0;font-size:11px;line-height:1.35;font-weight:750;color:#b2c8e3;overflow-wrap:anywhere}
+  .publicMetricNumber{margin:0;text-align:right;font-size:19px;line-height:1.2;font-weight:950;color:#f5f8ff;font-variant-numeric:tabular-nums}
+  .publicMetricNumber.na{color:#67809e}
+}
+@media(max-width:330px){
+  .publicScoreCardMetrics{grid-template-columns:minmax(0,1fr)}
+  .publicScoreCard{padding:10px}
+  .publicScoreCardHeader{gap:6px}
+}

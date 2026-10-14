@@ -5,6 +5,9 @@ on:
       - "index.html"
       - "base/index.html"
       - "base/css/style.css"
+      - "cloud/public.css"
+      - "cloud/public.js"
+      - "public.html"
       - "scripts/r38-p4-live-palette-qa.mjs"
       - ".github/workflows/r38-p4-live-palette.yml"
   push:
@@ -13,6 +16,9 @@ on:
       - "index.html"
       - "base/index.html"
       - "base/css/style.css"
+      - "cloud/public.css"
+      - "cloud/public.js"
+      - "public.html"
       - "scripts/r38-p4-live-palette-qa.mjs"
       - ".github/workflows/r38-p4-live-palette.yml"
   workflow_dispatch:
@@ -32,9 +38,11 @@ jobs:
           node --check scripts/r38-p4-live-palette-qa.mjs
           node scripts/r38-p4-live-palette-qa.mjs
           npm run build:cloudflare
-          grep -q 'base/index.html?v=r38p14toggle1' dist/index.html
-          grep -q 'css/style.css?v=r38p14toggle1' dist/base/index.html
-          grep -q 'js/i18n.js?v=r38p14toggle1' dist/base/index.html
+          grep -q 'base/index.html?v=r38p15scores1' dist/index.html
+          grep -q 'css/style.css?v=r38p15scores1' dist/base/index.html
+          grep -q 'js/i18n.js?v=r38p15scores1' dist/base/index.html
+          grep -q 'cloud/public.css?v=r38p15scores1' dist/public.html
+          grep -q 'cloud/public.js?v=r38p15scores1' dist/public.html
   deployed-chain:
     if: github.event_name != 'pull_request'
     needs: source-chain
