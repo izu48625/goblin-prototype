@@ -13,8 +13,11 @@ create or replace function private.refresh_discover_counter(p_topic_id uuid)
 returns void language plpgsql security definer set search_path='' as $$
 begin
   if p_topic_id is null then return; end if;
-  -- Serialize recalculations for the same topic to avoid stale overlapping writes.
-  perform pg_catalog.pg_advisory_xact_lock(pg_catalog.hashtextextended(p_topic_id::text, 7041));
+  -- Serialize on the parent row, rather than taking opaque advisory locks
+  -- that can create avoidable cross-topic deadlock cycles.
+  -- This also coordinates with concurrent topic updates and deletes.
+  perform 1 from public.topics where id=p_topic_id for update;
+  if not found then return; end if;
   if not exists(select 1 from public.topics where id=p_topic_id) then
     delete from private.discover_counters where topic_id=p_topic_id;
     return;
