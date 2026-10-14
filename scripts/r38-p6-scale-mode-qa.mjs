@@ -50,8 +50,8 @@ try{
   const after=await score();
   assert.deepEqual(after.map(x=>x.value),sample.map(String));
   assert.deepEqual(after.map(x=>x.grade),['heat-a','heat-a','heat-c','heat-e']);
-  const tints=['rgba(94, 116, 35, 0.48)','rgba(94, 116, 35, 0.48)',
-    'rgba(45, 100, 156, 0.34)','rgba(71, 87, 114, 0.17)'];
+  const tints=['rgba(110, 99, 57, 0.32)','rgba(110, 99, 57, 0.32)',
+    'rgba(39, 72, 103, 0.31)','rgba(31, 47, 53, 0.2)'];
   assert(after.every((entry,i)=>entry.color===tints[i]),
     'Score rebase lost a translucent overlay tint');
   const active=await home.locator('body').evaluate(()=>window.__statsMakerGetActiveSheet());
