@@ -353,35 +353,9 @@
     const metricChips=criteria.map(c=>`<span class="${weighted?'weightedMetric':''}">${esc(c.name)}${weighted?`<small>×${fmt(c.weight??1)}</small>`:''}</span>`).join('');
     const tableHead=criteria.map(c=>`<th>${esc(c.name)}</th>`).join('');
     const tableRows=rows.map(row=>{const scores=Array.isArray(row.scores)?row.scores:[];const av=average(scores,criteria,weighted);return `<tr><td>${esc(row.name)}</td>${criteria.map((_,i)=>{const n=num(scores[i]);return `<td class="${n===null?'na':'score'}">${n===null?'—':fmt(n)}</td>`}).join('')}<td class="avg">${av===null?'—':fmt(av)}</td></tr>`}).join('');
-    // R38 P15: on narrow screens the desktop matrix hides metrics off-screen.
-    // A second, semantic target-card view makes EVERY metric name/score/average
-    // readable without horizontal swiping. It uses exactly the same snapshot
-    // and average() computation as the desktop table, including 10/100 scales
-    // and weighted scores. No cloud data or output PNG logic is changed.
-    const mobileCreatorScores=rows.map((row,index)=>{
-      const scores=Array.isArray(row.scores)?row.scores:[];
-      const av=average(scores,criteria,weighted);
-      const targetName=String(row.name||`${ja?'対象':'Target'} ${index+1}`);
-      const metrics=criteria.map((criterion,i)=>{
-        const value=num(scores[i]);
-        const metricName=String(criterion.name||`${ja?'評価':'Metric'} ${i+1}`);
-        return `<div class="publicMetricPair">
-          <dt class="publicMetricLabel">${esc(metricName)}</dt>
-          <dd class="publicMetricNumber ${value===null?'na':''}">${value===null?'—':fmt(value)}</dd>
-        </div>`;
-      }).join('');
-      return `<section class="publicScoreCard" aria-label="${esc(targetName)}">
-        <div class="publicScoreCardHeader">
-          <h3>${esc(targetName)}</h3>
-          <div class="publicScoreCardAvg">
-            <span>${ja?'平均':'Average'}</span>
-            <strong>${av===null?'—':fmt(av)}</strong>
-          </div>
-        </div>
-        <dl class="publicScoreCardMetrics">${metrics}</dl>
-      </section>`;
-    }).join('');
-
+    // R38 P16: preserve the single original horizontal scroll matrix on every
+    // viewport. Compact mobile columns are controlled only by CSS, not by
+    // changing displayed source data, order, or average calculations.
 
     content.innerHTML=`
       <section class="hero">
@@ -449,8 +423,7 @@
       <div class="grid">
         <section class="card">
           <div class="cardTitleRow"><h2>${ja?'作成者の公開スコア':'Creator Scores'}</h2><span class="smallBadge">${rows.length} × ${criteria.length}</span></div>
-          <div class="tableWrap creatorScoreTable"><table><thead><tr><th>${ja?'対象':'Target'}</th>${tableHead}<th>${ja?'平均':'Average'}</th></tr></thead><tbody>${tableRows}</tbody></table></div>
-          <div class="publicScoreCards" aria-label="${ja?'作成者の公開スコア一覧':'Creator score cards'}">${mobileCreatorScores}</div>
+          <div class="tableWrap creatorScoreTable" role="region" tabindex="0" aria-label="${ja?'作成者の公開スコア：左右スクロール可能':'Creator scores: scroll horizontally'}"><table><thead><tr><th>${ja?'対象':'Target'}</th>${tableHead}<th>${ja?'平均':'Average'}</th></tr></thead><tbody>${tableRows}</tbody></table></div>
         </section>
         <aside>
           <section class="card">
