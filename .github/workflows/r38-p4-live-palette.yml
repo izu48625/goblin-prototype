@@ -41,8 +41,8 @@ jobs:
           grep -q 'base/index.html?v=r38p15scores1' dist/index.html
           grep -q 'css/style.css?v=r38p15scores1' dist/base/index.html
           grep -q 'js/i18n.js?v=r38p15scores1' dist/base/index.html
-          grep -q 'cloud/public.css?v=r38p15scores1' dist/public.html
-          grep -q 'cloud/public.js?v=r38p15scores1' dist/public.html
+          grep -q 'cloud/public.css?v=r38p16compact1' dist/public.html
+          grep -q 'cloud/public.js?v=r38p16compact1' dist/public.html
   deployed-chain:
     if: github.event_name != 'pull_request'
     needs: source-chain
