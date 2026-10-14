@@ -200,7 +200,11 @@ try{
   await toggle.waitFor({state:'visible'});
   assert.equal(await toggle.getAttribute('aria-pressed'),'true');
   assert.equal(await toggle.innerText(),'色 ON');
-  const stateBefore=await home.locator('body').evaluate(()=>JSON.stringify(window.__statsMakerGetActiveSheet()));
+  const stateBefore=await home.locator('body').evaluate(()=>{
+    const sheet=window.__statsMakerGetActiveSheet();
+    delete sheet.updatedAt; // pending pre-existing autosave may legitimately refresh it
+    return JSON.stringify(sheet);
+  });
   const checkColor=async(expected)=>{
     return home.locator('body').evaluate(()=>{
       const selectors=[
@@ -243,7 +247,11 @@ try{
     const off=await checkColor();
     assert(off.every(x=>x.color==='rgb(16, 27, 48)'),
       'OFF must neutralize normal/average/fit/overview tile backgrounds: '+JSON.stringify(off));
-    const stillSame=await home.locator('body').evaluate(()=>JSON.stringify(window.__statsMakerGetActiveSheet()));
+    const stillSame=await home.locator('body').evaluate(()=>{
+      const sheet=window.__statsMakerGetActiveSheet();
+      delete sheet.updatedAt;
+      return JSON.stringify(sheet);
+    });
     assert.equal(stillSame,stateBefore,'Color visibility toggle mutated scores or sheet metadata');
     await toggle.click();
     await page.waitForTimeout(220); // measure the finished tint, not its transition frame
