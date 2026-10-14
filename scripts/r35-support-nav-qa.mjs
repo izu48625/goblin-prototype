@@ -6,7 +6,7 @@ const BASE=process.env.BASE_URL||'http://127.0.0.1:8765';
 const read=p=>readFile(new URL('../'+p,import.meta.url),'utf8');
 const [js,css,roadmap,ja,en]=await Promise.all([
   'cloud/global-locale.js','cloud/global-locale.css','ROADMAP_R31_PLUS.md','ja/legal.html','en/legal.html'].map(read));
-assert(js.includes('globalSupportMenu')&&js.includes('data-global-support'));
+assert(js.includes('globalSupportMenu')&&js.includes('data-global-support')&&js.includes('data-global-guide'));
 assert(css.includes('.globalSupportPanel'));
 assert(roadmap.includes('R35 P3'));
 for(const page of [ja,en])for(const anchor of ['terms','privacy','contact'])assert(page.includes('id="'+anchor+'"'));
@@ -49,6 +49,15 @@ try{
         assert(measured.barHeight>=40&&measured.barHeight<=52,'Navbar height changed '+JSON.stringify(measured));
         await bar.locator('.globalSupportMenu summary').click();
         assert.equal(await bar.locator('.globalSupportMenu').getAttribute('open'),'','Help menu did not open on '+path);
+        for(const [kind,slug] of [['chart','chart-guide.html'],['png','png-guide.html']]){
+          const link=bar.locator('[data-global-guide="'+kind+'"]');
+          assert(await link.isVisible(),'Guide '+kind+' link missing on '+path);
+          const destination=new URL(await link.getAttribute('href'));
+          assert.equal(destination.pathname,'/'+lang+'/'+slug);
+          const bounds=await link.boundingBox();
+          assert(bounds&&bounds.x>=-1&&bounds.x+bounds.width<=width+1,
+            'Guide '+kind+' not visible on '+width+'px phone: '+JSON.stringify(bounds));
+        }
         for(const section of ['terms','privacy','contact']){
           const link=bar.locator('[data-global-support="'+section+'"]');
           assert(await link.isVisible(),section+' link hidden on '+path);
@@ -59,6 +68,14 @@ try{
         await page.keyboard.press('Escape');
         assert.equal(await bar.locator('.globalSupportMenu').getAttribute('open'),null);
         console.log('R35 support navbar PASS',width,lang,path);
+      }
+      // Real Home -> Help -> guide navigation without going via the About page.
+      for(const [kind,slug] of [['chart','chart-guide.html'],['png','png-guide.html']]){
+        await page.goto(BASE+'/index.html',{waitUntil:'domcontentloaded'});
+        await page.locator('.globalSupportMenu summary').click();
+        await page.locator('[data-global-guide="'+kind+'"]').click();
+        await page.waitForURL(url=>url.pathname==='/'+lang+'/'+slug);
+        assert.equal(await page.locator('main h1').count(),1,'Guide landing inaccessible: '+slug);
       }
       await page.goto(BASE+'/'+lang+'/',{waitUntil:'domcontentloaded'});
       await page.locator('.globalSupportMenu summary').click();
