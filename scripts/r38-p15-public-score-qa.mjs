@@ -89,7 +89,7 @@ try{
       assert.equal(layout.overflowing,0,'score metric content clipped inside card');
       const first=page.locator('.publicScoreCard').first();
       assert.equal((await first.locator('.publicMetricNumber').allTextContents()).length,cols);
-      assert.equal(await first.locator('.publicMetricNumber').first().innerText(),'10');
+      assert.equal(await first.locator('.publicMetricNumber').first().innerText(),cols===4?'10':'0');
       assert.equal(await first.locator('.publicScoreCardAvg strong').innerText(),
         cols===4?'8.5':'4.5');
     }else{
