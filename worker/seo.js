@@ -62,7 +62,7 @@ export async function publicWorkHtml(id){
   const titleText=title+' | Stats Maker';
   const intro=en?'Public rating sheet':'公開評価・比較シート';
   const open=en?'Explore ratings and rankings':'評価結果・ランキングを見る';
-  const make=en?'Create your own charts for free':'自分でも無料でグラフを作る';
+  const make=en?'Create your own charts':'自分のグラフを作る';
   const itemLabel=en?'Compared items':'比較対象';
   const metricLabel=en?'Rating criteria':'評価項目';
   const listHtml=items=>items.map(item=>'<li>'+esc(item)+'</li>').join('');
@@ -91,7 +91,7 @@ export async function publicWorkHtml(id){
     '<div class="actions"><a href="'+viewer+'">'+open+'</a><a class="secondary" href="'+ORIGIN+(en?'/en/':'/ja/')+'">'+make+'</a></div>'+
     (list.length?'<section><h2>'+itemLabel+'</h2><ul>'+listHtml(list)+'</ul></section>':'')+
     (metrics.length?'<section><h2>'+metricLabel+'</h2><ul>'+listHtml(metrics)+'</ul></section>':'')+
-    '</main><footer>Stats Maker — '+(en?'Free charts, comparisons and ratings':'無料でグラフ・評価・比較')+
+    '</main><footer>Stats Maker — '+(en?'Charts, comparisons and ratings':'グラフ・評価・比較')+
     ' · <a href="'+viewer+'">'+open+'</a>'+
     ' · <a href="'+ORIGIN+(en?'/en/legal.html#terms':'/ja/legal.html#terms')+'">'+(en?'Terms':'利用規約')+'</a>'+
     ' · <a href="'+ORIGIN+(en?'/en/legal.html#privacy':'/ja/legal.html#privacy')+'">'+(en?'Privacy':'プライバシー')+'</a>'+
