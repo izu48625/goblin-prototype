@@ -236,6 +236,7 @@ try{
     assert(geometry.toggleRight<=geometry.filterRight+1 && geometry.buttonHeight>=30,
       'Color switch exceeds filter row or is too short at '+width);
     await toggle.click();
+    await page.waitForTimeout(220); // original scoreCell has a 120ms background transition
     assert.equal(await toggle.innerText(),'色 OFF');
     assert.equal(await toggle.getAttribute('aria-pressed'),'false');
     assert(await home.locator('body').evaluate(el=>el.classList.contains('score-colors-off')));
@@ -245,6 +246,7 @@ try{
     const stillSame=await home.locator('body').evaluate(()=>JSON.stringify(window.__statsMakerGetActiveSheet()));
     assert.equal(stillSame,stateBefore,'Color visibility toggle mutated scores or sheet metadata');
     await toggle.click();
+    await page.waitForTimeout(220); // measure the finished tint, not its transition frame
     assert.equal(await toggle.innerText(),'色 ON');
     assert.equal(await toggle.getAttribute('aria-pressed'),'true');
     assert.deepEqual((await checkColor()).map(x=>x.color),
