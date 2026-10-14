@@ -23,8 +23,9 @@ assert(publicDoc.includes('cloud/public.js?v='+KEY), 'published JS not cache bus
 assert(publicCss.includes('.publicScoreCardMetrics'), 'responsive public score cards missing');
 assert(publicJS.includes('class="publicScoreCards"'), 'responsive public score cards not rendered');
 const liveQa=await readFile(new URL('../scripts/r38-p4-live-palette-qa.mjs',import.meta.url),'utf8');
-assert(!liveQa.includes("' +base"),'live QA references undefined base variable');
-assert(!liveQa.includes("'+base"),'live QA references undefined base variable');
+const liveRuntime=liveQa.slice(liveQa.lastIndexOf('for(const host of hosts){'));
+assert(!liveRuntime.includes("' +base"),'live QA references undefined base variable');
+assert(!liveRuntime.includes("'+base"),'live QA references undefined base variable');
 assert(homeDoc.includes('js/i18n.js?v='+KEY), 'toggle label translation cache stale');
 const appJS=await readFile(new URL('../base/js/app.js',import.meta.url),'utf8');
 assert(appJS.includes("COLOR_PREF_KEY='statsMaker.scoreColorsVisible.v1'"), 'display preference not implemented');
