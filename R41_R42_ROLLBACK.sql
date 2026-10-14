@@ -129,6 +129,11 @@ select pg_catalog.jsonb_build_object(
 $function$;
 
 
+-- R43 / R42: restore original R40 RPC first, then remove dependencies.
+drop function if exists public.discover_public_cards_by_ids_v1(uuid[],text,timestamptz);
+drop index if exists public.topics_discover_search_ja_trgm_idx;
+drop index if exists public.topics_discover_search_en_trgm_idx;
+drop function if exists public.discover_search_blob_v1(text,text,jsonb,text);
 -- R41 standalone reader rollback; shared participant function untouched.
 drop function if exists public.discover_public_participant_count_v1(uuid);
 drop function if exists public.discover_public_remix_count_v1(uuid);
