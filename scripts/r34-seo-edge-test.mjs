@@ -23,9 +23,9 @@ for(const [html,lang] of [[en,'en'],[ja,'ja']]){
   assert(html.includes('href="../discover.html?lang='+lang+'"'));
   assert(html.includes('name="description"'));
 }
-assert(en.includes('Free Chart Maker'), 'English search title missing');
+assert(en.includes('Chart Maker for Radar'), 'English chart-maker search title missing');
 assert(en.includes('anime')||en.includes('Anime'), 'English topic coverage missing');
-assert(ja.includes('無料グラフ'));
+assert(ja.includes('グラフ作成・能力比較'));
 assert(root.includes("localStorage.setItem('statsMaker.locale',language)"));
 assert(discover.includes('rating charts'));
 assert(robot.includes('Sitemap: https://statsmaker.app/sitemap.xml'));

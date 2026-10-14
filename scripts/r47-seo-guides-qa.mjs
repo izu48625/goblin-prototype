@@ -6,6 +6,17 @@ const text=path=>readFile(new URL('../'+path,import.meta.url),'utf8');
 const slugs=['chart-guide.html','png-guide.html'];
 const urls=slugs.flatMap(slug=>['ja','en'].map(lang=>'/'+lang+'/'+slug));
 const docs=[];
+const marketingPages=['index.html','discover.html',
+  ...['ja','en'].flatMap(lang=>['index.html','chart-guide.html','png-guide.html'].map(page=>lang+'/'+page))];
+for(const path of marketingPages){
+  const html=await text(path);
+  assert(!/(無料|架空|\\bfree\\b|\\bfictional\\b|\\bimaginary\\b|\\binvented\\b)/i.test(html),
+    'Avoid unwanted promotional wording or repetitive sample labels on '+path);
+}
+const sourceSeo=await text('worker/seo.js');
+assert(!/(自分でも無料|無料でグラフ|\\bfree charts\\b|charts for free)/i.test(sourceSeo),
+  'Public work SSR should not add pushy sales language');
+
 for(const lang of ['ja','en']){
   const home=await text(lang+'/index.html');
   // A coherent, genuinely localized search snippet must match the visible
@@ -56,9 +67,9 @@ for(const lang of ['ja','en']){
         path+' both examples must be linkable');
       assert(html.includes('href="/index.html?lang='+lang+'"'),
         path+' users need a route into the real scoring sheet');
-      assert(lang==='ja'?html.includes('架空のゲームキャラクター')&&html.includes('架空の選手'):
-        html.includes('fictional game characters')&&html.includes('fictional athletes'),
-        path+' examples must be identified as fictional');
+      assert(lang==='ja'?html.includes('サンプルのキャラクター')&&html.includes('サンプルスコア'):
+        html.includes('sample game characters')&&html.includes('sample comparison'),
+        path+' demonstration scores must be clearly marked as samples');
       assert(!/seodata\.dev|trenzhub|246,000|33,100/.test(html),
         'Market volume estimates must not appear in the guide');
     }
