@@ -411,6 +411,8 @@
 
   function reload(delay=0){
     clearTimeout(searchTimer);
+    // Switch tab headings immediately even before the network response.
+    sectionTitle.textContent=state.view==='community'?copy.communityWorks:copy.works;
     const generation=++state.generation;
     if(delay)searchTimer=setTimeout(()=>load(false,generation),delay);
     else void load(false,generation);
