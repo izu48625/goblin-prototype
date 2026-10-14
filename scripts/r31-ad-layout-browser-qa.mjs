@@ -66,6 +66,9 @@ try{
         'Finished graph sharing candidate must be inside export preview dialog');
     }
     if(item.label==='Graph editor'){
+      // Wait until the editor's async module has loaded its local project and
+      // attached mobile-tab handlers, not merely until ad-preview DOM exists.
+      await page.waitForFunction(()=>document.querySelector('#projectTitleInput')?.value==='R31 AD LAYOUT LOCAL QA',null,{timeout:20000});
       assert.equal(await page.locator('[data-sm-slot="editor-top"]').isVisible(),true,
         'Editor top preview placement should be visible immediately');
       // Editor's mobile settings sheet intentionally stays closed by default.

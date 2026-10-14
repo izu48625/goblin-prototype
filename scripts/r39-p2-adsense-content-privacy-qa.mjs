@@ -32,8 +32,10 @@ assert(jaIntro.includes('架空データ')&&enIntro.includes('fictional examples
 assert(jaIntro.includes('攻撃8・守備6・連携7')&&enIntro.includes('scores 8, 6, and 7'),
   'Original scoring guide must include concrete useful example');
 assert(jaIntro.includes('実際の統計')&&enIntro.includes('factual statistics'));
-assert(analytics.includes('enabled:false')&&analytics.includes("measurementId:''"),
-  'GA4 must stay disabled until owner grants explicit approval');
+assert(analytics.includes('enabled:true')&&analytics.includes("measurementId:'G-ZT8N1BVEL8'"),
+  'Owner-approved GA4 opt-in setup must be present');
+assert(jaLegal.includes('同意した場合だけ読み込み')&&enLegal.includes('explicitly accepts optional analytics'),
+  'GA4 policy must describe consent gate');
 assert(ads.includes("get('adPreview')==='1'"),
   'Only development preview ads may be displayed before account approval');
 const isPlaceholderTitle=title=>/^(?:新しいお題|untitled|new topic|new sheet|無題)(?:\s*\d+)?$/i.test(title);

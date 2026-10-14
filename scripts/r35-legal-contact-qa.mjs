@@ -41,7 +41,7 @@ const [remix,analytics,ads,publishModel]=await Promise.all([
 assert(ja.includes('制定：2026年10月11日')&&en.includes('Effective: October 11, 2026'));
 for(const [language,page,requirements] of [
   ['ja',ja,['無料で使える範囲','コピーして採点する（Remix）','準拠法・紛争対応','運営者と窓口','安全管理','海外からの利用','Cloudflare','Supabase','jsDelivr']],
-  ['en',en,['Free features','Copy &amp; rate (Remix)','Governing law and disputes','Operator and requests','Security','International users','Cloudflare','Supabase','jsDelivr']]
+  ['en',en,['Free features','Copy &amp; rate (Remix)','Governing law and disputes','Operator and requests','Security','international users','Cloudflare','Supabase','jsDelivr']]
 ]){
  for(const phrase of requirements)assert(page.includes(phrase),language+': policy missing '+phrase);
  assert.equal((page.match(/id="legalContactForm"/g)||[]).length,1,'Contact form must not duplicate');
@@ -50,7 +50,8 @@ for(const [language,page,requirements] of [
 assert(remix.includes('scores:Array(cols.length).fill(null)'),'Remix must start without source scores');
 assert(remix.includes('sourceTopicId:topic.id'),'Remix source attribution must be retained');
 assert(publishModel.includes("relation:'remix'"),'Republished Remix must retain source relation');
-assert(analytics.includes('enabled:false')&&analytics.includes("measurementId:''"),'GA4 must remain disabled');
+assert(analytics.includes('enabled:true')&&analytics.includes("measurementId:'G-ZT8N1BVEL8'"),'Owner-approved GA4 config missing');
+assert(ja.includes('「解析設定」')&&en.includes('“Analytics”'),'GA4 consent withdrawal notice must be present');
 assert(ads.includes("get('adPreview')==='1'"),'Ad slots remain developer-only previews');
 
 const key='a'.repeat(70)+'.'+'b'.repeat(70)+'.'+'c'.repeat(70);
