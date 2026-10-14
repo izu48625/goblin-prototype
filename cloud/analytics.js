@@ -230,6 +230,7 @@
     Object.assign(button.style,{display:'block',width:'100%',textAlign:'left',padding:'9px 10px',fontSize:'12px',minHeight:'42px',fontWeight:'800',
       border:'0',borderRadius:'8px',background:'transparent',color:'#d4e6fc',cursor:'pointer'});
     button.addEventListener('click',()=>{
+      document.querySelector('.globalSupportMenu')?.removeAttribute('open');
       consent='unset';
       notice();
     });
