@@ -114,13 +114,13 @@
     .rowDelete{border:0;background:transparent;color:#64758e;width:31px;height:31px;border-radius:7px}
     .rowDelete:hover{background:#2a1a25;color:#ff8d9b}
     .emptyAddRow{padding:7px;border-top:1px solid var(--line);background:#0d1728}
-    .heat-e{background:rgba(83,105,137,.19);--score-tile-overlay:rgba(83,105,137,.19)}
-    .heat-d{background:rgba(72,112,171,.30);--score-tile-overlay:rgba(72,112,171,.30)}
-    .heat-c{background:rgba(76,135,198,.38);--score-tile-overlay:rgba(76,135,198,.38)}
-    .heat-b{background:rgba(73,164,156,.43);--score-tile-overlay:rgba(73,164,156,.43)}
-    .heat-a{background:rgba(100,167,131,.48);--score-tile-overlay:rgba(100,167,131,.48)}
-    .heat-s{background:rgba(169,144,143,.42);--score-tile-overlay:rgba(169,144,143,.42)}
-    .heat-ss{background:rgba(218,94,159,.52);--score-tile-overlay:rgba(218,94,159,.52)}
+    .heat-e{background:rgba(31,47,53,.20);--score-tile-overlay:rgba(31,47,53,.20)}
+    .heat-d{background:rgba(37,64,85,.24);--score-tile-overlay:rgba(37,64,85,.24)}
+    .heat-c{background:rgba(39,72,103,.31);--score-tile-overlay:rgba(39,72,103,.31)}
+    .heat-b{background:rgba(40,89,89,.29);--score-tile-overlay:rgba(40,89,89,.29)}
+    .heat-a{background:rgba(110,99,57,.32);--score-tile-overlay:rgba(110,99,57,.32)}
+    .heat-s{background:rgba(122,84,62,.35);--score-tile-overlay:rgba(122,84,62,.35)}
+    .heat-ss{background:rgba(116,60,74,.42);--score-tile-overlay:rgba(116,60,74,.42)}
 
     /* Side */
     .side{display:grid;gap:9px;position:sticky;top:9px}
@@ -1728,6 +1728,13 @@ html[lang="en"] .rankModeBtn{
    It remains visibly layered but the final rendered color is stable across
    PC/phone responsive layouts and Chromium/WebKit (assuming matching display
    color calibration). Grade thresholds, values and storage are untouched. */
+/* R38 P13: photo-locked screenshot palette from IMG_7846(1).png.
+   Final measured sRGB pixels on #101b30: SS #3a293b, S #352f35,
+   A #2e3233, B #172d3c, C #172941, D #152439.
+   The lower RGBA alphas (0.20-0.42) preserve the target final shades
+   through real composition rather than through an opaque RGB fill.
+   Uniform backgrounds necessarily conceal much of the transparency.
+   No reflection, color-gradient, shadow or score-logic change. */
 /* R38 P12: REAL translucent G5 scoring, not shiny/painted glass.
    The score cell itself no longer owns a solid #101b30 backing or opaque
    reflection gradient. It paints only its actual rgba tint, so its underlying
@@ -1746,7 +1753,8 @@ html[lang="en"] .rankModeBtn{
 }
 #scoreTable tbody tr:nth-child(even),
 .fitTable tbody tr:nth-child(even){
-  background-color:#132036;
+  /* Nearly identical underlying navy to preserve the selected photo colors. */
+  background-color:#111c31;
 }
 /* Give overview cards the same backing rather than letting the grid border
    color show through the transparent metric cells. */
@@ -1777,37 +1785,37 @@ html[lang="en"] .rankModeBtn{
 #scoreTable td.avgCell.heat-e,
 .fitTable td.fitScoreCell.heat-e,
 .fitTable td.fitAverageCell.heat-e,
-.overviewMetric.heat-e{--score-tile-overlay:rgba(71,87,114,.17)}
+.overviewMetric.heat-e{--score-tile-overlay:rgba(31,47,53,.20)}
 #scoreTable td.scoreCell.heat-d,
 #scoreTable td.avgCell.heat-d,
 .fitTable td.fitScoreCell.heat-d,
 .fitTable td.fitAverageCell.heat-d,
-.overviewMetric.heat-d{--score-tile-overlay:rgba(51,82,135,.27)}
+.overviewMetric.heat-d{--score-tile-overlay:rgba(37,64,85,.24)}
 #scoreTable td.scoreCell.heat-c,
 #scoreTable td.avgCell.heat-c,
 .fitTable td.fitScoreCell.heat-c,
 .fitTable td.fitAverageCell.heat-c,
-.overviewMetric.heat-c{--score-tile-overlay:rgba(45,100,156,.34)}
+.overviewMetric.heat-c{--score-tile-overlay:rgba(39,72,103,.31)}
 #scoreTable td.scoreCell.heat-b,
 #scoreTable td.avgCell.heat-b,
 .fitTable td.fitScoreCell.heat-b,
 .fitTable td.fitAverageCell.heat-b,
-.overviewMetric.heat-b{--score-tile-overlay:rgba(55,119,100,.36)}
+.overviewMetric.heat-b{--score-tile-overlay:rgba(40,89,89,.29)}
 #scoreTable td.scoreCell.heat-a,
 #scoreTable td.avgCell.heat-a,
 .fitTable td.fitScoreCell.heat-a,
 .fitTable td.fitAverageCell.heat-a,
-.overviewMetric.heat-a{--score-tile-overlay:rgba(94,116,35,.48)}
+.overviewMetric.heat-a{--score-tile-overlay:rgba(110,99,57,.32)}
 #scoreTable td.scoreCell.heat-s,
 #scoreTable td.avgCell.heat-s,
 .fitTable td.fitScoreCell.heat-s,
 .fitTable td.fitAverageCell.heat-s,
-.overviewMetric.heat-s{--score-tile-overlay:rgba(168,80,34,.49)}
+.overviewMetric.heat-s{--score-tile-overlay:rgba(122,84,62,.35)}
 #scoreTable td.scoreCell.heat-ss,
 #scoreTable td.avgCell.heat-ss,
 .fitTable td.fitScoreCell.heat-ss,
 .fitTable td.fitAverageCell.heat-ss,
-.overviewMetric.heat-ss{--score-tile-overlay:rgba(218,94,159,.52)}
+.overviewMetric.heat-ss{--score-tile-overlay:rgba(116,60,74,.42)}
 
 /* A missing or untouched title is fixed inside Publish before any upload. */
 .publishTitleGuard{
