@@ -22,11 +22,11 @@ try{
   assert(!grid.includes('R37 Unlisted Secret Work'),'Unlisted leaked in Discover');
   assert(!grid.includes('R37 Private Secret Work'),'Private leaked in Discover');
   const reqs=await page.evaluate(()=>window.__r37VisibilityLog);
-  assert(reqs.filter(r=>r.k==='visibility'&&r.v==='public').length>=1,
-    'Discover must still query Public-only rows at API level');
+  assert(reqs.some(r=>r.rpc==='discover_public_works_v1'),
+    'Discover must use the public-only RPC');
   assert.equal(await page.locator('#grid article').count(),1,
     'Discover must render only Public RPC rows');
-  console.log('R37 Discover privacy PASS: API Public query plus defensive local filter');
+  console.log('R37 Discover privacy PASS: public-scoped RPC plus defensive local filter');
 
   for(const [id,name,allowed] of [
     [PUBLIC,'R37 Public Safe Work',true],
