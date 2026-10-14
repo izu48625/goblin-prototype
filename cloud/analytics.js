@@ -22,7 +22,7 @@
     'ad_slot_viewable'
   ]);
   const paramsAllowed={
-    page_group:['home','community','discover','published','my_works','editor','rating_legacy','unknown'],
+    page_group:['home','community','discover','published','my_works','editor','rating_legacy','landing_ja','landing_en','unknown'],
     template_type:['bar','radar','dot','range','scatter','quadrant','ring','ranking-card','stat-card','tier-list','unknown'],
     filter_type:['all','community','category','newest','popular','remix','other'],
     visibility:['public','private','unlisted','unknown'],
@@ -38,6 +38,8 @@
   const pageMap={discover:'discover',public:'published',my:'my_works',works:'my_works',rate:'rating_legacy',
     editor:'editor',base:'home'};
   function group(){
+    if(document.body?.dataset.smLocalizedLanding==='ja')return 'landing_ja';
+    if(document.body?.dataset.smLocalizedLanding==='en')return 'landing_en';
     if(document.body?.dataset.smAdPage)return pageMap[document.body.dataset.smAdPage]||'unknown';
     if(location.pathname.startsWith('/app/editor'))return 'editor';
     if(location.pathname==='/index.html'||location.pathname==='/')
@@ -50,7 +52,7 @@
     const name=group();
     return ({home:'/home',community:'/community',discover:'/discover',
       published:'/public',my_works:'/my',editor:'/app/editor',
-      rating_legacy:'/rate',unknown:'/other'})[name];
+      rating_legacy:'/rate',landing_ja:'/ja/',landing_en:'/en/',unknown:'/other'})[name];
   }
   function safePageLocation(){
     // Whitelist only short, benign campaign tags. Never send topic IDs,
@@ -174,12 +176,22 @@
       padding:'14px',border:'1px solid #5278a6',borderRadius:'13px',
       background:'#11233b',color:'#eaf2ff',boxShadow:'0 12px 34px #0009',
       fontFamily:'system-ui,sans-serif',fontSize:'12px',lineHeight:'1.6'});
+    const english=document.documentElement.lang==='en'||location.pathname.startsWith('/en/')||
+      new URLSearchParams(location.search).get('lang')==='en'||
+      (()=>{try{return localStorage.getItem('statsMaker.locale')==='en'}catch{return false}})();
     const msg=document.createElement('div');
-    msg.textContent='サイトの改善のため、Google Analyticsで画面の閲覧や操作の種類を集計してもよいですか？作品の名前・入力した点数・検索語・個人IDは送信しません。拒否しても全機能を利用できます。';
+    msg.textContent=english
+      ?'May we use Google Analytics to improve Stats Maker by counting page views and types of actions? We do not send your work titles, ratings, search words or user IDs. You can decline and keep using all features.'
+      :'サイトの改善のため、Google Analyticsで画面の閲覧や操作の種類を集計してもよいですか？作品の名前・入力した点数・検索語・個人IDは送信しません。拒否しても全機能を利用できます。';
     container.appendChild(msg);
+    const privacy=document.createElement('a');
+    privacy.href=english?'/en/legal.html#privacy':'/ja/legal.html#privacy';
+    privacy.textContent=english?'Privacy policy':'プライバシーポリシー';
+    Object.assign(privacy.style,{display:'inline-block',marginTop:'5px',color:'#c6dcff'});
+    container.appendChild(privacy);
     const row=document.createElement('div');
     Object.assign(row.style,{display:'flex',gap:'8px',marginTop:'10px'});
-    for(const [label,value] of [['拒否する','denied'],['許可する','granted']]){
+    for(const [label,value] of (english?[['Decline','denied'],['Allow analytics','granted']]:[['拒否する','denied'],['許可する','granted']])){
       const button=document.createElement('button');
       button.type='button';button.textContent=label;
       Object.assign(button.style,{flex:'1',minHeight:'44px',borderRadius:'8px',
@@ -197,7 +209,8 @@
     if(!bar)return;
     const button=document.createElement('button');
     button.type='button';button.id='sm-analytics-settings';
-    button.textContent='解析設定';button.title='アクセス解析の同意を変更';
+    const english=document.documentElement.lang==='en'||new URLSearchParams(location.search).get('lang')==='en'||(()=>{try{return localStorage.getItem('statsMaker.locale')==='en'}catch{return false}})();
+    button.textContent=english?'Analytics':'解析設定';button.title=english?'Change analytics consent':'アクセス解析の同意を変更';
     Object.assign(button.style,{padding:'6px',fontSize:'10px',minHeight:'30px',
       border:'1px solid #456080',borderRadius:'7px',background:'#13243b',color:'#d4e6fc'});
     button.addEventListener('click',()=>{
