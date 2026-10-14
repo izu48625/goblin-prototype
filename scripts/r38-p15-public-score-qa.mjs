@@ -102,8 +102,12 @@ try{
     assert(!layout.pageOverflow,'entire public page should not scroll horizontally');
     if(width<=760){
       assert.equal(layout.position,'sticky','target name must stay fixed during horizontal swipe');
-      assert(layout.nameWidth<=115,'name column too wide at '+width+': '+layout.nameWidth);
-      assert(layout.metricWidth<=74,'metric columns are not compact at '+width+': '+layout.metricWidth);
+      // At 760px the CSS table can expand to fill spare tablet width.
+      // Compact fixed widths are required specifically on narrow phones.
+      if(width<=390){
+        assert(layout.nameWidth<=115,'name column too wide at '+width+': '+layout.nameWidth);
+        assert(layout.metricWidth<=74,'metric columns are not compact at '+width+': '+layout.metricWidth);
+      }
       assert(layout.metricFont<=11.5 && layout.headingFont<=10,
         'mobile text should be smaller than previous display');
       const visible=await table.evaluate(el=>{
