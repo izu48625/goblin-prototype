@@ -18,29 +18,50 @@
       "/api/health",
       "/api/security/*",
       "/api/guard/*",
-      "/api/report/*"
+      "/api/report/*",
+      "/api/discover"
     ]
   },
   "ratelimits": [
     {
       "name": "OG_RATE_LIMIT",
       "namespace_id": "2601",
-      "simple": { "limit": 90, "period": 60 }
+      "simple": {
+        "limit": 90,
+        "period": 60
+      }
     },
     {
       "name": "COMMUNITY_GATEWAY_RATE_LIMIT",
       "namespace_id": "2603",
-      "simple": { "limit": 30, "period": 60 }
+      "simple": {
+        "limit": 30,
+        "period": 60
+      }
     },
     {
       "name": "REPORT_RATE_LIMIT",
       "namespace_id": "2604",
-      "simple": { "limit": 6, "period": 60 }
+      "simple": {
+        "limit": 6,
+        "period": 60
+      }
     },
     {
       "name": "SHARE_RATE_LIMIT",
       "namespace_id": "2602",
-      "simple": { "limit": 300, "period": 60 }
+      "simple": {
+        "limit": 300,
+        "period": 60
+      }
+    },
+    {
+      "name": "DISCOVER_RATE_LIMIT",
+      "namespace_id": "2605",
+      "simple": {
+        "limit": 90,
+        "period": 60
+      }
     }
   ],
   "previews": {
@@ -48,22 +69,42 @@
       {
         "name": "OG_RATE_LIMIT",
         "namespace_id": "726101",
-        "simple": { "limit": 90, "period": 60 }
+        "simple": {
+          "limit": 90,
+          "period": 60
+        }
       },
       {
         "name": "COMMUNITY_GATEWAY_RATE_LIMIT",
         "namespace_id": "726103",
-        "simple": { "limit": 30, "period": 60 }
+        "simple": {
+          "limit": 30,
+          "period": 60
+        }
       },
       {
         "name": "REPORT_RATE_LIMIT",
         "namespace_id": "726104",
-        "simple": { "limit": 6, "period": 60 }
+        "simple": {
+          "limit": 6,
+          "period": 60
+        }
       },
       {
         "name": "SHARE_RATE_LIMIT",
         "namespace_id": "726102",
-        "simple": { "limit": 300, "period": 60 }
+        "simple": {
+          "limit": 300,
+          "period": 60
+        }
+      },
+      {
+        "name": "DISCOVER_RATE_LIMIT",
+        "namespace_id": "726105",
+        "simple": {
+          "limit": 90,
+          "period": 60
+        }
       }
     ]
   },
