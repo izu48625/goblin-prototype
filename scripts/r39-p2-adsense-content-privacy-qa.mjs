@@ -47,7 +47,7 @@ if(process.argv[2]==='public-readonly'){
   assert(url?.startsWith('https://')&&key?.startsWith('sb_publishable_'),
     'Only publicly shipped Supabase URL and publishable key may be used');
   const params=new URLSearchParams({
-    select:'id,title,description,visibility,snapshot',
+    select:'id,title,description,visibility,snapshot,source_topic_id,score_scale,weighted',
     visibility:'eq.public',order:'published_at.desc',limit:'60'
   });
   let response;
@@ -69,6 +69,13 @@ if(process.argv[2]==='public-readonly'){
   assert(Array.isArray(rows),'Public topics response is not a list');
   assert(rows.every(row=>row.visibility==='public'),'Unlisted/private records must never enter audit');
   const flagged=[];
+  const fingerprintCounts=new Map();
+  for(const work of rows){
+    // This only detects identical public score snapshots; not stolen work.
+    const snapshot=work.snapshot && typeof work.snapshot==='object'?work.snapshot:{};
+    const key=JSON.stringify(snapshot);
+    fingerprintCounts.set(key,(fingerprintCounts.get(key)||0)+1);
+  }
   for(const work of rows){
     const reasons=[];
     const title=String(work.title||'').trim();
@@ -76,9 +83,17 @@ if(process.argv[2]==='public-readonly'){
     const snapshot=work.snapshot && typeof work.snapshot==='object'?work.snapshot:{};
     const targets=Array.isArray(snapshot.rows)?snapshot.rows:[];
     const criteria=Array.isArray(snapshot.criteria)?snapshot.criteria:[];
-    if(!title || /^(新しいお題|untitled|new topic|new sheet|無題)$/i.test(title))
+    if(!title || /^(?:新しいお題|untitled|new topic|new sheet|無題)(?:\s*\d+)?$/i.test(title))
       reasons.push('unhelpful-title');
-    if(description.length<25)reasons.push('thin-description');
+    if(!description)reasons.push('empty-description');
+    else if(description.length<25)reasons.push('thin-description');
+    if(/(?:コピー\s*){2,}|(?:（Remix）){2,}/i.test(title))
+      reasons.push('repeated-copy-or-remix-title');
+    if(/（Remix）/i.test(title) && !work.source_topic_id)
+      reasons.push('remix-source-reference-review');
+    if(['GOAT','GOATネオ'].includes(title))reasons.push('ambiguous-title');
+    if(fingerprintCounts.get(JSON.stringify(snapshot))>1)
+      reasons.push('identical-public-score-snapshot');
     if(targets.length<2)reasons.push('few-targets');
     if(criteria.length<2)reasons.push('few-criteria');
     if(targets.some(item=>!String(item?.name||'').trim()))reasons.push('unnamed-targets');
@@ -91,5 +106,6 @@ if(process.argv[2]==='public-readonly'){
   console.log('R39 P2 LIVE PUBLIC QUALITY REVIEW (NOT a copyright verdict)',JSON.stringify(totals));
   console.log('R39 P2 public review links',
     JSON.stringify(flagged.slice(0,20).map(x=>({url:'https://statsmaker.app/public.html?id='+x.id,reasons:x.reasons}))));
+  console.log('R39 P3 QUALITY SIGNALS ARE NOT GOOGLE RULES: No minimum title/description character count or duplicate-snapshot prohibition is inferred.');
   console.log('R39 P2 RIGHTS STILL NEED HUMAN REVIEW: uploaded images, quoted text, creator authorization and harassment cannot be inferred from titles or scores.');
 }
