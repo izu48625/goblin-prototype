@@ -22,6 +22,9 @@ assert(publicDoc.includes('cloud/public.css?v='+KEY), 'published CSS not cache b
 assert(publicDoc.includes('cloud/public.js?v='+KEY), 'published JS not cache busted');
 assert(publicCss.includes('.publicScoreCardMetrics'), 'responsive public score cards missing');
 assert(publicJS.includes('class="publicScoreCards"'), 'responsive public score cards not rendered');
+const liveQa=await readFile(new URL('../scripts/r38-p4-live-palette-qa.mjs',import.meta.url),'utf8');
+assert(!liveQa.includes("' +base"),'live QA references undefined base variable');
+assert(!liveQa.includes("'+base"),'live QA references undefined base variable');
 assert(homeDoc.includes('js/i18n.js?v='+KEY), 'toggle label translation cache stale');
 const appJS=await readFile(new URL('../base/js/app.js',import.meta.url),'utf8');
 assert(appJS.includes("COLOR_PREF_KEY='statsMaker.scoreColorsVisible.v1'"), 'display preference not implemented');
@@ -66,12 +69,12 @@ for(const host of hosts){
       assert(home.includes('id="scoreColorToggleBtn"'),'no score color toggle on production');
       assert(!home.includes('id="gradeFilter"'),'retired grade filter visible in production');
       const publicHome=await fetchText(host.base+'/public.html?paletteQA=r38p15-'+attempt);
-      assert(publicHome.includes('cloud/public.css?v='+KEY),'published score CSS stale at '+base);
-      assert(publicHome.includes('cloud/public.js?v='+KEY),'published score JS stale at '+base);
+      assert(publicHome.includes('cloud/public.css?v='+KEY),'published score CSS stale at '+host.base);
+      assert(publicHome.includes('cloud/public.js?v='+KEY),'published score JS stale at '+host.base);
       const publicStyle=await fetchText(host.base+'/cloud/public.css?v='+KEY);
       const publicLogic=await fetchText(host.base+'/cloud/public.js?v='+KEY);
-      assert(publicStyle.includes('.publicScoreCardMetrics'),'published card CSS missing at '+base);
-      assert(publicLogic.includes('class="publicScoreCards"'),'published card code missing at '+base);
+      assert(publicStyle.includes('.publicScoreCardMetrics'),'published card CSS missing at '+host.base);
+      assert(publicLogic.includes('class="publicScoreCards"'),'published card code missing at '+host.base);
       const css=await fetchText(host.base+'/base/css/style.css?v='+KEY);
       const app=await fetchText(host.base+'/base/js/app.js?v='+KEY);
       assert(app.includes('scoreTileColors'),'missing real per-cell JS colors');
