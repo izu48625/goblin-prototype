@@ -36,7 +36,7 @@ assert(analytics.includes('enabled:false')&&analytics.includes("measurementId:''
   'GA4 must stay disabled until owner grants explicit approval');
 assert(ads.includes("get('adPreview')==='1'"),
   'Only development preview ads may be displayed before account approval');
-const isPlaceholderTitle=title=>/^(?:新しいお題|untitled|new topic|new sheet|無題)(?:\\s*\\d+)?$/i.test(title);
+const isPlaceholderTitle=title=>/^(?:新しいお題|untitled|new topic|new sheet|無題)(?:\s*\d+)?$/i.test(title);
 assert(isPlaceholderTitle('新しいお題 10'),'numbered placeholder title regression');
 assert(isPlaceholderTitle('Untitled 7'),'English numbered placeholder title regression');
 assert(!isPlaceholderTitle('新しいお題で友人の能力を比較'),'legitimate longer title must not be flagged');
