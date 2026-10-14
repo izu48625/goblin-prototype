@@ -33,7 +33,7 @@ jobs:
           node scripts/r34-seo-edge-test.mjs
           node scripts/r37-visibility-edge-qa.mjs
           npm run build:cloudflare
-          grep -q 'cloud/discover.js?v=r37vis1' dist/discover.html
+          grep -q 'cloud/discover.js?v=r40server1' dist/discover.html
       - name: Isolated browser Public, Unlisted, Private verification
         run: |
           npm install --no-save playwright@1.56.1
