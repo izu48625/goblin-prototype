@@ -157,6 +157,7 @@
     consent=value;
     try{localStorage.setItem(consentKey,value)}catch{}
     document.querySelector('#sm-analytics-consent')?.remove();
+    document.querySelector('#basicRoot')?.style.removeProperty('top');
     if(value==='granted')loadGA4();
     else if(loaded&&typeof window.gtag==='function'){
       window.gtag('consent','update',{
@@ -171,9 +172,10 @@
     container.id='sm-analytics-consent';
     container.setAttribute('role','region');
     container.setAttribute('aria-label','アクセス解析の同意');
-    Object.assign(container.style,{position:'fixed',zIndex:'1000',bottom:'calc(12px + env(safe-area-inset-bottom))',
-      left:'12px',right:'12px',maxWidth:'630px',margin:'auto',
-      padding:'14px',border:'1px solid #5278a6',borderRadius:'13px',
+    // In-flow consent notice: never cover mobile save/export/rating controls.
+    Object.assign(container.style,{position:'relative',zIndex:'109',width:'calc(100% - 16px)',
+      maxWidth:'630px',margin:'8px auto',
+      padding:'12px',border:'1px solid #5278a6',borderRadius:'13px',
       background:'#11233b',color:'#eaf2ff',boxShadow:'0 12px 34px #0009',
       fontFamily:'system-ui,sans-serif',fontSize:'12px',lineHeight:'1.6'});
     const english=document.documentElement.lang==='en'||location.pathname.startsWith('/en/')||
@@ -201,23 +203,37 @@
       row.append(button);
     }
     container.append(row);
-    document.body.append(container);
+    const nav=document.querySelector('.globalLocaleBar');
+    if(nav)nav.insertAdjacentElement('afterend',container);
+    else document.body.prepend(container);
+    // The Home iframe shell is position:fixed; reserve the in-flow notice's
+    // actual height so its buttons never appear under the consent notice.
+    const adjust=()=>{
+      const root=document.getElementById('basicRoot');
+      if(root&&document.getElementById('sm-analytics-consent')){
+        const navHeight=document.querySelector('.globalLocaleBar')?.getBoundingClientRect().height||0;
+        root.style.top=Math.ceil(navHeight+container.getBoundingClientRect().height+8)+'px';
+      }
+    };
+    adjust();
+    requestAnimationFrame(adjust);
   }
   function settings(){
     if(!valid||framed||document.getElementById('sm-analytics-settings'))return;
-    const bar=document.querySelector('.globalLocaleBar');
-    if(!bar)return;
+    // Keep the 320px-wide global bar intact; add consent settings to HELP.
+    const panel=document.querySelector('.globalSupportPanel');
+    if(!panel)return;
     const button=document.createElement('button');
     button.type='button';button.id='sm-analytics-settings';
     const english=document.documentElement.lang==='en'||new URLSearchParams(location.search).get('lang')==='en'||(()=>{try{return localStorage.getItem('statsMaker.locale')==='en'}catch{return false}})();
     button.textContent=english?'Analytics':'解析設定';button.title=english?'Change analytics consent':'アクセス解析の同意を変更';
-    Object.assign(button.style,{padding:'6px',fontSize:'10px',minHeight:'30px',
-      border:'1px solid #456080',borderRadius:'7px',background:'#13243b',color:'#d4e6fc'});
+    Object.assign(button.style,{display:'block',width:'100%',textAlign:'left',padding:'9px 10px',fontSize:'12px',minHeight:'42px',fontWeight:'800',
+      border:'0',borderRadius:'8px',background:'transparent',color:'#d4e6fc',cursor:'pointer'});
     button.addEventListener('click',()=>{
       consent='unset';
       notice();
     });
-    bar.append(button);
+    panel.append(button);
   }
   // A general, privacy-constrained DOM event bridge: never include user text,
   // typed fields, full URLs, titles, IDs or score values in a GA4 event.

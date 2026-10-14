@@ -80,6 +80,7 @@ try{
   await page.locator('#sm-analytics-consent button').first().click();
   assert.equal(await page.evaluate(()=>window.SM_ANALYTICS.consent()),'denied');
   assert.equal(requests.length,0,'GA4 loaded after refusal');
+  await page.locator('.globalSupportMenu>summary').click();
   await page.locator('#sm-analytics-settings').click();
   await page.locator('#sm-analytics-consent button').last().click();
   await page.waitForFunction(()=>window.__ga4DummyLoaded===true);
@@ -102,6 +103,7 @@ try{
 
   // Revoking consent must disable further event forwarding.
   const before=calls.length;
+  await page.locator('.globalSupportMenu>summary').click();
   await page.locator('#sm-analytics-settings').click();
   await page.locator('#sm-analytics-consent button').first().click();
   await page.evaluate(()=>window.SM_ANALYTICS.event('share_action',{action_type:'share_url'}));
