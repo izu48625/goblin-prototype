@@ -1,0 +1,101 @@
+name: R39 P2 AdSense Content and Privacy Preflight
+
+on:
+  pull_request:
+    paths:
+      - "ja/index.html"
+      - "en/index.html"
+      - "ja/legal.html"
+      - "en/legal.html"
+      - "scripts/r39-p2-adsense-content-privacy-qa.mjs"
+      - "R39_P2_ADSENSE_CONTENT_REVIEW.md"
+      - ".github/workflows/r39-p2-adsense-content-qa.yml"
+  push:
+    branches: [main]
+    paths:
+      - "ja/index.html"
+      - "en/index.html"
+      - "ja/legal.html"
+      - "en/legal.html"
+      - "scripts/r39-p2-adsense-content-privacy-qa.mjs"
+      - "R39_P2_ADSENSE_CONTENT_REVIEW.md"
+      - ".github/workflows/r39-p2-adsense-content-qa.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  content-and-policy:
+    name: Bilingual landing, ads disclosure, copyright policy and legacy QA
+    runs-on: ubuntu-latest
+    timeout-minutes: 12
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+      - run: |
+          node --check scripts/r39-p2-adsense-content-privacy-qa.mjs
+          node scripts/r39-p2-adsense-content-privacy-qa.mjs
+          node scripts/r35-legal-contact-qa.mjs
+          node scripts/r38-readonly-readiness-qa.mjs local
+          npm run build:cloudflare
+          test -s dist/ja/index.html
+          test -s dist/en/index.html
+          test -s dist/ja/legal.html
+          test -s dist/en/legal.html
+          test ! -e dist/ads.txt
+
+  public-readonly-review:
+    name: Sample public UGC for human review signals (GET only)
+    runs-on: ubuntu-latest
+    timeout-minutes: 7
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+      - run: node scripts/r39-p2-adsense-content-privacy-qa.mjs public-readonly
+
+  live-public-pages:
+    name: Check deployed bilingual changes after main merge
+    if: github.event_name != 'pull_request'
+    needs: content-and-policy
+    runs-on: ubuntu-latest
+    timeout-minutes: 12
+    steps:
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+      - name: GET only; verify legally accurate pre-activation disclosures
+        run: |
+          node --input-type=module <<'JS'
+          import assert from 'node:assert/strict';
+          const hosts=['https://statsmaker.app','https://izu48625.github.io/goblin-prototype'];
+          const paths=[
+            ['/ja/','id="rating-guide"'],
+            ['/en/','id="rating-guide"'],
+            ['/ja/legal.html','Google広告の導入予定とCookie'],
+            ['/en/legal.html','Planned Google advertising and cookies']
+          ];
+          for(const host of hosts){
+            for(const [path,needle] of paths){
+              let ok=false;
+              for(let attempt=0;attempt<24;attempt++){
+                try{
+                  const resp=await fetch(host+path+'?r39p2='+attempt,{
+                    cache:'no-store',signal:AbortSignal.timeout(12000)
+                  });
+                  const html=await resp.text();
+                  ok=resp.status===200&&html.includes(needle)&&
+                    !/pagead2\.googlesyndication\.com/.test(html);
+                  if(ok)break;
+                }catch(error){console.log('R39 P2 live retry',host,path,String(error));}
+                await new Promise(resolve=>setTimeout(resolve,5000));
+              }
+              assert(ok,'R39 P2 bilingual policy/guide not deployed at '+host+path);
+            }
+            console.log('R39 P2 LIVE BILINGUAL GUIDE + PRE-ADS PRIVACY PASS',host);
+          }
+          JS
