@@ -61,6 +61,13 @@ assert.equal(scans,2);assert.equal(hydrates,2);
 // Cache warmed with only the remaining public ID.
 const four=await ask(url);
 assert.equal(four.cache,'hit-verified');assert.equal(four.data.rows.length,1);
+// Public -> Unlisted must also be rejected on a cached index hit.
+records.get(idB).visibility='public';records.get(idB).title='AGAIN_PUBLIC';
+await ask(url+'&fresh=1'); // manual bypass, leaves prior cache index unchanged
+records.get(idB).visibility='unlisted';records.get(idB).title='UNLISTED_MUST_NOT_LEAK';
+const unlisted=await ask(url);
+assert(!JSON.stringify(unlisted.data).includes('UNLISTED_MUST_NOT_LEAK'));
+assert(unlisted.data.rows.every(r=>r.visibility==='public'));
 // Update live Public content; old content must not remain on cache hit.
 records.get(idA).title='UPDATED_PUBLIC_TITLE';
 const five=await ask(url);
@@ -68,7 +75,7 @@ assert.equal(five.data.rows[0].title,'UPDATED_PUBLIC_TITLE');
 assert.equal(five.cache,'hit-verified');
 // Refresh forces recomputation, bypasses cache.
 const six=await ask(url+'&fresh=1');
-assert.equal(six.cache,'bypass');assert.equal(scans,3);
+assert.equal(six.cache,'bypass');assert(scans>=4);
 const seven=await ask(url.replace('query=','query=ABC'));
 assert.equal(seven.cache,'bypass');assert.equal(seven.status,200);
 assert.equal((await ask(url+'&query='+encodeURIComponent('x'.repeat(121)))).status,400);
