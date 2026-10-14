@@ -82,7 +82,7 @@ filtered as materialized (
 with_counts as materialized (
   select b.*,
     case when a.sort in ('popular','community')
-      then public.get_topic_participant_count(b.id) else 0::bigint end as participant_rank,
+      then public.discover_public_participant_count_v1(b.id) else 0::bigint end as participant_rank,
     case when a.sort in ('popular','remix')
       then public.discover_public_remix_count_v1(b.id)
       else 0::bigint end as remix_rank
@@ -116,7 +116,7 @@ select pg_catalog.jsonb_build_object(
         'show_community',p.show_community,'allow_ratings',p.allow_ratings,
         'visibility',p.visibility,
         'participants',case when a.sort in ('popular','community') then p.participant_rank
-                           else public.get_topic_participant_count(p.id) end,
+                           else public.discover_public_participant_count_v1(p.id) end,
         'remixCount',case when a.sort in ('popular','remix') then p.remix_rank
                          else public.discover_public_remix_count_v1(p.id)
                      end
