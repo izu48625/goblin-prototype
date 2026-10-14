@@ -1,0 +1,64 @@
+name: R44 GA4 Geography, Privacy and Mobile Consent QA
+
+on:
+  pull_request:
+    paths:
+      - "cloud/analytics.js"
+      - "cloud/analytics-config.js"
+      - "worker/analytics-region.js"
+      - "worker/index.js"
+      - "wrangler.jsonc"
+      - "ja/legal.html"
+      - "en/legal.html"
+      - "scripts/r33-analytics-browser-qa.mjs"
+      - "scripts/r44-analytics-region-qa.mjs"
+      - "scripts/r44-analytics-region-browser-qa.mjs"
+      - ".github/workflows/r44-ga4-region-qa.yml"
+  push:
+    branches: [main]
+    paths:
+      - "cloud/analytics.js"
+      - "worker/analytics-region.js"
+      - "worker/index.js"
+      - "wrangler.jsonc"
+      - "scripts/r44-analytics-region-qa.mjs"
+      - "scripts/r44-analytics-region-browser-qa.mjs"
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  geo-privacy-and-overseas-consent:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+      - name: Static contract and spoof checks
+        run: |
+          node --check worker/analytics-region.js
+          node --check cloud/analytics.js
+          node --check scripts/r44-analytics-region-qa.mjs
+          node --check scripts/r44-analytics-region-browser-qa.mjs
+          node scripts/r44-analytics-region-qa.mjs
+      - name: Build local production assets
+        run: npm run build:cloudflare
+      - name: Install Chromium and WebKit
+        run: |
+          npm install --no-save playwright@1.56.1
+          npx playwright install --with-deps chromium webkit
+      - name: Automated Japanese + simulated overseas + failures
+        run: |
+          python3 -m http.server 8765 --directory dist >/tmp/r44-geo-http.log 2>&1 &
+          HTTP_PID=$!
+          trap 'kill $HTTP_PID || true' EXIT
+          sleep 2
+          BASE_URL=http://127.0.0.1:8765 node scripts/r44-analytics-region-browser-qa.mjs
+      - name: Legacy bilingual analytics QA with simulated overseas
+        run: |
+          python3 -m http.server 8765 --directory dist >/tmp/r44-old-http.log 2>&1 &
+          HTTP_PID=$!
+          trap 'kill $HTTP_PID || true' EXIT
+          sleep 2
+          BASE_URL=http://127.0.0.1:8765 node scripts/r33-analytics-browser-qa.mjs

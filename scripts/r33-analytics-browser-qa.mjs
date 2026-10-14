@@ -4,6 +4,11 @@ const BASE=(process.env.BASE_URL||'http://127.0.0.1:8765').replace(/\/+$/,'');
 const browser=await chromium.launch({headless:true});
 try{
   const context=await browser.newContext({viewport:{width:390,height:844},locale:'ja-JP'});
+  // Simulate overseas visitors on CI (cannot rely on the runner's IP).
+  await context.route('**/api/analytics-region*',async route=>{
+    await route.fulfill({status:200,contentType:'application/json',
+      body:JSON.stringify({mode:'consent_required'})});
+  });
   const requests=[];
   context.on('request',r=>{
     if(/googletagmanager\.com|google-analytics\.com|cloudflareinsights\.com|\/analytics(?:\/|\.gif)/.test(r.url()))requests.push(r.url());
@@ -20,13 +25,15 @@ try{
   ];
   for(const [url,group] of routes){
     await page.goto(BASE+url,{waitUntil:'domcontentloaded'});
-    await page.waitForFunction(()=>!!window.SM_ANALYTICS);
+    await page.waitForFunction(()=>window.SM_ANALYTICS?.state().regionResolved===true);
+    await page.locator('#sm-analytics-consent').waitFor({state:group==='editor'?'hidden':'visible'});
     const state=await page.evaluate(()=>window.SM_ANALYTICS.state());
     assert.equal(state.configured,true);
     assert.equal(state.loaded,false);
     assert.equal(state.debug,true);
     assert.equal(state.events.length,0,'No events before consent');
     assert.equal(state.consent,'unset');
+    assert.equal(state.region,'consent_required');
     if(group==='landing_en')assert.equal(await page.locator('#sm-analytics-consent button').last().textContent(),'Allow analytics');
     const debugGroup=await page.evaluate(()=>{window.SM_ANALYTICS.event('page_view');return window.SM_ANALYTICS.state().events[0]?.params.page_group});
     assert.equal(debugGroup,group,'Safe page category must be retained in offline debug');
@@ -102,13 +109,19 @@ try{
   assert.equal(pageView[2].page_group,'discover');
 
   // Revoking consent must disable further event forwarding.
-  const before=calls.length;
+  const priorGoogleRequests=requests.length;
   await page.locator('.globalSupportMenu>summary').click();
   await page.locator('#sm-analytics-settings').click();
-  await page.locator('#sm-analytics-consent button').first().click();
+  await Promise.all([
+    page.waitForEvent('load',{timeout:12000}),
+    page.locator('#sm-analytics-consent button').first().click()
+  ]);
+  await page.waitForFunction(()=>window.SM_ANALYTICS?.state().regionResolved===true);
+  const afterRevoke=await page.evaluate(()=>window.SM_ANALYTICS.state());
+  assert.equal(afterRevoke.consent,'denied');
+  assert.equal(afterRevoke.loaded,false,'Reload must unload Google script after revocation');
   await page.evaluate(()=>window.SM_ANALYTICS.event('share_action',{action_type:'share_url'}));
-  const last=await page.evaluate(()=>window.dataLayer.map(x=>Array.from(x)));
-  assert(!last.slice(before).some(x=>x[0]==='event'&&x[1]==='share_action'));
+  assert.equal(requests.length,priorGoogleRequests,'Revocation reload must not fetch GA4');
   await context.close();
   console.log('R33 analytics consent/privacy/route/debug QA PASS (no live Google tracking)');
 }finally{await browser.close()}
