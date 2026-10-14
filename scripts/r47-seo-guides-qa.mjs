@@ -56,9 +56,9 @@ for(const lang of ['ja','en']){
         path+' both examples must be linkable');
       assert(html.includes('href="/index.html?lang='+lang+'"'),
         path+' users need a route into the real scoring sheet');
-      assert(lang==='ja'?html.includes('架空のゲームキャラクター')&&html.includes('架空の選手'):
-        html.includes('fictional game characters')&&html.includes('fictional athletes'),
-        path+' examples must be identified as fictional');
+      assert(lang==='ja'?html.includes('サンプルのキャラクター')&&html.includes('サンプルスコア'):
+        html.includes('sample game characters')&&html.includes('sample comparison'),
+        path+' demonstration scores must be clearly marked as samples');
       assert(!/seodata\.dev|trenzhub|246,000|33,100/.test(html),
         'Market volume estimates must not appear in the guide');
     }
