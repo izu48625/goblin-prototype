@@ -266,15 +266,8 @@
       if(!hay.includes(q))return false;
     }
 
-    const f=s.gradeFilter||'all';
-    if(f==='all')return true;
-
-    const a=avg(row);
-    if(f==='unrated')return a==null;
-
-    const g=grade(a);
-    if(f==='C')return ['C','D','E','–'].includes(g);
-    return g===f;
+    // R38 P15: retired grade dropdown. Ignore legacy saved filter values.
+    return true;
   }
 
   function filteredRows(){
@@ -2263,7 +2256,6 @@
     renderScaleMode();
     renderWeightMode();
     $('searchInput').value=s.search||'';
-    $('gradeFilter').value=s.gradeFilter||'all';
     syncScoreColorToggle();
     renderTable();
     renderOverview();
@@ -2271,7 +2263,6 @@
     renderColumnManager();
     renderSidebar();
     refreshEditorCommunitySummary(false);
-    $('filterCount').textContent=t('count.filtered',{visible:filteredRows().length,total:s.rows.length});
     renderViewMode();
   }
 
@@ -2339,7 +2330,6 @@
     // New blank rows would be hidden by grade/search filters.
     // Reset filters so the user can immediately see and edit the row.
     s.search='';
-    s.gradeFilter='all';
     s.viewMode='sheet';
 
     renderAll();
@@ -2557,19 +2547,9 @@
     renderOverview();
     renderFitTable();
     renderSidebar();
-    $('filterCount').textContent=t('count.filtered',{visible:filteredRows().length,total:activeSheet().rows.length});
     scheduleSave('');
   });
   $('scoreColorToggleBtn').addEventListener('click',toggleScoreColorsVisible);
-  $('gradeFilter').addEventListener('change',e=>{
-    activeSheet().gradeFilter=e.currentTarget.value;
-    renderTable();
-    renderOverview();
-    renderFitTable();
-    renderSidebar();
-    $('filterCount').textContent=t('count.filtered',{visible:filteredRows().length,total:activeSheet().rows.length});
-    scheduleSave('');
-  });
   $('compareAllBtn').addEventListener('click',()=>{
     const s=activeSheet();
     s.compare=s.rows.map((_,i)=>i);
