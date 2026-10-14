@@ -50,3 +50,9 @@
 - Compared before/after RPC results for all/newest, sports/popular, manga_anime/community, other/remix. All totals and full returned rows matched on the 11 existing Public works.
 - The query still performs JSONB normalized substring scans and maintains exact total counts. The magnitude of the R42 speed gain has **not** been measured against large real/synthetic stored-topic datasets.
 - R43 caching remains blocked pending immediate Public→Private revocation safety and avoiding personalized results. Do not merge/deploy PR yet.
+
+## Isolation hardening (continuation)
+- Corrected important blast-radius issue: R41 **no longer replaces shared** `public.get_topic_participant_count(uuid)`. New `public.discover_public_participant_count_v1(uuid)` and `public.discover_public_remix_count_v1(uuid)` are exclusively used by the proposed Discover RPC.
+- Updated both R41 cutover and R42 category pushdown SQL, plus rollback, to restore the R40 Discover function and drop only R41-specific functions. Other areas of the app retain the unchanged original count function.
+- Revalidated private counter creation, new readers, category index, Discover query and rollback in a rolled-back transaction. Anon Discover query returned 11 Public works; no production changes.
+- **Remaining blockers:** Trigger lifecycle and concurrent-write simulations on isolated DB, indexed full search, R43 Public-to-Private-safe cache, stress tests. PR stays Draft; DO NOT MERGE.
