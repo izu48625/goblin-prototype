@@ -80,8 +80,8 @@ html.embeddedSiteFrame #editorHomeBtn{display:none!important}
 }
 .globalSupportMenu>summary:focus-visible{outline:2px solid #9cbcff;outline-offset:2px}
 .globalSupportPanel{
-  position:absolute;z-index:120;top:calc(100% + 5px);left:0;
-  width:170px;display:grid;gap:3px;padding:7px;
+  position:absolute;z-index:120;top:calc(100% + 5px);right:0;left:auto;
+  width:220px;max-width:calc(100vw - 16px);display:grid;gap:3px;padding:7px;
   background:#0e2036;border:1px solid #3d628b;border-radius:11px;
   box-shadow:0 12px 36px rgba(0,0,0,.45)
 }
@@ -90,10 +90,13 @@ html.embeddedSiteFrame #editorHomeBtn{display:none!important}
   border-radius:8px;text-decoration:none;color:#d4e5ff;
   font:800 12px/1.3 system-ui,-apple-system,sans-serif
 }
+.globalSupportDivider{height:1px;background:#365373;margin:3px 4px}
 .globalSupportPanel a:hover,.globalSupportPanel a:focus-visible{
   background:#234566;color:#fff
 }
 @media(max-width:600px){
+  /* Fixed to the viewport so 320px iPhones cannot clip the new help guides. */
+  .globalSupportPanel{position:fixed;top:49px;right:8px;left:auto;width:min(220px,calc(100vw - 16px))}
   .globalSupportMenu>summary{padding:0 7px;font-size:11px}
 }
 @media(max-width:360px){
