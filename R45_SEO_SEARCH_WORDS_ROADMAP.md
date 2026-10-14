@@ -2,6 +2,12 @@
 
 更新：2026-10-14 / 正式ドメイン：https://statsmaker.app/ / GitHub main
 
+## 最新SEO市場調査の反映（2026-10-14 / R47 SEO-K1〜K4）
+- 調査・競合分野・数値の限界・日英キーワードの優先順位と実装箇所は [`R47_SEO_KEYWORD_MARKET_K1_K4.md`](R47_SEO_KEYWORD_MARKET_K1_K4.md) を参照。
+- **重点：キャラクター／選手の能力比較 → レーダーチャートやStat Card → ランキング・Tier List → PNG・必要に応じてCommunity。** 一般的な「無料グラフ作成」も維持。
+- Google Search Consoleは本人確認済み。Bing Webmaster ToolsはGSCからインポート済み、最終報告は **サイトマップProcessing・警告0件・検出URL0件** であり、処理完了と誤認しない。
+- キーワード別検索数は外部推定の域を出ず、SEO自然検索の競争度や将来の流入を保証しない。Google/Bingの検索実績が集まったら、国・期間・ページをそろえて再評価。GA4 OFF、AdSense未配信のまま。
+
 ## 方針
 - GA4は当面OFF。同意画面や国別判定のための新規開発は不要。AdSenseとSEOにGA4は必須ではない。
 - **Google検索でユーザーが入力したキーワードはGoogle Search Console（GSC、無料）で調べる。** GA4は不要。
