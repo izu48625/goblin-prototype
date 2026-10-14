@@ -37,6 +37,30 @@
   let library = loadLibrary();
   let saveTimer = null;
 
+  // R38 P14: a browser-local display preference, separate from the sheet
+  // storage, JSON backup and public snapshot. Existing users start ON.
+  const COLOR_PREF_KEY='statsMaker.scoreColorsVisible.v1';
+  function readScoreColorsVisible(){
+    try{return localStorage.getItem(COLOR_PREF_KEY)!=='off';}
+    catch{return true;}
+  }
+  let scoreColorsVisible=readScoreColorsVisible();
+  function syncScoreColorToggle(){
+    document.body.classList.toggle('score-colors-off',!scoreColorsVisible);
+    const button=$('scoreColorToggleBtn');
+    if(!button)return;
+    button.textContent=t(scoreColorsVisible?'filter.colorOn':'filter.colorOff');
+    button.classList.toggle('is-on',scoreColorsVisible);
+    button.setAttribute('aria-pressed',String(scoreColorsVisible));
+    button.title=t('filter.colorToggleAria');
+  }
+  function toggleScoreColorsVisible(){
+    scoreColorsVisible=!scoreColorsVisible;
+    syncScoreColorToggle(); // CSS-only: do not remount focused score inputs.
+    try{localStorage.setItem(COLOR_PREF_KEY,scoreColorsVisible?'on':'off');}
+    catch(error){console.warn('Score color preference could not be saved',error);}
+  }
+
   function makeId(){
     return 's_' + Date.now().toString(36) + '_' + Math.random().toString(36).slice(2,8);
   }
@@ -2240,6 +2264,7 @@
     renderWeightMode();
     $('searchInput').value=s.search||'';
     $('gradeFilter').value=s.gradeFilter||'all';
+    syncScoreColorToggle();
     renderTable();
     renderOverview();
     renderFitTable();
@@ -2535,6 +2560,7 @@
     $('filterCount').textContent=t('count.filtered',{visible:filteredRows().length,total:activeSheet().rows.length});
     scheduleSave('');
   });
+  $('scoreColorToggleBtn').addEventListener('click',toggleScoreColorsVisible);
   $('gradeFilter').addEventListener('change',e=>{
     activeSheet().gradeFilter=e.currentTarget.value;
     renderTable();
@@ -2569,6 +2595,11 @@
   });
 
   window.addEventListener('storage',event=>{
+    if(event.key===COLOR_PREF_KEY){
+      scoreColorsVisible=event.newValue!=='off';
+      syncScoreColorToggle();
+      return;
+    }
     if(!communityMode && event.key===STORAGE_KEY &&
        event.newValue!==lastStoredHomeRaw){
       otherTabChangedStorage=true;

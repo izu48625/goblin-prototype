@@ -1856,3 +1856,41 @@ html[lang="en"] .rankModeBtn{
   .currentScaleBadge{min-height:40px;padding:0 10px;font-size:12px}
   .scaleMismatchHint .scaleRebaseBtn{width:100%}
 }
+
+
+/* R38 P14: color visibility is a PRESENTATION preference, not a score mode.
+   Keep all seven R38 P13 color tokens exactly unchanged. This body class is
+   toggled without remounting score inputs, so iPhone editing is unaffected. */
+.scoreColorToggle{
+  display:inline-flex;align-items:center;justify-content:center;
+  box-sizing:border-box;min-height:32px;min-width:68px;
+  padding:0 7px;border:1px solid #46658b;border-radius:8px;
+  background:#142840;color:#c2d5ed;cursor:pointer;
+  font:850 10px/1.2 system-ui,-apple-system,sans-serif;
+  white-space:nowrap;touch-action:manipulation;
+}
+.scoreColorToggle.is-on{
+  color:#e0efff;background:#1b3e54;border-color:#5483a5;
+}
+.scoreColorToggle[aria-pressed="false"]{
+  color:#9eb0c9;background:#132035;border-color:#354b68;
+}
+.scoreColorToggle:focus-visible{outline:2px solid #84aaff;outline-offset:2px}
+body.score-colors-off #scoreTable td.scoreCell,
+body.score-colors-off #scoreTable td.avgCell,
+body.score-colors-off .fitTable td.fitScoreCell,
+body.score-colors-off .fitTable td.fitAverageCell,
+body.score-colors-off .overviewMetric{
+  background-color:#101b30!important;
+  background-image:none!important;
+  box-shadow:none!important;
+}
+@media(max-width:760px){
+  .filterBar{grid-template-columns:minmax(0,1fr) 94px 72px auto}
+  .scoreColorToggle{height:31px;min-height:31px;min-width:0;padding:0 4px;font-size:9px}
+}
+@media(max-width:360px){
+  .filterBar{grid-template-columns:94px 72px minmax(0,1fr)}
+  .filterBar .searchInput{grid-column:1/-1}
+  .filterBar .filterCount{justify-self:end}
+}
