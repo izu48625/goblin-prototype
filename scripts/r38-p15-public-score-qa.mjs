@@ -63,54 +63,82 @@ try{
   const page=await context.newPage();
   const errors=[];
   page.on('pageerror',error=>errors.push(error.message));
+  // R38 P16: the user wants the original sideways scrolling matrix, NOT cards.
+  // Small fonts and fixed sticky names must make more columns visible at once.
   const run=async({id,rows,cols,width,lang='ja'})=>{
     await page.setViewportSize({width,height:844});
-    await page.goto(BASE+'/public.html?id='+id+'&qa=r38p15',{waitUntil:'domcontentloaded'});
-    await page.locator('.publicScoreCard').first().waitFor({state:width<=760?'visible':'attached',timeout:25000});
-    assert.equal(await page.locator('.publicScoreCard').count(),rows);
-    assert.equal(await page.locator('.publicMetricPair').count(),rows*cols);
+    await page.goto(BASE+'/public.html?id='+id+'&qa=r38p16',{waitUntil:'domcontentloaded'});
     const table=page.locator('.creatorScoreTable');
+    await table.locator('tbody tr').first().waitFor({state:'visible',timeout:25000});
+    assert(await table.isVisible(),'score matrix must show at '+width);
+    assert.equal(await page.locator('.publicScoreCard').count(),0,
+      'R38 P15 cards must not be rendered');
+    assert.equal(await table.locator('tbody tr').count(),rows);
+    assert.equal(await table.locator('thead th').count(),cols+2);
+    const row=table.locator('tbody tr').first();
+    assert.equal(await row.locator('td').count(),cols+2);
+    assert.equal(await row.locator('td:nth-child(2)').innerText(),cols===4?'10':'0');
+    assert.equal(await row.locator('td:last-child').innerText(),cols===4?'8.5':'4.5');
+    assert.equal(await table.locator('thead th:last-child').innerText(),lang==='en'?'Average':'平均');
+    const layout=await table.evaluate(el=>{
+      const name=el.querySelector('tbody tr td:first-child');
+      const metric=el.querySelector('tbody tr td:nth-child(2)');
+      const head=el.querySelector('thead th:nth-child(2)');
+      const nx=name.getBoundingClientRect();
+      const mx=metric.getBoundingClientRect();
+      return {
+        client:el.clientWidth,scroll:el.scrollWidth,
+        position:getComputedStyle(name).position,
+        nameWidth:nx.width,metricWidth:mx.width,
+        nameFont:parseFloat(getComputedStyle(name).fontSize),
+        metricFont:parseFloat(getComputedStyle(metric).fontSize),
+        headingFont:parseFloat(getComputedStyle(head).fontSize),
+        right:el.getBoundingClientRect().right,
+        nameLeft:nx.left,
+        tableRight:el.querySelector('table').getBoundingClientRect().right,
+        pageOverflow:document.documentElement.scrollWidth>window.innerWidth+2
+      };
+    });
+    assert(!layout.pageOverflow,'entire public page should not scroll horizontally');
     if(width<=760){
-      assert.equal(await table.isVisible(),false,'desktop table must hide at mobile width');
-      const cards=page.locator('.publicScoreCards');
-      assert(await cards.isVisible(),'mobile score cards must show');
-      assert.equal(await page.locator('.publicScoreCardAvg').count(),rows);
-      const layout=await cards.evaluate(el=>{
-        const container=el.getBoundingClientRect();
-        const children=[...el.querySelectorAll('.publicScoreCard,.publicMetricPair')];
-        return {containerWidth:container.width,
-          outside:children.filter(child=>{
-            const b=child.getBoundingClientRect();
-            return b.left<container.left-1||b.right>container.right+1;
-          }).length,
-          overflowing:children.filter(child=>child.scrollWidth>child.clientWidth+3).length};
+      assert.equal(layout.position,'sticky','target name must stay fixed during horizontal swipe');
+      // At 760px the CSS table can expand to fill spare tablet width.
+      // Compact fixed widths are required specifically on narrow phones.
+      if(width<=390){
+        assert(layout.nameWidth<=115,'name column too wide at '+width+': '+layout.nameWidth);
+        assert(layout.metricWidth<=74,'metric columns are not compact at '+width+': '+layout.metricWidth);
+      }
+      assert(layout.metricFont<=11.5 && layout.headingFont<=10,
+        'mobile text should be smaller than previous display');
+      const visible=await table.evaluate(el=>{
+        const right=el.getBoundingClientRect().right;
+        return [...el.querySelectorAll('tbody tr:first-child td')].slice(1)
+          .filter(cell=>cell.getBoundingClientRect().right<=right+1).length;
       });
-      assert.equal(layout.outside,0,'public score cards overflow phone viewport');
-      assert.equal(layout.overflowing,0,'score metric content clipped inside card');
-      const first=page.locator('.publicScoreCard').first();
-      assert.equal((await first.locator('.publicMetricNumber').allTextContents()).length,cols);
-      assert.equal(await first.locator('.publicMetricNumber').first().innerText(),cols===4?'10':'0');
-      assert.equal(await first.locator('.publicScoreCardAvg strong').innerText(),
-        cols===4?'8.5':'4.5');
+      if(width<=390)assert(visible>=2,'must show at least 2 metrics next to name at '+width);
+      if(layout.scroll>layout.client+5){
+        const before=await table.locator('tbody tr:first-child td:first-child').evaluate(el=>el.getBoundingClientRect().left);
+        const shift=await table.evaluate(el=>{el.scrollLeft=Math.min(100,el.scrollWidth-el.clientWidth);return el.scrollLeft});
+        assert(shift>10,'horizontal swipe did not move the score table at '+width);
+        const after=await table.locator('tbody tr:first-child td:first-child').evaluate(el=>el.getBoundingClientRect().left);
+        assert(Math.abs(before-after)<=2,'sticky target name did not remain visible during scrolling');
+        await table.evaluate(el=>{el.scrollLeft=0});
+      }
     }else{
-      assert(await table.isVisible(),'desktop matrix must still be shown');
-      assert.equal(await page.locator('.publicScoreCards').isVisible(),false);
-      assert.equal(await table.locator('tbody tr').count(),rows);
-      assert.equal(await table.locator('thead th').count(),cols+2);
+      assert(layout.nameWidth>0,'desktop name column missing');
+      assert(layout.metricWidth>0,'desktop score column missing');
     }
     assert(!errors.some(e=>/SyntaxError|TypeError|ReferenceError/.test(e)),
       'Uncaught script errors: '+errors);
-    console.log('R38 P15 creator public score cards PASS',engine===webkit?'webkit':'chromium',
-      rows+'x'+cols,width,lang);
+    console.log('R38 P16 compact horizontally scrollable public scores PASS',
+      engine===webkit?'webkit':'chromium',rows+'x'+cols,width,lang,layout);
   };
   for(const width of [320,390,760,1024])
     await run({id:IDS.small,rows:4,cols:4,width});
-  for(const width of [320,390,1024])
+  for(const width of [320,390,760,1024])
     await run({id:IDS.large,rows:40,cols:10,width});
-  // English captions must switch via existing persisted UI locale.
   await page.evaluate(()=>localStorage.setItem('statsMaker.locale','en'));
   await run({id:IDS.small,rows:4,cols:4,width:390,lang:'en'});
-  assert.equal(await page.locator('.publicScoreCardAvg span').first().innerText(),'Average');
   assert.equal(requests.length,0,'Real Supabase requests are not allowed in UI QA');
-  console.log('R38 P15 public responsive scoring layout and isolated mock DB PASS');
+  console.log('R38 P16 original horizontal public matrix and isolated mock DB PASS');
 }finally{await browser.close()}

@@ -1,6 +1,7 @@
 import assert from 'node:assert/strict';
 import {readFile} from 'node:fs/promises';
 const KEY='r38p15scores1';
+const PUB_KEY='r38p16compact1';
 const HOME='base/index.html?v='+KEY;
 const STYLE='css/style.css?v='+KEY;
 const expectedColors=[
@@ -18,10 +19,12 @@ assert(!homeDoc.includes('id="filterCount"'), 'retired row-count still in DOM');
 const publicDoc=await readFile(new URL('../public.html',import.meta.url),'utf8');
 const publicCss=await readFile(new URL('../cloud/public.css',import.meta.url),'utf8');
 const publicJS=await readFile(new URL('../cloud/public.js',import.meta.url),'utf8');
-assert(publicDoc.includes('cloud/public.css?v='+KEY), 'published CSS not cache busted');
-assert(publicDoc.includes('cloud/public.js?v='+KEY), 'published JS not cache busted');
-assert(publicCss.includes('.publicScoreCardMetrics'), 'responsive public score cards missing');
-assert(publicJS.includes('class="publicScoreCards"'), 'responsive public score cards not rendered');
+assert(publicDoc.includes('cloud/public.css?v='+PUB_KEY), 'published CSS not cache busted');
+assert(publicDoc.includes('cloud/public.js?v='+PUB_KEY), 'published JS not cache busted');
+assert(publicCss.includes('.creatorScoreTable table'), 'compact horizontal score table CSS missing');
+assert(!publicCss.includes('.publicScoreCards{display:grid'), 'card-mode CSS must be removed');
+assert(publicJS.includes('class="tableWrap creatorScoreTable"'), 'horizontal score table not rendered');
+assert(!publicJS.includes('publicScoreCards'), 'unwanted public score card markup still present');
 const liveQa=await readFile(new URL('../scripts/r38-p4-live-palette-qa.mjs',import.meta.url),'utf8');
 const liveRuntime=liveQa.slice(liveQa.lastIndexOf('for(const host of hosts){'));
 assert(!liveRuntime.includes("' +base"),'live QA references undefined base variable');
@@ -37,7 +40,7 @@ assert(localCss.includes('background-color:var(--score-tile-overlay, transparent
 assert(localCss.includes('Final measured sRGB pixels on #101b30'),'photo-locked palette documentation missing');
 assert(localCss.includes('#scoreTable tbody tr:nth-child(even)'), 'subtle score row underlay missing');
 assert(!localCss.includes('linear-gradient(170deg,rgba(255,255,255,.145)'), 'old fake glass sheen still present');
-console.log('R38 P15 simplified filters + responsive public score source-chain PASS');
+console.log('R38 P16 compact horizontal public score source-chain PASS');
 if(process.argv[2]!=='live')process.exit(0);
 
 // No browser storage, Supabase credentials, user works or POST requests.
@@ -70,12 +73,12 @@ for(const host of hosts){
       assert(home.includes('id="scoreColorToggleBtn"'),'no score color toggle on production');
       assert(!home.includes('id="gradeFilter"'),'retired grade filter visible in production');
       const publicHome=await fetchText(host.base+'/public.html?paletteQA=r38p15-'+attempt);
-      assert(publicHome.includes('cloud/public.css?v='+KEY),'published score CSS stale at '+host.base);
-      assert(publicHome.includes('cloud/public.js?v='+KEY),'published score JS stale at '+host.base);
-      const publicStyle=await fetchText(host.base+'/cloud/public.css?v='+KEY);
-      const publicLogic=await fetchText(host.base+'/cloud/public.js?v='+KEY);
-      assert(publicStyle.includes('.publicScoreCardMetrics'),'published card CSS missing at '+host.base);
-      assert(publicLogic.includes('class="publicScoreCards"'),'published card code missing at '+host.base);
+      assert(publicHome.includes('cloud/public.css?v='+PUB_KEY),'published score CSS stale at '+host.base);
+      assert(publicHome.includes('cloud/public.js?v='+PUB_KEY),'published score JS stale at '+host.base);
+      const publicStyle=await fetchText(host.base+'/cloud/public.css?v='+PUB_KEY);
+      const publicLogic=await fetchText(host.base+'/cloud/public.js?v='+PUB_KEY);
+      assert(publicStyle.includes('.creatorScoreTable table'),'compact scroll CSS missing at '+host.base);
+      assert(publicLogic.includes('class="tableWrap creatorScoreTable"'),'horizontal table markup missing at '+host.base);
       const css=await fetchText(host.base+'/base/css/style.css?v='+KEY);
       const app=await fetchText(host.base+'/base/js/app.js?v='+KEY);
       assert(app.includes('scoreTileColors'),'missing real per-cell JS colors');
@@ -86,15 +89,15 @@ for(const host of hosts){
       assert(!css.includes('linear-gradient(170deg,rgba(255,255,255,.145)'),'stale faux gloss is present');
       for(const color of expectedColors)
         assert(css.includes('--score-tile-overlay:'+color),'missing color '+color);
-      console.log('R38 P15 LIVE asset chain PASS',host.name,host.base,
+      console.log('R38 P16 LIVE asset chain PASS',host.name,host.base,
         {outerBytes:root.length,homeBytes:home.length,cssBytes:css.length});
       success=true;
     }catch(error){
       last=String(error);
-      console.log('R38 P15 LIVE awaiting asset deployment',host.name,attempt+1,last);
+      console.log('R38 P16 LIVE awaiting asset deployment',host.name,attempt+1,last);
       if(attempt<29)await wait(5000);
     }
   }
   assert(success,host.name+' never served new complete palette asset chain: '+last);
 }
-console.log('R38 P15 production and Pages freshness PASS; no real data touched');
+console.log('R38 P16 production and Pages freshness PASS; no real data touched');
