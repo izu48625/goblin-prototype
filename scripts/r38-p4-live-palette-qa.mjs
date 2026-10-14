@@ -65,11 +65,11 @@ for(const host of hosts){
       assert(home.includes('js/i18n.js?v='+KEY),'stale Home HTML -> translations');
       assert(home.includes('id="scoreColorToggleBtn"'),'no score color toggle on production');
       assert(!home.includes('id="gradeFilter"'),'retired grade filter visible in production');
-      const publicHome=await get(base+'/public.html?paletteQA=r38p15-'+Date.now());
+      const publicHome=await fetchText(host.base+'/public.html?paletteQA=r38p15-'+attempt);
       assert(publicHome.includes('cloud/public.css?v='+KEY),'published score CSS stale at '+base);
       assert(publicHome.includes('cloud/public.js?v='+KEY),'published score JS stale at '+base);
-      const publicStyle=await get(base+'/cloud/public.css?v='+KEY);
-      const publicLogic=await get(base+'/cloud/public.js?v='+KEY);
+      const publicStyle=await fetchText(host.base+'/cloud/public.css?v='+KEY);
+      const publicLogic=await fetchText(host.base+'/cloud/public.js?v='+KEY);
       assert(publicStyle.includes('.publicScoreCardMetrics'),'published card CSS missing at '+base);
       assert(publicLogic.includes('class="publicScoreCards"'),'published card code missing at '+base);
       const css=await fetchText(host.base+'/base/css/style.css?v='+KEY);
