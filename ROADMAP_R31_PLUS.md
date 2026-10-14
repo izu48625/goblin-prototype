@@ -1,5 +1,7 @@
 # Stats Maker 正式開発ロードマップ — R31以降
 
+> **2026-10-14 SEO最新状況：** Search Console所有権確認・サイトマップ送信・日英紹介ページのGoogle登録は本人確認済み。R47で日英ガイド4ページと検索向け説明を改善。以後はSearch Consoleの検索クエリ・CTR・順位の実データに基づいて改善する。過去の「Search Console未完了」は当時の履歴であり、再登録やDNS認証のやり直しは不要。GA4は停止を維持。
+
 更新日: 2026-10-11
 正式ソース: GitHub `main` / 本番 `https://statsmaker.app/`
 基準: GitHub `main` の最新HEADを毎回確認する（固定SHAを最新版とみなさない）。R30 Data Safety & Recovery以降のR31 UI、R32広告配置プレビュー、R33無料解析基盤まで実装済み。

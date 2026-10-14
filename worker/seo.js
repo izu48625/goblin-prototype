@@ -37,14 +37,25 @@ export async function publicWorkHtml(id){
   if(!work)return response('<!doctype html><html><head><meta name="robots" content="noindex"></head><body>Not found</body></html>','text/html; charset=utf-8',404,'no-store');
   const lang=work.language_code==='en'?'en':'ja',en=lang==='en';
   const title=trim(work.title,140)||'Untitled work';
-  const desc=trim(work.description,240)||(en
-    ?'Explore a public comparison and rating sheet made with Stats Maker.'
-    :'Stats Makerで作成された公開評価・比較シートです。');
   const snapshot=work.snapshot&&typeof work.snapshot==='object'&&!Array.isArray(work.snapshot)?work.snapshot:{};
   const list=(Array.isArray(snapshot.rows)?snapshot.rows:[]).slice(0,18)
     .map(row=>trim(row?.name,90)).filter(Boolean);
   const metrics=(Array.isArray(snapshot.criteria)?snapshot.criteria:[]).slice(0,10)
     .map(row=>trim(typeof row==='string'?row:row?.name,90)).filter(Boolean);
+  // Keep the author's own description exactly as written (up to the
+  // existing display limit). Only a missing description gets a truthful
+  // summary derived from this currently Public work's real snapshot.
+  // Never invent scores, opinions, category labels or translations.
+  const fallback=en
+    ?[list.length?'Compare '+list.slice(0,3).join(', ')+'.':'',
+       metrics.length?'Rating criteria: '+metrics.slice(0,3).join(', ')+'.':'']
+       .filter(Boolean).join(' ')
+    :[list.length?'比較対象：'+list.slice(0,3).join('・')+'。':'',
+       metrics.length?'評価項目：'+metrics.slice(0,3).join('・')+'。':'']
+       .filter(Boolean).join(' ');
+  const desc=trim(work.description,240)||trim(fallback,240)||(en
+    ?'Explore a public comparison and rating sheet made with Stats Maker.'
+    :'Stats Makerで作成された公開評価・比較シートです。');
   const canonical=ORIGIN+'/work/'+encodeURIComponent(id);
   const viewer=ORIGIN+'/public.html?id='+encodeURIComponent(id);
   // Links are created from server-owned host + validated UUID only.

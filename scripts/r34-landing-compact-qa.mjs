@@ -5,8 +5,8 @@ import {readFile} from 'node:fs/promises';
 const BASE=process.env.BASE_URL||'http://127.0.0.1:8765';
 const read=async path=>readFile(new URL('../'+path,import.meta.url),'utf8');
 const roadmap=await read('ROADMAP_R31_PLUS.md');
-assert(roadmap.includes('**[ ] 未完了：Search Console → インデックス作成 → サイトマップ') ||
-       roadmap.includes('**[ ] 未完了：Search Console'));
+assert(roadmap.includes('Search Console所有権確認・サイトマップ送信・日英紹介ページのGoogle登録は本人確認済み'),
+  'Roadmap must reflect the owner-completed GSC verification without repeating setup');
 assert(roadmap.includes('https://statsmaker.app/sitemap.xml'));
 const en=await read('en/index.html'),ja=await read('ja/index.html');
 const originalIntro={
@@ -46,7 +46,8 @@ try{
     assert.equal(await page.locator('#rating-guide .grid article').count(),4,
       'Original score-method guide must have four useful steps');
     assert.equal(await page.locator('.hero h1').count(),1);
-    assert.equal(await page.locator('main details').count(),3);
+    assert.equal(await page.locator('main details').count(),4,
+      'Four practical FAQs, including optional Community rating, must remain readable');
     const geometry=await page.evaluate(()=>{
       const card=document.querySelector('.grid article');
       const bar=document.querySelector('.globalLocaleBar');
