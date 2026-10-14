@@ -34,6 +34,9 @@ function checked(data){
 }
 function parse(url){
   const q=url.searchParams;
+  for(const key of ['query','category','view','sort','locale','offset','limit','anchor','fresh']){
+    if(q.getAll(key).length>1)throw Error('duplicate '+key);
+  }
   const query=q.get('query')||'';
   if(query.length>120)throw Error('query too long');
   const rawOffset=q.get('offset')||'0',rawLimit=q.get('limit')||'12';
