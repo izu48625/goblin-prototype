@@ -388,8 +388,10 @@
           if(error)throw error;
           return [topic.id,Number(data||0)];
         }catch(error){
-          // A failed count must not silently change Popular/Community ranking.
-          throw new Error('Participant counts unavailable: '+String(error?.message||error));
+          // Preserve the existing best-effort participant badge behavior
+          // when a per-topic count endpoint is temporarily unavailable.
+          console.warn('[Stats Maker] Discover participant count unavailable',topic.id,error);
+          return [topic.id,0];
         }
       }));
       rows.forEach(([id,count])=>map.set(id,count));
