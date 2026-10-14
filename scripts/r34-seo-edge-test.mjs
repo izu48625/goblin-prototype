@@ -112,6 +112,32 @@ try{
   assert(!body.includes('http-equiv="refresh"'),'SEO landing should not redirect automatically');
   assert(!body.includes('location.replace('));
 
+  // Missing description: derive only truthful visible Public subjects and
+  // criterion names. Escape all user-supplied text in HTML and metadata.
+  const authoredDescription=fixture.description;
+  fixture.description='';
+  const derived=await req('/work/'+publicId);
+  assert.equal(derived.status,200);
+  const derivedBody=await derived.text();
+  assert(derivedBody.includes('Compare Messi &amp; Ronaldo'),
+    'Actual public target names should inform an absent work description');
+  assert(derivedBody.includes('Rating criteria: Skill, Goals'),
+    'Actual public metric names should inform an absent work description');
+  assert(!derivedBody.includes(malicious),
+    'Generated Public description must HTML-escape submitted content');
+  assert(derivedBody.includes('<meta name="description" content="'),
+    'Generated description should be machine-readable');
+
+  fixture.language_code='ja';
+  const jpDerived=await req('/work/'+publicId);
+  assert.equal(jpDerived.status,200);
+  const jpBody=await jpDerived.text();
+  assert(jpBody.includes('比較対象：'),'Japanese Public summary must be localized');
+  assert(jpBody.includes('評価項目：'),'Japanese Public criteria must be localized');
+  assert(!jpBody.includes(malicious),'Japanese fallback must escape submitted text');
+  fixture.language_code='en';
+  fixture.description=authoredDescription;
+
   const unlisted=await req('/work/'+unlistedId);
   assert.equal(unlisted.status,404);
   assert((await unlisted.text()).includes('noindex'));
