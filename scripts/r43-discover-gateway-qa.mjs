@@ -63,7 +63,8 @@ const four=await ask(url);
 assert.equal(four.cache,'hit-verified');assert.equal(four.data.rows.length,1);
 // Public -> Unlisted must also be rejected on a cached index hit.
 records.get(idB).visibility='public';records.get(idB).title='AGAIN_PUBLIC';
-await ask(url+'&fresh=1'); // manual bypass, leaves prior cache index unchanged
+cache.clear();
+await ask(url); // cache the now-Public B identifier
 records.get(idB).visibility='unlisted';records.get(idB).title='UNLISTED_MUST_NOT_LEAK';
 const unlisted=await ask(url);
 assert(!JSON.stringify(unlisted.data).includes('UNLISTED_MUST_NOT_LEAK'));
