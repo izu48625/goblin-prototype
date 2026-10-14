@@ -40,7 +40,11 @@ async function localAudit(){
   const analytics=await read('cloud/analytics-config.js');
   assert(analytics.includes('enabled:true')&&analytics.includes("measurementId:'G-ZT8N1BVEL8'"),'Owner-approved opt-in GA4 config missing');
   const analyticsRuntime=await read('cloud/analytics.js');
-  assert(analyticsRuntime.includes("consent!=='granted'")&&analyticsRuntime.includes("consent==='unset'"),'Analytics must remain consent gated');
+  assert(analyticsRuntime.includes("consent!=='granted'")&&
+    analyticsRuntime.includes("region==='jp'")&&
+    analyticsRuntime.includes("source='jp_default'")&&
+    analyticsRuntime.includes("fetch('/api/analytics-region'"),
+    'Non-JP analytics must remain consent gated; trusted JP check required');
   const layout=await read('cloud/ad-layout.js');
   assert(layout.includes('adPreview=1'),'Ad placement must remain preview-only');
   const builder=await read('scripts/build-cloudflare.mjs');
