@@ -5,7 +5,7 @@ create or replace function public.discover_public_cards_by_ids_v1(
 ) returns jsonb language sql stable security invoker set search_path = '' as $$
 with page as (
  select t.*, req.ord
- from pg_catalog.unnest(coalesce(p_ids,'{}'::uuid[])[1:12])
+ from pg_catalog.unnest((coalesce(p_ids,'{}'::uuid[]))[1:12])
     with ordinality as req(id,ord)
  join public.topics t on t.id=req.id
  where t.visibility='public'
