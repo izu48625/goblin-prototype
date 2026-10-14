@@ -27,8 +27,9 @@ for(const [page,...patterns] of terms){
 assert(jaLegal.includes('最終更新：2026年10月14日'));
 assert(enLegal.includes('Last updated: October 14, 2026'));
 assert(jaIntro.includes('id="rating-guide"')&&enIntro.includes('id="rating-guide"'));
-assert(jaIntro.includes('架空データ')&&enIntro.includes('fictional examples'),
-  'Do not present made-up example work as genuine public user submissions');
+assert(jaIntro.includes('サンプルデータ')&&jaIntro.includes('実在')&&
+  enIntro.includes('sample values')&&enIntro.includes('not actual published works'),
+  'Sample scores must not be presented as genuine public user submissions');
 assert(jaIntro.includes('攻撃8・守備6・連携7')&&enIntro.includes('scores 8, 6, and 7'),
   'Original scoring guide must include concrete useful example');
 assert(jaIntro.includes('実際の統計')&&enIntro.includes('factual statistics'));
