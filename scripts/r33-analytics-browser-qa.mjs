@@ -28,7 +28,8 @@ try{
     assert.equal(state.events.length,0,'No events before consent');
     assert.equal(state.consent,'unset');
     if(group==='landing_en')assert.equal(await page.locator('#sm-analytics-consent button').last().textContent(),'Allow analytics');
-    assert.equal(state.events[0]?.params.page_group,group);
+    const debugGroup=await page.evaluate(()=>{window.SM_ANALYTICS.event('page_view');return window.SM_ANALYTICS.state().events[0]?.params.page_group});
+    assert.equal(debugGroup,group,'Safe page category must be retained in offline debug');
   }
   await page.goto(BASE+'/discover.html?analyticsDebug=1',{waitUntil:'domcontentloaded'});
   await page.locator('[data-view="community"]').click();
