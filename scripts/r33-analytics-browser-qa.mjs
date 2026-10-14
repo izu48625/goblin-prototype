@@ -14,16 +14,20 @@ try{
     ['/index.html?community=57b432ed-fbf2-4261-b57d-9e0f27356d2e&analyticsDebug=1','community'],
     ['/discover.html?analyticsDebug=1','discover'],
     ['/public.html?id=SECRET-UNLISTED-ID&analyticsDebug=1','published'],
-    ['/my.html?analyticsDebug=1','my_works']
+    ['/my.html?analyticsDebug=1','my_works'],
+    ['/ja/?analyticsDebug=1','landing_ja'],
+    ['/en/?analyticsDebug=1','landing_en']
   ];
   for(const [url,group] of routes){
     await page.goto(BASE+url,{waitUntil:'domcontentloaded'});
     await page.waitForFunction(()=>!!window.SM_ANALYTICS);
     const state=await page.evaluate(()=>window.SM_ANALYTICS.state());
-    assert.equal(state.configured,false);
+    assert.equal(state.configured,true);
     assert.equal(state.loaded,false);
     assert.equal(state.debug,true);
-    assert.equal(state.events[0]?.name,'page_view');
+    assert.equal(state.events.length,0,'No events before consent');
+    assert.equal(state.consent,'unset');
+    if(group==='landing_en')assert.equal(await page.locator('#sm-analytics-consent button').last().textContent(),'Allow analytics');
     assert.equal(state.events[0]?.params.page_group,group);
   }
   await page.goto(BASE+'/discover.html?analyticsDebug=1',{waitUntil:'domcontentloaded'});
@@ -52,7 +56,7 @@ try{
   assert(!('page_location' in work[0].params));
   assert(!('work_code' in work[1].params));
   assert(!items.some(x=>x.name==='not_on_allowlist'));
-  assert.equal(requests.length,0,'Unconfigured analytics made third-party requests');
+  assert.equal(requests.length,0,'Consent-gated analytics made third-party requests before opt-in');
 
   // BASIC consent mode: consent UI is configured on demand, no Google tag
   // network request until visitor explicitly grants analytics permission.
