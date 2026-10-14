@@ -31,7 +31,7 @@ GitHub Actions [`R38 P17 Read-Only Prelaunch Acceptance`](.github/workflows/r38-
 | 公開範囲・SEO・通報 | 自動契約テスト済み | 実運用での権利・UGC対応は継続 |
 | 公開スコア横スクロール | R38 P16反映済み | モバイルで文字・列幅を縮小。実機の最終外観は本人確認 |
 | 日英SEO・robots・Public限定sitemap | ソースと配信を監査 | 実際のGoogle検索登録は未確認 |
-| GA4 | 意図的に無効 | `enabled:false`, `measurementId:''`。本人がPCから再開するまでは有効にしない |
+| GA4 | R45で再び無効化 | `enabled:false`, `measurementId:''`。同意画面・Googleタグ・送信なし。再開には本人の新たな依頼が必要 |
 | AdSense | 未申請・未配信 | 実広告コード・Publisher ID・正式ads.txtなし（プレビューのみ） |
 | 旧Vercel OGP | 要実配信確認 | GitHubに失効/no-store対策はあるが、独立Vercelホストと外部SNSキャッシュは別管理 |
 | 物理iPhone Safari | **未完了** | OS共有シート、写真保存、キーボード・下部バーを最終確認 |

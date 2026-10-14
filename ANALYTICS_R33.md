@@ -1,3 +1,9 @@
+# R45 decision (2026-10-14): GA4 paused
+
+The owner decided to pause GA4 while prioritizing a simple user experience. Current config is `enabled:false` and `measurementId:''`: GA4 consent UI, Google tag and GA4 telemetry are disabled. The original implementation remains dormant for possible later review. Earlier R33/R40 notes below are **historical only**. GA4 is not needed for AdSense or Google Search Console keyword queries.
+
+---
+
 # R40 GA4 activation update (2026-10-14)
 
 The owner supplied `G-ZT8N1BVEL8` and explicitly requested activation. GA4 is now configured, but loads only if the visitor accepts analytics; no Google tag is loaded before consent. AdSense is still disabled. Japanese and English introduction pages are included. The R33 notes below describe the **historical October 11 pre-activation state** and no longer represent the current GA4 status. Owner must still verify real-time data in their Analytics account after deployment.

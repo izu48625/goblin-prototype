@@ -1,3 +1,9 @@
+# CURRENT STATUS — R45 (2026-10-14)
+
+**Owner requested GA4 to be paused.** Current source is `cloud/analytics-config.js` with `enabled:false` and `measurementId:''`: no GA4 banner or Google Analytics requests. The activation steps below are historical, not the current operating procedure. Account deletion is unnecessary. Future reactivation requires owner approval and privacy/consent review. AdSense remains separate and disabled.
+
+---
+
 # Stats Maker R40: GA4 opt-in activation
 
 Updated 2026-10-14 · `izu48625/goblin-prototype` · `statsmaker.app`
