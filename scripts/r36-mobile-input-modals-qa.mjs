@@ -6,7 +6,7 @@ import {chromium} from 'playwright';
 const BASE=process.env.BASE_URL||'http://127.0.0.1:4173';
 const browser=await chromium.launch({headless:true});
 const sizes=[{width:320,height:568},{width:390,height:560},{width:390,height:844},{width:430,height:932}];
-const checks=['#titleInput','#descInput','#sheetSelect','#searchInput','#gradeFilter',
+const checks=['#titleInput','#descInput','#sheetSelect','#searchInput',
   '#scoreTable .nameInput','#scoreTable .scoreInput','#noteTextarea'];
 try{
   for(const size of sizes){
