@@ -213,21 +213,19 @@
     if(p>=50)return 'heat-d';
     return 'heat-e';
   }
-  // R38 P10: selected G5 mockup; SS red-purple unchanged.
-  // Deepen smoky orange S, olive/yellow-green A and dusky blues below A.
-  // Preserve translucent RGBA, stable underlay, scores and 10/100 mode.
-  // R38 P9: deeper translucent RGBA tints on a stable CSS base layer.
-  // CSS uses background-image:linear-gradient(tint,tint) over #101b30,
-  // rather than rendering a solid hex or raw translucent background-color.
-  // Keep this palette synchronized with base/css/style.css.
+  // R38 P13: photo-locked rendered sRGB palette via authentic translucent
+  // RGBA composition on a shared #101b30 backing. Compare final painted
+  // pixels to IMG_7846(1).png, not these tint RGB values in isolation.
+  // Keep CSS selectors and inline updates in sync. No change to grading
+  // thresholds, stored values, public works, or 10/100 score behavior.
   const scoreTileColors=Object.freeze({
-    'heat-ss':'rgba(218,94,159,.52)', // 95–100%
-    'heat-s':'rgba(168,80,34,.49)',  // 90–94%
-    'heat-a':'rgba(94,116,35,.48)',  // 80–89%
-    'heat-b':'rgba(55,119,100,.36)',  // 70–79%
-    'heat-c':'rgba(45,100,156,.34)',  // 60–69%
-    'heat-d':'rgba(51,82,135,.27)',  // 50–59%
-    'heat-e':'rgba(71,87,114,.17)'   // 0–49%
+    'heat-ss':'rgba(116,60,74,.42)', // 95–100%
+    'heat-s':'rgba(122,84,62,.35)',  // 90–94%
+    'heat-a':'rgba(110,99,57,.32)',  // 80–89%
+    'heat-b':'rgba(40,89,89,.29)',  // 70–79%
+    'heat-c':'rgba(39,72,103,.31)',  // 60–69%
+    'heat-d':'rgba(37,64,85,.24)',  // 50–59%
+    'heat-e':'rgba(31,47,53,.20)'   // 0–49%
   });
   function scoreTileColor(v){return scoreTileColors[heatClass(v)]||'';}
   function esc(s){
