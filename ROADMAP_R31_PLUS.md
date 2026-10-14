@@ -1,5 +1,7 @@
 # Stats Maker 正式開発ロードマップ — R31以降
 
+> **2026-10-14 R49 AdSense申請準備：** R48のナビ・SEO等のCI成功。Public作品11件の説明空欄0・25文字未満0・仮タイトル0を再確認。完全一致スナップショット2組（計4件）は作者目視判断を残す。画像URL0/60対象、通報・問い合わせレコード各0（いずれも監査時点）。次は**本人の権利確認→AdSenseアカウント作成→発行されたサイト確認タグ実装→本人の審査依頼**。本物のPublisher IDがない限り広告スクリプト・`ads.txt`・CMPを無断有効化しない。詳細：`R39_P1_ADSENSE_REGISTRATION_PREP.md`。GA4はR45でOFF。
+
 > **2026-10-14 SEO最新状況：** Search Console所有権確認・サイトマップ送信・日英紹介ページのGoogle登録は本人確認済み。R47で日英ガイド4ページと検索向け説明を改善。以後はSearch Consoleの検索クエリ・CTR・順位の実データに基づいて改善する。過去の「Search Console未完了」は当時の履歴であり、再登録やDNS認証のやり直しは不要。GA4は停止を維持。
 
 更新日: 2026-10-11
@@ -8,18 +10,13 @@
 
 ## 現在の作業状態・次に進める開発（2026-10-11）
 
-### 保留：Google Analytics 4（GA4）無料アクセス解析の有効化
+### 現在の方針：GA4停止（R45）
 
-**状態：ユーザー指示によりPCで操作できる時まで一時停止。ここから先を勝手に進めない。**
-- GA4の「Stats Maker」アカウント／プロパティとStats Makerの**ウェブデータストリームは本人が作成済み**。新しく作り直さない。
-- iPhone SafariではGoogle Analytics管理画面の表示が崩れ、ストリーム詳細と測定ID（`G-...`）を取得できなかった。
-- **PCでの再開手順**：同じGoogleアカウントで `https://analytics.google.com/` → 管理 → データ ストリーム → 作成済みStats Maker Web → 測定IDを確認 → このチャットへ測定IDを送る。
-- R33の `cloud/analytics.js`（プライバシーに配慮したイベント、同意機構）および `ANALYTICS_R33.md` は保持。**`cloud/analytics-config.js` は `enabled:false`、`measurementId:''` のまま固定**し、解析イベントを外部送信しない。
-- ID受領後もいきなり有効化せず、プライバシーポリシー／適切な同意管理を確認し、本人承認のうえで有効化→本番で検証する。無料運用を維持する。
-- ここでの「Google Analytics」は**解析サービス**のことで、ロードマップから除外したGoogle/Apple **ログイン認証**の復活を意味しない。
-- 期限や自動リマインダーは設定しない。ユーザーから再開の指示が来たときに再開。
+- ユーザー指示によりGA4は不要のため停止。**PCでの測定ID設定待ちや自動再開はしない。**
+- `cloud/analytics-config.js` は `enabled:false`、`measurementId:''`。広告準備とは独立し、本人の明示的な方針変更までは計測オフを維持。
+- Google/Appleログイン新設や有料解析サービス導入も不要。Google Search Console/Bingで検索実測を確認。
 
-### R34 進行中：日英の検索流入を増やす「公開作品SEO」＋AdSense審査の土台
+### R34〜R47 完了：日英の公開作品SEO＋AdSense審査の土台
 
 1. **SEO監査**：実際の `/p/:id`、`/public`、`/discover` のindex/noindex、canonical、OGP、作品データのレンダリング、検索エンジンの見え方を調査（現状 `worker/index.js` のOGP中継は `noindex,follow`、静的 `sitemap.xml` は未配置）。
 2. **Publicのみ検索対象**：一般公開作品だけインデックス対象を検討し、Unlisted／Private、評価中の下書き、所有者専用画面を検索から保護。作品タイトルや内容は公開時の同意・設定に沿って表示する。
@@ -97,8 +94,8 @@ Heatmap / Waffle / Stat Board は現行のユーザー向け対象外。内部�
 - 日本語 `/ja/` と英語 `/en/` に独立した検索用コンテンツ、canonical、hreflang。
 - 一般公開作品のみ `/work/:id` に読み取り専用SEO紹介ページ。Public-only動的サイトマップ、robots.txt。詳しくは [SEO_R34.md](SEO_R34.md)。
 - GA4保留のままSEO作業は独立して実施。紹介ページの文章は保持し、特徴紹介カードをコンパクト化。紹介ページにも共通固定バー（HOME｜Discover｜JA/EN）を適用。
-- **[ ] 未完了：Google Search Console（無料）に `statsmaker.app` のプロパティを登録・所有権を確認。** DNS変更や外部アカウント操作は本人が実施・承認する。
-- **[ ] 未完了：Search Console → インデックス作成 → サイトマップ → `https://statsmaker.app/sitemap.xml` を送信。** 送信後は読み込み結果・インデックス状況・英語/日本語の検索クエリを確認する。実施済みと偽らない。
+- **[x] 完了（2026-10-14）：Google Search Console に `statsmaker.app` を登録し、本人が所有権確認済み。** 再度DNS認証を行わない。
+- **[x] 完了（2026-10-14）：`https://statsmaker.app/sitemap.xml` をSearch Consoleへ送信し、正常処理を本人が確認済み。** 日英検索クエリ等は実測データ蓄積後に改善。
 - [ ] 公開作品だけの `/work/:id` がインデックスされ、URL限定・非公開作品が検索対象外であることを継続監視。
 - 検索順位・登録は保証されない。実際のサイトでの検証・改善を継続。
 
@@ -151,7 +148,7 @@ Heatmap / Waffle / Stat Board は現行のユーザー向け対象外。内部�
 ## R38 — AdSense審査準備・申請
 
 - **R38 P1（SEO・AdSense事前監査）**：日英紹介ページ、Public限定作品SEO、問い合わせ導線、HTMLの軽量性、公開サイトの読み取り専用監査を実施。詳細は `R38_ADSENSE_READINESS.md`。広告コードとGA4は引き続き無効。
-- Search Consoleのドメイン所有権確認・サイトマップ送信は**未実施**（ユーザーによるGoogleアカウント操作が必要）。
+- Search Consoleのドメイン所有権確認・サイトマップ送信は**2026-10-14本人が完了済み**。AdSenseのサイト接続とは別工程。
 - AdSense publisher IDは未確認のため、`ads.txt`や検証コードを仮の値で公開しない。申請・配信・Googleの設定変更は**本人の明示承認後のみ**。
 - EEA・英国・スイスへの広告配信にはGoogleの地域別CMP要件などを確認し、必要な同意管理を選ぶ。開発用広告プレビューを実配信と混同しない。
 - Googleの審査結果は保証できない。独自の公開作例、UGC管理、権利処理、実際の運営者情報の確定は運用上の残作業。
