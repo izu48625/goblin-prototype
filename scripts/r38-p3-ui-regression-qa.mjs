@@ -193,6 +193,88 @@ try{
 
   await page.setViewportSize({width:390,height:844});
 
+  // R38 P14: screenshot-matched palette is default ON. A single toggle next
+  // to the "All" grade filter neutralizes table/average/fit/overview displays
+  // without touching score values, grade classes or the sheet's stored JSON.
+  const toggle=home.locator('#scoreColorToggleBtn');
+  await toggle.waitFor({state:'visible'});
+  assert.equal(await toggle.getAttribute('aria-pressed'),'true');
+  assert.equal(await toggle.innerText(),'色 ON');
+  const stateBefore=await home.locator('body').evaluate(()=>JSON.stringify(window.__statsMakerGetActiveSheet()));
+  const checkColor=async(expected)=>{
+    return home.locator('body').evaluate(()=>{
+      const selectors=[
+        '#scoreTable tbody tr:first-child td.scoreCell',
+        '#scoreTable tbody tr:first-child td.avgCell',
+        '.fitTable tbody tr:first-child td.fitScoreCell',
+        '.fitTable tbody tr:first-child td.fitAverageCell',
+        '.overviewMetric.heat-ss'
+      ];
+      return selectors.map(sel=>{
+        const el=document.querySelector(sel);
+        if(!el)throw new Error('Missing color sample selector '+sel);
+        return {selector:sel,color:getComputedStyle(el).backgroundColor,
+          grade:[...el.classList].find(c=>c.startsWith('heat-'))};
+      });
+    });
+  };
+  const original=await checkColor();
+  assert.equal(original[0].color,'rgba(116, 60, 74, 0.42)');
+  assert(original.slice(1).every(x=>x.color.startsWith('rgba(')),
+    'Initial grades missing outside the regular score table');
+  for(const width of [1365,390,320]){
+    await page.setViewportSize({width,height:844});
+    const geometry=await home.locator('.filterBar').evaluate(el=>{
+      const select=el.querySelector('#gradeFilter').getBoundingClientRect();
+      const toggle=el.querySelector('#scoreColorToggleBtn').getBoundingClientRect();
+      const container=el.getBoundingClientRect();
+      return {selectRight:select.right,toggleLeft:toggle.left,toggleRight:toggle.right,
+        filterRight:container.right,buttonHeight:toggle.height};
+    });
+    assert(geometry.toggleLeft>=geometry.selectRight-1,
+      'Color switch must stay to the right of All filter at '+width);
+    assert(geometry.toggleRight<=geometry.filterRight+1 && geometry.buttonHeight>=30,
+      'Color switch exceeds filter row or is too short at '+width);
+    await toggle.click();
+    assert.equal(await toggle.innerText(),'色 OFF');
+    assert.equal(await toggle.getAttribute('aria-pressed'),'false');
+    assert(await home.locator('body').evaluate(el=>el.classList.contains('score-colors-off')));
+    const off=await checkColor();
+    assert(off.every(x=>x.color==='rgb(16, 27, 48)'),
+      'OFF must neutralize normal/average/fit/overview tile backgrounds: '+JSON.stringify(off));
+    const stillSame=await home.locator('body').evaluate(()=>JSON.stringify(window.__statsMakerGetActiveSheet()));
+    assert.equal(stillSame,stateBefore,'Color visibility toggle mutated scores or sheet metadata');
+    await toggle.click();
+    assert.equal(await toggle.innerText(),'色 ON');
+    assert.equal(await toggle.getAttribute('aria-pressed'),'true');
+    assert.deepEqual((await checkColor()).map(x=>x.color),
+      original.map(x=>x.color),'ON must restore original photo palette in every view');
+    console.log('R38 P14 all-view score color toggle PASS',
+      process.env.BROWSER_ENGINE||'chromium',width);
+  }
+  await page.setViewportSize({width:390,height:844});
+  // Persistence belongs to a separate preference key, not the saved work.
+  await toggle.click();
+  assert.equal(await toggle.getAttribute('aria-pressed'),'false');
+  await page.waitForTimeout(950); // let prior score edits autosave normally
+  await page.reload({waitUntil:'domcontentloaded'});
+  await home.locator('#scoreColorToggleBtn').waitFor({state:'visible'});
+  assert.equal(await toggle.getAttribute('aria-pressed'),'false','OFF was not restored on reload');
+  assert.equal(await toggle.innerText(),'色 OFF');
+  assert((await checkColor()).every(x=>x.color==='rgb(16, 27, 48)'));
+  assert.equal(await home.locator('body').evaluate(()=>localStorage.getItem('statsMaker.scoreColorsVisible.v1')),'off');
+  const afterReload=await home.locator('body').evaluate(()=>window.__statsMakerGetActiveSheet().rows[0].scores[0]);
+  assert.equal(Number(afterReload),97,'score values not preserved through reload');
+  // Verify JA/EN dynamic state label and retain default JA for remaining QA.
+  await home.locator('body').evaluate(()=>window.SM_I18N.setLanguage('en'));
+  assert.equal(await toggle.innerText(),'Color OFF');
+  await home.locator('body').evaluate(()=>window.SM_I18N.setLanguage('ja'));
+  assert.equal(await toggle.innerText(),'色 OFF');
+  await toggle.click();
+  assert.equal(await toggle.innerText(),'色 ON');
+  assert.equal(await home.locator('body').evaluate(()=>localStorage.getItem('statsMaker.scoreColorsVisible.v1')),'on');
+  console.log('R38 P14 color setting survives reload and translates JA/EN PASS');
+
   const nav=page.locator('.globalLocaleBar');
   assert.equal(await nav.locator('.globalIntroBtn').count(),1);
   assert.equal(await nav.locator('.globalIntroBtn').innerText(),'紹介');
