@@ -1,4 +1,5 @@
 import {communityGateway,securityConfig} from './community-gateway.js';
+import {discoverPublicRequest} from './discover-public.js';
 import {workReportGateway} from './work-report.js';
 import {contactGateway} from './legal-contact.js';
 import {publicWorkHtml,sitemapIndex,staticSitemap,workSitemap} from './seo.js';
@@ -91,7 +92,7 @@ async function proxyLegacyOg(request){
 }
 
 export default {
-  async fetch(request,env){
+  async fetch(request,env,ctx){
     const url=new URL(request.url);
     if(url.pathname==='/sitemap.xml'||url.pathname==='/sitemap-static.xml'||/^\/sitemap-works-[1-9][0-9]*\.xml$/.test(url.pathname)){
       if(request.method!=='GET'&&request.method!=='HEAD')
@@ -106,6 +107,7 @@ export default {
         return new Response('Method Not Allowed',{status:405,headers:{Allow:'GET, HEAD'}});
       return publicWorkHtml(seoWork[1]);
     }
+    if(url.pathname==='/api/discover')return discoverPublicRequest(request,env,ctx);
     if(url.pathname==='/api/health'){
       return Response.json({ok:true,service:'stats-maker',release:'r26p4-prep',hosting:'cloudflare-workers',ogBackend:'vercel-stage1'},{headers:{'Cache-Control':'no-store'}});
     }
