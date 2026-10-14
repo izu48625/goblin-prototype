@@ -36,6 +36,10 @@ assert(analytics.includes('enabled:false')&&analytics.includes("measurementId:''
   'GA4 must stay disabled until owner grants explicit approval');
 assert(ads.includes("get('adPreview')==='1'"),
   'Only development preview ads may be displayed before account approval');
+const isPlaceholderTitle=title=>/^(?:新しいお題|untitled|new topic|new sheet|無題)(?:\\s*\\d+)?$/i.test(title);
+assert(isPlaceholderTitle('新しいお題 10'),'numbered placeholder title regression');
+assert(isPlaceholderTitle('Untitled 7'),'English numbered placeholder title regression');
+assert(!isPlaceholderTitle('新しいお題で友人の能力を比較'),'legitimate longer title must not be flagged');
 console.log('R39 P2 JA/EN original landing content, UGC terms and pre-AdSense privacy QA PASS');
 
 // Read-only public listing quality check. No guessing about image copyrights;
@@ -83,7 +87,7 @@ if(process.argv[2]==='public-readonly'){
     const snapshot=work.snapshot && typeof work.snapshot==='object'?work.snapshot:{};
     const targets=Array.isArray(snapshot.rows)?snapshot.rows:[];
     const criteria=Array.isArray(snapshot.criteria)?snapshot.criteria:[];
-    if(!title || /^(?:新しいお題|untitled|new topic|new sheet|無題)(?:\s*\d+)?$/i.test(title))
+    if(!title || isPlaceholderTitle(title))
       reasons.push('unhelpful-title');
     if(!description)reasons.push('empty-description');
     else if(description.length<25)reasons.push('thin-description');
