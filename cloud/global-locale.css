@@ -67,7 +67,8 @@ html.embeddedSiteFrame #editorHomeBtn{display:none!important}
 }
 
 /* R35 P3: discoverable support dropdown shared by Home, Discover, Public and intro. */
-.globalSupportMenu{position:relative;min-width:0;flex-shrink:0}
+/* Localized intro pages style generic <details>; keep the global Help trigger aligned in the 44px bar. */
+.globalSupportMenu{position:relative;min-width:0;flex-shrink:0;padding:0;border:0}
 .globalSupportMenu>summary{
   display:flex;align-items:center;justify-content:center;cursor:pointer;
   min-height:35px;padding:0 11px;list-style:none;border:1px solid #2a496a;

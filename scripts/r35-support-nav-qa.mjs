@@ -40,11 +40,20 @@ try{
             scrollWidth:bar.scrollWidth,clientWidth:bar.clientWidth,
             navLeft:nav.getBoundingClientRect().left,
             navRight:nav.getBoundingClientRect().right,
+            navTop:nav.getBoundingClientRect().top,
+            navBottom:nav.getBoundingClientRect().bottom,
+            supportPadding:getComputedStyle(bar.querySelector('.globalSupportMenu')).paddingTop,
+            supportBorder:getComputedStyle(bar.querySelector('.globalSupportMenu')).borderBottomWidth,
             controlsLeft:controls.getBoundingClientRect().left,
             controlsRight:controls.getBoundingClientRect().right};
         });
         assert(measured.scrollWidth<=measured.clientWidth+2,'Support navbar horizontal overflow '+path+' '+JSON.stringify(measured));
         assert(measured.navLeft>=-1&&measured.navRight<=width+1,'Nav outside viewport '+path+' '+JSON.stringify(measured));
+        // Landing FAQ CSS targets all <details>; it must never enlarge the common Help nav.
+        assert(measured.navTop>=-1&&measured.navBottom<=measured.barHeight+2,
+          'Support nav vertically overflows 44px toolbar '+path+' '+JSON.stringify(measured));
+        assert(measured.supportPadding==='0px'&&measured.supportBorder==='0px',
+          'Generic FAQ details styling leaked into shared Help '+path+' '+JSON.stringify(measured));
         assert(measured.controlsRight<=width+1&&measured.controlsLeft>=measured.navRight-1,'Controls overlap '+path+' '+JSON.stringify(measured));
         assert(measured.barHeight>=40&&measured.barHeight<=52,'Navbar height changed '+JSON.stringify(measured));
         await bar.locator('.globalSupportMenu summary').click();
