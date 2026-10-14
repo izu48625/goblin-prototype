@@ -40,7 +40,11 @@ try{
     assert.equal(await bar.locator('[data-global-lang]').count(),2);
     assert.equal(await bar.locator('[data-global-lang="'+language+'"]').getAttribute('aria-pressed'),'true');
     assert.equal(await page.locator('header nav').count(),0,'Landing has duplicate old top navigation');
-    assert.equal(await page.locator('.grid article').count(),4);
+    // Keep the original four compact feature cards, but allow the new
+    // standalone R39 P2 original scoring-guide section below them.
+    assert.equal(await page.locator('.grid').first().locator('article').count(),4);
+    assert.equal(await page.locator('#rating-guide .grid article').count(),4,
+      'Original score-method guide must have four useful steps');
     assert.equal(await page.locator('.hero h1').count(),1);
     assert.equal(await page.locator('main details').count(),3);
     const geometry=await page.evaluate(()=>{
