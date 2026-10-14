@@ -380,9 +380,16 @@
         const response=await fetch('/api/discover?'+params.toString(),{
           headers:{Accept:'application/json'},cache:'no-store'
         });
+        if(response.status===429||response.status===400){
+          const rejected=new Error('Discover request rejected: '+response.status);
+          rejected.skipFallback=true;
+          throw rejected;
+        }
         if(!response.ok)throw new Error('Discover gateway unavailable');
         data=await response.json();
       }catch(gatewayError){
+        // Never bypass the public gateway's abuse/validation response.
+        if(gatewayError?.skipFallback)throw gatewayError;
         if(!sb)throw gatewayError;
         const fallback=await sb.rpc('discover_public_works_v1',args);
         data=fallback.data;
