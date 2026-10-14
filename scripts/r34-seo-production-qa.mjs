@@ -1,7 +1,18 @@
 import assert from 'node:assert/strict';
+import {readFile} from 'node:fs/promises';
 
 const base=(process.env.BASE_URL||'https://statsmaker.app').replace(/\/+$/,'');
 const sleep=ms=>new Promise(resolve=>setTimeout(resolve,ms));
+// Match the currently committed page metadata; changing SEO copy must not
+// break production QA merely because an outdated marketing phrase was removed.
+const pages=await Promise.all(['en','ja'].map(async lang=>{
+  const source=await readFile(new URL('../'+lang+'/index.html',import.meta.url),'utf8');
+  const title=source.match(/<title>([^<]+)<\/title>/)?.[1];
+  const description=source.match(/<meta name="description" content="([^"]+)">/)?.[1];
+  const script=source.match(/(?:\/?cloud\/global-locale\.js\?v=[A-Za-z0-9.-]+)/)?.[0];
+  assert(title&&description&&script,'Missing indexed landing metadata or shared nav: '+lang);
+  return {lang,path:'/'+lang+'/',title,description,script};
+}));
 const fetchText=async(path)=>{
   const response=await fetch(base+path,{headers:{'User-Agent':'StatsMakerR34ReadOnlyQA/1.0'},redirect:'follow'});
   return {response,text:await response.text()};
@@ -9,8 +20,11 @@ const fetchText=async(path)=>{
 async function awaitRelease(){
   for(let i=0;i<30;i++){
     try{
-      const [en,map]=await Promise.all([fetchText('/en/'),fetchText('/sitemap.xml')]);
-      if(en.response.ok&&en.text.includes('Turn ratings and comparisons into shareable charts')&&
+      const [en,ja,map]=await Promise.all([fetchText('/en/'),fetchText('/ja/'),fetchText('/sitemap.xml')]);
+      const live=[en,ja];
+      if(live.every((p,i)=>p.response.ok&&
+          p.text.includes('<title>'+pages[i].title+'</title>')&&
+          p.text.includes(pages[i].script))&&
         map.response.ok&&map.text.includes('<sitemapindex'))return;
     }catch(e){console.log('R34 release poll',String(e))}
     await sleep(5000);
@@ -18,15 +32,17 @@ async function awaitRelease(){
   throw new Error('R34 English SEO landing and XML sitemap not deployed after 150 seconds');
 }
 await awaitRelease();
-for(const [path,lang,fragment] of [
-  ['/en/','en','Free Chart Maker'],['/ja/','ja','無料グラフ作成']]){
+for(const {path,lang,title,description,script} of pages){
   const {response,text}=await fetchText(path);
   assert.equal(response.status,200,path);
   assert(text.includes('<html lang="'+lang+'">'));
   assert(text.includes('hreflang="en"'));
   assert(text.includes('hreflang="ja"'));
   assert(text.includes('href="https://statsmaker.app/'+lang+'/"'));
-  assert(text.includes(fragment));
+  assert(text.includes('<title>'+title+'</title>'),'Production SEO title differs from current source: '+path);
+  assert(text.includes('<meta name="description" content="'+description+'">'),'Production SEO description mismatch: '+path);
+  assert(text.includes(script),'Production shared menu JS is stale: '+path);
+  assert(text.includes('chart-guide.html')&&text.includes('png-guide.html'),'Practical guides not linked from '+path);
   console.log('LIVE SEO LANDING PASS',path,response.url);
 }
 const robots=await fetchText('/robots.txt');
