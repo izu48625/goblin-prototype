@@ -5,12 +5,17 @@
    * Default: 0 network requests, 0 third-party scripts, 0 stored event data.
    * No visitor identifier, work title, search terms, scores, URL queries,
    * publication IDs, account IDs, or raw event payloads are ever transmitted.
-   * GDPR-friendly BASIC consent: no Google script until explicit opt-in.
+   * Geolocation-aware: JP may track without a banner, other/unknown must opt in.
+   * No Google script or event before the first-party Cloudflare geo check.
    */
   const cfg=window.SM_ANALYTICS_CONFIG||{};
   const valid=cfg.enabled===true&&/^G-[A-Z0-9]{6,16}$/.test(cfg.measurementId||'');
   const framed=window.parent!==window;
-  const consentKey='sm-analytics-consent-v1';
+  const consentKey='sm-analytics-consent-v2';
+  const legacyConsentKey='sm-analytics-consent-v1';
+  let region='checking';
+  let regionResolved=false;
+  let source='none';
   const debug=new URLSearchParams(location.search).get('analyticsDebug')==='1';
   const debugEvents=[];
   const events=new Set([
@@ -101,10 +106,34 @@
   let consent='unset';
   try{
     const stored=localStorage.getItem(consentKey);
-    if(stored==='granted'||stored==='denied')consent=stored;
+    if(stored==='granted'||stored==='denied'){
+      consent=stored;
+      source='explicit';
+    }else if(localStorage.getItem(legacyConsentKey)==='denied'){
+      // Honor an earlier opt-out, but don't grandfather old affirmative
+      // consent after the regional policy change.
+      consent='denied';
+      source='legacy_denial';
+    }
   }catch{}
+  async function detectRegion(){
+    // Strictly use the same-origin edge decision, never browser locale,
+    // URL country flags, user-supplied headers or IP geolocation from JS.
+    // Timeout/errors/malformed responses all require an explicit choice.
+    const controller=new AbortController();
+    const timer=setTimeout(()=>controller.abort(),4500);
+    try{
+      const response=await fetch('/api/analytics-region',{
+        method:'GET',credentials:'same-origin',cache:'no-store',signal:controller.signal
+      });
+      if(!response.ok)return 'consent_required';
+      const body=await response.json();
+      return body?.mode==='jp'?'jp':'consent_required';
+    }catch{return 'consent_required'}
+    finally{clearTimeout(timer)}
+  }
   function pushGoogle(item){
-    if(!loaded||consent!=='granted'||typeof window.gtag!=='function')return;
+    if(!regionResolved||!loaded||consent!=='granted'||typeof window.gtag!=='function')return;
     const fields={...item.params};
     if(item.name==='page_view'){
       fields.page_title='Stats Maker · '+fields.page_group;
@@ -131,7 +160,7 @@
     pushGoogle(item);
   }
   function loadGA4(){
-    if(!valid||loaded||consent!=='granted'||(framed&&window.parent.SM_ANALYTICS))return;
+    if(!valid||!regionResolved||loaded||consent!=='granted'||(framed&&window.parent.SM_ANALYTICS))return;
     loaded=true;
     window.dataLayer=window.dataLayer||[];
     window.gtag=function(){window.dataLayer.push(arguments)};
@@ -155,15 +184,20 @@
   function setConsent(value){
     if(value!=='granted'&&value!=='denied')return;
     consent=value;
+    source='explicit';
     try{localStorage.setItem(consentKey,value)}catch{}
     document.querySelector('#sm-analytics-consent')?.remove();
     document.querySelector('#basicRoot')?.style.removeProperty('top');
     if(value==='granted')loadGA4();
-    else if(loaded&&typeof window.gtag==='function'){
-      window.gtag('consent','update',{
-        analytics_storage:'denied',ad_storage:'denied',
-        ad_user_data:'denied',ad_personalization:'denied'
-      });
+    else if(loaded){
+      // Loaded Google scripts cannot reliably be unloaded in-place;
+      // reload with the persisted denial so no new GA4 library is fetched.
+      if(typeof window.gtag==='function')
+        window.gtag('consent','update',{
+          analytics_storage:'denied',ad_storage:'denied',
+          ad_user_data:'denied',ad_personalization:'denied'
+        });
+      location.reload();
     }
   }
   function notice(force=false){
@@ -308,7 +342,7 @@
   }
   window.SM_ANALYTICS={
     event:dispatch,consent:()=>consent,
-    state:()=>({configured:valid,consent,loaded,debug,events:debugEvents.slice()}),
+    state:()=>({configured:valid,consent,loaded,region,regionResolved,source,debug,events:debugEvents.slice()}),
     setConsent
   };
   function start(){
@@ -317,8 +351,25 @@
     if(valid||debug)observeLiveAds();
     // Prevent duplicate page views for Home's same-origin editable iframe.
     if(!framed){
-      if(valid&&consent==='granted')loadGA4();
-      else if(valid&&consent==='unset')notice();
+      if(valid){
+        detectRegion().then(decision=>{
+          region=decision;
+          regionResolved=true;
+          if(consent==='denied')return;
+          if(consent==='granted'){
+            // Only v2 explicitly-recorded consent is trusted across regions.
+            loadGA4();
+            return;
+          }
+          if(region==='jp'){
+            // JP default does NOT write 'granted' to storage. Traveling from
+            // JP to EU/UK or unknown must not inherit a fabricated opt-in.
+            consent='granted';
+            source='jp_default';
+            loadGA4();
+          }else notice();
+        });
+      }
       if(valid){
         const observer=new MutationObserver(()=>{settings();if(document.getElementById('sm-analytics-settings'))observer.disconnect()});
         observer.observe(document.body,{childList:true,subtree:true});

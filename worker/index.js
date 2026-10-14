@@ -2,6 +2,7 @@ import {communityGateway,securityConfig} from './community-gateway.js';
 import {discoverPublicRequest} from './discover-public.js';
 import {workReportGateway} from './work-report.js';
 import {contactGateway} from './legal-contact.js';
+import {analyticsRegionResponse} from './analytics-region.js';
 import {publicWorkHtml,sitemapIndex,staticSitemap,workSitemap} from './seo.js';
 const SUPABASE_URL='https://ibpdxbeltdwkquowjeay.supabase.co';
 const SUPABASE_KEY='sb_publishable_6abnwW_1p-U_Y_DefUXfFQ_Dz_Y2vsD';
@@ -108,6 +109,7 @@ export default {
       return publicWorkHtml(seoWork[1]);
     }
     if(url.pathname==='/api/discover')return discoverPublicRequest(request,env,ctx);
+    if(url.pathname==='/api/analytics-region')return analyticsRegionResponse(request);
     if(url.pathname==='/api/health'){
       return Response.json({ok:true,service:'stats-maker',release:'r26p4-prep',hosting:'cloudflare-workers',ogBackend:'vercel-stage1'},{headers:{'Cache-Control':'no-store'}});
     }
