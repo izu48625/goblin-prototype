@@ -1,3 +1,9 @@
+# Current SEO priorities — R45 (2026-10-14)
+
+GA4 is paused and is **not required for SEO**. Next: register `statsmaker.app` on Google Search Console (free), verify ownership, submit `https://statsmaker.app/sitemap.xml`, then inspect actual search queries, impressions, clicks, CTR and ranking by language/page/country. Search Console verification/sitemap submission are **not yet confirmed**. See `R45_SEO_SEARCH_WORDS_ROADMAP.md` for keyword planning. Avoid invented traffic figures or keyword-stuffed pages.
+
+---
+
 # Stats Maker R34 — 日本語・英語SEO／公開作品サイトマップ
 
 更新日: 2026-10-11

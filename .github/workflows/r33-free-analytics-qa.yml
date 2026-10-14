@@ -24,19 +24,19 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: "22"
-      - name: Static syntax and owner-approved opt-in GA4 checks
+      - name: Static syntax and owner-requested paused GA4 checks
         run: |
           node --check cloud/analytics-config.js
           node --check cloud/analytics.js
           node --check scripts/r33-analytics-browser-qa.mjs
-          node -e "const fs=require('fs');const c=fs.readFileSync('cloud/analytics-config.js','utf8');if(!c.includes('enabled:true')||!c.includes('G-ZT8N1BVEL8'))process.exit(1)"
+          node -e "const fs=require('fs');const c=fs.readFileSync('cloud/analytics-config.js','utf8');if(!c.includes('enabled:false')||!c.includes(\"measurementId:''\"))process.exit(1)"
       - name: Local build
         run: npm run build:cloudflare
       - name: Install isolated Chromium
         run: |
           npm install --no-save playwright@1.56.1
           npx playwright install --with-deps chromium
-      - name: Validate safe, consent-gated journeys
+      - name: Validate no consent UI and no GA4 network requests
         run: |
           python3 -m http.server 8765 --directory dist >/tmp/r33analytics.log 2>&1 &
           HTTP_PID=$!

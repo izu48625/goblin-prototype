@@ -10,105 +10,52 @@ try{
   });
   const page=await context.newPage();
   const routes=[
-    ['/index.html?analyticsDebug=1','home'],
-    ['/index.html?community=57b432ed-fbf2-4261-b57d-9e0f27356d2e&analyticsDebug=1','community'],
-    ['/discover.html?analyticsDebug=1','discover'],
-    ['/public.html?id=SECRET-UNLISTED-ID&analyticsDebug=1','published'],
-    ['/my.html?analyticsDebug=1','my_works'],
-    ['/ja/?analyticsDebug=1','landing_ja'],
-    ['/en/?analyticsDebug=1','landing_en']
+    '/index.html','/index.html?community=57b432ed-fbf2-4261-b57d-9e0f27356d2e',
+    '/discover.html','/public.html?id=SECRET-UNLISTED-ID',
+    '/my.html','/ja/','/en/'
   ];
-  for(const [url,group] of routes){
+  for(const url of routes){
     await page.goto(BASE+url,{waitUntil:'domcontentloaded'});
     await page.waitForFunction(()=>!!window.SM_ANALYTICS);
     const state=await page.evaluate(()=>window.SM_ANALYTICS.state());
-    assert.equal(state.configured,true);
-    assert.equal(state.loaded,false);
-    assert.equal(state.debug,true);
-    assert.equal(state.events.length,0,'No events before consent');
-    assert.equal(state.consent,'unset');
-    if(group==='landing_en')assert.equal(await page.locator('#sm-analytics-consent button').last().textContent(),'Allow analytics');
-    const debugGroup=await page.evaluate(()=>{window.SM_ANALYTICS.event('page_view');return window.SM_ANALYTICS.state().events[0]?.params.page_group});
-    assert.equal(debugGroup,group,'Safe page category must be retained in offline debug');
+    assert.equal(state.configured,false,url);
+    assert.equal(state.loaded,false,url);
+    assert.equal(await page.locator('#sm-analytics-consent').count(),0,'Consent UI shown '+url);
+    assert.equal(await page.locator('#sm-analytics-settings').count(),0,'GA4 settings shown '+url);
+    assert.equal(requests.length,0,'Unexpected GA4 network request '+url);
   }
+  // Even a visitor who previously accepted GA4 must no longer be tracked.
+  await page.goto(BASE+'/discover.html',{waitUntil:'domcontentloaded'});
+  await page.evaluate(()=>localStorage.setItem('sm-analytics-consent-v1','granted'));
+  await page.reload({waitUntil:'domcontentloaded'});
+  await page.waitForFunction(()=>!!window.SM_ANALYTICS);
+  assert.equal((await page.evaluate(()=>window.SM_ANALYTICS.state())).loaded,false);
+  assert.equal(requests.length,0,'Stored historic consent revived GA4');
+  assert.equal(await page.locator('#sm-analytics-consent').count(),0);
+
+  // Local-only debugging keeps the sanitizer, but does not contact Google.
   await page.goto(BASE+'/discover.html?analyticsDebug=1',{waitUntil:'domcontentloaded'});
-  await page.locator('[data-view="community"]').click();
+  await page.waitForFunction(()=>!!window.SM_ANALYTICS);
   const items=await page.evaluate(()=>{
     window.SM_ANALYTICS.event('work_view',{
       work_code:'deadbeef',visibility:'public',outcome:'success',
-      id:'REAL_USER_ID',score:99,title:'PRIVATE_TITLE',search:'PRIVATE_QUERY',
+      id:'PRIVATE_ID',score:88,title:'PRIVATE_TITLE',search:'PRIVATE_SEARCH',
       page_location:'https://statsmaker.app/public?id=SECRET'
     });
-    window.SM_ANALYTICS.event('work_view',{
-      work_code:'not-valid-private-id',visibility:'unlisted',foo:'secret'
-    });
-    window.SM_ANALYTICS.event('not_on_allowlist',{password:'none'});
-    return window.SM_ANALYTICS.state().events;
+    window.SM_ANALYTICS.event('work_view',{work_code:'SECRET',visibility:'unlisted'});
+    window.SM_ANALYTICS.event('not_allowed',{email:'secret@example.com'});
+    window.SM_ANALYTICS.setConsent('granted');
+    return window.SM_ANALYTICS.state();
   });
-  assert(items.some(x=>x.name==='discover_filter'&&x.params.filter_type==='community'));
-  const work=items.filter(x=>x.name==='work_view');
+  const work=items.events.filter(x=>x.name==='work_view');
   assert.equal(work.length,2);
   assert.equal(work[0].params.work_code,'deadbeef');
-  assert.equal(work[0].params.visibility,'public');
-  assert(!('id' in work[0].params));
-  assert(!('title' in work[0].params));
-  assert(!('score' in work[0].params));
-  assert(!('search' in work[0].params));
-  assert(!('page_location' in work[0].params));
+  for(const key of ['id','score','title','search','page_location'])
+    assert(!(key in work[0].params),'Leaked private field '+key);
   assert(!('work_code' in work[1].params));
-  assert(!items.some(x=>x.name==='not_on_allowlist'));
-  assert.equal(requests.length,0,'Consent-gated analytics made third-party requests before opt-in');
-
-  // BASIC consent mode: consent UI is configured on demand, no Google tag
-  // network request until visitor explicitly grants analytics permission.
-  await context.route('**/cloud/analytics-config.js*',async route=>{
-    await route.fulfill({
-      contentType:'application/javascript',
-      body:"window.SM_ANALYTICS_CONFIG={enabled:true,measurementId:'G-TEST1234'};"
-    });
-  });
-  await context.route(/^https:\/\/www\.googletagmanager\.com\/gtag\/js.*$/,async route=>{
-    await route.fulfill({
-      status:200,contentType:'application/javascript',
-      body:'window.__ga4DummyLoaded=true;'
-    });
-  });
-  await page.goto(BASE+'/discover.html?id=SECRET-UNLISTED-ID&utm_source=reddit&utm_medium=social&utm_campaign=launch&analyticsDebug=1',
-    {waitUntil:'domcontentloaded'});
-  await page.locator('#sm-analytics-consent').waitFor({state:'visible'});
-  assert.equal(requests.length,0,'GA4 was loaded before consent');
-  await page.locator('#sm-analytics-consent button').first().click();
-  assert.equal(await page.evaluate(()=>window.SM_ANALYTICS.consent()),'denied');
-  assert.equal(requests.length,0,'GA4 loaded after refusal');
-  await page.locator('.globalSupportMenu>summary').click();
-  await page.locator('#sm-analytics-settings').click();
-  await page.locator('#sm-analytics-consent button').last().click();
-  await page.waitForFunction(()=>window.__ga4DummyLoaded===true);
-  const after=await page.evaluate(()=>{
-    return {state:window.SM_ANALYTICS.state(),dataLayer:window.dataLayer.map(x=>Array.from(x))};
-  });
-  assert.equal(after.state.consent,'granted');
-  assert.equal(after.state.loaded,true);
-  assert(requests.some(x=>x.includes('googletagmanager.com/gtag/js?id=G-TEST1234')));
-  const calls=after.dataLayer;
-  const config=calls.find(x=>x[0]==='config');
-  const pageView=calls.find(x=>x[0]==='event'&&x[1]==='page_view');
-  assert.equal(config[1],'G-TEST1234');
-  assert.equal(config[2].send_page_view,false,'Automatic raw-URL pageview must be disabled');
-  assert.equal(pageView[2].page_location,
-    BASE+'/discover?utm_source=reddit&utm_medium=social&utm_campaign=launch');
-  assert(!JSON.stringify(calls).includes('SECRET-UNLISTED-ID'),
-    'Analytics payload leaked a private URL query');
-  assert.equal(pageView[2].page_group,'discover');
-
-  // Revoking consent must disable further event forwarding.
-  const before=calls.length;
-  await page.locator('.globalSupportMenu>summary').click();
-  await page.locator('#sm-analytics-settings').click();
-  await page.locator('#sm-analytics-consent button').first().click();
-  await page.evaluate(()=>window.SM_ANALYTICS.event('share_action',{action_type:'share_url'}));
-  const last=await page.evaluate(()=>window.dataLayer.map(x=>Array.from(x)));
-  assert(!last.slice(before).some(x=>x[0]==='event'&&x[1]==='share_action'));
+  assert(!items.events.some(x=>x.name==='not_allowed'));
+  assert.equal(items.loaded,false,'Manual consent bypassed global off switch');
+  assert.equal(requests.length,0,'Debug sent GA4 request');
   await context.close();
-  console.log('R33 analytics consent/privacy/route/debug QA PASS (no live Google tracking)');
+  console.log('R45 GA4 paused across routes; no consent banner/Google requests; old consent & debug PASS');
 }finally{await browser.close()}

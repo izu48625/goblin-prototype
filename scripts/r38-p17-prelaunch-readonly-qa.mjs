@@ -44,8 +44,8 @@ async function inventory(){
   check(sources['public.html'].includes('content="noindex,follow"'),
     'noncanonical public viewer became indexable');
   const config=sources['cloud/analytics-config.js'];
-  check(config.includes('enabled:true')&&config.includes("measurementId:'G-ZT8N1BVEL8'"),
-    'Approved consent-gated GA4 config is absent');
+  check(config.includes('enabled:false')&&config.includes("measurementId:''"),
+    'GA4 must be paused per owner decision');
   check(sources['cloud/ad-layout.js'].includes('adPreview=1'),
     'advertising must remain a preview until authorized');
   for(const lang of ['ja','en']){
