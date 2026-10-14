@@ -69,11 +69,12 @@ assert.equal(five.cache,'hit-verified');
 // Refresh forces recomputation, bypasses cache.
 const six=await ask(url+'&fresh=1');
 assert.equal(six.cache,'bypass');assert.equal(scans,3);
-const seven=await ask(url+'&query=ABC');
+const seven=await ask(url.replace('query=','query=ABC'));
 assert.equal(seven.cache,'bypass');assert.equal(seven.status,200);
 assert.equal((await ask(url+'&query='+encodeURIComponent('x'.repeat(121)))).status,400);
 assert.equal((await ask(url.replace('limit=12','limit=1000'))).status,400);
 assert.equal((await ask(url.replace('sort=newest','sort=bad'))).status,400);
+assert.equal((await ask(url+'&query=ABC')).status,400,'duplicate query params must be rejected');
 assert.equal(seenHeaders.length,scans+hydrates);
 const blocked=await discoverPublicRequest(req(url),{DISCOVER_RATE_LIMIT:{async limit(){return {success:false}}}},ctx);
 assert.equal(blocked.status,429);
