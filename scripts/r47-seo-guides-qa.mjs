@@ -26,6 +26,20 @@ for(const lang of ['ja','en']){
   assert(description.length<220,'avoid needlessly long description');
   assert.equal((await text('cloud/analytics-config.js')).includes('enabled:false'),true,'GA4 must stay off');
 
+  // SEO-K: intent-led landing links to actual content, not dead anchors.
+  for(const anchor of ['character-stats','player-stats']){
+    assert(home.includes('href="/'+lang+'/chart-guide.html#'+anchor+'"'),
+      lang+' comparison link must lead to a real guide section');
+  }
+  assert(
+    lang==='ja'?home.includes('能力値')&&home.includes('スポーツ選手'):
+      home.includes('character stat')&&home.includes('player comparison'),
+    lang+' search intent must match real feature text');
+  assert(!/seodata\.dev|trenzhub|246,000|33,100/.test(home),
+    'Unverified external keyword volume must not appear in the site');
+  assert(!/adsbygoogle|ca-pub-|googletagmanager\.com/.test(home),
+    'GA4 and AdSense must remain inactive');
+
   assert(home.includes('href="/'+lang+'/chart-guide.html"'),'chart guide must have a real landing-page link');
   assert(home.includes('href="/'+lang+'/png-guide.html"'),'PNG guide must have a real landing-page link');
   for(const slug of slugs){
@@ -37,6 +51,18 @@ for(const lang of ['ja','en']){
     for(const v of ['ja','en'])
       assert(html.includes('hreflang="'+v+'" href="https://statsmaker.app/'+v+'/'+slug+'"'),path+' hreflang '+v);
     assert(html.includes('href="/index.html?lang='+lang+'"'),path+' working creation CTA');
+    if(slug==='chart-guide.html'){
+      assert(html.includes('id="character-stats"')&&html.includes('id="player-stats"'),
+        path+' both examples must be linkable');
+      assert(html.includes('href="/index.html?lang='+lang+'"'),
+        path+' users need a route into the real scoring sheet');
+      assert(lang==='ja'?html.includes('架空のゲームキャラクター')&&html.includes('架空の選手'):
+        html.includes('fictional game characters')&&html.includes('fictional athletes'),
+        path+' examples must be identified as fictional');
+      assert(!/seodata\.dev|trenzhub|246,000|33,100/.test(html),
+        'Market volume estimates must not appear in the guide');
+    }
+
     assert(html.includes('href="/'+lang+'/legal.html#privacy"'),path+' privacy link');
     assert(html.includes('href="/'+lang+'/legal.html#contact"'),path+' contact link');
     assert(html.includes('<main>')&&html.includes('<h1>')&&html.includes('<h2>'),path+' semantic guide headings');
