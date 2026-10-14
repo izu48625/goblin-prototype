@@ -35,7 +35,7 @@ GitHub Actions [`R38 P17 Read-Only Prelaunch Acceptance`](.github/workflows/r38-
 | AdSense | 未申請・未配信 | 実広告コード・Publisher ID・正式ads.txtなし（プレビューのみ） |
 | 旧Vercel OGP | 要実配信確認 | GitHubに失効/no-store対策はあるが、独立Vercelホストと外部SNSキャッシュは別管理 |
 | 物理iPhone Safari | **未完了** | OS共有シート、写真保存、キーボード・下部バーを最終確認 |
-| Google Search Console | **未完了** | 本人のGoogleログインと所有権確認、sitemap送信が必要 |
+| Google Search Console | **本人確認済み（2026-10-14）** | ドメイン認証・sitemap送信成功、/ja/・/en/登録済み。検索クエリの実データは今後確認 |
 
 ## 3. 本人に残る最短作業
 
