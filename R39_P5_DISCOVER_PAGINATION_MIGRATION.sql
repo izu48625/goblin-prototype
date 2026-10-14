@@ -60,7 +60,7 @@ BEGIN
       ELSE pg_catalog.regexp_split_to_array(
         pg_catalog.btrim(pg_catalog.regexp_replace(
           pg_catalog.regexp_replace(
-            pg_catalog.lower(pg_catalog.normalize(p_query,NFKC)),
+            pg_catalog.lower(pg_catalog.normalize(p_query,'NFKC')),
             '[・･／/,_-]+',' ','g'),
           '[[:space:]]+',' ','g')),' ')
       END AS terms
@@ -83,8 +83,8 @@ BEGIN
         pg_catalog.cardinality(a.terms)=0
         OR NOT EXISTS (
           SELECT 1
-          FROM pg_catalog.unnest(a.terms) term
-          WHERE pg_catalog.position(term IN
+          FROM pg_catalog.unnest(a.terms) AS tok(term)
+          WHERE position(term IN
             pg_catalog.regexp_replace(
               pg_catalog.regexp_replace(
                 pg_catalog.lower(pg_catalog.normalize(
@@ -112,7 +112,7 @@ BEGIN
                        FROM pg_catalog.jsonb_array_elements(
                          CASE WHEN pg_catalog.jsonb_typeof(t.snapshot->'criteria')='array'
                            THEN t.snapshot->'criteria' ELSE '[]'::jsonb END) x(item))
-                  ),NFKC)),
+                  ),'NFKC')),
                 '[・･／/,_-]+',' ','g'),
               '[[:space:]]+',' ','g')
           )=0
@@ -144,7 +144,7 @@ BEGIN
           CASE WHEN p_sort='popular' THEN c.participant_count END DESC NULLS LAST,
           CASE WHEN p_sort='community' THEN c.participant_count END DESC NULLS LAST,
           CASE WHEN p_sort='remix' THEN c.remix_total END DESC NULLS LAST,
-          pg_catalog.coalesce(c.published_at,c.snapshot_updated_at) DESC NULLS LAST,
+          coalesce(c.published_at,c.snapshot_updated_at) DESC NULLS LAST,
           c.id DESC
       ) AS row_rank
     FROM counted c
