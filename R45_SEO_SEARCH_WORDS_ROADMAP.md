@@ -8,7 +8,9 @@
 - 検索者が必要としている内容と実際の機能が一致する独自コンテンツを優先する。検索順位は保証できない。
 - Private/Unlisted作品を検索対象にしない。一般公開の作品でも権利・重複・説明の品質を維持する。
 
-## P1｜Google Search Console導入（未完了・所有者のPC作業）
+## P1｜Google Search Console導入（2026-10-14 本人確認済み）
+**2026-10-14 更新：所有者のPCでドメイン所有権確認に成功、`https://statsmaker.app/sitemap.xml` 送信成功。日本語 `/ja/` と英語 `/en/` はGoogleに登録済みと確認。DNS TXTを削除せず、再登録・再送信を繰り返さない。** Search Consoleで検索パフォーマンスの実データが十分蓄積されたら、検索クエリ・表示回数・CTR・順位・国/デバイス別の改善に進む。Googleの画面そのものをこのPRから読み取ったわけではなく、本人の確認結果を引き継いだ記録。
+
 1. https://search.google.com/search-console/ から statsmaker.app のドメインプロパティを登録（サイト名は `statsmaker.app`。DNSへのTXTレコード追加など、所有権確認が必要な場合あり）。
 2. 所有権が確認できたら https://statsmaker.app/sitemap.xml を「サイトマップ」から送信。サイトマップはすでに実装済みだが、Search Console送信は未確認。
 3. インデックス登録の状況、除外・クロールエラー、モバイル表示を点検。新規登録から実データが見えるまで時間がかかる。
@@ -40,6 +42,6 @@
 
 ## 現在の状態
 - 実装済：日本語/英語紹介ページ、canonical、hreflang、Public作品のSEOページ、robots.txt、Public限定sitemap。
-- **未完了：Search Console所有権確認、sitemap送信、実際の検索キーワード調査、追加コンテンツ制作。**
+- **Search Console所有権確認・サイトマップ送信・日英紹介ページの登録確認は本人確認済み。** 未完了：検索クエリの十分な実データによる検証と継続的な改善。R47ではガイド4ページに加えて、日英紹介ページとPublic作品の検索向け説明文を改善。
 - GA4停止。Cloudflare Web Analyticsも利用開始の確認はなく、必要なら別途設定する。
 - AdSense登録・審査・広告配信は別工程。検索流入を増やすSEOと混同しない。
