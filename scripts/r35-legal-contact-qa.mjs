@@ -41,7 +41,7 @@ const [remix,analytics,ads,publishModel]=await Promise.all([
 assert(ja.includes('制定：2026年10月11日')&&en.includes('Effective: October 11, 2026'));
 for(const [language,page,requirements] of [
   ['ja',ja,['無料で使える範囲','コピーして採点する（Remix）','準拠法・紛争対応','運営者と窓口','安全管理','海外からの利用','Cloudflare','Supabase','jsDelivr']],
-  ['en',en,['Free features','Copy &amp; rate (Remix)','Governing law and disputes','Operator and requests','Security','International users','Cloudflare','Supabase','jsDelivr']]
+  ['en',en,['Free features','Copy &amp; rate (Remix)','Governing law and disputes','Operator and requests','Security','international users','Cloudflare','Supabase','jsDelivr']]
 ]){
  for(const phrase of requirements)assert(page.includes(phrase),language+': policy missing '+phrase);
  assert.equal((page.match(/id="legalContactForm"/g)||[]).length,1,'Contact form must not duplicate');

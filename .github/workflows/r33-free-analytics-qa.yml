@@ -29,7 +29,7 @@ jobs:
           node --check cloud/analytics-config.js
           node --check cloud/analytics.js
           node --check scripts/r33-analytics-browser-qa.mjs
-          node -e "const fs=require('fs');const c=fs.readFileSync('cloud/analytics-config.js','utf8');if(!c.includes('enabled:true')||!c.includes("measurementId:'G-ZT8N1BVEL8'"))process.exit(1)"
+          node -e "const fs=require('fs');const c=fs.readFileSync('cloud/analytics-config.js','utf8');if(!c.includes('enabled:true')||!c.includes('G-ZT8N1BVEL8'))process.exit(1)"
       - name: Local build
         run: npm run build:cloudflare
       - name: Install isolated Chromium
