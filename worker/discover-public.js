@@ -44,7 +44,7 @@ function parse(url){
       !['ja','en'].includes(locale))throw Error('bad filter');
   const anchor=q.get('anchor')||null;
   if(anchor&&(anchor.length>40||!Number.isFinite(Date.parse(anchor))))throw Error('bad anchor');
-  return {query,sort,category,view,locale,offset:Number(rawOffset),anchor};
+  return {query,sort,category,view,locale,offset:Number(rawOffset),anchor,fresh:q.get('fresh')==='1'};
 }
 function params(input){
   return {p_query:input.query,p_category:input.category,p_view:input.view,
@@ -76,7 +76,7 @@ export async function discoverPublicRequest(request,env,ctx){
     }catch{return response({error:'temporarily_unavailable'},503)}
   }
   try{
-    const useCache=cacheable(input)&&typeof caches!=='undefined'&&!!caches.default;
+    const useCache=!input.fresh&&cacheable(input)&&typeof caches!=='undefined'&&!!caches.default;
     if(useCache){
       let old=null;
       try{
