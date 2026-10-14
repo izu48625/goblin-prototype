@@ -42,3 +42,11 @@
 - Ran anon-role comparison of the original and counter-backed rankings for newest/popular/community/remix against all 11 existing Public works. All returned the same total (11) and identical ordered IDs.
 - This is NOT proof of concurrency-safe counter maintenance: trigger deadlocks, rating re-submissions, simultaneous Public/Private edits, deletes and cascades remain untested; full search projection and Cloudflare cache remain not implemented.
 - Production database and site remain unchanged by this PR. Keep as Draft.
+
+## Continuation: ranking locks / category pushdown (2026-10-14)
+- Changed R41 counter refresh from advisory per-topic lock to a parent topic row lock. SQL install + rollback smoke succeeded in a single rolled-back transaction. This is **not proof of deadlock-freedom** under simultaneous cross-topic writes.
+- Added `R42_DISCOVER_CATEGORY_PUSHDOWN.sql`, using a Public-only category predicate before snapshot materialization. It is the proposed final R42 cutover SQL following R41 counter backfill/readers.
+- Aligned `R42_DISCOVER_CATEGORY_INDEX.sql` expression with the exact category normalization used by the query. Index creation validated and rolled back, no persistent change.
+- Compared before/after RPC results for all/newest, sports/popular, manga_anime/community, other/remix. All totals and full returned rows matched on the 11 existing Public works.
+- The query still performs JSONB normalized substring scans and maintains exact total counts. The magnitude of the R42 speed gain has **not** been measured against large real/synthetic stored-topic datasets.
+- R43 caching remains blocked pending immediate Public→Private revocation safety and avoiding personalized results. Do not merge/deploy PR yet.
