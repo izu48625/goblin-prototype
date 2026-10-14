@@ -1463,7 +1463,7 @@ html[lang="en"] .rankModeBtn{
 
   .filterBar{
     display:grid;
-    grid-template-columns:minmax(0,1fr) 94px auto;
+    grid-template-columns:minmax(0,1fr) 80px;
     gap:5px;
     padding:6px;
     flex-wrap:nowrap;
@@ -1886,11 +1886,21 @@ body.score-colors-off .overviewMetric{
   box-shadow:none!important;
 }
 @media(max-width:760px){
-  .filterBar{grid-template-columns:minmax(0,1fr) 94px 72px auto}
+  .filterBar{grid-template-columns:minmax(0,1fr) 80px}
   .scoreColorToggle{height:31px;min-height:31px;min-width:0;padding:0 4px;font-size:9px}
 }
-@media(max-width:360px){
-  .filterBar{grid-template-columns:94px 72px minmax(0,1fr)}
-  .filterBar .searchInput{grid-column:1/-1}
-  .filterBar .filterCount{justify-self:end}
+
+
+/* R38 P15: no grade dropdown or count; search + color visibility only. */
+.filterBar{
+  display:grid;grid-template-columns:minmax(0,1fr) 80px;
+  gap:7px;align-items:center;
+}
+.filterBar .searchInput{grid-column:auto;min-width:0}
+.filterBar .scoreColorToggle{
+  width:80px;min-width:0;min-height:34px;justify-self:end;
+}
+@media(max-width:760px){
+  .filterBar{grid-template-columns:minmax(0,1fr) 80px}
+  .filterBar .scoreColorToggle{height:34px;min-height:34px;font-size:10px}
 }
