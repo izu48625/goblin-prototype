@@ -27,7 +27,7 @@ with args as (
     case when p_view = 'community' then 'community' else 'all' end as view,
     case when p_locale = 'en' then 'en' else 'ja' end as locale,
     trim(pg_catalog.regexp_replace(
-      pg_catalog.translate(pg_catalog.lower(pg_catalog.normalize(coalesce(p_query,''),NFKC)),
+      pg_catalog.translate(pg_catalog.lower(pg_catalog.normalize(coalesce(p_query,''),'NFKC')),
         '・/\,_-', '      '), '\s+', ' ', 'g')) as needle
 ),
 public_only as materialized (
@@ -70,7 +70,7 @@ filtered as materialized (
               (select pg_catalog.string_agg(e.value->>'name',' ')
                from pg_catalog.jsonb_array_elements(case when pg_catalog.jsonb_typeof(b.snapshot->'criteria')='array'
                  then b.snapshot->'criteria' else '[]'::jsonb end) as e(value))
-            ),NFKC)), '・/\,_-', '      '), '\s+', ' ', 'g')),
+            ),'NFKC')), '・/\,_-', '      '), '\s+', ' ', 'g')),
         term.word)=0
     ))
 ),
