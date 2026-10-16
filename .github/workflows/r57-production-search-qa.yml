@@ -1,0 +1,30 @@
+name: R57 Production Discover GET Safety
+on:
+  pull_request:
+    paths:
+      - 'R57_PRODUCTION_CUTOVER.md'
+      - 'R57_PRODUCTION_SEARCH_ROLLBACK.sql'
+      - 'R57_RESTORE_LEGACY_SEARCH_INDEXES.sql'
+      - 'R57_OPTIONAL_SCHEMA_CLEANUP_ROLLBACK.sql'
+      - '.github/workflows/r57-production-search-qa.yml'
+  push:
+    branches: [main]
+    paths:
+      - 'R57_PRODUCTION_CUTOVER.md'
+      - '.github/workflows/r57-production-search-qa.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  public-get-only:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Verify public Discover (4 gentle GETs, no production writes)
+        env:
+          BASE_URL: https://statsmaker.app
+        run: node scripts/r54-discover-live-qa.mjs
