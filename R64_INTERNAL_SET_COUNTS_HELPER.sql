@@ -4,8 +4,15 @@
 -- Neither tables nor arbitrary routines are granted. No schema CREATE permission.
 CREATE SCHEMA IF NOT EXISTS discover_internal;
 REVOKE ALL ON SCHEMA discover_internal FROM PUBLIC;
-REVOKE ALL ON SCHEMA discover_internal FROM anon, authenticated;
-GRANT USAGE ON SCHEMA discover_internal TO anon, authenticated;
+REVOKE ALL ON SCHEMA discover_internal FROM anon;
+GRANT USAGE ON SCHEMA discover_internal TO anon;
+DO $schema_auth$
+BEGIN
+ IF EXISTS (SELECT 1 FROM pg_catalog.pg_roles WHERE rolname='authenticated') THEN
+  EXECUTE 'REVOKE ALL ON SCHEMA discover_internal FROM authenticated';
+  EXECUTE 'GRANT USAGE ON SCHEMA discover_internal TO authenticated';
+ END IF;
+END $schema_auth$;
 -- Keep future functions inaccessible by default in this namespace.
 -- Only the exact function below gets explicit execute permissions.
 -- R64 CANDIDATE: helper lives only in a non-exposed internal schema.
