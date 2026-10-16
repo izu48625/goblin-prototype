@@ -2,10 +2,10 @@ import assert from 'node:assert/strict';
 import {readFile} from 'node:fs/promises';
 
 const expected='<meta name="google-adsense-account" content="ca-pub-2734957009365610">';
-const forbidden=/<script\\b[^>]*(?:pagead2\\.googlesyndication\\.com\\/pagead\\/js\\/adsbygoogle\\.js|adsbygoogle)[^>]*>/i;
+const forbidden=/<script\b[^>]*(?:pagead2\.googlesyndication\.com\/pagead\/js\/adsbygoogle\.js|adsbygoogle)[^>]*>/i;
 const mode=process.argv[2]||'local';
 const headOf=html=>{
-  const match=html.match(/<head\\b[^>]*>([\\s\\S]*?)<\\/head>/i);
+  const match=html.match(/<head\b[^>]*>([\s\S]*?)<\/head>/i);
   assert(match,'Outer HTML <head> is absent');
   return match[1];
 };
