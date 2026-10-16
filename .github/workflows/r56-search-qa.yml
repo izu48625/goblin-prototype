@@ -1,0 +1,48 @@
+name: R56 Search SQL 50k Correctness and Benchmark
+on:
+  pull_request:
+    paths:
+      - 'R56_DISCOVER_SINGLE_TERM_CANDIDATE.sql'
+      - 'scripts/r56-50k-search-parity.sql'
+      - 'scripts/r56-50k-fixture.sh'
+      - '.github/workflows/r56-search-qa.yml'
+      - 'R56_SEARCH_OPTIMIZATION_AUDIT.md'
+  push:
+    branches: [main]
+    paths:
+      - 'R56_DISCOVER_SINGLE_TERM_CANDIDATE.sql'
+      - 'scripts/r56-50k-search-parity.sql'
+      - 'scripts/r56-50k-fixture.sh'
+      - '.github/workflows/r56-search-qa.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  isolated-50k:
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    services:
+      postgres:
+        image: postgres:17
+        env:
+          POSTGRES_PASSWORD: test_only_not_a_production_secret
+          POSTGRES_USER: postgres
+          POSTGRES_DB: postgres
+        ports: ['5432:5432']
+        options: >-
+          --health-cmd "pg_isready -U postgres"
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+    env:
+      PGHOST: 127.0.0.1
+      PGPORT: '5432'
+      PGUSER: postgres
+      PGPASSWORD: test_only_not_a_production_secret
+      PGDATABASE: postgres
+    steps:
+      - uses: actions/checkout@v4
+      - name: Create 50k mixed-visibility synthetic works in isolated PostgreSQL
+        run: bash scripts/r56-50k-fixture.sh
+      - name: Compare 28 exact JSON cases then benchmark single/multiterm searches
+        run: psql -X -v ON_ERROR_STOP=1 -f scripts/r56-50k-search-parity.sql
