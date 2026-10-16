@@ -5,8 +5,8 @@
 import {readFileSync} from 'node:fs';
 
 export const QUOTAS=Object.freeze([
-  {key:'database_bytes',label:'Supabase database size',limit:500*1024*1024,unit:'bytes',period:'current'},
-  {key:'worker_requests_utc_day',label:'Cloudflare Worker requests',limit:100000,unit:'requests',period:'UTC day'},
+  {key:'database_bytes',label:'Supabase database size (conservative 500 MB)',limit:500000000,unit:'bytes',period:'current'},
+  {key:'worker_requests_utc_day',label:'Cloudflare Worker requests (account-wide)',limit:100000,unit:'requests',period:'UTC day'},
   {key:'egress_uncached_bytes_billing_month',label:'Supabase uncached egress',limit:5e9,unit:'bytes',period:'organization billing month'},
   {key:'egress_cached_bytes_billing_month',label:'Supabase cached egress',limit:5e9,unit:'bytes',period:'organization billing month'},
   {key:'auth_mau_billing_month',label:'Supabase active users',limit:50000,unit:'MAU',period:'organization billing month'},
