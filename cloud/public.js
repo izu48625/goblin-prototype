@@ -295,7 +295,7 @@
     const sb=window.SM_SUPABASE?.client;if(!sb)throw new Error('Supabase is not ready.');
 
     const {data,error}=await sb.from('topics')
-      .select('*,topic_items(id,name,position,image_url),criteria(id,name,weight,position)')
+      .select('id,owner_id,title,description,score_scale,weighted,visibility,allow_ratings,show_community,source_topic_id,published_at,snapshot,snapshot_updated_at,topic_items(id,name,position,image_url),criteria(id,name,weight,position)')
       .eq('id',id).single();
     if(error)throw error;
 
