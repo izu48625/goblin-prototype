@@ -1,0 +1,32 @@
+name: R66 Free Usage Read-Only Guard
+on:
+  pull_request:
+    paths:
+      - 'scripts/r66-free-usage-triage.mjs'
+      - 'scripts/r66-free-usage-triage-qa.mjs'
+      - 'monitoring/r66-verified-snapshot-20261016.json'
+      - 'R66_READONLY_MONITORING.md'
+      - '.github/workflows/r66-free-usage-guard.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  quota-guard:
+    name: No-network usage classifier / unknown-safe
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Check JavaScript syntax
+        run: |
+          node --check scripts/r66-free-usage-triage.mjs
+          node --check scripts/r66-free-usage-triage-qa.mjs
+      - name: Test actual guards without network calls
+        run: node scripts/r66-free-usage-triage-qa.mjs
+      - name: Print R66 read-only baseline (not current!)
+        run: |
+          node scripts/r66-free-usage-triage.mjs monitoring/r66-verified-snapshot-20261016.json > "$RUNNER_TEMP/r66-summary.json"
+          node -e 'const fs=require("fs");const v=JSON.parse(fs.readFileSync(process.argv[1]));if(v.summary.status!=="incomplete"||v.summary.unmeasured.length!==5)process.exit(1);const out=process.env.GITHUB_STEP_SUMMARY;fs.appendFileSync(out,"### R66 Historical 2026-10-16 DB snapshot (NOT live data)\\n\\nDB: "+v.metrics[0].pct+"% of conservative 500MB threshold. Remaining 5 quotas **UNMEASURED**; manual provider dashboard required.\\n")' "$RUNNER_TEMP/r66-summary.json"
