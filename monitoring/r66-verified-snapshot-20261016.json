@@ -1,0 +1,22 @@
+{
+  "as_of_utc": "2026-10-16T10:58:06.331Z",
+  "database_bytes": 12954771,
+  "worker_requests_utc_day": null,
+  "worker_errors_utc_day": null,
+  "egress_uncached_bytes_billing_month": null,
+  "egress_cached_bytes_billing_month": null,
+  "auth_mau_billing_month": null,
+  "storage_bytes": null,
+  "additional_readonly": {
+    "public_works": 11,
+    "unlisted_works": 0,
+    "private_works": 0,
+    "db_connections_instantaneous": 8,
+    "db_active_connections_instantaneous": 1
+  },
+  "provenance": {
+    "database": "Supabase SQL SELECT, read-only; verified 2026-10-16",
+    "plan": "Supabase org Free confirmed",
+    "missing": "Cloudflare dashboard / Supabase organization Usage dashboard not directly accessible via connected tools"
+  }
+}
