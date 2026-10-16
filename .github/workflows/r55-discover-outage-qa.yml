@@ -12,6 +12,8 @@ on:
     branches: [main]
     paths:
       - 'cloud/discover.js'
+      - 'worker/community-gateway.js'
+      - 'scripts/r26-gateway-test.mjs'
       - 'scripts/r55-discover-outage-containment-qa.mjs'
       - '.github/workflows/r55-discover-outage-qa.yml'
   workflow_dispatch:
