@@ -1,0 +1,62 @@
+name: R62 Free Isolated Discover SQL Hotspots
+on:
+  pull_request:
+    paths:
+      - 'scripts/r62-discover-profile.py'
+      - '.github/workflows/r62-discover-profile.yml'
+      - 'R62_DISCOVER_PROFILING.md'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  sql-profile:
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    strategy:
+      fail-fast: false
+      matrix:
+        works: [10000, 50000, 100000]
+    name: PostgreSQL 17 profile / ${{ matrix.works }} works
+    services:
+      postgres:
+        image: postgres:17
+        env:
+          POSTGRES_PASSWORD: test_only_not_production
+          POSTGRES_USER: postgres
+          POSTGRES_DB: postgres
+        ports: ['5432:5432']
+        options: >-
+          --health-cmd "pg_isready -U postgres"
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+    env:
+      PGHOST: '127.0.0.1'
+      PGPORT: '5432'
+      PGDATABASE: postgres
+      PGUSER: postgres
+      PGPASSWORD: test_only_not_production
+    steps:
+      - uses: actions/checkout@v4
+      - name: Compile profile and enforce localhost-only safety
+        run: |
+          python3 -m py_compile scripts/r62-discover-profile.py
+          test "$PGHOST" = '127.0.0.1'
+          test "$PGDATABASE" = postgres
+          test -z "${DATABASE_URL:-}"
+          test -z "${SUPABASE_DB_URL:-}"
+      - name: Build isolated production-style data
+        run: |
+          bash scripts/r58-p4-fixture.sh "${{ matrix.works }}"
+          psql -X -v ON_ERROR_STOP=1 -f R60_DISCOVER_FUSED_COUNTS_HELPER.sql
+          psql -X -v ON_ERROR_STOP=1 -f R60_DISCOVER_FUSED_COUNTS_RPC_CANDIDATE.sql
+      - name: Explain full Discover SQL and isolate expensive stages
+        run: python3 scripts/r62-discover-profile.py "${{ matrix.works }}"
+      - name: Save query plans as artifact
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: r62-query-profile-${{ matrix.works }}
+          path: artifacts/r62-profile-${{ matrix.works }}.json
+          if-no-files-found: warn
+          retention-days: 14
