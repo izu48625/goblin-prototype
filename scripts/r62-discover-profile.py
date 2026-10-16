@@ -72,7 +72,11 @@ def main():
     if os.getenv("SUPABASE_DB_URL") or os.getenv("DATABASE_URL"):
         raise SystemExit("No external DB URLs allowed")
     sql=Path("R60_DISCOVER_FUSED_COUNTS_RPC_CANDIDATE.sql").read_text(encoding="utf-8")
-    body=sql.split("AS $function$",1)[1].split("$function$;",1)[0].strip().rstrip(";")
+    # The SQL DDL closes with "$function$" then a newline then ";".
+    # Split on the actual delimiter, not on an assumed immediately-following semicolon.
+    if sql.count("$function$") != 2:
+        raise SystemExit("Unexpected number of SQL function delimiters")
+    body=sql.split("$function$")[1].strip().rstrip(";")
     if not body.lower().startswith("with args as"):
         raise SystemExit("Not an R60 query body")
     output={"size":size,"environment":"disposable postgres 17 local ONLY",
