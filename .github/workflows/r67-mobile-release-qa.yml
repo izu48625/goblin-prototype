@@ -1,0 +1,51 @@
+name: R67 iPhone WebKit Release Contract
+on:
+  pull_request:
+    paths:
+      - 'scripts/r67-mobile-shell-webkit-qa.mjs'
+      - '.github/workflows/r67-mobile-release-qa.yml'
+      - 'R67_R68_READINESS_REVIEW.md'
+      - 'index.html'
+      - 'base/**'
+      - 'cloud/global-locale.css'
+      - 'app/**'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  webkit-mobile-safety:
+    runs-on: ubuntu-latest
+    name: 320/375/390/430 iPhone shell, sharing and local saves
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Build local production-equivalent assets
+        run: npm run build:cloudflare
+      - name: Install headless WebKit/Chromium (no paid services)
+        run: |
+          npm install --no-save playwright@1.56.1
+          npx playwright install --with-deps webkit chromium
+      - name: Serve local static site only
+        run: |
+          python3 -m http.server 4173 --bind 127.0.0.1 --directory dist >/tmp/r67-static.log 2>&1 &
+          for i in $(seq 1 30); do
+            if curl -fsS http://127.0.0.1:4173/index.html >/dev/null; then exit 0; fi
+            sleep 1
+          done
+          exit 1
+      - name: New R67 iPhone Safari short-screen shell and help regressions
+        env:
+          BASE_URL: http://127.0.0.1:4173
+        run: |
+          node --check scripts/r67-mobile-shell-webkit-qa.mjs
+          node scripts/r67-mobile-shell-webkit-qa.mjs
+      - name: Existing keyboard, save, modal and WebKit image share checks
+        env:
+          BASE_URL: http://127.0.0.1:4173
+        run: |
+          node scripts/r36-mobile-input-modals-qa.mjs
+          node scripts/r36-webkit-iphone-share-qa.mjs
+          BROWSER_ENGINE=webkit node scripts/r38-p15-public-score-qa.mjs
