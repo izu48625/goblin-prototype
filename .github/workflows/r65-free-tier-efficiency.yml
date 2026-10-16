@@ -1,0 +1,74 @@
+name: R65 Free Tier Efficiency QA
+on:
+  pull_request:
+    paths:
+      - 'worker/seo.js'
+      - 'worker/index.js'
+      - 'worker/discover-public.js'
+      - 'scripts/r65-free-efficiency-qa.mjs'
+      - 'scripts/r65-postgrest-projection-qa.sh'
+      - '.github/workflows/r65-free-tier-efficiency.yml'
+      - 'R65_FREE_TIER_EFFICIENCY.md'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  edge-contracts:
+    name: Edge SEO / OG / Discover protections
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Syntax checks
+        run: |
+          node --check worker/seo.js
+          node --check worker/index.js
+          node --check worker/discover-public.js
+          node --check scripts/r65-free-efficiency-qa.mjs
+      - name: New R65 efficiency / revocation / HEAD tests
+        run: node scripts/r65-free-efficiency-qa.mjs
+      - name: Existing bilingual public-only SEO
+        run: node scripts/r34-seo-edge-test.mjs
+      - name: Existing OG rate-limit and Worker routes
+        run: node scripts/r26-edge-test.mjs
+      - name: Existing Public / Unlisted / Private share and OG
+        run: node scripts/r37-visibility-edge-qa.mjs
+      - name: Existing Discover cache and privacy
+        run: node scripts/r43-discover-gateway-qa.mjs
+  postgrest-projection:
+    name: Real PostgREST JSON paths / no secrets
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    services:
+      postgres:
+        image: postgres:17
+        env:
+          POSTGRES_PASSWORD: fixture_only_not_production
+          POSTGRES_USER: postgres
+          POSTGRES_DB: postgres
+        ports: ['5432:5432']
+        options: >-
+          --health-cmd "pg_isready -U postgres"
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+    env:
+      PGHOST: '127.0.0.1'
+      PGPORT: '5432'
+      PGDATABASE: postgres
+      PGUSER: postgres
+      PGPASSWORD: fixture_only_not_production
+    steps:
+      - uses: actions/checkout@v4
+      - name: Verify no real DB credentials and create fixture
+        run: |
+          test "$PGHOST" = 127.0.0.1
+          test "$PGDATABASE" = postgres
+          test -z "${DATABASE_URL:-}"
+          test -z "${SUPABASE_DB_URL:-}"
+          bash scripts/r58-p4-fixture.sh 1000
+      - name: Test exact projection using real PostgREST public API
+        run: bash scripts/r65-postgrest-projection-qa.sh
