@@ -56,7 +56,7 @@ jobs:
           python3 scripts/r58-p4-load.py "${{ matrix.works }}"
           mv "artifacts/r58-p4-load-${{ matrix.works }}.json" "artifacts/r63-baseline-${{ matrix.works }}.json"
       - name: 32 JSON parity and all-Public data protection; install R63
-        run: psql -X -v ON_ERROR_STOP=1 -f scripts/r63-set-counts-parity-qa.sql
+        run: psql -X -v ON_ERROR_STOP=1 -f scripts/r63-public-set-parity-qa.sql
       - name: R63 set-based candidate on same synthetic fixture
         run: |
           python3 scripts/r58-p4-load.py "${{ matrix.works }}"
@@ -86,7 +86,7 @@ jobs:
         if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: r63-set-comparison-${{ matrix.works }}
+          name: r63-public-set-comparison-${{ matrix.works }}
           path: artifacts/r63-*.json
           if-no-files-found: warn
           retention-days: 14
