@@ -1,5 +1,8 @@
 # Stats Maker 正式開発ロードマップ — R31以降
 
+> **R55 スケール・障害耐性の再監査（2026-10-16）：** Discoverの本番Worker 503時に、ブラウザが直接Supabase RPCへ回り込む負荷連鎖を遮断。Communityのレート制限binding障害は503 fail-closed。破棄可能なPostgresで64同時投稿/下書き/再投稿/削除の正確なカウンタ維持、50,000件のPublic/Unlisted/Private混合データで14条件SQL結果一致を確認。50k単発DB実行は新着91ms、人気452ms、日本語広域検索1649msと**検索に残課題**。R55詳細 `R55_CAPACITY_AUDIT.md`。以後は幅広く一致する検索条件・Communityの全経路負荷・予算監視を優先。本番へのダミー大量投稿、課金、GA4、AdSense広告配信は行っていない。
+
+
 > **R53–R54 耐性強化（2026-10-16）：** Discover先頭ページの同一Worker内で50同時コールドアクセス→従来50回相当の全ランキング検索を1回＋49回のPublicライブ再取得に集約。DBは10,000件隔離試験で14条件JSON完全一致、計測値は新着39.9→10.5ms、人気105.4→67.9ms。**本番も読み取り用`discover_public_works_v1`関数のみ最適化済み**（本番11件・14/14結果ハッシュ一致、anon Public-onlyチェック完了）。[R54実環境適用](R54_DISCOVER_PRODUCTION_CUTOVER.md)・[R53試験設計](R53_DISCOVER_SCALE_QA.md)。**残り：** Workerをまたぐ大規模同時接続のp95実測、Community書き込み同時負荷、DB/転送量/429監視、1〜2字検索や深いページ最適化。無料枠とGA4停止・AdSense審査待ちを維持。
 
 
