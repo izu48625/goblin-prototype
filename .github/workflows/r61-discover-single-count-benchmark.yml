@@ -55,7 +55,7 @@ jobs:
           python3 scripts/r58-p4-load.py "${{ matrix.works }}"
           mv "artifacts/r58-p4-load-${{ matrix.works }}.json" "artifacts/r61-baseline-${{ matrix.works }}.json"
       - name: 32 JSON parity and all-topic counter checks; install R61
-        run: psql -X -v ON_ERROR_STOP=1 -f scripts/r61-candidate-counts-parity-qa.sql
+        run: psql -X -v ON_ERROR_STOP=1 -f scripts/r61-single-count-parity-qa.sql
       - name: R61 candidate load on same synthetic fixture
         run: |
           python3 scripts/r58-p4-load.py "${{ matrix.works }}"
