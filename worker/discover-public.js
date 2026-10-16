@@ -89,11 +89,22 @@ export async function discoverPublicRequest(request,env,ctx){
   let input;
   try{input=parse(new URL(request.url))}
   catch{return response({error:'invalid_query'},400)}
-  if(env.DISCOVER_RATE_LIMIT){
+  // R65: Production must fail CLOSED if a limiter binding is accidentally
+  // missing; otherwise a misconfigured deploy can stampede Supabase Free.
+  // Local/GitHub Pages direct previews do not require Cloudflare bindings.
+  const host=new URL(request.url).hostname.toLowerCase();
+  const production=host==='statsmaker.app'||host==='www.statsmaker.app';
+  if(production||env.DISCOVER_RATE_LIMIT){
     try{
+      if(typeof env.DISCOVER_RATE_LIMIT?.limit!=='function')
+        return response({error:'temporarily_unavailable'},503);
       const ip=request.headers.get('CF-Connecting-IP')||'unknown-client';
       const rate=await env.DISCOVER_RATE_LIMIT.limit({key:ip});
-      if(!rate.success)return response({error:'rate_limited'},429);
+      if(rate?.success!==true){
+        const limited=response({error:'rate_limited'},429);
+        limited.headers.set('Retry-After','60');
+        return limited;
+      }
     }catch{return response({error:'temporarily_unavailable'},503)}
   }
   try{

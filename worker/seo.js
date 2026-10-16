@@ -6,6 +6,16 @@ const ORIGIN='https://statsmaker.app';
 const API='https://ibpdxbeltdwkquowjeay.supabase.co/rest/v1/topics';
 const KEY='sb_publishable_6abnwW_1p-U_Y_DefUXfFQ_Dz_Y2vsD';
 const PER_PAGE=200,MAX_SITEMAP_PAGES=250;
+// R65: request only the FIRST 18 target names and 10 criterion entries used
+// by the SEO HTML. Never transfer scores/images/the whole published snapshot.
+// PostgREST supports -> and ->> nested JSON projections.
+const SEO_ROW_COUNT=18,SEO_METRIC_COUNT=10;
+const SEO_PROJECTION=[
+  'id','title','description','language_code','published_at',
+  'snapshot_updated_at','visibility',
+  ...Array.from({length:SEO_ROW_COUNT},(_,i)=>'seo_row_'+i+':snapshot->rows->'+i+'->>name'),
+  ...Array.from({length:SEO_METRIC_COUNT},(_,i)=>'seo_metric_'+i+':snapshot->criteria->'+i)
+].join(',');
 const esc=x=>String(x??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 const clean=x=>String(x??'').replace(/\s+/g,' ').trim();
 const trim=(x,max=190)=>clean(x).slice(0,max);
@@ -24,10 +34,27 @@ async function publicQuery(query){
   const data=await result.json();
   return {data,range:result.headers.get('Content-Range')||''};
 }
+// HEAD crawlers need only status and visibility, not 28 projected fields or
+// snapshot content. Still check live Public RLS for immediate revocation.
+export async function publicWorkHead(id){
+  const valid=safeId(id);
+  const headers={'Content-Type':'text/html; charset=utf-8','Cache-Control':'no-store',
+    'X-Content-Type-Options':'nosniff'};
+  if(!valid)return new Response(null,{status:404,headers});
+  const query=new URLSearchParams({select:'id',id:'eq.'+valid,visibility:'eq.public',limit:'1'});
+  let rows;
+  try{({data:rows}=await publicQuery(query))}
+  catch(error){
+    console.error('[R65 SEO] HEAD Public existence check failed',String(error));
+    return new Response(null,{status:503,headers});
+  }
+  return new Response(null,{status:Array.isArray(rows)&&rows[0]?200:404,headers});
+}
+
 export async function publicWorkHtml(id){
   const valid=safeId(id);
   if(!valid)return response('<!doctype html><html><head><meta name="robots" content="noindex"></head><body>Not found</body></html>','text/html; charset=utf-8',404,'no-store');
-  const query=new URLSearchParams({select:'id,title,description,language_code,snapshot,published_at,snapshot_updated_at,visibility',id:'eq.'+valid,visibility:'eq.public',limit:'1'});
+  const query=new URLSearchParams({select:SEO_PROJECTION,id:'eq.'+valid,visibility:'eq.public',limit:'1'});
   let rows;
   try{({data:rows}=await publicQuery(query))}catch(error){
     console.error('[R34 SEO] public work query failed',String(error));
@@ -37,10 +64,16 @@ export async function publicWorkHtml(id){
   if(!work)return response('<!doctype html><html><head><meta name="robots" content="noindex"></head><body>Not found</body></html>','text/html; charset=utf-8',404,'no-store');
   const lang=work.language_code==='en'?'en':'ja',en=lang==='en';
   const title=trim(work.title,140)||'Untitled work';
-  const snapshot=work.snapshot&&typeof work.snapshot==='object'&&!Array.isArray(work.snapshot)?work.snapshot:{};
-  const list=(Array.isArray(snapshot.rows)?snapshot.rows:[]).slice(0,18)
-    .map(row=>trim(row?.name,90)).filter(Boolean);
-  const metrics=(Array.isArray(snapshot.criteria)?snapshot.criteria:[]).slice(0,10)
+  // The legacy snapshot branch keeps test/old mock compatibility; the live
+  // projection above never requests the complete snapshot.
+  const snapshot=work.snapshot&&typeof work.snapshot==='object'&&!Array.isArray(work.snapshot)?work.snapshot:null;
+  const list=(snapshot&&Array.isArray(snapshot.rows)
+    ?snapshot.rows.slice(0,SEO_ROW_COUNT).map(row=>trim(row?.name,90))
+    :Array.from({length:SEO_ROW_COUNT},(_,i)=>trim(work['seo_row_'+i],90)))
+    .filter(Boolean);
+  const metrics=(snapshot&&Array.isArray(snapshot.criteria)
+    ?snapshot.criteria.slice(0,SEO_METRIC_COUNT)
+    :Array.from({length:SEO_METRIC_COUNT},(_,i)=>work['seo_metric_'+i]))
     .map(row=>trim(typeof row==='string'?row:row?.name,90)).filter(Boolean);
   // Keep the author's own description exactly as written (up to the
   // existing display limit). Only a missing description gets a truthful

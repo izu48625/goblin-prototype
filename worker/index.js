@@ -2,7 +2,7 @@ import {communityGateway,securityConfig} from './community-gateway.js';
 import {discoverPublicRequest} from './discover-public.js';
 import {workReportGateway} from './work-report.js';
 import {contactGateway} from './legal-contact.js';
-import {publicWorkHtml,sitemapIndex,staticSitemap,workSitemap} from './seo.js';
+import {publicWorkHead,publicWorkHtml,sitemapIndex,staticSitemap,workSitemap} from './seo.js';
 const SUPABASE_URL='https://ibpdxbeltdwkquowjeay.supabase.co';
 const SUPABASE_KEY='sb_publishable_6abnwW_1p-U_Y_DefUXfFQ_Dz_Y2vsD';
 const LEGACY_OG_ORIGIN='https://stats-maker-ogp.vercel.app';
@@ -18,11 +18,13 @@ function safeTopicId(value){
   return /^[a-zA-Z0-9_-]{8,128}$/.test(id)?id:'';
 }
 
-async function fetchTopic(id){
+async function fetchTopic(id,forImage=false){
   const topicId=safeTopicId(id);
   if(!topicId)return null;
   const query=new URLSearchParams({
-    select:'id,title,description,language_code,snapshot_updated_at,published_at,visibility',
+    // OG needs existence/visibility only. The share HTML needs metadata;
+    // neither path should transfer snapshots or private fields.
+    select:forImage?'id,visibility':'id,title,description,language_code,snapshot_updated_at,published_at,visibility',
     id:'eq.'+topicId,
     visibility:'in.(public,unlisted)',
     limit:'1'
@@ -70,8 +72,16 @@ async function checkPublicRateLimit(request,limiter){
   // Cloudflare normally supplies CF-Connecting-IP. Use a deliberately
   // conservative fallback only for non-Cloudflare local test traffic.
   const ip=request.headers.get('CF-Connecting-IP')||'unknown-client';
-  const outcome=await limiter.limit({key:ip});
-  if(outcome.success)return null;
+  let outcome;
+  try{
+    if(typeof limiter?.limit!=='function')
+      throw new Error('rate_limit_binding_missing');
+    outcome=await limiter.limit({key:ip});
+  }catch{
+    return Response.json({error:'temporarily_unavailable'},{status:503,
+      headers:{'Cache-Control':'no-store','Retry-After':'60'}});
+  }
+  if(outcome?.success===true)return null;
   return Response.json({error:'rate_limited',message:'Please try again shortly.'},{
     status:429,
     headers:{'Retry-After':'60','Cache-Control':'no-store'}
@@ -97,6 +107,13 @@ export default {
     if(url.pathname==='/sitemap.xml'||url.pathname==='/sitemap-static.xml'||/^\/sitemap-works-[1-9][0-9]*\.xml$/.test(url.pathname)){
       if(request.method!=='GET'&&request.method!=='HEAD')
         return new Response('Method Not Allowed',{status:405,headers:{Allow:'GET, HEAD'}});
+      if(request.method==='HEAD'){
+        // HEAD bots must not trigger a Supabase query for an XML body.
+        const m=url.pathname.match(/^\/sitemap-works-([0-9]+)\.xml$/);
+        const n=m?Number(m[1]):1;
+        return new Response(null,{status:Number.isSafeInteger(n)&&n>=1&&n<=250?200:404,
+          headers:{'Content-Type':'application/xml; charset=utf-8','Cache-Control':'no-store'}});
+      }
       if(url.pathname==='/sitemap.xml')return sitemapIndex();
       if(url.pathname==='/sitemap-static.xml')return staticSitemap();
       return workSitemap(url.pathname.match(/^\/sitemap-works-([0-9]+)\.xml$/)[1]);
@@ -105,7 +122,7 @@ export default {
     if(seoWork){
       if(request.method!=='GET'&&request.method!=='HEAD')
         return new Response('Method Not Allowed',{status:405,headers:{Allow:'GET, HEAD'}});
-      return publicWorkHtml(seoWork[1]);
+      return request.method==='HEAD'?publicWorkHead(seoWork[1]):publicWorkHtml(seoWork[1]);
     }
     if(url.pathname==='/api/discover')return discoverPublicRequest(request,env,ctx);
     if(url.pathname==='/api/health'){
@@ -127,11 +144,15 @@ export default {
       const topicId=safeTopicId(url.searchParams.get('id'));
       if(!topicId)return new Response('Not found',{status:404,headers:{'Cache-Control':'no-store'}});
       let topic;
-      try{topic=await fetchTopic(topicId)}catch(error){
+      try{topic=await fetchTopic(topicId,true)}catch(error){
         console.error('[Stats Maker] OG visibility check failed',error);
         return new Response('Service temporarily unavailable',{status:503,headers:{'Cache-Control':'no-store'}});
       }
-      if(!topic)return new Response('Not found',{status:404,headers:{'Cache-Control':'no-store'}});
+      if(!topic)return new Response(request.method==='HEAD'?null:'Not found',
+        {status:404,headers:{'Cache-Control':'no-store'}});
+      if(request.method==='HEAD')return new Response(null,{status:200,
+        headers:{'Cache-Control':'private, no-store','Content-Type':'image/png',
+          'X-Stats-Maker-OG-Backend':'vercel-stage1'}});
       return proxyLegacyOg(request);
     }
     const match=url.pathname.match(/^\/p\/([a-zA-Z0-9_-]{8,128})\/?$/);
@@ -142,6 +163,8 @@ export default {
       const id=safeTopicId(match[1]);
       let topic=null;
       try{topic=await fetchTopic(id)}catch(error){console.error('[Stats Maker] share fetch failed',error)}
+      if(request.method==='HEAD')return new Response(null,{status:topic?200:404,
+        headers:{'Content-Type':'text/html; charset=utf-8','Cache-Control':'no-store'}});
       const html=shareHtml({origin:url.origin,id,topic});
       return new Response(html,{status:topic?200:404,headers:{'Content-Type':'text/html; charset=utf-8','Cache-Control':'no-store'}});
     }
