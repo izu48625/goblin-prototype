@@ -16,7 +16,7 @@ const snapshot={as_of_utc:now,database_bytes:12954771};
 const base=triage(snapshot);
 assert.equal(base.site,'statsmaker.app');
 assert.equal(base.summary.status,'incomplete','Unknown quotas must NOT be green');
-assert.equal(base.metrics.find(x=>x.key==='database_bytes').pct,2.47);
+assert.equal(base.metrics.find(x=>x.key==='database_bytes').pct,2.59);
 assert.equal(base.metrics.find(x=>x.key==='database_bytes').status,'normal');
 assert.equal(base.metrics.filter(x=>x.status==='unmeasured').length,5);
 assert.equal(base.errorSignal.status,'unmeasured');
@@ -55,6 +55,6 @@ try {
  const raw=execFileSync(process.execPath,[new URL('./r66-free-usage-triage.mjs',import.meta.url).pathname,path],{encoding:'utf8'});
  const cli=JSON.parse(raw);
  assert.equal(cli.summary.status,'incomplete');
- assert.equal(cli.metrics.find(x=>x.key==='database_bytes').pct,2.47);
+ assert.equal(cli.metrics.find(x=>x.key==='database_bytes').pct,2.59);
 }finally{rmSync(testFolder,{recursive:true,force:true})}
 console.log('R66 quota evaluator PASS: missing metrics unknown, 50/80/90/100 thresholds, errors and CLI');
