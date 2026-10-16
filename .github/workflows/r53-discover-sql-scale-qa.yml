@@ -1,0 +1,43 @@
+name: R53 Isolated 10k Work Discover SQL Parity and Benchmark
+on:
+  pull_request:
+    paths:
+      - 'scripts/r53-*.sql'
+      - 'scripts/r53-baseline-live-discover.sql'
+      - 'R53_DISCOVER_LATE_HYDRATION_CANDIDATE.sql'
+      - 'R53_DISCOVER_LATE_HYDRATION_ROLLBACK.sql'
+      - '.github/workflows/r53-discover-sql-scale-qa.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  isolated-10k:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    services:
+      postgres:
+        image: postgres:17
+        env:
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: test_only_not_a_production_secret
+          POSTGRES_DB: postgres
+        ports: ['5432:5432']
+        options: >-
+          --health-cmd "pg_isready -U postgres"
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+    env:
+      PGHOST: 127.0.0.1
+      PGPORT: '5432'
+      PGUSER: postgres
+      PGPASSWORD: test_only_not_a_production_secret
+      PGDATABASE: postgres
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install local database fixtures, never production
+        run: |
+          psql -X -v ON_ERROR_STOP=1 -f scripts/r53-scale-fixture-init.sql
+      - name: Compare current R43 v1 and R53 candidate, 10k mixed-visibility rows
+        run: |
+          psql -X -v ON_ERROR_STOP=1 -f scripts/r53-scale-parity.sql
