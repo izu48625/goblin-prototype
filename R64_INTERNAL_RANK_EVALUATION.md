@@ -25,3 +25,26 @@ Publicデータのみでも匿名ユーザーが公開Discover検索を連打す
 ## 実測
 
 GitHub Actions `R64 Unexposed Ranking Helper HTTP and Load`。実測後に結果を追記。
+
+## 隔離試験完了（2026-10-16）
+
+[GitHub Actions #38886435786](https://github.com/izu48625/goblin-prototype/actions/runs/38886435786) **4/4ジョブ成功**。1k/10k/50k/100kそれぞれ1/5/20/50並列。各規模210×2件、合計**1,680件の負荷クエリ全成功（エラー0）**。32条件の完全JSON一致×4規模、全公開作品の参加者/Remix数、Private/Unlistedの非表示、Public→Privateへの変更直後の集計除外が成功。
+
+最も重要なAPI実機確認：使い捨てPostgREST v14.18（公開スキーマ=public）を接続し、Discover RPC **HTTP200**、一括集計関数の公開RPC直接アクセス **HTTP404**、`Accept-Profile: discover_internal` は **HTTP406** を確認。
+
+|作品数|50並列 R60 p95|50並列 R64 p95|短縮|
+|--:|--:|--:|--:|
+|1,000|768.29ms|851.69ms|**-10.9%（悪化）**|
+|10,000|1,866.92ms|1,733.30ms|+7.2%|
+|50,000|8,445.07ms|5,783.15ms|**+31.5%**|
+|100,000|15,842.87ms|10,167.47ms|**+35.8%**|
+
+100kでは1並列802.31→415.10ms（48.3%短縮）、5並列1,829.03→965.20ms（47.2%短縮）、20並列5,840.45→3,592.52ms（38.5%短縮）。小規模50並列が悪化する条件を隠さず、費用無料・検証ハードウェアの変動に留意する。
+
+### セキュリティと採用制約
+
+**PostgRESTでdiscover_internalスキーマが公開されていないことが安全条件。** SQL権限だけではバルク関数へのDB直接実行を完全に防げない。Project本番の「Exposed schemas」を検証できない場合はカットオーバーを保留。公開スキーマに関数を置かない設計でも、将来の管理者が内部スキーマを公開した場合にはAPIアクセス可能になるため運用文書に禁止を明記。
+
+Supabaseの公式ドキュメント：`https://supabase.com/docs/guides/api/using-custom-schemas` と `https://supabase.com/docs/guides/database/postgres/row-level-security`。本番に負荷試験はしない。GitHub Actionsの性能がそのまま本番Freeプランの性能ではない。
+
+ロールバック：`R64_INTERNAL_RANK_ROLLBACK.sql`（R60関数復帰＋anon/authenticatedの内部ヘルパー使用権剥奪、データテーブル変更なし）。
