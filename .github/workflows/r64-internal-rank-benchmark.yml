@@ -57,7 +57,7 @@ jobs:
           python3 scripts/r58-p4-load.py "${{ matrix.works }}"
           mv "artifacts/r58-p4-load-${{ matrix.works }}.json" "artifacts/r64-baseline-${{ matrix.works }}.json"
       - name: 32 JSON parity and all-Public data protection; install R64
-        run: psql -X -v ON_ERROR_STOP=1 -f scripts/r63-public-set-parity-qa.sql
+        run: psql -X -v ON_ERROR_STOP=1 -f scripts/r64-internal-parity-qa.sql
       - name: PostgREST public API exposure regression (1k fixture only)
         if: matrix.works == 1000
         run: bash scripts/r64-postgrest-exposure-qa.sh
@@ -80,7 +80,7 @@ jobs:
           for p in (1,5,20,50):
               x=a["concurrency"][str(p)];y=b["concurrency"][str(p)]
               improvement=round((1-y["wall_p95_ms"]/x["wall_p95_ms"])*100,1)
-              print(f"R63 {size} topics / {p} parallel: old={x['wall_p95_ms']}ms new={y['wall_p95_ms']}ms change={improvement}% errors={y['errors']}",flush=True)
+              print(f"R64 {size} topics / {p} parallel: old={x['wall_p95_ms']}ms new={y['wall_p95_ms']}ms change={improvement}% errors={y['errors']}",flush=True)
               f.write(f"|{p}|{x['wall_p95_ms']}|{y['wall_p95_ms']}|{improvement:+.1f}%|{x['errors']}|{y['errors']}|\n")
               if y["errors"]: raise SystemExit(f"Unexpected errors for {size}/{p}")
           f.write("\nPer-query JSON includes mixed search/category/popular/community cases; CPU spot samples are best-effort.\n")
