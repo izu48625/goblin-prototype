@@ -1,0 +1,43 @@
+name: R52 Multilingual UI copy correctness
+
+on:
+  pull_request:
+    paths:
+      - "base/js/i18n.js"
+      - "app/src/core/i18n.js"
+      - "cloud/discover.js"
+      - "scripts/r52-copy-parity-qa.mjs"
+      - ".github/workflows/r52-copy-parity-qa.yml"
+      - "R52_SCALE_CONTENT_AUDIT.md"
+  push:
+    branches: [main]
+    paths:
+      - "base/js/i18n.js"
+      - "app/src/core/i18n.js"
+      - "cloud/discover.js"
+      - "scripts/r52-copy-parity-qa.mjs"
+      - ".github/workflows/r52-copy-parity-qa.yml"
+      - "R52_SCALE_CONTENT_AUDIT.md"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  bilingual-copy:
+    name: JA EN parity, honest error messages and Popular ranking
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+      - run: |
+          node --check scripts/r52-copy-parity-qa.mjs
+          node --check base/js/i18n.js
+          node --check cloud/discover.js
+          node scripts/r52-copy-parity-qa.mjs
+          npm run build:cloudflare
+          test -s dist/base/js/i18n.js
+          test -s dist/cloud/discover.js
