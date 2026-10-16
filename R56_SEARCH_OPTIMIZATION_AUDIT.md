@@ -36,6 +36,18 @@ R55隔離 PostgreSQL 17（模擬50,000作品・Public/Unlisted/Private混在）�
 - 本番への移行はGitHubのPR合格後に実施し、日時とSHAをこの監査記録に追加。
 - 検索結果の無断キャッシュ、Private/Unlistedを経由した結果返却、検索結果件数の切り捨て、ユーザーへ課金する構成変更は行わない。
 
+
+## 適用完了・検証結果（2026-10-16 JST）
+
+- R56候補をPR [#185](https://github.com/izu48625/goblin-prototype/pull/185) で8チェックすべて成功させてmainにマージ。main commit `3078354547cec6dc6eda56cc9fa5b8bc66c29028`。
+- **本番Supabaseに`r56_discover_search_first_term_once` migration適用済み**。事前の現行関数定義が、GitHubの `R53_DISCOVER_LATE_HYDRATION_CANDIDATE.sql` と完全一致することを確認したうえで置換した。
+- 隔離PostgreSQL 17の50,000模擬作品で **28/28件の全文JSON一致**。日本語1語 2828.048→1953.224ms（約31%短縮）、日本語2語 3669.224→2826.283ms（約23%短縮）、英語1語＋人気順 3465.477→2414.659ms（約30%短縮）。同一CI内の1回ずつのDB単発計測。
+- 本番DBで**適用前後28件の完全JSONハッシュが全一致**（不一致0件）。通常検索、カテゴリー、Community、ページ送り、日英、記号リテラルなどを含む。
+- `SET LOCAL ROLE anon`の読取りで「サッカー」のPublic 7件／返却7件／全行Public／匿名に見えるPrivate 0件を確認。
+- 対象は**読み取り用の`public.discover_public_works_v1` 1関数のみ**。公開作品・スコア・Auth・RLS・支払い・AdSense・GA4は変更していない。
+- 本番戻しが必要なら旧関数の保存済み定義 `R53_DISCOVER_LATE_HYDRATION_CANDIDATE.sql` を使い`CREATE OR REPLACE FUNCTION`で復旧（ロールバックファイル `R56_SEARCH_ROLLBACK.sql`）。**ロールバックは現在未実行**。
+- R56の28条件全一致でも50,000作品の検索が2秒程度かかるケースが残る。これで全ユーザー・同時アクセスにおける高速表示を保証するわけではない。
+
 ## 依然として残る限界
 
 - 最初の単語に一致する候補が非常に多い場合、検索用テキストのJSONB→正規化処理そのものは1回必要。1〜2文字検索、パフォーマンスが悪いインデックス利用、10万件以上、人気順での全件集計、深いOFFSETはさらに専用改善を要する。
