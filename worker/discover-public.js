@@ -6,6 +6,24 @@ const CATEGORIES=new Set(['all','sports','manga_anime','movie_tv','food','game',
 const SORTS=new Set(['newest','popular','community','remix']);
 const UUID=/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 const TTL=20;
+// Best-effort in-isolate coalescing of expensive rank/search scans. Never cache
+// the returned title/snapshot in Cache API or a durable Worker store.
+const inFlightFirstPages=new Map();
+
+function firstPageScan(input){
+  const key=cacheKey(input).url;
+  const existing=inFlightFirstPages.get(key);
+  if(existing)return {promise:existing,owner:false};
+  const promise=dbRpc('discover_public_works_v1',params(input)).then(checked);
+  inFlightFirstPages.set(key,promise);
+  // A failed request must never pin an in-flight key. Do not leave a rejected
+  // cleanup promise unobserved (causes Worker unhandled rejections).
+  promise.then(
+    ()=>{if(inFlightFirstPages.get(key)===promise)inFlightFirstPages.delete(key)},
+    ()=>{if(inFlightFirstPages.get(key)===promise)inFlightFirstPages.delete(key)}
+  );
+  return {promise,owner:true};
+}
 
 async function dbRpc(fn,params){
   const res=await fetch(SUPABASE_URL+'/rest/v1/rpc/'+fn,{
@@ -101,7 +119,27 @@ export async function discoverPublicRequest(request,env,ctx){
         // recompute. This is fail-closed for Public -> Private/Unlisted.
       }
     }
-    const fresh=checked(await dbRpc('discover_public_works_v1',params(input)));
+    // Cache misses from a simultaneous visitor burst previously all launched
+    // the same expensive full-ranking RPC. Merge them within this isolate.
+    // Joiners MUST verify each result against current Public RLS before serving
+    // it, to preserve the existing revocation guarantees for concurrent edits.
+    const flight=useCache?firstPageScan(input):null;
+    const fresh=flight?await flight.promise:
+      checked(await dbRpc('discover_public_works_v1',params(input)));
+    if(useCache&&!flight.owner){
+      const ids=fresh.rows.map(t=>t.id);
+      const rows=await dbRpc('discover_public_cards_by_ids_v1',{
+        p_ids:ids,p_view:input.view,p_anchor:fresh.anchor
+      });
+      if(Array.isArray(rows)&&rows.length===ids.length&&
+          rows.every((r,i)=>r?.id===ids[i]&&r.visibility==='public')){
+        return response(checked({...fresh,rows}),200,'coalesced-verified');
+      }
+      // A work was just hidden or removed. Do not serve stale content or stale
+      // ranking; recompute once for this request using current Public rules.
+      return response(checked(await dbRpc('discover_public_works_v1',params(input))),
+        200,'miss');
+    }
     if(useCache){
       const index={ids:fresh.rows.map(r=>r.id),total:Number(fresh.total),
         has_more:fresh.has_more,anchor:fresh.anchor};
