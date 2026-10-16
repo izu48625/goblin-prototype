@@ -1,5 +1,9 @@
 # Stats Maker 正式開発ロードマップ — R31以降
 
+> **R57 本番検索高速化完了（2026-10-16）：** Discoverの検索用テキストをJA/ENのPostgreSQL STORED GENERATED列として事前計算し、Public専用GIN索引を採用。50,000件の隔離データでは日本語1語検索1941→109ms（約94%減）、2語2783→116ms（約96%減）、英語人気順2389→460ms（約81%減）。28条件で完全JSON一致、編集時の再計算、Private非露出を検証。本番でも移行前後28条件一致、匿名Private可視0、重複する旧索引は削除済み。Supabase FreeのままDB全体約12MB。詳細 [R57本番移行](R57_PRODUCTION_CUTOVER.md)。**残り：** 端末/多地域の実測p95、更新集中時の生成列維持コスト、select('*')の余分な転送量、Worker Free/Supabase Egress制限、Community/Turnstile全経路。広告/GA4は現状維持。
+
+
+
 > **R56検索CPU削減：実環境適用済み（2026-10-16）** `discover_public_works_v1`の最初の検索単語の重複正規化・照合を省いた。50k模擬作品で28条件JSON完全一致、日本語単語2828→1953ms、2単語3669→2826ms、英語Popular3465→2415ms（単発隔離DB）。本番関数は適用前後28件JSONハッシュ一致、匿名Public限定QA合格。PR #185／main `3078354547cec6dc6eda56cc9fa5b8bc66c29028`、詳細 `R56_SEARCH_OPTIMIZATION_AUDIT.md`。**残る検索負荷：** 多数の作品に一致する広義の語、1〜2文字、人気順全件評価と深いOFFSET。次フェーズはインデックス利用・検索専用テキスト索引・候補範囲削減を隔離DBで評価し、投稿編集時の整合性と非公開化直後の漏えい防止を最優先で検証。課金/広告/GA4は現状維持。
 
 
