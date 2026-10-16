@@ -5,6 +5,14 @@
 正式サイト：`https://statsmaker.app/`  
 方針：**AdSenseのサイト審査と広告実装を終えてから正式リリースを告知する。** サイトは現在すでに稼働しており、新規公開ではなく「正式告知」の順序変更。
 
+## 2026-10-16 R50：AdSenseサイト所有権メタタグ設置
+
+- ユーザーがAdSense画面で「**メタタグ**」方式を選び、公開用タグ `<meta name="google-adsense-account" content="ca-pub-2734957009365610">` を提供した。
+- 正式URLの外側HTML `index.html` の `<head>` にこのタグのみを追加する。Cloudflare Workersビルド `dist/index.html` と本番 `https://statsmaker.app/` のHTMLに同じタグが出ることを専用QAで検証する。
+- **AdSenseコード（adsbygoogle.js）、広告配信、ads.txt、GA4は開始しない。** タグは所有権のリンク用で広告表示用ではない。
+- 完了後は本人がAdSenseの「コードを配置しました」→「確認」を実行し、接続が成功したら支払い情報などの必須事項を完了して「審査をリクエスト」を実行する。**コード反映だけでGoogleの承認や審査申請が済んだとは扱わない。**
+- 検証時点の状態はGitHub ActionsのR50専用QA・Cloudflare本番スモークの実行結果に従う。本人によるGoogle審査操作は未代行。
+
 ## 2026-10-14 R49申請直前・読み取り専用再監査
 
 - GitHub main の確認基準：`1ca0ae80c01fb493c46a47e15117c9d8335eca09`（R48）。**作業時は再取得**し、このSHAを固定最新版としない。
