@@ -36,7 +36,7 @@ assert(messages.includes("'action.hideMetrics':'Hide Metric Controls'"));
 assert(messages.includes("'publish.migrationRequired':'公開データの確認中に問題が発生しました。"));
 assert(messages.includes("'publish.migrationRequired':'A publishing data check failed."));
 assert(discover.includes("popularSort.title=popularExplanation"));
-assert(discover.includes("popularSort.setAttribute('aria-label'"));
+assert(discover.includes('popularSort.ariaLabel='));
 assert(discover.includes('参加者数と公開Remix数を基に並べます。'));
 assert(discover.includes('Ranked by participants and public Remix count.'));
 assert(discover.includes("const PAGE_SIZE=12;"),'Discover paging accidentally modified');
