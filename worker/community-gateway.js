@@ -57,10 +57,19 @@ export async function communityGateway(request,env){
   const size=Number(request.headers.get('Content-Length')||0);
   if(size>100000)return reject(413,'payload_too_large');
 
-  const limited=await env.COMMUNITY_GATEWAY_RATE_LIMIT.limit({
-    key:request.headers.get('CF-Connecting-IP')||'unknown-client'
-  });
-  if(!limited.success)return json({error:'rate_limited'},429,{'Retry-After':'60'});
+  // A missing/faulty rate-limit binding must fail closed with a predictable
+  // response instead of throwing an unhandled Worker error (or bypassing it).
+  let limited;
+  try {
+    if(typeof env.COMMUNITY_GATEWAY_RATE_LIMIT?.limit!=='function')
+      return reject(503,'gateway_rate_limit_unavailable');
+    limited=await env.COMMUNITY_GATEWAY_RATE_LIMIT.limit({
+      key:request.headers.get('CF-Connecting-IP')||'unknown-client'
+    });
+  }catch{
+    return reject(503,'gateway_rate_limit_unavailable');
+  }
+  if(!limited?.success)return json({error:'rate_limited'},429,{'Retry-After':'60'});
 
   const auth=request.headers.get('Authorization')||'';
   const bearer=auth.match(/^Bearer ([A-Za-z0-9_.-]{40,5500})$/);
