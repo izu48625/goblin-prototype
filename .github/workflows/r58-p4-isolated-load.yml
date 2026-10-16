@@ -1,0 +1,63 @@
+name: R58-P4 Free 1k-100k Isolated Load Benchmark
+on:
+  pull_request:
+    paths:
+      - 'scripts/r58-p4-fixture.sh'
+      - 'scripts/r58-p4-load.py'
+      - '.github/workflows/r58-p4-isolated-load.yml'
+      - 'R58_P4_FREE_LOAD_PLAN.md'
+      - 'R57_DISCOVER_PRECOMPUTED_SEARCH_SCHEMA_CANDIDATE.sql'
+      - 'R57_DISCOVER_PRECOMPUTED_SEARCH_RPC_CANDIDATE.sql'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  isolated-scale:
+    name: Postgres 17 / ${{ matrix.works }} synthetic works
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    strategy:
+      fail-fast: false
+      matrix:
+        works: [1000, 10000, 50000, 100000]
+    services:
+      postgres:
+        image: postgres:17
+        env:
+          POSTGRES_PASSWORD: test_only_not_a_production_secret
+          POSTGRES_USER: postgres
+          POSTGRES_DB: postgres
+        ports: ['5432:5432']
+        options: >-
+          --health-cmd "pg_isready -U postgres"
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+    env:
+      PGHOST: 127.0.0.1
+      PGPORT: '5432'
+      PGUSER: postgres
+      PGPASSWORD: test_only_not_a_production_secret
+      PGDATABASE: postgres
+    steps:
+      - uses: actions/checkout@v4
+      - name: Confirm all test traffic is localhost only
+        run: |
+          test "$PGHOST" = '127.0.0.1'
+          test "$PGPORT" = '5432'
+          test "$PGDATABASE" = 'postgres'
+          test -z "${DATABASE_URL:-}"
+          test -z "${SUPABASE_DB_URL:-}"
+          python3 -m py_compile scripts/r58-p4-load.py
+      - name: Prepare synthetic dataset and production-equivalent query
+        run: bash scripts/r58-p4-fixture.sh "${{ matrix.works }}"
+      - name: Measure 1, 5, 20, 50 concurrent queries and Public-only isolation
+        run: python3 scripts/r58-p4-load.py "${{ matrix.works }}"
+      - name: Upload isolated benchmark JSON
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: r58-p4-load-${{ matrix.works }}
+          path: artifacts/r58-p4-load-${{ matrix.works }}.json
+          if-no-files-found: warn
+          retention-days: 14
