@@ -4,6 +4,7 @@ on:
     paths:
       - 'scripts/r53-*.sql'
       - 'scripts/r53-baseline-live-discover.sql'
+      - 'scripts/r54-isolated-parallel-read-qa.sh'
       - 'R53_DISCOVER_LATE_HYDRATION_CANDIDATE.sql'
       - 'R53_DISCOVER_LATE_HYDRATION_ROLLBACK.sql'
       - '.github/workflows/r53-discover-sql-scale-qa.yml'
@@ -41,3 +42,5 @@ jobs:
       - name: Compare current R43 v1 and R53 candidate, 10k mixed-visibility rows
         run: |
           psql -X -v ON_ERROR_STOP=1 -f scripts/r53-scale-parity.sql
+      - name: Twenty simultaneous anonymous Discover reads (isolated)
+        run: bash scripts/r54-isolated-parallel-read-qa.sh

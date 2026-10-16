@@ -1,0 +1,30 @@
+name: R54 Live Public Discover GET Smoke
+on:
+  pull_request:
+    paths:
+      - 'scripts/r54-discover-live-qa.mjs'
+      - '.github/workflows/r54-discover-live-qa.yml'
+      - 'R54_DISCOVER_PRODUCTION_CUTOVER.md'
+  push:
+    branches: [main]
+    paths:
+      - 'scripts/r54-discover-live-qa.mjs'
+      - '.github/workflows/r54-discover-live-qa.yml'
+      - 'R54_DISCOVER_PRODUCTION_CUTOVER.md'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  public-discover-readonly:
+    runs-on: ubuntu-latest
+    timeout-minutes: 8
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - run: node --check scripts/r54-discover-live-qa.mjs
+      - name: GET-only production Discover against Public data
+        env:
+          BASE_URL: https://statsmaker.app
+        run: node scripts/r54-discover-live-qa.mjs
