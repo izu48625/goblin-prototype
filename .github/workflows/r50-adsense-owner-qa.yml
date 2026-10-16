@@ -1,0 +1,49 @@
+name: R50 AdSense owner meta only (no ad serving)
+
+on:
+  pull_request:
+    paths:
+      - "index.html"
+      - "scripts/r50-adsense-owner-qa.mjs"
+      - "R39_P1_ADSENSE_REGISTRATION_PREP.md"
+      - ".github/workflows/r50-adsense-owner-qa.yml"
+  push:
+    branches: [main]
+    paths:
+      - "index.html"
+      - "scripts/r50-adsense-owner-qa.mjs"
+      - "R39_P1_ADSENSE_REGISTRATION_PREP.md"
+      - ".github/workflows/r50-adsense-owner-qa.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  owner-meta:
+    name: Root head, Cloudflare static asset and no real ads
+    runs-on: ubuntu-latest
+    timeout-minutes: 8
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+      - run: |
+          node --check scripts/r50-adsense-owner-qa.mjs
+          npm run build:cloudflare
+          node scripts/r50-adsense-owner-qa.mjs local
+          test ! -e dist/ads.txt
+
+  live-owner-meta:
+    name: Production GET ownership meta (after main merge)
+    if: github.event_name != 'pull_request'
+    needs: owner-meta
+    runs-on: ubuntu-latest
+    timeout-minutes: 8
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+      - run: node scripts/r50-adsense-owner-qa.mjs live
