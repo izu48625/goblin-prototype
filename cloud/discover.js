@@ -112,7 +112,7 @@
       ?'参加者数と公開Remix数を基に並べます。'
       :'Ranked by participants and public Remix count.';
     popularSort.title=popularExplanation;
-    popularSort.setAttribute('aria-label',copy.popular+' — '+popularExplanation);
+    popularSort.ariaLabel=copy.popular+' — '+popularExplanation;
     document.querySelector('[data-sort="community"]').textContent=copy.community;
     document.querySelector('[data-sort="remix"]').textContent=copy.remix;
     refreshBtn.textContent=copy.refresh;
