@@ -104,7 +104,15 @@
     });
 
     document.querySelector('[data-sort="newest"]').textContent=copy.newest;
-    document.querySelector('[data-sort="popular"]').textContent=copy.popular;
+    const popularSort=document.querySelector('[data-sort="popular"]');
+    popularSort.textContent=copy.popular;
+    // Popular mixes submitted participant count with public Remix count.
+    // Keep the short visible label on iPhone; explain the metric accessibly.
+    const popularExplanation=locale==='ja'
+      ?'参加者数と公開Remix数を基に並べます。'
+      :'Ranked by participants and public Remix count.';
+    popularSort.title=popularExplanation;
+    popularSort.setAttribute('aria-label',copy.popular+' — '+popularExplanation);
     document.querySelector('[data-sort="community"]').textContent=copy.community;
     document.querySelector('[data-sort="remix"]').textContent=copy.remix;
     refreshBtn.textContent=copy.refresh;
