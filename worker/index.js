@@ -107,21 +107,16 @@ export default {
     if(url.pathname==='/sitemap.xml'||url.pathname==='/sitemap-static.xml'||/^\/sitemap-works-[1-9][0-9]*\.xml$/.test(url.pathname)){
       if(request.method!=='GET'&&request.method!=='HEAD')
         return new Response('Method Not Allowed',{status:405,headers:{Allow:'GET, HEAD'}});
-      if(request.method==='HEAD')
-        return new Response(null,{status:200,headers:{
-          'Content-Type':'application/xml; charset=utf-8','Cache-Control':'no-store'
-        }});
-      if(url.pathname==='/sitemap.xml')return sitemapIndex();
-      if(url.pathname==='/sitemap-static.xml')return staticSitemap();
-      const page=url.pathname.match(/^\/sitemap-works-([0-9]+)\.xml$/)[1];
       if(request.method==='HEAD'){
-        // No DB scan just to answer metadata-only bot probes. Invalid
-        // sitemap page numbers still return 404 as on GET.
-        const n=Number(page);
+        // HEAD bots must not trigger a Supabase query for an XML body.
+        const m=url.pathname.match(/^\/sitemap-works-([0-9]+)\.xml$/);
+        const n=m?Number(m[1]):1;
         return new Response(null,{status:Number.isSafeInteger(n)&&n>=1&&n<=250?200:404,
           headers:{'Content-Type':'application/xml; charset=utf-8','Cache-Control':'no-store'}});
       }
-      return workSitemap(page);
+      if(url.pathname==='/sitemap.xml')return sitemapIndex();
+      if(url.pathname==='/sitemap-static.xml')return staticSitemap();
+      return workSitemap(url.pathname.match(/^\/sitemap-works-([0-9]+)\.xml$/)[1]);
     }
     const seoWork=url.pathname.match(/^\/work\/([a-zA-Z0-9_-]{8,128})\/?$/);
     if(seoWork){
