@@ -1,0 +1,96 @@
+name: R64 Unexposed Ranking Helper HTTP and Load
+on:
+  pull_request:
+    paths:
+      - 'R64_INTERNAL_SET_COUNTS_HELPER.sql'
+      - 'scripts/r64-postgrest-exposure-qa.sh'
+      - 'R64_INTERNAL_SET_COUNTS_RPC_CANDIDATE.sql'
+      - 'scripts/r64-internal-parity-qa.sql'
+      - '.github/workflows/r64-internal-rank-benchmark.yml'
+      - 'R64_INTERNAL_RANK_EVALUATION.md'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  topk-comparison:
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    name: "R64 before/after ${{ matrix.works }} works"
+    strategy:
+      fail-fast: false
+      matrix:
+        works: [1000, 10000, 50000, 100000]
+    services:
+      postgres:
+        image: postgres:17
+        env:
+          POSTGRES_PASSWORD: test_only_not_a_production_secret
+          POSTGRES_USER: postgres
+          POSTGRES_DB: postgres
+        ports: ['5432:5432']
+        options: >-
+          --health-cmd "pg_isready -U postgres"
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+    env:
+      PGHOST: 127.0.0.1
+      PGPORT: '5432'
+      PGUSER: postgres
+      PGPASSWORD: test_only_not_a_production_secret
+      PGDATABASE: postgres
+    steps:
+      - uses: actions/checkout@v4
+      - name: Check synthetic fixture only
+        run: |
+          test "$PGHOST" = 127.0.0.1
+          test "$PGDATABASE" = postgres
+          test -z "${DATABASE_URL:-}"
+          test -z "${SUPABASE_DB_URL:-}"
+          bash scripts/r58-p4-fixture.sh "${{ matrix.works }}"
+      - name: Install R60 live-compatible baseline
+        run: |
+          psql -X -v ON_ERROR_STOP=1 -f R60_DISCOVER_FUSED_COUNTS_HELPER.sql
+          psql -X -v ON_ERROR_STOP=1 -f R60_DISCOVER_FUSED_COUNTS_RPC_CANDIDATE.sql
+      - name: Baseline R60 load (unchanged)
+        run: |
+          python3 scripts/r58-p4-load.py "${{ matrix.works }}"
+          mv "artifacts/r58-p4-load-${{ matrix.works }}.json" "artifacts/r64-baseline-${{ matrix.works }}.json"
+      - name: 32 JSON parity and all-Public data protection; install R64
+        run: psql -X -v ON_ERROR_STOP=1 -f scripts/r63-public-set-parity-qa.sql
+      - name: PostgREST public API exposure regression (1k fixture only)
+        if: matrix.works == 1000
+        run: bash scripts/r64-postgrest-exposure-qa.sh
+      - name: R64 internal set-based candidate on same synthetic fixture
+        run: |
+          python3 scripts/r58-p4-load.py "${{ matrix.works }}"
+          mv "artifacts/r58-p4-load-${{ matrix.works }}.json" "artifacts/r64-internal-${{ matrix.works }}.json"
+      - name: Compare R60 vs R64 by query type
+        run: |
+          python3 - <<'PY'
+          import json,os
+          from pathlib import Path
+          size=int("${{ matrix.works }}")
+          a=json.loads(Path(f"artifacts/r64-baseline-{size}.json").read_text())
+          b=json.loads(Path(f"artifacts/r64-internal-{size}.json").read_text())
+          f=open(os.environ['GITHUB_STEP_SUMMARY'],'a',encoding='utf-8')
+          f.write(f"### R64 non-exposed Public ranking: {size:,} topics\n\n")
+          f.write("Same runner, same fixture; **sequential non-randomized measurements**, not direct production timing.\n\n")
+          f.write("|Concurrency|R60 p95 ms|R64 p95 ms|Difference|R60 errors|R64 errors|\n|--:|--:|--:|--:|--:|--:|\n")
+          for p in (1,5,20,50):
+              x=a["concurrency"][str(p)];y=b["concurrency"][str(p)]
+              improvement=round((1-y["wall_p95_ms"]/x["wall_p95_ms"])*100,1)
+              print(f"R63 {size} topics / {p} parallel: old={x['wall_p95_ms']}ms new={y['wall_p95_ms']}ms change={improvement}% errors={y['errors']}",flush=True)
+              f.write(f"|{p}|{x['wall_p95_ms']}|{y['wall_p95_ms']}|{improvement:+.1f}%|{x['errors']}|{y['errors']}|\n")
+              if y["errors"]: raise SystemExit(f"Unexpected errors for {size}/{p}")
+          f.write("\nPer-query JSON includes mixed search/category/popular/community cases; CPU spot samples are best-effort.\n")
+          f.close()
+          PY
+      - name: Save baseline and optimized results
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: r64-internal-comparison-${{ matrix.works }}
+          path: artifacts/r64-*.json
+          if-no-files-found: warn
+          retention-days: 14
