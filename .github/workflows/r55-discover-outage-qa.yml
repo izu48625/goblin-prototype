@@ -1,0 +1,42 @@
+name: R55 Discover Outage Containment QA
+on:
+  pull_request:
+    paths:
+      - 'cloud/discover.js'
+      - 'worker/community-gateway.js'
+      - 'scripts/r26-gateway-test.mjs'
+      - 'scripts/r55-discover-outage-containment-qa.mjs'
+      - '.github/workflows/r55-discover-outage-qa.yml'
+      - 'R55_CAPACITY_AUDIT.md'
+  push:
+    branches: [main]
+    paths:
+      - 'cloud/discover.js'
+      - 'worker/community-gateway.js'
+      - 'scripts/r26-gateway-test.mjs'
+      - 'scripts/r55-discover-outage-containment-qa.mjs'
+      - '.github/workflows/r55-discover-outage-qa.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  outage-no-stampede:
+    runs-on: ubuntu-latest
+    timeout-minutes: 12
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Syntax and official-domain outage / preview compatibility
+        run: |
+          node --check cloud/discover.js
+          node --check scripts/r55-discover-outage-containment-qa.mjs
+          node scripts/r55-discover-outage-containment-qa.mjs
+      - name: Community gateway limiter outage fail-closed
+        run: node scripts/r26-gateway-test.mjs
+      - name: Existing paginated Discover, privacy and preview QA
+        run: |
+          node scripts/r40-discover-server-pagination-qa.mjs
+          node scripts/r43-discover-gateway-qa.mjs
+      - run: npm run build:cloudflare

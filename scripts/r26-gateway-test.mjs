@@ -92,6 +92,15 @@ try{
   assert.equal(r.status,429);
   assert.equal(outbound.length,0);
   rateSuccess=true;
+  r=await worker.fetch(makeReq(),{...env,COMMUNITY_GATEWAY_RATE_LIMIT:undefined});
+  assert.equal(r.status,503,'missing limiter must fail closed');
+  assert.equal((await r.json()).error,'gateway_rate_limit_unavailable');
+  r=await worker.fetch(makeReq(),{
+    ...env,COMMUNITY_GATEWAY_RATE_LIMIT:{async limit(){throw Error('simulated limiter outage')}}
+  });
+  assert.equal(r.status,503,'thrown limiter error must fail closed');
+  assert.equal((await r.json()).error,'gateway_rate_limit_unavailable');
+  assert.equal(outbound.length,0,'limiter outage must not forward to auth/Turnstile/database');
 
   authSuccess=false;
   r=await worker.fetch(makeReq(),env);

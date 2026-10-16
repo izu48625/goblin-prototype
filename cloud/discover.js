@@ -363,8 +363,11 @@
       moreBtn.classList.add('hidden');
     }
     try{
-      // Prefer same-origin Public-only cache gateway, never sends a user token.
-      // R40 RPC is the safe fallback if the Worker route is unavailable.
+      // Production must not bypass the Worker during an outage: a
+      // gateway 503 likely means the same Supabase backend is overloaded.
+      // Direct RPC fallback is retained for local / GitHub Pages previews.
+      const officialHost=['statsmaker.app','www.statsmaker.app']
+        .includes(window.location?.hostname||'');
       const args={
         p_query:state.query,
         p_category:state.category,
@@ -393,11 +396,13 @@
           rejected.skipFallback=true;
           throw rejected;
         }
-        if(!response.ok)throw new Error('Discover gateway unavailable');
+        if(!response.ok)throw new Error('Discover gateway HTTP '+response.status);
         data=await response.json();
       }catch(gatewayError){
-        // Never bypass the public gateway's abuse/validation response.
-        if(gatewayError?.skipFallback)throw gatewayError;
+        // Never turn official-domain Worker errors into a thundering herd
+        // of direct Supabase requests. In previews, retain historical
+        // RPC fallback because /api/discover is intentionally unavailable.
+        if(gatewayError?.skipFallback||officialHost)throw gatewayError;
         if(!sb)throw gatewayError;
         const fallback=await sb.rpc('discover_public_works_v1',args);
         data=fallback.data;

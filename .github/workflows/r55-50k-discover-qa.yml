@@ -1,0 +1,38 @@
+name: R55 Isolated 50k Discover Capacity QA
+on:
+  pull_request:
+    paths:
+      - '.github/workflows/r55-50k-discover-qa.yml'
+      - 'scripts/r53-scale-fixture-init.sql'
+      - 'scripts/r53-scale-parity.sql'
+      - 'scripts/r55-50k-discover-qa.sh'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  isolated-50k:
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    services:
+      postgres:
+        image: postgres:17
+        env:
+          POSTGRES_PASSWORD: test_only_not_a_production_secret
+          POSTGRES_USER: postgres
+          POSTGRES_DB: postgres
+        ports: ['5432:5432']
+        options: >-
+          --health-cmd "pg_isready -U postgres"
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+    env:
+      PGHOST: 127.0.0.1
+      PGPORT: '5432'
+      PGUSER: postgres
+      PGPASSWORD: test_only_not_a_production_secret
+      PGDATABASE: postgres
+    steps:
+      - uses: actions/checkout@v4
+      - name: Verify 50k fixture baseline/optimized JSON parity and DB execution times
+        run: bash scripts/r55-50k-discover-qa.sh
