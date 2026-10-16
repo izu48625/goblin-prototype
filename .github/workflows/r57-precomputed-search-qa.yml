@@ -1,0 +1,41 @@
+name: R57 Precomputed Search 50k Isolated Benchmark
+on:
+  pull_request:
+    paths:
+      - 'R57_DISCOVER_PRECOMPUTED_SEARCH_SCHEMA_CANDIDATE.sql'
+      - 'R57_DISCOVER_PRECOMPUTED_SEARCH_RPC_CANDIDATE.sql'
+      - 'scripts/r57-50k-precomputed-search-qa.sql'
+      - '.github/workflows/r57-precomputed-search-qa.yml'
+      - 'R57_SEARCH_INDEX_EVALUATION.md'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  isolated-50k:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    services:
+      postgres:
+        image: postgres:17
+        env:
+          POSTGRES_PASSWORD: test_only_not_a_production_secret
+          POSTGRES_USER: postgres
+          POSTGRES_DB: postgres
+        ports: ['5432:5432']
+        options: >-
+          --health-cmd "pg_isready -U postgres"
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+    env:
+      PGHOST: 127.0.0.1
+      PGPORT: '5432'
+      PGUSER: postgres
+      PGPASSWORD: test_only_not_a_production_secret
+      PGDATABASE: postgres
+    steps:
+      - uses: actions/checkout@v4
+      - name: Create isolated 50k mixed-visibility synthetic data
+        run: bash scripts/r56-50k-fixture.sh
+      - name: Compare baseline and generated columns via 28 exact JSON responses
+        run: psql -X -v ON_ERROR_STOP=1 -f scripts/r57-50k-precomputed-search-qa.sql
