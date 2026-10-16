@@ -1,0 +1,59 @@
+name: R58 P2 Community Full-Route Mock and Counters
+on:
+  pull_request:
+    paths:
+      - 'scripts/r58-community-gateway-burst-qa.mjs'
+      - '.github/workflows/r58-community-gateway-burst-qa.yml'
+      - 'R58_P2_P3_GUARD_MONITORING_AUDIT.md'
+      - 'scripts/r58-free-usage-readonly.sql'
+  push:
+    branches: [main]
+    paths:
+      - 'scripts/r58-community-gateway-burst-qa.mjs'
+      - '.github/workflows/r58-community-gateway-burst-qa.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  mock-gateway:
+    runs-on: ubuntu-latest
+    timeout-minutes: 8
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Safe mock Auth, Turnstile, limiter and RPC concurrency
+        run: |
+          node --check scripts/r58-community-gateway-burst-qa.mjs
+          node scripts/r26-gateway-test.mjs
+          node scripts/r58-community-gateway-burst-qa.mjs
+          node scripts/r55-discover-outage-containment-qa.mjs
+  isolated-db-counters:
+    runs-on: ubuntu-latest
+    timeout-minutes: 16
+    services:
+      postgres:
+        image: postgres:17
+        env:
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: r58_disposable_testing_only
+          POSTGRES_DB: postgres
+        ports: ['5432:5432']
+        options: >-
+          --health-cmd "pg_isready -U postgres"
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+    env:
+      PGHOST: 127.0.0.1
+      PGPORT: '5432'
+      PGUSER: postgres
+      PGPASSWORD: r58_disposable_testing_only
+      PGDATABASE: postgres
+    steps:
+      - uses: actions/checkout@v4
+      - name: Re-test original R41 triggers and 64 concurrent DB operations
+        run: |
+          psql -X -v ON_ERROR_STOP=1 -f scripts/r41-counter-fixture-qa.sql
+          bash scripts/r55-community-concurrency-qa.sh
