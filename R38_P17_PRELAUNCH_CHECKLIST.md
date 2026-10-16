@@ -5,6 +5,9 @@
 直前のR38 P16確定main：`53ecf773e6907a430cb72b0e30572fd00425bce7`  
 本書は運用手順・判定基準であり、Google・Vercel側での実際の管理操作を完了したという意味ではありません。
 
+> **R51最新監査（2026-10-16）：** この下には開発当時の履歴も残っているため、最新状況は [R51最終総合監査](R51_FINAL_RELEASE_AUDIT.md) を優先する。2026-10-16 main `8303022ce110` の全16チェック成功。Google Search Consoleは10/14に本人が認証・サイトマップ送信済み、AdSenseは10/16に所有権確認成功・**サイト審査待ち**（本人画面）。支払いの初期設定も本人画面で完了。実広告・`ads.txt`は未導入、GA4はOFF。物理iPhoneテストは未完了。古い「AdSense未申請」「Search Console未確認」記載は**過去の状態**であり、再申請・再設定を促さない。
+
+
 ## 1. R38 P17 で追加した自動ゲート（本番データへの書込禁止）
 
 GitHub Actions [`R38 P17 Read-Only Prelaunch Acceptance`](.github/workflows/r38-p17-prelaunch-qa.yml) はPR時にローカル＋隔離ブラウザテストを実行し、main反映後にCloudflare/GitHub PagesをGETのみで点検する。
@@ -32,7 +35,7 @@ GitHub Actions [`R38 P17 Read-Only Prelaunch Acceptance`](.github/workflows/r38-
 | 公開スコア横スクロール | R38 P16反映済み | モバイルで文字・列幅を縮小。実機の最終外観は本人確認 |
 | 日英SEO・robots・Public限定sitemap | ソースと配信を監査 | 実際のGoogle検索登録は未確認 |
 | GA4 | R45で再び無効化 | `enabled:false`, `measurementId:''`。同意画面・Googleタグ・送信なし。再開には本人の新たな依頼が必要 |
-| AdSense | 未申請・未配信 | 実広告コード・Publisher ID・正式ads.txtなし（プレビューのみ） |
+| AdSense | **審査待ち（2026-10-16本人画面）・未配信** | Google所有権メタタグとpub-IDを正式ルートで確認。実広告コード・正式ads.txtなし（プレビューのみ） |
 | 旧Vercel OGP | 要実配信確認 | GitHubに失効/no-store対策はあるが、独立Vercelホストと外部SNSキャッシュは別管理 |
 | 物理iPhone Safari | **未完了** | OS共有シート、写真保存、キーボード・下部バーを最終確認 |
 | Google Search Console | **本人確認済み（2026-10-14）** | ドメイン認証・sitemap送信成功、/ja/・/en/登録済み。検索クエリの実データは今後確認 |
@@ -40,10 +43,10 @@ GitHub Actions [`R38 P17 Read-Only Prelaunch Acceptance`](.github/workflows/r38-
 ## 3. 本人に残る最短作業
 
 - **iPhone実機（10〜15分程度）**：`statsmaker.app`を開き、10点／100点採点・色ON/OFF・公開作品の横スクロール・Community・10種のグラフのうち代表3種を確認。PNGをiOS共有シート経由で実際に「写真へ保存」し、Safariへ戻ってデータ残存を確認。新規の本番公開作品やCommunity投稿をQA目的で作成しない。詳しくは [R36_IPHONE_FINAL_CHECK.md](R36_IPHONE_FINAL_CHECK.md)。
-- **Google Search Console（PC）**：本人のGoogleアカウントで `statsmaker.app` の所有権を確認 → `https://statsmaker.app/sitemap.xml` を送信 → 「成功」等の実表示を確認。Googleアカウント・DNSの操作は承認なしに実施しない。
+- **Google Search Console（完了済み、追加操作不要）**：本人が2026-10-14に `statsmaker.app` の所有権確認・ `https://statsmaker.app/sitemap.xml` の送信成功を確認した。以後は検索クエリ等の実績を監視する。
 - **旧Vercel（必要ならPC）**：旧 `stats-maker-ogp.vercel.app` のデプロイ履歴・直接URLの失効時応答・キャッシュを点検。GitHubで修正済みのコードが旧ホストに展開されたかは別途判定する。既存共有URLを突然無効化しない。
 - **運用確認**：運営者情報、利用規約・プライバシー表記、通報の受信・対応手順、公開コンテンツの著作権リスクを最終チェック。
-- **R39へ移行する場合のみ**：AdSense・GA4・同意管理などは本人承認後。現段階で申請／課金／広告配信／解析送信は開始しない。
+- **AdSense審査待ち**：本人は2026-10-16にサイト所有権確認・審査リクエスト・支払い情報の初期登録を完了。審査通過後のみ、本人承認を受けて実広告・必要なCMP・正式ads.txtを導入する。GA4はR45方針でOFFのまま。
 
 ## 4. リリース判断
 
