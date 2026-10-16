@@ -1,0 +1,30 @@
+name: R69 Organic Discovery Entry Points
+on:
+  pull_request:
+    paths:
+      - 'R69_ORGANIC_GROWTH_PLAYBOOK.md'
+      - 'scripts/r69-entrypoints-qa.mjs'
+      - '.github/workflows/r69-organic-entrypoints.yml'
+      - 'index.html'
+      - 'discover.html'
+      - 'ja/**'
+      - 'en/**'
+      - 'cloud/analytics-config.js'
+      - 'cloud/ad-layout.js'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  no-network-entrypoints:
+    name: Canonical entrypoints and no live ads/GA4
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Verify entrypoint correctness and paused tracking
+        run: |
+          node --check scripts/r69-entrypoints-qa.mjs
+          node scripts/r69-entrypoints-qa.mjs
