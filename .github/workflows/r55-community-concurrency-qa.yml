@@ -1,0 +1,44 @@
+name: R55 Community 64 Parallel Writes Isolated
+on:
+  pull_request:
+    paths:
+      - 'scripts/r55-community-concurrency-qa.sh'
+      - '.github/workflows/r55-community-concurrency-qa.yml'
+      - 'R55_CAPACITY_AUDIT.md'
+  push:
+    branches: [main]
+    paths:
+      - 'scripts/r55-community-concurrency-qa.sh'
+      - '.github/workflows/r55-community-concurrency-qa.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  postgres-64:
+    runs-on: ubuntu-latest
+    timeout-minutes: 16
+    services:
+      postgres:
+        image: postgres:17
+        env:
+          POSTGRES_PASSWORD: test_only_not_a_production_secret
+          POSTGRES_USER: postgres
+          POSTGRES_DB: postgres
+        ports: ['5432:5432']
+        options: >-
+          --health-cmd "pg_isready -U postgres"
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+    env:
+      PGHOST: 127.0.0.1
+      PGPORT: '5432'
+      PGUSER: postgres
+      PGPASSWORD: test_only_not_a_production_secret
+      PGDATABASE: postgres
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install original R41 counters and isolated schema
+        run: psql -X -v ON_ERROR_STOP=1 -f scripts/r41-counter-fixture-qa.sql
+      - name: 64 parallel insert/update/delete and counter consistency checks
+        run: bash scripts/r55-community-concurrency-qa.sh
