@@ -14,6 +14,7 @@ on:
       - "rate.html"
       - "my.html"
       - "worker/**"
+      - "tests/og-image.test.mjs"
       - "scripts/build-cloudflare.mjs"
       - "scripts/production-smoke.mjs"
       - "scripts/r26-edge-test.mjs"
@@ -49,6 +50,7 @@ on:
       - "rate.html"
       - "my.html"
       - "worker/**"
+      - "tests/og-image.test.mjs"
       - "scripts/build-cloudflare.mjs"
       - "wrangler.jsonc"
       - "package.json"
@@ -68,6 +70,8 @@ jobs:
       - name: Syntax check
         run: |
           node --check worker/index.js
+          node --check worker/og-image.js
+          node --check tests/og-image.test.mjs
           node --check worker/community-gateway.js
           node --check scripts/r26-gateway-test.mjs
           node --check scripts/r26-client-gateway-test.mjs
@@ -99,6 +103,8 @@ jobs:
           node --check scripts/r30-storage-and-max-data-qa.mjs
           node --check scripts/r30-home-corrupt-recovery-qa.mjs
           node --check app/src/launcher.js
+      - name: Cloudflare-only OG PNG tests
+        run: node --test tests/og-image.test.mjs
       - name: R26 edge guard test
         run: node scripts/r26-edge-test.mjs
       - name: R26 Turnstile gateway test

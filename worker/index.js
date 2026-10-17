@@ -3,9 +3,9 @@ import {discoverPublicRequest} from './discover-public.js';
 import {workReportGateway} from './work-report.js';
 import {contactGateway} from './legal-contact.js';
 import {publicWorkHead,publicWorkHtml,sitemapIndex,staticSitemap,workSitemap} from './seo.js';
+import {cardFromTopic,renderOgPng} from './og-image.js';
 const SUPABASE_URL='https://ibpdxbeltdwkquowjeay.supabase.co';
 const SUPABASE_KEY='sb_publishable_6abnwW_1p-U_Y_DefUXfFQ_Dz_Y2vsD';
-const LEGACY_OG_ORIGIN='https://stats-maker-ogp.vercel.app';
 
 function escapeHtml(value){
   return String(value??'').replace(/[&<>"']/g,ch=>({
@@ -24,7 +24,8 @@ async function fetchTopic(id,forImage=false){
   const query=new URLSearchParams({
     // OG needs existence/visibility only. The share HTML needs metadata;
     // neither path should transfer snapshots or private fields.
-    select:forImage?'id,visibility':'id,title,description,language_code,snapshot_updated_at,published_at,visibility',
+    select:forImage==='body'?'id,title,score_scale,weighted,snapshot,visibility':
+      forImage==='head'?'id,visibility':'id,title,description,language_code,snapshot_updated_at,published_at,visibility',
     id:'eq.'+topicId,
     visibility:'in.(public,unlisted)',
     limit:'1'
@@ -47,7 +48,7 @@ function shareHtml({origin,id,topic}){
   const version=encodeURIComponent(String(topic?.snapshot_updated_at||topic?.published_at||Date.now()));
   const imageUrl=exists?origin+'/api/og?id='+encodeURIComponent(id)+'&v='+version:'';
   const imageMeta=imageUrl
-    ?'<meta property="og:image" content="'+escapeHtml(imageUrl)+'"><meta property="og:image:width" content="1200"><meta property="og:image:height" content="630"><meta property="og:image:type" content="image/png"><meta name="twitter:image" content="'+escapeHtml(imageUrl)+'">'
+    ?'<meta property="og:image" content="'+escapeHtml(imageUrl)+'"><meta property="og:image:width" content="600"><meta property="og:image:height" content="315"><meta property="og:image:type" content="image/png"><meta name="twitter:image" content="'+escapeHtml(imageUrl)+'">'
     :'';
   return '<!doctype html><html lang="'+escapeHtml(language)+'"><head>' +
     '<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">' +
@@ -88,19 +89,6 @@ async function checkPublicRateLimit(request,limiter){
   });
 }
 
-async function proxyLegacyOg(request){
-  const requestUrl=new URL(request.url);
-  const target=new URL('/api/og',LEGACY_OG_ORIGIN);
-  target.search=requestUrl.search;
-  const upstream=await fetch(target.toString(),{headers:{'User-Agent':request.headers.get('User-Agent')||'Stats-Maker-Cloudflare'}});
-  const headers=new Headers(upstream.headers);
-  headers.set('Cache-Control','private, no-store');
-  // A previously shared image must not remain in CDN/browser caches after
-  // the publisher changes visibility. Upstream Vercel caches remain separate.
-  headers.set('X-Stats-Maker-OG-Backend','vercel-stage1');
-  return new Response(upstream.body,{status:upstream.status,headers});
-}
-
 export default {
   async fetch(request,env,ctx){
     const url=new URL(request.url);
@@ -126,7 +114,7 @@ export default {
     }
     if(url.pathname==='/api/discover')return discoverPublicRequest(request,env,ctx);
     if(url.pathname==='/api/health'){
-      return Response.json({ok:true,service:'stats-maker',release:'r26p4-prep',hosting:'cloudflare-workers',ogBackend:'vercel-stage1'},{headers:{'Cache-Control':'no-store'}});
+      return Response.json({ok:true,service:'stats-maker',release:'r26p4-prep',hosting:'cloudflare-workers',ogBackend:'cloudflare-free-png'},{headers:{'Cache-Control':'no-store'}});
     }
     if(url.pathname==='/api/security/config'){
       if(request.method!=='GET')return new Response('Method Not Allowed',{status:405,headers:{Allow:'GET'}});
@@ -144,7 +132,7 @@ export default {
       const topicId=safeTopicId(url.searchParams.get('id'));
       if(!topicId)return new Response('Not found',{status:404,headers:{'Cache-Control':'no-store'}});
       let topic;
-      try{topic=await fetchTopic(topicId,true)}catch(error){
+      try{topic=await fetchTopic(topicId,request.method==='GET'?'body':'head')}catch(error){
         console.error('[Stats Maker] OG visibility check failed',error);
         return new Response('Service temporarily unavailable',{status:503,headers:{'Cache-Control':'no-store'}});
       }
@@ -152,8 +140,18 @@ export default {
         {status:404,headers:{'Cache-Control':'no-store'}});
       if(request.method==='HEAD')return new Response(null,{status:200,
         headers:{'Cache-Control':'private, no-store','Content-Type':'image/png',
-          'X-Stats-Maker-OG-Backend':'vercel-stage1'}});
-      return proxyLegacyOg(request);
+          'X-Stats-Maker-OG-Backend':'cloudflare-free-png'}});
+      try {
+        const png=renderOgPng(cardFromTopic(topic));
+        return new Response(png,{status:200,headers:{
+          'Content-Type':'image/png','Cache-Control':'private, no-store',
+          'X-Content-Type-Options':'nosniff',
+          'X-Stats-Maker-OG-Backend':'cloudflare-free-png'
+        }});
+      }catch(error){
+        console.error('[Stats Maker] Cloudflare OG PNG render failed',error);
+        return new Response('Image temporarily unavailable',{status:503,headers:{'Cache-Control':'no-store'}});
+      }
     }
     const match=url.pathname.match(/^\/p\/([a-zA-Z0-9_-]{8,128})\/?$/);
     if(match){

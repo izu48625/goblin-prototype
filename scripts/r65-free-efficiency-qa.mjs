@@ -10,19 +10,20 @@ const prevFetch=globalThis.fetch;
 const snapshot={rows:[{name:'Messi & Ronaldo',scores:Array(10).fill(90),image_url:'UNNEEDED'},
                       {name:'<img src=x onerror=alert(1)>',scores:[66]}],
                 criteria:[{name:'Finishing',weight:1},'Agility']};
-const row={id:ids.public,title:'Football Best',description:'Compare elite football players',
+const row={id:ids.public,title:'Football Best',description:'Compare elite football players',score_scale:100,weighted:false,
            language_code:'en',snapshot_updated_at:'2026-10-16T08:00:00Z',
            published_at:'2026-10-15T08:00:00Z'};
 const limiter={async limit(){return {success:true}}};
 const env={OG_RATE_LIMIT:limiter,SHARE_RATE_LIMIT:limiter,DISCOVER_RATE_LIMIT:limiter,
            ASSETS:{async fetch(){return new Response('asset')}}};
 const call=(uri,method='GET',options=env)=>worker.fetch(new Request(BASE+uri,{method}),options);
-function project(select,r){
-  assert(!select.split(',').includes('snapshot'),'Full snapshot transferred to SEO');
+function project(select,r,isOgRead=false){
+  assert(isOgRead||!select.split(',').includes('snapshot'),'Full snapshot transferred to SEO/share');
   return Object.fromEntries(select.split(',').map(col=>{
     const [alias,source]=col.includes(':')?col.split(':'):[col,col];
     if(/^seo_row_\d+$/.test(alias))return [alias,snapshot.rows[Number(alias.slice(8))]?.name??null];
     if(/^seo_metric_\d+$/.test(alias))return [alias,snapshot.criteria[Number(alias.slice(11))]??null];
+    if(source==='snapshot'&&isOgRead)return [alias,snapshot];
     assert(Object.hasOwn(r,source),'Unknown projection '+source);
     return [alias,r[source]];
   }));
@@ -34,11 +35,11 @@ globalThis.fetch=async(input)=>{
     const select=url.searchParams.get('select')||'';
     const publicOnly=url.searchParams.get('visibility')==='eq.public';
     const allowed=publicOnly?visibility.get(id)==='public':['public','unlisted'].includes(visibility.get(id));
-    const kind=publicOnly?(select==='id'?'seoHead':'seo'):
-      (select==='id,visibility'?'ogDb':'share');
+    const isOgRead=!publicOnly&&(select==='id,visibility'||select.includes('snapshot'));
+    const kind=publicOnly?(select==='id'?'seoHead':'seo'):(isOgRead?'ogDb':'share');
     calls[kind].push({id,select});
     if(!allowed)return Response.json([]);
-    return Response.json([project(select,{...row,id,visibility:visibility.get(id)})]);
+    return Response.json([project(select,{...row,id,visibility:visibility.get(id)},isOgRead)]);
   }
   if(url.hostname==='stats-maker-ogp.vercel.app'){
     calls.vercel.push(url.href);
@@ -71,16 +72,19 @@ try{
   assert.equal((await call('/work/'+ids.public,'HEAD')).status,404);
   visibility.set(ids.public,'public');
   res=await call('/api/og?id='+ids.public);
-  assert.equal(res.status,200);assert.equal(calls.vercel.length,1);
-  assert.equal(calls.ogDb.at(-1).select,'id,visibility');
+  assert.equal(res.status,200);assert.equal(calls.vercel.length,0);
+  assert.equal(calls.ogDb.at(-1).select,'id,title,score_scale,weighted,snapshot,visibility');
+  assert.equal(res.headers.get('Content-Type'),'image/png');
   res=await call('/api/og?id='+ids.public,'HEAD');
   assert.equal(res.status,200);
   assert.equal(res.headers.get('Cache-Control'),'private, no-store');
   assert.equal(await res.text(),'');
-  assert.equal(calls.vercel.length,1,'OG HEAD must not invoke Vercel');
+  assert.equal(calls.ogDb.at(-1).select,'id,visibility',
+    'HEAD must not fetch a snapshot');
+  assert.equal(calls.vercel.length,0,'OG must not invoke Vercel');
   visibility.set(ids.public,'private');
   assert.equal((await call('/api/og?id='+ids.public,'HEAD')).status,404);
-  assert.equal(calls.vercel.length,1);
+  assert.equal(calls.vercel.length,0);
   visibility.set(ids.public,'public');
   assert.equal((await call('/api/og?id='+ids.unlisted,'HEAD')).status,200);
   res=await call('/p/'+ids.public,'HEAD');
@@ -102,6 +106,6 @@ try{
   assert.equal(calls.discover.length,0,'Rate-limit failures must not call DB');
   assert.equal((await call('/api/og?id='+ids.public,'GET',{})).status,503,
     'Missing OG limiter should fail closed');
-  assert.equal(calls.vercel.length,1);
+  assert.equal(calls.vercel.length,0);
   console.log('R65 edge efficiency/privacy/SEO projection/HEAD/fail-closed QA PASS');
 }finally{globalThis.fetch=prevFetch}
