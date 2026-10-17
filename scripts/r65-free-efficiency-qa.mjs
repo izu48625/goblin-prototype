@@ -79,7 +79,7 @@ try{
   assert.equal(res.status,200);
   assert.equal(res.headers.get('Cache-Control'),'private, no-store');
   assert.equal(await res.text(),'');
-  assert.equal(calls.ogDb.at(-1).select,'id,title,description,language_code,snapshot_updated_at,published_at,visibility',
+  assert.equal(calls.ogDb.at(-1).select,'id,visibility',
     'HEAD must not fetch a snapshot');
   assert.equal(calls.vercel.length,0,'OG must not invoke Vercel');
   visibility.set(ids.public,'private');
