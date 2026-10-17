@@ -131,7 +131,7 @@ export default {
       const topicId=safeTopicId(url.searchParams.get('id'));
       if(!topicId)return new Response('Not found',{status:404,headers:{'Cache-Control':'no-store'}});
       let topic;
-      try{topic=await fetchTopic(topicId,true)}catch(error){
+      try{topic=await fetchTopic(topicId,request.method==='GET')}catch(error){
         console.error('[Stats Maker] OG visibility check failed',error);
         return new Response('Service temporarily unavailable',{status:503,headers:{'Cache-Control':'no-store'}});
       }
