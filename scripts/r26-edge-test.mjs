@@ -33,7 +33,6 @@ globalThis.fetch=async request=>{
     assert.equal(url.searchParams.get('visibility'),'in.(public,unlisted)');
     return Response.json([{id:'5ffb1644-b5f8-434f-b216-27012c90bbfe',visibility:'public'}]);
   }
-  if(target.includes('/api/og'))return new Response(new Uint8Array([137,80,78,71]),{status:200,headers:{'Content-Type':'image/png'}});
   throw new Error('Unexpected upstream call: '+target);
 };
 
@@ -52,18 +51,20 @@ try{
 
   const allowed=await worker.fetch(new Request('https://statsmaker.app/api/og?id=5ffb1644-b5f8-434f-b216-27012c90bbfe', {headers:header}),env);
   assert.equal(allowed.status,200);
-  assert.equal(allowed.headers.get('X-Stats-Maker-OG-Backend'),'vercel-stage1');
-  assert.equal(externalFetches,2);
+  assert.equal(allowed.headers.get('X-Stats-Maker-OG-Backend'),'cloudflare-free-png');
+  assert.deepEqual([...new Uint8Array(await allowed.arrayBuffer()).subarray(0,8)],
+    [137,80,78,71,13,10,26,10],'Cloudflare must return a real PNG');
+  assert.equal(externalFetches,1);
 
   const denied=await worker.fetch(new Request('https://statsmaker.app/api/og?id=5ffb1644-b5f8-434f-b216-27012c90bbfe', {headers:header}),env);
   assert.equal(denied.status,429);
   assert.equal(denied.headers.get('Retry-After'),'60');
-  assert.equal(externalFetches,2,'blocked request must not reach OGP origin');
+  assert.equal(externalFetches,1,'blocked request must not query Supabase');
   assert.deepEqual(calls.og,[{key:'192.0.2.18'},{key:'192.0.2.18'}]);
 
   const shareDenied=await worker.fetch(new Request('https://statsmaker.app/p/5ffb1644-b5f8-434f-b216-27012c90bbfe',{headers:header}),env);
   assert.equal(shareDenied.status,429);
-  assert.equal(externalFetches,2,'blocked share must not reach Supabase');
+  assert.equal(externalFetches,1,'blocked share must not reach Supabase');
   assert.deepEqual(calls.share,[{key:'192.0.2.18'}]);
 
   const invalidMethod=await worker.fetch(new Request('https://statsmaker.app/api/og',{method:'POST',headers:header}),env);
