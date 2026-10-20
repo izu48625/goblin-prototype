@@ -51,11 +51,13 @@ function renderLanguage(){
 }
 function getLiveSheet(){
   try{
-    const lib=frame.contentWindow?.__statsMakerGetLibrary?.();
-    // The Home iframe reports when its persisted library is corrupt. Never
-    // bypass its fail-closed autosave safeguard during extension navigation.
-    if(lib&&!communityMode&&frame.contentWindow?.__statsMakerCanPersist?.()!==false)
-      localStorage.setItem("statsMakerV014Library",JSON.stringify(lib));
+    // Only the Home frame may persist its library. It checks concurrent tabs,
+    // corrupted data and storage failures before extension navigation.
+    if(!communityMode){
+      const flush=frame.contentWindow?.__statsMakerFlushForExtension;
+      if(typeof flush!=="function")throw new Error("Home save bridge unavailable; please reload");
+      flush();
+    }
     return frame.contentWindow?.__statsMakerGetActiveSheet?.()||null;
   }catch(error){console.error("Base bridge failed",error);return null}
 }
@@ -108,6 +110,12 @@ frame.addEventListener("load",()=>{
     }
   }catch(error){console.error("Home initialization failed",error)}
 });
-window.addEventListener("message",event=>{if(event.data?.type!=="statsmaker:languagechange")return;language=event.data.locale==="en"?"en":"ja";localStorage.setItem("statsMakerV2Language",language);renderLanguage()});
+window.addEventListener("message",event=>{
+  if(event.origin!==location.origin||event.source!==frame.contentWindow||
+     event.data?.type!=="statsmaker:languagechange")return;
+  language=event.data.locale==="en"?"en":"ja";
+  localStorage.setItem("statsMakerV2Language",language);
+  renderLanguage();
+});
 renderLanguage();
 if(new URLSearchParams(location.search).get("extensions")==="1")requestAnimationFrame(()=>backdrop.classList.remove("hidden"));
