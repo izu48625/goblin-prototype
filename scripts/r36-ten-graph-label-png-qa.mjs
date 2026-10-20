@@ -11,7 +11,7 @@ try{
     userAgent:'Mozilla/5.0 (iPhone; CPU iPhone OS 18_0 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/18.0 Mobile/15E148 Safari/604.1'
   });
   const page=await context.newPage();
-  await page.goto(BASE+'/app/editor.html',{waitUntil:'domcontentloaded'});
+  // Render against the static Home shell; editor navigation requires a saved project.
   // The editor itself requires a saved local project; test rendering in an
   // isolated document with just the production editor CSS, not any account.
   await page.goto(BASE+'/index.html',{waitUntil:'domcontentloaded'});

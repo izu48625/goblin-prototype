@@ -51,6 +51,16 @@ try{
   const bridge=await home.locator('body').evaluate(()=>
     window.__statsMakerCanPersist?.());
   assert.equal(bridge,false,'Home did not block persistence after corrupt read');
+  const guardedFlush=await home.locator('body').evaluate(()=>{
+    try{
+      window.__statsMakerFlushForExtension();
+      return {blocked:false};
+    }catch(error){return {blocked:true,message:String(error.message)}}
+  });
+  assert.equal(guardedFlush.blocked,true,'Extension bridge bypassed corrupt storage guard');
+  assert.match(guardedFlush.message,/Unreadable Home storage/);
+  assert.equal(await page.evaluate(key=>localStorage.getItem(key),KEY),RAW,
+    'Direct extension flush overwrote unreadable storage');
   await home.locator('#titleInput').fill('Do not overwrite raw backup');
   await home.locator('#titleInput').press('Tab');
   await page.waitForTimeout(600);
@@ -144,6 +154,16 @@ try{
   assert.equal(result.raw,RAW,'The damaged original bytes were not preserved');
   assert.equal(result.recovered.activeId,'r30-restored');
   assert.equal(result.recovered.sheets[0].rows[0].scores[0],92);
+  // A valid recovered Home must allow the guarded extension flush.
+  const goodFlush=await home.locator('body').evaluate(()=>{
+    const flush=window.__statsMakerFlushForExtension;
+    if(typeof flush!=='function')throw new Error('Extension flush bridge missing');
+    return flush();
+  });
+  assert.equal(goodFlush,true,'Recovered Home cannot flush for extension');
+  const afterFlush=await page.evaluate(key=>JSON.parse(localStorage.getItem(key)),KEY);
+  assert.equal(afterFlush.sheets[0].rows[0].scores[0],92,
+    'Guarded extension flush lost restored scores');
   assert.deepEqual(errors.filter(e=>/SyntaxError|ReferenceError/.test(e)),[],
     'Unexpected runtime failures during recovery path');
   console.log('R30 Home corrupted storage PASS: autosave and launcher blocked; raw preserved; manual restore verified');
