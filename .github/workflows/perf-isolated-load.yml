@@ -1,0 +1,20 @@
+name: Isolated Load Harness
+on:
+  pull_request:
+    paths:
+      - 'scripts/perf-isolated-http-load.mjs'
+      - 'scripts/perf-isolated-http-load.test.mjs'
+      - '.github/workflows/perf-isolated-load.yml'
+  workflow_dispatch:
+jobs:
+  local-load:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - run: node --test scripts/perf-isolated-http-load.test.mjs
