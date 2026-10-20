@@ -138,6 +138,21 @@
     }
   }
 
+  // Commit the Home library synchronously before navigating to a visual tool.
+  // Reuse the same storage conflict and corruption checks as autosave.
+  function flushLibraryForExtension(){
+    if(communityMode)return true; // Community drafts are not Home storage.
+    if(storageRecoveryRequired)throw new Error('Unreadable Home storage; export before continuing');
+    assertStorageCurrent();
+    const raw=JSON.stringify(library);
+    localStorage.setItem(STORAGE_KEY,raw);
+    lastStoredHomeRaw=raw;
+    clearTimeout(saveTimer);
+    saveTimer=null;
+    $('saveBadge').textContent=t('save.saved');
+    return true;
+  }
+
   function scheduleSave(message=t('save.auto')){
     clearTimeout(saveTimer);
     $('saveBadge').textContent=t('save.saving');
@@ -2615,6 +2630,7 @@
   window.__statsMakerGetActiveSheet = () => clone(activeSheet());
   window.__statsMakerGetLibrary = () => clone(library);
   window.__statsMakerCanPersist = () => !storageRecoveryRequired && !otherTabChangedStorage;
+  window.__statsMakerFlushForExtension = flushLibraryForExtension;
   window.__statsMakerCreateFreshSheet = createFreshSheet;
   window.__statsMakerMountCommunitySheet = incoming => {
     if(!communityMode || incoming?.sourceTopicId!==communityTopicId ||

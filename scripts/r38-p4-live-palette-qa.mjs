@@ -10,7 +10,7 @@ const expectedColors=[
 const local=[['index.html',HOME],['base/index.html',STYLE],['base/index.html','js/app.js?v='+KEY]];
 for(const [path,needle] of local){
   const data=await readFile(new URL('../'+path,import.meta.url),'utf8');
-  assert(data.includes(needle),path+' is not cache-busted: '+needle);
+  assert(data.includes(needle) || (path==='base/index.html' && needle==='js/app.js?v='+KEY && data.includes('js/app.js?v='+KEY+'&audit=safe-save-20261020')),path+' is not cache-busted: '+needle);
 }
 const homeDoc=await readFile(new URL('../base/index.html',import.meta.url),'utf8');
 assert(homeDoc.includes('id="scoreColorToggleBtn"'), 'filter-bar ON/OFF button missing');
