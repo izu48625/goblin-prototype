@@ -1,0 +1,48 @@
+name: Local Worker Load Test
+on:
+  pull_request:
+    paths:
+      - 'scripts/perf-isolated-http-load.mjs'
+      - '.github/workflows/perf-local-worker-load.yml'
+      - 'worker/**'
+      - 'wrangler.jsonc'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  local-worker:
+    runs-on: ubuntu-latest
+    timeout-minutes: 12
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - run: npm ci
+      - run: npm run build:cloudflare
+      - name: Start local Cloudflare Worker (never deploy)
+        run: |
+          npx wrangler dev --local --ip 127.0.0.1 --port 8787 > /tmp/stats-load-worker.log 2>&1 &
+          echo $! > /tmp/stats-load-worker.pid
+          for i in $(seq 1 45); do
+            if curl -fsS http://127.0.0.1:8787/api/health >/dev/null; then exit 0; fi
+            sleep 2
+          done
+          cat /tmp/stats-load-worker.log
+          exit 1
+      - name: Load test 100, 500 and 1000 concurrent clients (local only)
+        run: |
+          mkdir -p perf-results
+          for concurrency in 100 500 1000; do
+            node scripts/perf-isolated-http-load.mjs --url http://127.0.0.1:8787/api/health --concurrency "$concurrency" --requests 2000 --timeout 15000 | tee "perf-results/health-${concurrency}.json"
+          done
+          node scripts/perf-isolated-http-load.mjs --url http://127.0.0.1:8787/ --concurrency 100 --requests 1000 --timeout 15000 | tee perf-results/home-100.json
+      - name: Upload reports and local logs
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: local-worker-load-results
+          path: |
+            perf-results/
+            /tmp/stats-load-worker.log
+          if-no-files-found: ignore
