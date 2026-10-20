@@ -11,7 +11,7 @@ if(!allowed.has(url.hostname))throw Error('Safety stop: only loopback hosts are 
 if(!['http:','https:'].includes(url.protocol))throw Error('Unsupported protocol');
 if(url.username||url.password)throw Error('Credentials in URL forbidden');
 const concurrency=Number(args.concurrency||10), requests=Number(args.requests||200);
-if(!Number.isInteger(concurrency)||concurrency<1||concurrency>100||!Number.isInteger(requests)||requests<1||requests>20000)throw Error('Invalid limits');
+if(!Number.isInteger(concurrency)||concurrency<1||concurrency>1000||!Number.isInteger(requests)||requests<1||requests>20000)throw Error('Invalid limits');
 const timeout=Number(args.timeout||10000);
 if(!Number.isFinite(timeout)||timeout<100||timeout>30000)throw Error('Invalid timeout');
 let next=0,failed=0,success=0,bytes=0;const samples=[],codes={};
