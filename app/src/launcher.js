@@ -59,7 +59,7 @@ function getLiveSheet(){
       flush();
     }
     return frame.contentWindow?.__statsMakerGetActiveSheet?.()||null;
-  }catch(error){console.error("Base bridge failed",error);return null}
+  }catch(error){console.error("Base bridge failed",error);throw error}
 }
 function openExtension(type){
   try{
