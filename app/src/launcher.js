@@ -5,6 +5,7 @@ import {syncSourceProject} from "./core/source-sync.js?v=r29source1";
 const EXTENSIONS=[
   ["popular","ranking-card","Ranking Card","総合平均または評価項目でランキング","Rank by overall average or any metric"],
   ["popular","stat-card","Stat Card","対象の画像と評価を1枚のカードに","Turn one subject into a visual stat card"],
+  ["popular","image-line","Image Line","各項目に画像を並べた折れ線グラフ","Line chart over one background image per item"],
   ["popular","bar","Bar Chart","評価項目を棒グラフで比較","Compare a metric with horizontal bars"],
   ["popular","radar","Radar Chart","複数対象を全評価項目で比較","Compare multiple subjects across metrics"],
   ["compare","quadrant","Quadrant","任意の2項目で4象限マップ","Map subjects on any two metrics"],
