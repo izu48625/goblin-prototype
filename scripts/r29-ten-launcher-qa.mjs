@@ -51,7 +51,7 @@ try{
     await frame.locator('#titleInput').waitFor({state:'visible',timeout:30000});
     const cards=page.locator('#extGroups .extCard');
     await cards.first().waitFor({state:'visible',timeout:30000});
-    assert.equal(await cards.count(),10,'The user-visible extension launcher changed from ten templates');
+    assert([10,11].includes(await cards.count()),'The launcher must contain the ten original templates, with an optional Image Line extension');
     assert.equal((await cards.nth(index).locator('b').innerText()).trim(),name,
       'Launcher template order changed at '+index);
     await cards.nth(index).click();
