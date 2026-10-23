@@ -12,11 +12,12 @@ const EXTENSIONS=[
   ["compare","range","Range / Dumbbell","2項目の差を見せる","Show the gap between two metrics"],
   ["compare","scatter","Scatter","任意の2項目を散布図に","Plot any two metrics as a scatter chart"],
   ["ranking","tier-list","Tier List","評価をTier形式で整理","Organize subjects into visual tiers"],
-  ["number","ring","Ring Gauge","対象の評価をリングで表示","Show a subject's scores as ring gauges"]
+  ["number","ring","Ring Gauge","対象の評価をリングで表示","Show a subject's scores as ring gauges"],
+  ["creative","image-line","Image Line","各項目に画像を並べた折れ線グラフ","Line chart over one background image per item"]
 ];
 const UI={
-  ja:{launcherTitle:"拡張機能",launcherSub:"グラフ・カードを作る",pickerTitle:"拡張機能",pickerDesc:"基本表の対象・画像・評価項目・点数をそのまま使います。",groups:{popular:"人気",compare:"比較",ranking:"ランキング",number:"数値表示"}},
-  en:{launcherTitle:"Visual Tools",launcherSub:"Create charts & cards",pickerTitle:"Visual Tools",pickerDesc:"Uses names, images, metrics and scores from your current sheet.",groups:{popular:"POPULAR",compare:"COMPARE",ranking:"RANKING",number:"SHOW A NUMBER"}}
+  ja:{launcherTitle:"拡張機能",launcherSub:"グラフ・カードを作る",pickerTitle:"拡張機能",pickerDesc:"基本表の対象・画像・評価項目・点数をそのまま使います。",groups:{popular:"人気",compare:"比較",ranking:"ランキング",number:"数値表示",creative:"画像グラフ"}},
+  en:{launcherTitle:"Visual Tools",launcherSub:"Create charts & cards",pickerTitle:"Visual Tools",pickerDesc:"Uses names, images, metrics and scores from your current sheet.",groups:{popular:"POPULAR",compare:"COMPARE",ranking:"RANKING",number:"SHOW A NUMBER",creative:"IMAGE CHART"}}
 };
 const $=id=>document.getElementById(id);
 const frame=$("basicFrame"),backdrop=$("extBackdrop");
@@ -37,7 +38,7 @@ function renderLanguage(){
   const u=UI[language];
   $("launcherTitle").textContent=u.launcherTitle;$("launcherSub").textContent=u.launcherSub;$("pickerTitle").textContent=u.pickerTitle;$("pickerDesc").textContent=u.pickerDesc;
   const host=$("extGroups");host.innerHTML="";
-  ["popular","compare","ranking","number"].forEach(group=>{
+  ["popular","compare","ranking","number","creative"].forEach(group=>{
     const items=EXTENSIONS.filter(x=>x[0]===group);if(!items.length)return;
     const section=document.createElement("div");section.className="extGroup";section.innerHTML='<div class="extGroupTitle"></div><div class="extGrid"></div>';
     section.querySelector(".extGroupTitle").textContent=u.groups[group];

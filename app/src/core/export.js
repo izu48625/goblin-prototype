@@ -1,4 +1,5 @@
 import {getImageUrl} from "./images.js";
+import {renderImageLineCanvas} from "./image-line.js";
 
 function safeName(project){
   return (project.meta.title||"stats-maker").replace(/[\\/:*?"<>|]+/g,"_");
@@ -942,6 +943,7 @@ export async function renderNativeProject(project){
     case "ranking-card": return await renderRanking(project);
     case "stat-card": return await renderStat(project);
     case "bar": return renderBar(project);
+    case "image-line": return renderImageLineCanvas(project);
     case "radar": return renderRadar(project);
     case "quadrant": return renderQuadrant(project);
     case "dot": return renderDot(project);
@@ -976,7 +978,7 @@ export async function exportPreview(root,project,format="png"){
   let canvas;
   // Safari/iPhone uses our own Canvas renderer. It does not rely on
   // html2canvas or SVG foreignObject, both of which are unreliable here.
-  if(isIOS()){
+  if(isIOS() || project.type==="image-line"){
     canvas=await renderNativeProject(project);
   }else{
     try{canvas=await renderWithHtml2Canvas(root,project)}
@@ -1003,7 +1005,7 @@ export function exportProjectJSON(project){
 // active project had been replaced. Hidden legacy templates must remain
 // supported so older exported backups can still be restored.
 const IMPORTABLE_PROJECT_TYPES=new Set([
-  "ranking-card","stat-card","bar","radar","quadrant","dot","range",
+  "ranking-card","stat-card","bar","image-line","radar","quadrant","dot","range",
   "scatter","tier-list","ring","heatmap","waffle","stat-board"
 ]);
 const isRecord=value=>value!==null&&typeof value==="object"&&!Array.isArray(value);

@@ -5,7 +5,7 @@
 **開発方針（2026-10-11）:** [ROADMAP_R31_PLUS.md](ROADMAP_R31_PLUS.md) を優先して参照してください。
 Google / Apple認証の追加・複雑なゲストID管理は開発ロードマップから外し、Home、グラフ、Discover、Community、iPhone Safariの品質を優先します。
 
-**正式なユーザー向け拡張機能:** Ranking Card / Stat Card / Bar Chart / Radar Chart / Quadrant / Dot Chart / Range / Dumbbell / Scatter / Tier List / Ring Gauge の10種類。
+**正式なユーザー向け拡張機能:** Ranking Card / Stat Card / Bar Chart / Radar Chart / Quadrant / Dot Chart / Range / Dumbbell / Scatter / Tier List / Ring Gauge / Image Line の11種類。
 Heatmap、Waffle、Stat Boardはユーザー向け拡張機能から廃止されています（内部レガシーコードが残る可能性あり）。
 
 ---
@@ -129,3 +129,13 @@ Publish / Community / Remixへ進む。
 - Base sheet names, criteria, scores, notes and row images are bridged into V2 source-linked projects.
 - Editor back button returns to the extension picker over the base screen.
 - The old standalone "何を作りますか？" V2 home is no longer the formal entry screen.
+
+
+## R70 Image Line（画像付き折れ線グラフ）
+- 拡張機能 → 画像グラフ → **Image Line** から作成できます。
+- 基本表に評価と画像があれば、評価行の並びを維持したまま、画像を項目別の縦帯背景として使います。基本表に画像がない場合は色帯を表示します。
+- 編集画面の **DATA** では項目ごとの画像アップロード（基本表の画像をローカル上書き可能）、表示件数1〜40、最小値・最大値、画像の濃さ、点数・目盛・ラベル表示を変更できます。自由編集の作品なら名前・点数・並びも編集できます。
+- **STYLE** で線の色（accent）や背景色、テーマを変更し、**CANVAS** で横長の画像サイズを変更できます。
+- プレビューとPNG/JPG書き出しは同じCanvas描画処理を使い、iPhone SafariでもSVG/HTMLキャプチャに依存しません。
+- アップロード画像は従来の画像マネージャーと同様、各ブラウザ内のIndexedDBに保存されます。JSON書き出しは画像の参照を保存しますが、画像ファイル本体を別端末へ移すものではありません。
+- 他者の著作物の使用と再公開は利用権・引用等の条件をご確認ください。

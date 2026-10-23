@@ -308,11 +308,29 @@ export function createStatBoardProject(){
   return p;
 }
 
+export function createImageLineProject(){
+  const p=base("image-line","画像付き折れ線グラフ");
+  p.meta.subtitle="各項目の評価推移";
+  p.canvas={preset:"landscape",width:1600,height:900,transparent:false};
+  applyTheme(p,"light");
+  p.data.items=[8,9,7,6,9,5,8,7].map((value,i)=>({
+    id:uid("item"),name:"項目"+(i+1),value,enabled:true,
+    imageRef:null,imageData:""
+  }));
+  p.settings={
+    min:0,max:10,displayLimit:15,
+    showGrid:true,showValues:true,showLabels:true,
+    showImages:true,imageOpacity:.70
+  };
+  return p;
+}
+
 export function createProject(type){
   if(type==="ranking-card")return createRankingProject();
   if(type==="stat-card")return createStatCardProject();
   if(type==="quadrant")return createQuadrantProject();
   if(type==="bar")return createBarProject();
+  if(type==="image-line")return createImageLineProject();
   if(type==="radar")return createRadarProject();
   if(type==="dot")return createDotProject();
   if(type==="ring")return createRingProject();

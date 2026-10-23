@@ -11,12 +11,14 @@ import {scatterChart} from "./scatter.js?v=r36graph1";
 import {rangeChart} from "./range.js";
 import {waffleChart} from "./waffle.js";
 import {statBoard} from "./stat-board.js";
+import {imageLineChart} from "./image-line.js";
 
 export const VISUALIZATIONS={
   [rankingCard.id]:rankingCard,
   [statCard.id]:statCard,
   [quadrant.id]:quadrant,
   [barChart.id]:barChart,
+  [imageLineChart.id]:imageLineChart,
   [radarChart.id]:radarChart,
   [dotChart.id]:dotChart,
   [ringGauge.id]:ringGauge,

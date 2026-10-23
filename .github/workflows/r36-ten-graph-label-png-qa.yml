@@ -31,7 +31,7 @@ jobs:
           node --check app/src/editor/editor.js
           node --check scripts/r36-ten-graph-label-png-qa.mjs
           npm run build:cloudflare
-          grep -q 'editor.css?v=r36graph1' dist/app/editor.html
+          grep -q 'editor.css?v=r70imageline1' dist/app/editor.html
       - name: Browser render ten visible chart types and encode iPhone PNGs
         run: |
           npm install --no-save playwright@1.56.1

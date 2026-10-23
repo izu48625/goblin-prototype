@@ -2007,3 +2007,13 @@ body.hasGlobalLocaleBar #moreMenu{top:98px}
   line-height:1.08;
 }
 .stat-subtitle{max-width:100%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+
+/* R70: compact repeated per-column image uploads in the Image Line editor. */
+.image-line-data-list{gap:8px}
+.image-line-data-row{padding:8px}
+.image-line-data-row .drag-label{font-size:11px;color:#dce8f8}
+.image-line-image-manager{padding:6px}
+.image-line-image-manager .image-manager-actions{display:none}
+.image-line-image-manager .image-dropzone{min-height:52px;padding:5px}
+.image-line-image-manager .image-preview{width:44px;height:44px}
+.image-line-image-manager .image-drop-copy small{font-size:9px}

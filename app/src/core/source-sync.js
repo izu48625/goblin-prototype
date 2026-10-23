@@ -202,7 +202,7 @@ function syncMetricItems(project,model,key,rawIndices){
   const label=model.metricLabel(key);
   project.settings.sourceMetricKey=key;
 
-  const fullPool=["ranking-card","bar","dot","tier-list"].includes(project.type);
+  const fullPool=["ranking-card","bar","dot","tier-list","image-line"].includes(project.type);
   const max=fullPool?40:20;
   const fallback=fullPool?40:10;
   const legacyAutoPool=fullPool && project.type!=="tier-list" && !project.settings.sourcePoolMode;
@@ -215,6 +215,7 @@ function syncMetricItems(project,model,key,rawIndices){
     if(!project.settings.sourcePoolMode)project.settings.sourcePoolMode="all";
   }
 
+  const previousImageRefs=new Map((project.data.items||[]).map(item=>[item.sourceRawIndex,item.imageRef]).filter(([key])=>Number.isInteger(key)));
   project.data.items=selection.rows.map(r=>({
     id:`src_${r.rawIndex}`,
     sourceRawIndex:r.rawIndex,
@@ -223,7 +224,7 @@ function syncMetricItems(project,model,key,rawIndices){
     note:r.note,
     category:"",
     imageData:r.image,
-    imageRef:null,
+    imageRef:previousImageRefs.get(r.rawIndex)||null,
     imageShape:"circle",
     enabled:true
   })).filter(item=>Number.isFinite(item.value));
@@ -254,6 +255,11 @@ function syncMetricItems(project,model,key,rawIndices){
     project.settings.showCategory=false;
     project.settings.autoMax=false;
     project.settings.max=model.scale;
+    project.meta.subtitle=label;
+  }else if(project.type==="image-line"){
+    project.settings.min=0;
+    project.settings.max=model.scale;
+    project.settings.displayLimit=Math.min(40,Math.max(1,Number(project.settings.displayLimit)||15));
     project.meta.subtitle=label;
   }else if(project.type==="dot"){
     project.settings.unit="";
@@ -461,7 +467,7 @@ export function syncSourceProject(project,changes={},explicitSheet=null){
   setSourceBasics(project,model);
 
   const type=project.type;
-  if(["ranking-card","bar","dot","tier-list"].includes(type)){
+  if(["ranking-card","bar","dot","tier-list","image-line"].includes(type)){
     const key=changes.metricKey
       ?? project.settings.sourceMetricKey
       ?? model.metricKey;

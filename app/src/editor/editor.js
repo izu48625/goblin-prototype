@@ -2,8 +2,8 @@ import {t,getLanguage,setLanguage,toggleLanguage,applyI18n} from "../core/i18n.j
 import {getProject,saveProject} from "../core/store.js";
 import {THEMES,CANVAS_PRESETS,applyTheme,applyCanvasPreset,newItemId,newStatId,newAxisId,newSeriesId} from "../core/project.js";
 import {History} from "../core/history.js";
-import {getVisualization} from "../visualizations/registry.js?v=r36graph1";
-import {exportPreview,exportProjectJSON,readProjectJSON,isIOS} from "../core/export.js?v=r36graph1";
+import {getVisualization} from "../visualizations/registry.js?v=r70imageline1";
+import {exportPreview,exportProjectJSON,readProjectJSON,isIOS} from "../core/export.js?v=r70imageline1";
 import {createImageManager} from "./image-editor.js";
 import {createDataImport} from "./data-import.js";
 import {createSpreadsheetEditor} from "./spreadsheet-editor.js";
@@ -428,10 +428,10 @@ function buildSpreadsheetSection(p){
     onCell=(i,k,v)=>mutate(x=>x.data.items[i][k]=v);
     onAdd=()=>mutate(x=>x.data.items.push({id:newItemId(),name:"New Item",value:0,category:"",note:"",imageRef:null,imageShape:"circle",enabled:true}));
     onDelete=i=>mutate(x=>x.data.items.splice(i,1));onMove=(i,d)=>mutate(x=>swapRows(x.data.items,i,d));
-  }else if(["bar","dot"].includes(p.type)){
+  }else if(["bar","dot","image-line"].includes(p.type)){
     rows=p.data.items;columns=[{key:"name",label:"Name"},{key:"value",label:"Value",type:"number"},{key:"category",label:"Category"}];
     onCell=(i,k,v)=>mutate(x=>x.data.items[i][k]=v);
-    onAdd=()=>mutate(x=>x.data.items.push({id:newItemId(),name:"New Item",value:0,category:"",enabled:true}));
+    onAdd=()=>mutate(x=>{if(x.data.items.length<40)x.data.items.push({id:newItemId(),name:"New Item",value:0,category:"",imageRef:null,imageData:"",enabled:true})});
     onDelete=i=>mutate(x=>x.data.items.splice(i,1));onMove=(i,d)=>mutate(x=>swapRows(x.data.items,i,d));
   }else if(["quadrant","scatter"].includes(p.type)){
     rows=p.data.items;columns=[{key:"name",label:"Name"},{key:"x",label:"X",type:"number"},{key:"y",label:"Y",type:"number"},{key:"category",label:"Category"}];
@@ -492,7 +492,7 @@ function buildLinkedDataPanel(p,model){
     frag.appendChild(sec);
   }
 
-  if(["ranking-card","bar","dot","tier-list"].includes(p.type)){
+  if(["ranking-card","bar","dot","tier-list","image-line"].includes(p.type)){
     const sec=section("評価項目");
     sec.appendChild(sourceSelectField(
       "表示する評価",
@@ -734,7 +734,113 @@ function buildLinkedDataPanel(p,model){
   }
 
   if(options.children.length>1)frag.appendChild(options);
+  if(p.type==="image-line")frag.appendChild(buildImageLineControls(p,true));
 
+  return frag;
+}
+
+// Image Line works with a standalone sheet or a source-linked Home sheet.
+// Home rows keep their names, scores, order and embedded images; local uploads
+// override an individual image without changing the Home sheet itself.
+function buildImageLineControls(p,linked=false){
+  const frag=document.createDocumentFragment();
+  const ja=getLanguage()==="ja";
+  const settings=section(ja?"折れ線グラフの設定":"Line chart options");
+  settings.appendChild(field(ja?"最小値":"Minimum",p.settings.min??0,
+    v=>mutate(x=>x.settings.min=numberValue(v)),"number"));
+  settings.appendChild(field(ja?"最大値":"Maximum",p.settings.max??10,
+    v=>mutate(x=>x.settings.max=numberValue(v)),"number"));
+  settings.appendChild(field(ja?"画像の濃さ（0〜1）":"Image opacity (0–1)",
+    p.settings.imageOpacity??.70,v=>mutate(x=>
+      x.settings.imageOpacity=Math.max(0,Math.min(1,Number(v)||0))
+    ),"number",{min:"0",max:"1",step:"0.1"}));
+  const count=document.createElement("div");count.className="field";
+  const countLabel=document.createElement("label");
+  countLabel.textContent=ja?"表示件数":"Visible items";count.appendChild(countLabel);
+  count.appendChild(choiceButtons([10,15,20,30,40].map(n=>({value:n,label:String(n)})),
+    Number(p.settings.displayLimit||15),
+    v=>mutate(x=>x.settings.displayLimit=Number(v))));
+  settings.appendChild(count);
+  settings.appendChild(toggleOption(ja?"背景画像":"Background images",
+    p.settings.showImages!==false,()=>mutate(x=>x.settings.showImages=x.settings.showImages===false)));
+  settings.appendChild(toggleOption(ja?"点数を表示":"Value labels",
+    p.settings.showValues!==false,()=>mutate(x=>x.settings.showValues=x.settings.showValues===false)));
+  settings.appendChild(toggleOption(ja?"目盛り線":"Grid lines",
+    p.settings.showGrid!==false,()=>mutate(x=>x.settings.showGrid=x.settings.showGrid===false)));
+  settings.appendChild(toggleOption(ja?"項目名":"Item labels",
+    p.settings.showLabels!==false,()=>mutate(x=>x.settings.showLabels=x.settings.showLabels===false)));
+  frag.appendChild(settings);
+
+  const data=section(ja?"項目ごとの画像":"Images by item");
+  const note=document.createElement("div");note.className="source-info-note";
+  note.textContent=linked
+    ? (ja?"名前と点数は基本表と連動します。画像を設定すると、その項目だけ上書きできます。":"Names and scores come from Home. An uploaded image overrides only that item's photo.")
+    : (ja?"項目名・点数・画像を編集できます。並び順が折れ線の左から右になります。":"Edit names, scores and images. Row order is left-to-right on the line.");
+  data.appendChild(note);
+  const limit=Math.max(1,Math.min(40,Number(p.settings.displayLimit)||15));
+  const list=document.createElement("div");list.className="data-list image-line-data-list";
+  (p.data.items||[]).slice(0,limit).forEach((item,index)=>{
+    const row=document.createElement("div");row.className="data-row image-line-data-row";
+    const head=document.createElement("div");head.className="data-row-head";
+    const name=document.createElement("span");name.className="drag-label";
+    name.textContent=(index+1)+". "+String(item.name||"");
+    head.appendChild(name);
+    if(!linked){
+      const actions=document.createElement("div");actions.className="row-actions";
+      [["↑",-1],["↓",1]].forEach(([caption,diff])=>{
+        const b=document.createElement("button");b.type="button";b.className="icon-btn";
+        b.textContent=caption;b.disabled=index+diff<0||index+diff>=p.data.items.length;
+        b.addEventListener("click",()=>mutate(x=>swapRows(x.data.items,index,diff)));
+        actions.appendChild(b);
+      });
+      const del=document.createElement("button");del.type="button";del.className="icon-btn";
+      del.textContent="×";del.addEventListener("click",()=>mutate(x=>x.data.items.splice(index,1)));
+      actions.appendChild(del);head.appendChild(actions);
+    }
+    row.appendChild(head);
+    if(!linked){
+      const cells=document.createElement("div");cells.className="inline-grid";
+      cells.appendChild(field(ja?"項目名":"Name",item.name||"",
+        v=>mutate(x=>x.data.items[index].name=v)));
+      cells.appendChild(field(ja?"点数":"Value",item.value??0,
+        v=>mutate(x=>x.data.items[index].value=numberValue(v)),"number"));
+      row.appendChild(cells);
+    }else{
+      const label=document.createElement("div");label.className="source-info-note";
+      label.textContent=(ja?"点数：":"Score: ")+(item.value??"—");
+      row.appendChild(label);
+    }
+    if(!item.imageRef && /^data:image\/(png|jpeg|webp|gif);base64,/i.test(item.imageData||"")){
+      const thumb=document.createElement("img");
+      thumb.src=item.imageData;thumb.alt="";
+      thumb.style.cssText="display:block;width:88px;height:56px;object-fit:cover;border-radius:7px;margin:6px 0";
+      row.appendChild(thumb);
+    }
+    const manager=createImageManager({
+      imageRef:item.imageRef||null,
+      allowShape:false,
+      label:ja?"背景画像（タップで追加）":"Background image",
+      onChange:imageRef=>mutate(x=>x.data.items[index].imageRef=imageRef)
+    });
+    manager.classList.add("image-line-image-manager");
+    row.appendChild(manager);
+    list.appendChild(row);
+  });
+  data.appendChild(list);
+  if(!linked){
+    const add=document.createElement("button");add.type="button";
+    add.className="btn add-row-btn";
+    add.textContent=ja?"+ 項目を追加":"+ Add item";
+    add.disabled=(p.data.items||[]).length>=40;
+    add.addEventListener("click",()=>mutate(x=>{
+      if(x.data.items.length<40)x.data.items.push({
+        id:newItemId(),name:ja?"新しい項目":"New item",value:0,
+        imageRef:null,imageData:"",enabled:true
+      });
+    }));
+    data.appendChild(add);
+  }
+  frag.appendChild(data);
   return frag;
 }
 
@@ -1516,6 +1622,8 @@ function buildDataPanel(){
     frag.appendChild(blocks);
   }
 
+  if(p.type==="image-line")frag.appendChild(buildImageLineControls(p,false));
+
   const spreadsheet=buildSpreadsheetSection(p);
   if(spreadsheet)frag.appendChild(spreadsheet);
 
@@ -1735,7 +1843,7 @@ function renderSourceQuickBar(){
       p.settings.sourceSubjectIndex??model.rows[0]?.rawIndex??"",
       value=>mutate(x=>syncSourceProject(x,{subjectIndex:Number(value)}))
     );
-  }else if(["ranking-card","bar","dot","tier-list"].includes(p.type)){
+  }else if(["ranking-card","bar","dot","tier-list","image-line"].includes(p.type)){
     addSelect(
       "評価",
       getMetricOptions(model),
