@@ -6,7 +6,7 @@ export const imageLineChart={
   validate:project=>Array.isArray(project.data?.items),
   async render(project,root){
     const canvas=await renderImageLineCanvas(project);
-    canvas.className="visual image-line-visual";
+    canvas.className="image-line-visual";
     canvas.style.width="100%";
     canvas.style.height="100%";
     canvas.style.display="block";
