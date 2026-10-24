@@ -1,0 +1,47 @@
+/* R72: neutral editor surfaces without altering functional table sizing, score
+   tile color semantics, canvas output, Local-first logic or mobile controls. */
+:root{
+  color-scheme:dark;
+  --bg:#191b1c;--panel:#242729;--panel2:#2b2e30;--panel3:#303436;
+  --text:#f2f0eb;--muted:#a8afb0;--line:#414548;--line2:#53585a;
+  --accent:#e29a71;--shadow:0 3px 12px rgba(0,0,0,.12);--radius:8px;
+}
+html{background:var(--bg)}
+body{background:var(--bg);color:var(--text)}
+.panel{background:#25282a;border-color:#414548;box-shadow:var(--shadow);border-radius:8px}
+.topbar.panel{background:#25282a;border-color:#414548}
+.btn{background:#333739;border-color:#595f61;border-radius:5px;color:#f2f0ea}
+.btn:not(.primary):hover{border-color:#d28b67;background:#383d3f}
+.btn.primary{
+  background:#d36b4d;border-color:#d36b4d;color:#fff;
+  box-shadow:none;border-radius:5px
+}
+.discoverBtn{background:#333739;border-color:#64716c;color:#f6f1e7}
+.editorHomeBtn{background:#303638;border-color:#58676a;color:#f2eee7}
+.brandMark{background:#dc795a;border-radius:4px;box-shadow:none}
+.brandTitle{letter-spacing:.035em}
+.fieldLabel,.eyebrow{color:#d9b08e}
+.titleInput,.descInput,.sheetSelect{
+  background:#1e2223;border-color:#565b5d;color:#f2f0eb;border-radius:5px
+}
+.titleInput:focus,.descInput:focus,.sheetSelect:focus{border-color:#dc956f}
+.sheetPanel.panel{background:#242729;border-color:#414548;box-shadow:none}
+.sheetToolbar{background:#282b2d;border-color:#4a4d50}
+.tableWrap{background:#232627}
+table{background:#26292b}
+th,td{border-color:#45494b;background:#272b2d}
+thead th,.indexHead,.nameHead{background:#373b3d;color:#f3f0ea}
+.indexCell,.nameCell{background:#2b3031}
+.avgCell{background:#303436}
+.scoreCell{background:#272b2d}
+.nameInput,.colInput,.scoreInput{color:#f6f2ec}
+.scoreInput:focus,.nameInput:focus,.colInput:focus{
+  box-shadow:inset 0 0 0 2px #db9b74;background:#41413e
+}
+.thumbBtn{background:#343a3b;border-color:#626a68;color:#cad0c9;border-radius:4px}
+.sidePanel.panel{background:#25282a;border-color:#414548}
+.sidePanel .sectionTitle{color:#f2f0ea}
+@media(max-width:760px){
+  .topbar.panel{background:#25282a;border-radius:7px}
+  .sheetPanel.panel{border-color:#414548;border-radius:7px}
+}
