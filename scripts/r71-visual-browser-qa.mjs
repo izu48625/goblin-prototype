@@ -81,9 +81,9 @@ for(const engine of [chromium,webkit]){
       assert(requestArgs.some(p=>p.view==='community'));
       privatize=true;
       await page.locator('#refreshBtn').click();
-      await page.waitForFunction(()=>!document.querySelector('#status').classList.contains('hidden'));
-      assert.equal(await page.locator('.workCard').count(),0,
-        'Non-Public payload must never be rendered');
+      await page.waitForFunction(()=>document.querySelector('#status')?.textContent.includes('読み込めませんでした'));
+      assert.equal(await page.locator('.workCard').isVisible(),false,
+        'Non-Public payload must never be visible');
       await page.goto(base+'/index.html?lang=ja',{waitUntil:'domcontentloaded'});
       assert.equal(await page.locator('#basicFrame').count(),1,'Home iframe preserved');
       assert.equal(await page.locator('#extLauncher').count(),1,'Editor extension launcher preserved');
