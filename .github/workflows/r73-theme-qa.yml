@@ -1,0 +1,54 @@
+name: R73 Shared Theme & Menu Accessibility
+on:
+  pull_request:
+    paths:
+      - 'cloud/global-locale.css'
+      - 'cloud/r72-site.css'
+      - 'cloud/r73-reading.css'
+      - 'base/css/r73-editor-colors.css'
+      - 'app/css/r73-editor-chrome.css'
+      - 'ja/**'
+      - 'en/**'
+      - 'index.html'
+      - 'discover.html'
+      - 'base/index.html'
+      - 'app/editor.html'
+      - 'scripts/r73-*.mjs'
+      - '.github/workflows/r73-theme-qa.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  contrast-privacy-and-regression:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Static style and data-contract checks
+        run: |
+          node --check scripts/r73-theme-static-qa.mjs
+          node --check scripts/r73-theme-browser-qa.mjs
+          node scripts/r73-theme-static-qa.mjs
+          node scripts/r71-visual-static-qa.mjs
+          node scripts/r72-readiness-qa.mjs
+          npm run build:cloudflare
+          test -s dist/cloud/r73-reading.css
+          test -s dist/base/css/r73-editor-colors.css
+          test -s dist/app/css/r73-editor-chrome.css
+      - name: Isolated Chromium and WebKit
+        run: |
+          npm install --no-save playwright@1.56.1
+          npx playwright install --with-deps chromium webkit
+      - name: Serve only local static bundle
+        run: |
+          python3 -m http.server 4173 --bind 127.0.0.1 --directory dist >/tmp/r73-server.log 2>&1 &
+          for i in $(seq 1 30); do
+            if curl -fsS http://127.0.0.1:4173/ja/ >/dev/null; then exit 0; fi
+            sleep 1
+          done
+          exit 1
+      - name: Verify mobile 320/390, desktop, contrast, navigation and editor
+        run: node scripts/r73-theme-browser-qa.mjs
