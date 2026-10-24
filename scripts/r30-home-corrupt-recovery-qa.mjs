@@ -1,3 +1,4 @@
+import {openVisuals} from './r80-qa-click.mjs';
 import assert from 'node:assert/strict';
 import {readFile} from 'node:fs/promises';
 import {chromium} from 'playwright';
@@ -59,7 +60,7 @@ try{
 
   // Navigating through the extension launcher used to bypass Home autosave
   // and commit the blank in-memory library to storage.
-  await page.locator('#extLauncher').click();
+  await openVisuals(page);
   await page.locator('#extGroups .extCard').first().waitFor({state:'visible'});
   await page.locator('#extGroups .extCard').first().click();
   // With an unreadable source library, opening a chart may be blocked by
