@@ -1,0 +1,45 @@
+name: R75 Light Scoring Editor Design and Privacy
+on:
+  pull_request:
+    paths:
+      - 'index.html'
+      - 'base/index.html'
+      - 'base/css/r75-light-editor.css'
+      - 'cloud/r75-light-host.css'
+      - 'scripts/r38-p3-ui-regression-qa.mjs'
+      - 'scripts/r74-header-score-browser-qa.mjs'
+      - 'scripts/r75-*.mjs'
+      - '.github/workflows/r75-light-score-editor-qa.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  browser-and-rgba:
+    runs-on: ubuntu-latest
+    timeout-minutes: 22
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Static CSS, privacy and original color-mapping invariants
+        run: |
+          node scripts/r75-light-static-qa.mjs
+          node scripts/r72-readiness-qa.mjs
+          npm run build:cloudflare
+          test -s dist/base/css/r75-light-editor.css
+          test -s dist/cloud/r75-light-host.css
+      - name: Install isolated browsers
+        run: |
+          npm install --no-save playwright@1.56.1
+          npx playwright install --with-deps chromium webkit
+      - name: Serve local static build
+        run: |
+          python3 -m http.server 4173 --bind 127.0.0.1 --directory dist >/tmp/r75-server.log 2>&1 &
+          for i in $(seq 1 30); do
+            if curl -fsS http://127.0.0.1:4173/index.html >/dev/null; then exit 0; fi
+            sleep 1
+          done
+          exit 1
+      - name: Chromium & WebKit 320, 390, 1180
+        run: node scripts/r75-light-browser-qa.mjs

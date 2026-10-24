@@ -57,12 +57,12 @@ for(const engine of [chromium,webkit]){
    const control=await page.frameLocator('#basicFrame').locator('#addRowBtn').evaluate(el=>({
     bg:getComputedStyle(el).backgroundColor,fg:getComputedStyle(el).color
    }));
-   assert.equal(control.bg,'rgb(75, 64, 56)','Row add remains navy '+JSON.stringify(control));
+   assert.equal(control.bg,'rgb(255, 243, 238)','Row add should be warm light '+JSON.stringify(control));
    assert(contrast(control.bg,control.fg)>=4.5,'Row add contrast '+JSON.stringify(control));
    const badge=await page.frameLocator('#basicFrame').locator('#currentScaleBadge').evaluate(el=>getComputedStyle(el).backgroundColor);
-   assert.equal(badge,'rgb(70, 62, 51)','100-point badge remains navy '+badge);
+   assert.equal(badge,'rgb(239, 233, 222)','100-point badge should be warm light '+badge);
    const blank=await page.frameLocator('#basicFrame').locator('#scoreTable tbody tr:nth-child(2) td.scoreCell').first().evaluate(el=>getComputedStyle(el).backgroundColor);
-   assert.equal(blank,'rgb(16, 27, 48)','Screenshot-locked score colors accidentally changed');
+   assert.equal(blank,'rgb(255, 255, 255)','Blank score cells must match white page');
    console.log('R74 '+engine.name()+' '+width+'px: 6 pages, nav, i18n, score controls PASS');
    await context.close();
   }

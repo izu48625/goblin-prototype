@@ -1,0 +1,72 @@
+/* R75: make / Home shell visually match the light Discover/reading palette.
+ * Preserve iframe, existing extension launcher and browser-safe bottom sheet.
+ */
+:root {
+  color-scheme:light;
+  --bg:#f6f5f1;--text:#252930;--muted:#636d72
+}
+html,body,body.homeHost,#basicRoot,#basicFrame {
+  background:#f6f5f1;color:#252930;color-scheme:light
+}
+body.homeHost .globalLocaleBar{
+  --sm-nav-bg:#fff;
+  --sm-nav-fg:#292e33;
+  --sm-nav-panel:#fff;
+  --sm-nav-border:#d1cfc7;
+  --sm-nav-muted:#535c62;
+  --sm-nav-hover:#f2f0ea;
+  background:#fff;color:#292e33;border-bottom-color:#dedbd4
+}
+body.homeHost .globalLocaleBar :is(.globalHomeBtn,.globalDiscoverBtn,.globalIntroBtn,.globalSupportMenu>summary){
+  background:#fff;color:#292e33;border:1px solid #d1cfc7;
+  box-shadow:none;border-radius:5px
+}
+body.homeHost .globalLocaleBar :is(.globalHomeBtn,.globalDiscoverBtn,.globalIntroBtn,.globalSupportMenu>summary):hover{
+  color:#242930;background:#f0eee9
+}
+body.homeHost .globalSupportPanel{
+  background:#fff;border-color:#d4d1c9;box-shadow:0 10px 24px rgba(0,0,0,.12)
+}
+body.homeHost .globalSupportPanel a{color:#2b3336}
+body.homeHost .globalSupportPanel a:hover{background:#f1eee9;color:#263034}
+body.homeHost .globalSupportDivider{background:#ddd9d1}
+body.homeHost .globalLocaleSwitch{
+  background:#efeee9;border-color:#d6d2ca
+}
+body.homeHost .globalLocaleSwitch button{color:#525e62}
+body.homeHost .globalLocaleSwitch button.active{
+  background:#292e33;color:#fff
+}
+#extLauncher{
+  background:#b64d35;border:1px solid #b64d35;color:#fff;
+  box-shadow:0 4px 10px rgba(76,40,28,.14);border-radius:7px
+}
+#extLauncher:hover{background:#a64430}
+#extBackdrop{background:rgba(20,23,25,.46);backdrop-filter:blur(4px)}
+#extSheet {
+  color:#252930;background:#f6f5f1;border:1px solid #d9d5cc;
+  box-shadow:0 -15px 45px rgba(32,35,36,.15);border-radius:12px 12px 0 0
+}
+.extHandle{background:#b7b6af}
+.extHead{background:#f6f5f1;border-bottom-color:#dedbd4}
+.extHead h2{color:#252930}
+.extHead p{color:#687174}
+.extGroupTitle{color:#aa5039}
+.extCard{
+  background:#fff;color:#2c3135;border:1px solid #d6d3cb;
+  border-radius:6px;box-shadow:none
+}
+.extCard:hover{background:#f4f0e9;border-color:#c78c7d}
+.extCard b{color:#282d32}
+.extCard span{color:#5c666b}
+#extClose{
+  background:#fff;color:#292e32;border:1px solid #c9c8c0;border-radius:6px
+}
+.langSwitch{background:#efeee9;border-color:#dad7cf}
+.langSwitch button{color:#555e61}
+.langSwitch button.active{background:#292e33;color:#fff}
+.extExamplesInfo{color:#525e63}
+.extExamplesInfo a{color:#326165}
+body.homeHost :is(button,a):focus-visible{
+  outline:3px solid #b64d35;outline-offset:3px
+}

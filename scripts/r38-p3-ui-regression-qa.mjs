@@ -77,30 +77,26 @@ try{
   // A measured digital screenshot (IMG_7846(1).png) is now the source of
   // truth for the FINAL displayed score colors. Calculate the RGBA composite,
   // rather than comparing tint source RGB or accepting arbitrary hue families.
-  const channels=(rgba,base=[16,27,48])=>{
+  const channels=(rgba,base=[255,255,255])=>{
     const match=rgba.match(/^rgba\((\d+),(\d+),(\d+),\.(\d+)\)$/);
     assert(match,'bad transparent tint '+rgba);
     const opacity=Number('0.'+match[4]);
     assert(opacity>0 && opacity<=0.42, 'score tile translucency too weak '+rgba);
     return [1,2,3].map((pos,i)=>Math.round(Number(match[pos])*opacity+base[i]*(1-opacity)));
   };
-  const screenshotReference=[
-    [58,41,59], // 97: plum
-    [53,47,54], // 94: smoky warm gray
-    [46,50,51], // 88: muted yellow-green gray
-    [23,41,65]  // 67: dusty blue
-  ];
+  // R75 request: retain exact translucent grade RGBA but show them on light paper.
+  // The former dark composite was intentionally superseded by the user.
   const referenceCompose=expectedRaw.map(v=>channels(v));
-  assert(referenceCompose.every((v,i)=>v.every((c,j)=>Math.abs(c-screenshotReference[i][j])<=1)),
-    'RGBA values no longer reconstruct user-approved photo colors: '+JSON.stringify(referenceCompose));
+  assert(referenceCompose.every(v=>v.every(c=>c>=155&&c<=255)),
+    'RGBA overlays no longer have a bright, readable composite: '+JSON.stringify(referenceCompose));
   const blank=await home.locator('#scoreTable tbody tr:nth-child(2) td.scoreCell').first().evaluate(td=>({
     hasGrade:[...td.classList].some(x=>x.startsWith('heat-')),
     backing:getComputedStyle(td).backgroundColor,
     layer:getComputedStyle(td).backgroundImage
   }));
   assert(!blank.hasGrade && blank.layer==='none' &&
-    blank.backing==='rgb(16, 27, 48)',
-    'empty score cells must keep the existing dark opaque background');
+    blank.backing==='rgb(255, 255, 255)',
+    'empty score cells must be opaque white in R75 light theme');
   console.log('R38 P13 screenshot-locked true alpha and blank cells PASS',colors);
 
   const cellPixelPair=async locator=>{
@@ -149,9 +145,11 @@ try{
   // B/C/D, not just the four values used in the 10-point-mode test.
   const pixelValues=[97,94,88,67,70,60,50];
   const targets=[
-    [58,41,59],[53,47,54],[46,50,51],[23,41,65],
-    [23,45,60],[23,41,65],[21,36,57]
-  ];
+    ...expectedRaw,
+    'rgba(40,89,89,.29)', // 70
+    'rgba(39,72,103,.31)', // 60
+    'rgba(37,64,85,.24)' // 50
+  ].map(v=>channels(v));
   for(const width of [1365,390,320]){
     await page.setViewportSize({width,height:844});
     const samples=[];
@@ -161,7 +159,7 @@ try{
       await home.locator('#titleInput').click();
       const actual=await cellPixelPair(home.locator('#scoreTable tbody tr:first-child td.scoreCell').first());
       assert(rgbClose(actual.top,targets[i]),
-        'User-approved screenshot RGB mismatch at '+width+', score '+pixelValues[i]+
+        'R75 white-backed original RGBA mismatch at '+width+', score '+pixelValues[i]+
         ': '+actual.top+' target '+targets[i]);
       assert(rgbClose(actual.bottom,actual.top),
         'Score color has unwanted gloss at '+width+', score '+pixelValues[i]);
@@ -247,7 +245,7 @@ try{
     assert.equal(await toggle.getAttribute('aria-pressed'),'false');
     assert(await home.locator('body').evaluate(el=>el.classList.contains('score-colors-off')));
     const off=await checkColor();
-    assert(off.every(x=>x.color==='rgb(16, 27, 48)'),
+    assert(off.every(x=>x.color==='rgb(255, 255, 255)'),
       'OFF must neutralize normal/average/fit/overview tile backgrounds: '+JSON.stringify(off));
     const stillSame=await home.locator('body').evaluate(()=>{
       const sheet=window.__statsMakerGetActiveSheet();
@@ -273,7 +271,7 @@ try{
   await home.locator('#scoreColorToggleBtn').waitFor({state:'visible'});
   assert.equal(await toggle.getAttribute('aria-pressed'),'false','OFF was not restored on reload');
   assert.equal(await toggle.innerText(),'色 OFF');
-  assert((await checkColor()).every(x=>x.color==='rgb(16, 27, 48)'));
+  assert((await checkColor()).every(x=>x.color==='rgb(255, 255, 255)'));
   assert.equal(await home.locator('body').evaluate(()=>localStorage.getItem('statsMaker.scoreColorsVisible.v1')),'off');
   const afterReload=await home.locator('body').evaluate(()=>window.__statsMakerGetActiveSheet().rows[0].scores[0]);
   assert.equal(Number(afterReload),97,'score values not preserved through reload');
