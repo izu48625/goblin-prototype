@@ -61,12 +61,15 @@ for(const engine of [chromium,webkit]){
      const result=await page.goto(base+'/'+lang+'/'+path,{waitUntil:'load'});
      assert.equal(result.status(),200);
      await page.waitForFunction(()=>!!document.querySelector('link[href*="r73-reading.css"]')?.sheet,null,{timeout:12000});
+     await page.waitForLoadState('load');
+     await page.waitForFunction(()=>getComputedStyle(document.body).backgroundColor==='rgb(246, 245, 241)',null,{timeout:4500}).catch(()=>{});
      const c2=await page.evaluate(()=>({
+       sheets:[...document.styleSheets].map(s=>({href:s.href,disabled:s.disabled,rules:(()=>{try{return s.cssRules.length}catch{return -1}})()})),
        bg:getComputedStyle(document.body).backgroundColor,
        color:getComputedStyle(document.body).color,
        overflow:document.documentElement.scrollWidth-innerWidth
      }));
-     assert(luminance(c2.bg)>.82,'Dark reading page remains: '+lang+path);
+     assert(luminance(c2.bg)>.82,'Dark reading page remains: '+lang+path+' '+JSON.stringify(c2));
      assert(contrast(c2.bg,c2.color)>=4.5,'Reading contrast '+lang+path);
      assert(c2.overflow<=2,'Reading page horizontally overflows '+lang+path+width+JSON.stringify(c2));
     }
