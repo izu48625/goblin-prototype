@@ -1,0 +1,41 @@
+name: R82 Community Structure Visibility Safety
+on:
+  pull_request:
+    paths:
+      - 'base/css/r82-community-controls-guard.css'
+      - 'base/index.html'
+      - 'scripts/r82-community-controls-qa.mjs'
+      - '.github/workflows/r82-community-controls-qa.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  community-safe-scoring:
+    runs-on: ubuntu-latest
+    timeout-minutes: 16
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Static Community editing permission guard
+        run: |
+          node scripts/r82-community-controls-qa.mjs
+          npm run build:cloudflare
+          test -s dist/base/css/r82-community-controls-guard.css
+      - name: Browser setup
+        run: |
+          npm install --no-save playwright@1.56.1
+          npx playwright install --with-deps chromium
+      - name: Serve PR build
+        run: |
+          python3 -m http.server 4173 --bind 127.0.0.1 --directory dist >/tmp/r82-community-local.log 2>&1 &
+          for i in $(seq 1 30); do
+            if curl -fsS http://127.0.0.1:4173/index.html >/dev/null; then exit 0; fi
+            sleep 1
+          done
+          exit 1
+      - name: Real Community Homepage score input and structural hide check
+        env:
+          BASE_URL: http://127.0.0.1:4173
+        run: node scripts/production-smoke.mjs browser-community-home
