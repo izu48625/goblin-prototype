@@ -107,9 +107,18 @@ try {
   });
   for(const field of inputs)assert(field.font>=16,
     size.label+' Safari focus autozoom: '+JSON.stringify(field));
-  assert((await frame.locator('body').evaluate(()=>
-    document.documentElement.scrollWidth-innerWidth))<=2,
-    size.label+' horizontal scrolling of Home shell');
+  const homeOverflow=await frame.locator('body').evaluate(()=>{
+    const root=document.documentElement;
+    return {difference:root.scrollWidth-innerWidth,rootWidth:root.scrollWidth,
+      viewport:innerWidth,offenders:[...document.body.querySelectorAll('*')]
+        .filter(el=>{const r=el.getBoundingClientRect();return r.right>innerWidth+2||r.left< -2})
+        .slice(0,16).map(el=>{const r=el.getBoundingClientRect();return {
+          tag:el.tagName,id:el.id,class:String(el.className).slice(0,70),
+          left:Math.round(r.left),right:Math.round(r.right),width:Math.round(r.width)
+        }})};
+  });
+  assert(homeOverflow.difference<=2,
+    size.label+' horizontal scrolling of Home shell: '+JSON.stringify(homeOverflow));
 
   await page.locator('#extLauncher').click();
   const panel=page.locator('#extSheet');
