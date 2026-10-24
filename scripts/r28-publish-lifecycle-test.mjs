@@ -1,3 +1,4 @@
+import {clickBasic} from './r80-qa-click.mjs';
 import assert from 'node:assert/strict';
 import {chromium} from 'playwright';
 
@@ -63,7 +64,7 @@ try{
     }
     throw new Error('Home numeric input did not commit before publish button');
   });
-  await home.locator('#publishBtn').click();
+  await clickBasic(home,'publishBtn');
   await home.locator('#publishSettingsPane:not(.hidden)').waitFor({timeout:20000});
   await home.locator('input[name="publishVisibility"][value="unlisted"]').check();
   await home.locator('#publishExecuteBtn').click();
