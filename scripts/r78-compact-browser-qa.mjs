@@ -46,8 +46,7 @@ for(const engine of [chromium,webkit]){
      assert(geometry.select.width>=130,'Saved-sheet selector cannot be tapped '+width);
      assert(geometry.title.height>=40&&geometry.desc.height>=40&&geometry.select.height>=40,
        'Native input tap size too small '+width);
-     assert(geometry.newButton.height>=44&&geometry.publish.height>=44,
-       'Main button tap targets too small '+width);
+     assert(geometry.menu.height>=32,'Actions menu entry too small '+width);
      for(const x of [geometry.title,geometry.desc,geometry.select])
        assert(parseFloat(x.fontsize)>=16,'iOS auto-zoom risk: '+x.fontsize);
    }else{
