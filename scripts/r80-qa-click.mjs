@@ -23,6 +23,6 @@ export async function openVisuals(page){
 }
 export async function focusSearch(frame){
  const search=frame.locator('#searchInput');
- if(!await search.isVisible())await frame.locator('#r80SearchBtn').click();
+ if(!await search.isVisible()){\n  await frame.locator('#r80OptionsBtn').click();\n  await frame.locator('#r81SearchAction').click();\n }
  return search;
 }
