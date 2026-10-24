@@ -1,3 +1,4 @@
+import {clickBasic} from './r80-qa-click.mjs';
 import assert from 'node:assert/strict';
 import {readFile} from 'node:fs/promises';
 import {chromium,webkit} from 'playwright';
@@ -34,9 +35,9 @@ try{
   assert.equal(cssSource,'css/style.css?v=r38p15scores1',
     'Home document still references cached old score-cell CSS');
   await home.locator('#scoreTable .scoreInput').first().waitFor({state:'visible'});
-  await home.locator('#scoreSettingsBtn').click();
+  await clickBasic(home,'scoreSettingsBtn');
   await home.locator('#scale10Btn').click();
-  await home.locator('#scoreSettingsBtn').click();
+  await clickBasic(home,'scoreSettingsBtn');
   const values=[10,9,8,6];
   for(let i=0;i<values.length;i++)
     await home.locator('[data-score-row="0"][data-score-col="'+i+'"]').fill(String(values[i]));
@@ -113,9 +114,9 @@ try{
   const rgbClose=(a,b)=>a.length===b.length&&a.every((n,i)=>Math.abs(n-b[i])<=4);
   const baselineTopRGB=[];
 
-  await home.locator('#scoreSettingsBtn').click();
+  await clickBasic(home,'scoreSettingsBtn');
   await home.locator('#scale100Btn').click();
-  await home.locator('#scoreSettingsBtn').click();
+  await clickBasic(home,'scoreSettingsBtn');
   const referenceValues=[97,94,88,67];
   for(let i=0;i<referenceValues.length;i++)
     await home.locator('[data-score-row="0"][data-score-col="'+i+'"]')
@@ -310,7 +311,7 @@ try{
   await page.setViewportSize({width:390,height:844});
   await home.locator('#titleInput').fill('新しいお題 7');
   await home.locator('.nameInput').first().fill('テスト対象');
-  await home.locator('#publishBtn').click();
+  await clickBasic(home,'publishBtn');
   await home.locator('#publishTitleGuard').waitFor({state:'visible',timeout:10000});
   await home.locator('#publishSettingsPane:not(.hidden)').waitFor({timeout:20000});
   await home.locator('#publishExecuteBtn').click();
