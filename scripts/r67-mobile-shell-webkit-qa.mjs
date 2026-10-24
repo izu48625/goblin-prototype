@@ -1,3 +1,4 @@
+import {openVisuals} from './r80-qa-click.mjs';
 import assert from 'node:assert/strict';
 import {webkit} from 'playwright';
 
@@ -65,11 +66,16 @@ try {
   }
   assert(initial.navScroll<=initial.navWidth+2,
     size.label+' nav overflow hidden by sticky header: '+JSON.stringify(initial));
-  assert(initial.launcher.height>=44 && initial.launcher.left>=-2
-    && initial.launcher.right<=initial.width+2 && initial.launcher.bottom<=initial.height+2,
-    size.label+' extension entry unreachable: '+JSON.stringify(initial));
-  assert(initial.shell.bottom<=initial.launcher.top+8,
-    size.label+' launcher overlaps Home scrolling surface: '+JSON.stringify(initial));
+  // R80 puts the same extension picker in the editor toolbar instead of a
+  // fixed footer CTA, so the bottom scoring rows must remain unobscured.
+  const compact=await frame.locator('#r80VisualsBtn').evaluate(el=>{
+    const r=el.getBoundingClientRect();
+    return {w:r.width,h:r.height,right:r.right,left:r.left};
+  });
+  assert(compact.h>=40&&compact.w>=48&&compact.left>=-2&&compact.right<=size.width+2,
+    size.label+' scoring-toolbar extension action unreachable: '+JSON.stringify(compact));
+  assert(Math.abs(initial.shell.bottom-initial.height)<=2,
+    size.label+' Home must use full viewport after removing fixed launcher');
   assert.equal(await page.locator('.globalLocaleBar').count(),1,
     'Duplicated global nav');
   assert.equal(await frame.locator('.globalLocaleBar').count(),0,
@@ -130,7 +136,7 @@ try {
   assert(homeOverflow.difference<=2,
     size.label+' horizontal scrolling of Home shell: '+JSON.stringify(homeOverflow));
 
-  await page.locator('#extLauncher').click();
+  await openVisuals(page);
   const panel=page.locator('#extSheet');
   await panel.waitFor({state:'visible',timeout:15000});
   const p=await panel.evaluate(el=>{

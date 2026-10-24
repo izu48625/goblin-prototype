@@ -1,3 +1,4 @@
+import {openVisuals} from './r80-qa-click.mjs';
 import assert from 'node:assert/strict';
 import {chromium,webkit} from 'playwright';
 const base='http://127.0.0.1:4173';
@@ -56,7 +57,7 @@ for(const engine of [chromium,webkit]){
    assert(await selected.isVisible(),'Comparison selection remains operable');
    const sel=await selected.evaluate(e=>getComputedStyle(e).backgroundColor);
    assert(light(sel),'Comparison tab still dark '+sel);
-   await page.locator('#extLauncher').click();
+   await openVisuals(page);
    const card=page.locator('#extGroups .extCard').filter({hasText:'Ranking Card'});
    await card.click();
    await page.waitForURL(/\/app\/editor\.html/);
@@ -69,7 +70,7 @@ for(const engine of [chromium,webkit]){
    });
    assert(light(appState.bar),'Source ribbon still dark '+JSON.stringify(appState));
    if(width<500)assert(light(appState.tab),'Extension tabs still dark '+JSON.stringify(appState));
-   assert(!light(appState.artwork),'Dark graph artwork must remain user-controlled');
+   assert(light(appState.artwork),'New ranking project defaults light; saved dark artwork stays user-controlled');
    console.log('R79 '+engine.name()+' '+width+'px overview/fit/rank/tabs/extension PASS');
    await ctx.close();
  }

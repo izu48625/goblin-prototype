@@ -1,0 +1,45 @@
+name: R80 Scoring First and Light New Templates
+on:
+  pull_request:
+    paths:
+      - 'base/index.html'
+      - 'index.html'
+      - 'base/js/r80-scoring-first.js'
+      - 'base/css/r80-scoring-first.css'
+      - 'cloud/r80-no-sticky-launcher.css'
+      - 'app/src/core/project.js'
+      - 'app/src/launcher.js'
+      - 'scripts/r80-*.mjs'
+      - '.github/workflows/r80-scoring-first-qa.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  mobile-flow-and-template-defaults:
+    runs-on: ubuntu-latest
+    timeout-minutes: 24
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Static guards and build
+        run: |
+          node scripts/r80-scoring-first-static-qa.mjs
+          npm run build:cloudflare
+          test -s dist/base/js/r80-scoring-first.js
+          test -s dist/base/css/r80-scoring-first.css
+      - name: Install Chromium/WebKit
+        run: |
+          npm install --no-save playwright@1.56.1
+          npx playwright install --with-deps chromium webkit
+      - name: Serve local site
+        run: |
+          python3 -m http.server 4173 --bind 127.0.0.1 --directory dist >/tmp/r80-server.log 2>&1 &
+          for i in $(seq 1 30); do
+            if curl -fsS http://127.0.0.1:4173/index.html >/dev/null; then exit 0; fi
+            sleep 1
+          done
+          exit 1
+      - name: Real mobile menu and new-theme workflow
+        run: node scripts/r80-scoring-first-browser-qa.mjs

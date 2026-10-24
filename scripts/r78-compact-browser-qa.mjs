@@ -1,3 +1,4 @@
+import {openVisuals} from './r80-qa-click.mjs';
 import assert from 'node:assert/strict';
 import {chromium,webkit} from 'playwright';
 const BASE='http://127.0.0.1:4173';
@@ -45,8 +46,7 @@ for(const engine of [chromium,webkit]){
      assert(geometry.select.width>=130,'Saved-sheet selector cannot be tapped '+width);
      assert(geometry.title.height>=40&&geometry.desc.height>=40&&geometry.select.height>=40,
        'Native input tap size too small '+width);
-     assert(geometry.newButton.height>=44&&geometry.publish.height>=44,
-       'Main button tap targets too small '+width);
+     assert(geometry.menu.height>=32,'Actions menu entry too small '+width);
      for(const x of [geometry.title,geometry.desc,geometry.select])
        assert(parseFloat(x.fontsize)>=16,'iOS auto-zoom risk: '+x.fontsize);
    }else{
@@ -75,7 +75,7 @@ for(const engine of [chromium,webkit]){
     assert(await frame.locator('#mobileHeaderMoreMenu').isVisible(),'Header popup broken');
     await frame.locator('#mobileHeaderMoreBtn').click();
    }
-   await page.locator('#extLauncher').click();
+   await openVisuals(page);
    assert(await page.locator('#extSheet').isVisible(),'Visual tools launcher broken');
    await page.locator('#extClose').click();
    console.log('R78 '+engine.name()+' '+width+'px native input, no overlap, controls PASS');

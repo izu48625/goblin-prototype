@@ -29,13 +29,13 @@ function base(type,title){
     meta:{title,subtitle:"",language:"ja",createdAt:now,updatedAt:now},
     canvas:{preset:"square",width:1080,height:1080,transparent:false},
     style:{
-      theme:"dark",
-      background:THEMES.dark.bg,
-      surface:THEMES.dark.surface,
-      primary:THEMES.dark.text,
-      secondary:THEMES.dark.muted,
-      accent:THEMES.dark.accent,
-      border:THEMES.dark.border,
+      theme:"light",
+      background:THEMES.light.bg,
+      surface:THEMES.light.surface,
+      primary:THEMES.light.text,
+      secondary:THEMES.light.muted,
+      accent:THEMES.light.accent,
+      border:THEMES.light.border,
       typography:{fontFamily:"system-ui",titleScale:1,bodyScale:1,weight:700,align:"left"}
     },
     data:{},
@@ -55,7 +55,7 @@ export function createRankingProject(){
     {id:uid("item"),name:"対象E",value:69,note:"",category:"",imageRef:null,imageShape:"circle",color:null,enabled:true}
   ];
   p.settings={
-    template:"sports",
+    template:"minimal",
     unit:"PTS",
     topN:10,
     sort:"manual",
@@ -91,7 +91,7 @@ export function createStatCardProject(){
       {id:uid("stat"),label:"評価6",value:84}
     ]
   };
-  p.settings={template:"sports",maxStats:10};
+  p.settings={template:"minimal",maxStats:10};
   return p;
 }
 

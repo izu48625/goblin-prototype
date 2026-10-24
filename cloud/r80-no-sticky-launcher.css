@@ -1,0 +1,8 @@
+/* R80: no fixed extension banner covering scoring rows on phones.
+   Accessible equivalent is #r80VisualsBtn in the iframe's editor toolbar.
+   Community participation keeps its existing fixed controls and launcher. */
+@media(max-width:760px){
+  body.homeHost:not(.communityShell) #extLauncher{display:none!important}
+  body.homeHost:not(.communityShell) #basicRoot{bottom:0!important}
+  body.homeHost:not(.communityShell) #basicFrame{height:100%}
+}

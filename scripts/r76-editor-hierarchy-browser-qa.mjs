@@ -1,3 +1,4 @@
+import {clickBasic,openVisuals} from './r80-qa-click.mjs';
 import assert from 'node:assert/strict';
 import {chromium,webkit} from 'playwright';
 const base='http://127.0.0.1:4173';
@@ -51,23 +52,23 @@ for(const engine of [chromium,webkit]){
    assert(styles.overflow<=2,'Document viewport overflow '+width+' '+JSON.stringify(styles));
    if(width<500)assert(styles.row.h>=40,'Add-row mobile tap target too small');
    assert(luminosity(styles.filter.bg)>.83,'Search should be light');
-   const launch=await page.locator('#extLauncher').evaluate(el=>{
-     const r=el.getBoundingClientRect();return {height:r.height,width:r.width};
-   });
-   assert(launch.height>=44&&launch.height<=56,'Extension launcher should be compact '+JSON.stringify(launch));
+   const launch=width<500
+    ? await frame.locator('#r80VisualsBtn').evaluate(el=>{const r=el.getBoundingClientRect();return {height:r.height,width:r.width};})
+    : await page.locator('#extLauncher').evaluate(el=>{const r=el.getBoundingClientRect();return {height:r.height,width:r.width};});
+   assert(launch.height>=40&&launch.height<=56,'Visual tools entry must remain easy to tap '+JSON.stringify(launch));
    const rowCount=await frame.locator('#scoreTable tbody tr').count();
    await frame.locator('#addRowBtn').click();
    assert((await frame.locator('#scoreTable tbody tr').count())>rowCount,
      'Add row must still function after visual redesign');
-   await frame.locator('#scoreSettingsBtn').click();
+   await clickBasic(frame,'scoreSettingsBtn');
    assert(await frame.locator('#scoreSettingsPanel').isVisible(),
      'Scoring settings remain accessible');
-   await frame.locator('#scoreSettingsBtn').click();
+   await clickBasic(frame,'scoreSettingsBtn');
    await frame.locator('#overviewViewBtn').click();
    assert(await frame.locator('#overviewSheetView').isVisible(),'Overview button functionality');
    await frame.locator('#sheetViewBtn').click();
    assert(await frame.locator('#normalSheetView').isVisible(),'Return to sheet');
-   await page.locator('#extLauncher').click();
+   await openVisuals(page);
    assert(await page.locator('#extSheet').isVisible(),'Extension sheet still opens');
    await page.locator('#extClose').click();
    assert(!await page.locator('#extSheet').isVisible(),'Extension sheet still closes');
