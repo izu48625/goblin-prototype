@@ -1,3 +1,27 @@
+/* Compact, task-oriented site navigation: visible without expanding FAQs. */
+body[data-sm-localized-landing] .r72PageNav{
+ display:flex;align-items:center;gap:9px;flex-wrap:wrap;
+ margin:17px 0 5px;padding:0
+}
+body[data-sm-localized-landing] .r72PageNav a{
+ display:inline-flex;align-items:center;justify-content:center;
+ min-height:36px;padding:7px 12px;border:1px solid #dad8cf;
+ border-radius:4px;background:#fff;color:#3d4448;text-decoration:none;
+ font-size:13px;font-weight:750
+}
+body[data-sm-localized-landing] .r72PageNav a:hover{
+ background:#f3eee7;border-color:#bfae9e
+}
+@media(max-width:680px){
+ body[data-sm-localized-landing] .r72PageNav{
+   overflow-x:auto;flex-wrap:nowrap;scrollbar-width:thin;
+   gap:7px;margin:8px -14px 3px;padding:0 14px 5px
+ }
+ body[data-sm-localized-landing] .r72PageNav a{
+   flex:none;min-height:40px;font-size:12px;padding:7px 10px
+ }
+}
+
 /* R72: editorial, work-led brand treatment. Public bilingual landing pages only.
    Original charts remain the source of visual color; no decorative AI gradients. */
 body[data-sm-localized-landing]{
