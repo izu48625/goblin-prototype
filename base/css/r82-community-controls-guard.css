@@ -1,0 +1,20 @@
+/* R82 safety: explicit specificity over R81 mobile display:flex!important.
+   Community visitors may enter SCORES only; structure, sheets, publish, and
+   extension creation must not be exposed by any light/dark layout rule.
+   Do not alter normal editor or generated artwork. */
+body.community-mode .topbar .topActions,
+body.community-mode .sheetPanel .coreActions,
+body.community-mode .sheetPanel .r80-options-panel,
+body.community-mode .sheetPanel #scoreSettingsPanel,
+body.community-mode .sheetPanel #utilityBar,
+body.community-mode .sheetPanel #columnManage{
+  display:none!important;
+}
+body.community-mode .topbar .topActions :is(#publishBtn,#newSheetBtn,#duplicateBtn,
+#deleteSheetBtn,#mobileHeaderMoreBtn,#r81ThemeBtn),
+body.community-mode .sheetPanel .coreActions :is(#addRowBtn,#addColBtn,#r80OptionsBtn,
+#r80VisualsBtn,#scoreSettingsBtn,#moreToolsBtn),
+body.community-mode #addRowWideBtn,
+body.community-mode #mobileHeaderMoreMenu{
+  display:none!important;
+}
