@@ -21,6 +21,10 @@ for(const engine of [chromium,webkit]){
    const context=await browser.newContext({viewport:{width,height:mobile?800:900},isMobile:mobile,hasTouch:mobile,locale:'ja-JP'});
    // Local mock-only: browser never contacts cloud database.
    await context.route('https://*.supabase.co/**',route=>route.abort());
+   // CSS-only editor inspection: without a saved project the app intentionally redirects home.
+   await context.route(url=>url.pathname==='/app/src/editor-entry.js',route=>route.fulfill({
+    status:200,contentType:'application/javascript',body:'export {};'
+   }));
    await context.route('https://cdn.jsdelivr.net/**',route=>route.fulfill({
     status:200,contentType:'application/javascript',body:'window.supabase={createClient:()=>({})};'
    }));
@@ -80,7 +84,7 @@ for(const engine of [chromium,webkit]){
    const editorBg=await page.locator('.preview-toolbar').evaluate(el=>getComputedStyle(el).backgroundColor);
    assert(neutral(editorBg),'Graph editor chrome still navy');
    // Chart output theme is explicitly owned by the selected graph, not by site chrome.
-   const artBg=await page.locator('.preview-root').evaluate(el=>getComputedStyle(el).backgroundColor);
+   const artBg=await page.evaluate(()=>getComputedStyle(document.querySelector('#previewRoot')).backgroundColor);
    assert(!neutral(artBg),'Chart template colors were accidentally overwritten: '+artBg);
    console.log('R73 '+engine.name()+' '+width+' basic and graph editor palettes PASS');
    await context.close();
