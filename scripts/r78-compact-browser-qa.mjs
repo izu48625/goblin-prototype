@@ -52,11 +52,11 @@ for(const engine of [chromium,webkit]){
    }else{
      assert(geometry.title.width>=170,'Desktop header broken');
    }
-   await frame.locator('#titleInput').fill('R78入力確認');
-   await frame.locator('#descInput').fill('省スペースでも編集できる');
+   await frame.locator('#titleInput').fill('R67 LOCAL WebKit '+width);
+   await frame.locator('#descInput').fill('not published; free local test');
    await frame.locator('#sheetSelect').click();
-   assert.equal(await frame.locator('#titleInput').inputValue(),'R78入力確認');
-   assert.equal(await frame.locator('#descInput').inputValue(),'省スペースでも編集できる');
+   assert.equal(await frame.locator('#titleInput').inputValue(),'R67 LOCAL WebKit '+width);
+   assert.equal(await frame.locator('#descInput').inputValue(),'not published; free local test');
    await frame.locator('#scoreTable .scoreInput').first().fill('82');
    await frame.locator('#scoreTable .scoreInput').first().press('Tab');
    const overflowDebug=await frame.locator('body').evaluate(()=>{
