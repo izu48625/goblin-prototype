@@ -34,7 +34,7 @@ body{color:var(--r79-text);background:var(--r79-page)}
   color:#555e62
 }
 #currentScaleBadge{
-  background:transparent;border:0;color:#595f62;font-weight:800;
+  background:#f4f2ed;border:0;color:#595f62;font-weight:800;
   min-height:40px;padding:0 4px;box-shadow:none
 }
 .sheetPanel .filterBar{
