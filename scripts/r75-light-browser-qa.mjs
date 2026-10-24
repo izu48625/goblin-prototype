@@ -68,7 +68,7 @@ for(const engine of [chromium,webkit]){
    await page.waitForTimeout(240);
    const off=await frame.locator('#scoreTable tbody tr:first-child td.scoreCell').first().evaluate(el=>getComputedStyle(el).backgroundColor);
    assert.equal(off,'rgb(255, 255, 255)','OFF must be white');
-   await toggle.click();
+   await clickBasic(frame,'scoreColorToggleBtn');
    assert.equal(await toggle.getAttribute('aria-pressed'),'true');
    // New bottom sheet also uses paper, not the former dark backdrop.
    await openVisuals(page);

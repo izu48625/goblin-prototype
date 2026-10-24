@@ -526,6 +526,13 @@ async function browserCommunityHome(){
       'Public topic title can be modified in Community mode');
     assert(await frame.locator('#addRowBtn').isHidden(),
       'Community exposed structural row editing');
+    if(mode==='browser-community-structure'){
+      for(const id of ['#addColBtn','#newSheetBtn','#publishBtn',
+        '#r80OptionsBtn','#r80VisualsBtn','#mobileHeaderMoreBtn']){
+        assert(await frame.locator(id).isHidden(),
+          'Community UI exposed editing-only control: '+id);
+      }
+    }
     const initialStorage=await page.evaluate(()=>localStorage.getItem('statsMakerV014Library'));
     await frame.locator('[data-score-row="0"][data-score-col="0"]').fill('8');
     assert(await frame.locator('#scoreTable tbody tr').nth(0).locator('.progressPill').innerText()==='1/2',
@@ -549,6 +556,10 @@ async function browserCommunityHome(){
     await frame.locator('[data-sort-now="0"][data-sort-dir="desc"]').first().click();
     await frame.locator('#overviewViewBtn').click();
     await frame.locator('#sheetViewBtn').click();
+    // Strict PR-only light/dark visibility & editable score preview: local static
+    // mock host does not contain the Cloudflare guarded POST gateway. Original
+    // production smoke always continues to the secure authenticated submit.
+    if(mode==='browser-community-structure')return;
     await page.locator('#communitySubmit').click();
     try{
       await page.locator('.communityMessage.ok').waitFor({timeout:9000});
@@ -756,5 +767,6 @@ else if(mode==='browser-remix-storage')await browserRemixStorage();
 else if(mode==='browser-remix-context')await browserRemixContext();
 else if(mode==='browser-community-panel')await browserCommunityPanel();
 else if(mode==='browser-community-home')await browserCommunityHome();
+else if(mode==='browser-community-structure')await browserCommunityHome();
 else if(mode==='browser-iphone-png')await browserIphonePng();
 else throw new Error('Unknown smoke mode: '+mode);
