@@ -185,7 +185,7 @@ html[data-sm-theme="dark"] body:has(#scoreTable)
 }
 html[data-sm-theme="dark"] body:has(#scoreTable)
 #scoreTable .scoreInput::placeholder{
-  color:#aebbc0!important;opacity:1!important
+  color:#d3dcdd!important;opacity:1!important
 }
 html[data-sm-theme="dark"] body:has(#scoreTable)
 #scoreTable .thumbBtn{
