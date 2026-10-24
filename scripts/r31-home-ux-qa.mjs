@@ -1,3 +1,4 @@
+import {clickBasic} from './r80-qa-click.mjs';
 import assert from 'node:assert/strict';
 import {chromium} from 'playwright';
 
@@ -25,9 +26,9 @@ try{
     'All metric editing chips must be shown without a toggle');
   const metricPanel=frame.locator('#columnManage');
   assert(await metricPanel.isVisible());
-  await frame.locator('#scoreSettingsBtn').click();
+  await clickBasic(frame,'scoreSettingsBtn');
   assert(await metricPanel.isVisible(),'Score settings incorrectly hide metric management');
-  await frame.locator('#moreToolsBtn').click();
+  await clickBasic(frame,'moreToolsBtn');
   assert(await metricPanel.isVisible(),'More menu incorrectly hides metric management');
   await frame.locator('#overviewViewBtn').click();
   assert(await metricPanel.isVisible(),'Overview view hid metric chips');
