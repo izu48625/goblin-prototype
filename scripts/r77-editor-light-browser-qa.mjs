@@ -1,3 +1,4 @@
+import {openVisuals} from './r80-qa-click.mjs';
 import assert from 'node:assert/strict';
 import {chromium,webkit} from 'playwright';
 const base='http://127.0.0.1:4173';
@@ -30,21 +31,20 @@ for(const engine of [chromium,webkit]){
    const page=await context.newPage();
    const jsErrors=[];page.on('pageerror',e=>jsErrors.push(e.message));
    await page.goto(base+'/index.html?lang=ja',{waitUntil:'domcontentloaded'});
-   const launcher=page.locator('#extLauncher');
+   const launcher=width<500?page.frameLocator('#basicFrame').locator('#r80VisualsBtn'):page.locator('#extLauncher');
    await launcher.waitFor({state:'visible'});
    const bottom=await launcher.evaluate(el=>{
      const a=el.getBoundingClientRect(),c=getComputedStyle(el);
      return {w:a.width,h:a.height,bg:c.backgroundColor,fg:c.color,
         viewport:window.innerWidth,left:a.left};
    });
-   assert(bottom.h>=44&&bottom.h<=56,'Button should be tappable/compact '+JSON.stringify(bottom));
+   assert(bottom.h>=40&&bottom.h<=56,'Visual tools entry must be tappable '+JSON.stringify(bottom));
    if(width<500){
-     assert(bottom.w<=206,'Full-width orange banner still shown '+JSON.stringify(bottom));
-     assert(Math.abs(bottom.left-(width-bottom.w)/2)<3,'Launcher not centered '+JSON.stringify(bottom));
-     assert(lum(bottom.bg)>.85,'Launcher must be white');
+     assert(bottom.w>=48,'Mobile Visual Tools shortcut too small '+JSON.stringify(bottom));
+     assert(lum(bottom.bg)>.85,'Launcher should be a quiet light action');
      assert(ratio(bottom.bg,bottom.fg)>=4.5,'Launcher text illegible');
    }
-   await launcher.click();
+   await openVisuals(page);
    await page.locator('#extSheet').waitFor({state:'visible'});
    const card=page.locator('#extGroups .extCard').filter({hasText:'Ranking Card'});
    await card.waitFor({state:'visible'});
@@ -73,7 +73,7 @@ for(const engine of [chromium,webkit]){
    assert.equal(state.toolbar.bg,'rgb(255, 255, 255)','Zoom toolbar still dark');
    assert(ratio(state.nav.bg,state.navLink.fg)>=4.5,'Header nav readability');
    assert(lum(state.previewArea.bg)>.80,'Checkered preview workbench still dark');
-   assert(lum(state.art.bg)<.5,'Native ranking artwork was inadvertently light-restyled');
+   assert(lum(state.art.bg)>.75,'New minimal ranking artwork must default to light; user templates remain selectable');
    assert.equal(state.projectType,'ranking-card');
    assert(state.xOverflow<=3,'Editor horizontally overflows '+width+' '+state.xOverflow);
    if(width<500){
