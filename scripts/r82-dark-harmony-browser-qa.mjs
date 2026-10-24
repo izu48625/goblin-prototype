@@ -48,6 +48,9 @@ for(const engine of [chromium,webkit]){
       await new Promise(r=>setTimeout(r,50));
     }
     await new Promise(r=>requestAnimationFrame(()=>requestAnimationFrame(r)));
+    // Native scoring tiles have a 120ms background transition. Compare the
+    // settled frame, not the intermediate gray while theme changes.
+    await new Promise(r=>setTimeout(r,260));
   });
   const dark=await style();
   const surfaces=['head','fixed','sortRow','thumb','row','empty','titleInput'];
