@@ -1,3 +1,4 @@
+import {openVisuals} from './r80-qa-click.mjs';
 import assert from 'node:assert/strict';
 import {chromium} from 'playwright';
 
@@ -162,7 +163,7 @@ try{
 
   // Extension opens via JS rather than a normal anchor. It should also carry
   // preview through to the visual editor without fetching ad vendors.
-  await page.locator('#extLauncher').click();
+  await openVisuals(page);
   await page.locator('.extCard').first().click();
   await page.waitForURL(url=>url.pathname.endsWith('/app/editor.html')&&url.searchParams.get('adPreview')==='1',
     {timeout:25000});
