@@ -97,3 +97,32 @@ body.r73-reading[data-sm-legal-page] .legalFooter{border-color:#dfdcd4;color:#65
   body.r73-reading[data-sm-legal-page] section{padding:19px 14px}
   body.r73-reading .actions a{min-height:46px}
 }
+
+
+/* R74: inserted shared bar replaces each guide's historical wide article
+   header. The legacy inline nav{flex-wrap:wrap} must not split a 44px bar. */
+body.r73-reading .globalLocaleBar{
+  position:sticky;top:0;width:100%;height:44px;min-height:44px;
+  max-width:none;box-sizing:border-box;
+}
+body.r73-reading .globalLocaleBar .globalNavLinks{
+  flex-wrap:nowrap;min-width:0;font-size:12px
+}
+body.r73-reading .globalLocaleBar .globalLocaleControls{flex-shrink:0}
+body.r73-reading .globalLocaleBar .globalSupportPanel{
+  font-size:12px;line-height:1.3
+}
+body.r73-reading .globalLocaleBar :is(a,summary){
+  text-decoration:none
+}
+body.r73-reading main{padding-top:0}
+body.r73-reading .globalLocaleBar+main .intro,
+body.r73-reading .globalLocaleBar+main .hero{
+  padding-top:clamp(24px,4vw,40px)
+}
+@media(max-width:600px){
+  body.r73-reading .globalLocaleBar{
+    height:44px;min-height:44px
+  }
+  body.r73-reading .globalLocaleBar .globalNavLinks{gap:4px}
+}
