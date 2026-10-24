@@ -68,10 +68,14 @@
     }
   }[locale];
 
+  // Landing page category links use only known filters (no unbounded searches).
+  const incoming=new URLSearchParams(window.location.search);
+  const initialCategory=incoming.get('category');
+  const initialView=incoming.get('view');
   const state={
     works:[],
-    view:'all',
-    category:'all',
+    view:initialView==='community'?'community':'all',
+    category:categories.includes(initialCategory)?initialCategory:'all',
     sort:'newest',
     query:'',
     visible:12,
@@ -288,6 +292,7 @@
         </div>
 
         <a class="workMainLink" href="${href}">
+          ${creatorPreviewHtml(topic)}
           <div class="workTitle">${esc(topic.title||'Untitled')}</div>
           <div class="workDesc">${esc(description)}</div>
         </a>
@@ -309,7 +314,6 @@
             <span class="statsDisclosureChevron">⌄</span>
           </summary>
           <div class="statsDisclosureBody">
-            ${creatorPreviewHtml(topic)}
             <div class="cardMeta statsMeta">
               <span class="metaChip">${stats.targets||'—'} ${copy.targets}</span>
               <span class="metaChip">${stats.metrics||'—'} ${copy.metrics}</span>
@@ -470,7 +474,7 @@
     button.addEventListener('click',()=>{
       state.view=button.dataset.view==='community'?'community':'all';
       window.SM_ANALYTICS?.event('discover_filter',{filter_type:state.view});
-      document.querySelectorAll('.browseTab').forEach(btn=>btn.classList.toggle('active',btn===button));
+      document.querySelectorAll('.browseTab').forEach(btn=>{btn.classList.toggle('active',btn===button);btn.setAttribute('aria-pressed',String(btn===button));});
       reload();
     });
   });
@@ -480,7 +484,7 @@
       const requested=button.dataset.category||'all';
       state.category=categories.includes(requested)?requested:'all';
       window.SM_ANALYTICS?.event('discover_filter',{filter_type:'category'});
-      document.querySelectorAll('.categoryBtn').forEach(btn=>btn.classList.toggle('active',btn===button));
+      document.querySelectorAll('.categoryBtn').forEach(btn=>{btn.classList.toggle('active',btn===button);btn.setAttribute('aria-pressed',String(btn===button));});
       reload();
     });
   });
@@ -497,5 +501,14 @@
   refreshBtn.addEventListener('click',()=>{skipCacheOnce=true;reload();});
 
   setCopy();
+  // Match the visual selection to a validated deep link before the first RPC.
+  document.querySelectorAll('.categoryBtn').forEach(button=>{
+    button.classList.toggle('active',button.dataset.category===state.category);
+    button.setAttribute('aria-pressed',String(button.dataset.category===state.category));
+  });
+  document.querySelectorAll('.browseTab').forEach(button=>{
+    button.classList.toggle('active',button.dataset.view===state.view);
+    button.setAttribute('aria-pressed',String(button.dataset.view===state.view));
+  });
   reload();
 })();
