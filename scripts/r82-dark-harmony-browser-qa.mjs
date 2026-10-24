@@ -74,6 +74,8 @@ for(const engine of [chromium,webkit]){
   const score=f.locator('#scoreTable .scoreInput').first();
   await score.fill('97');
   await score.press('Tab');
+  // Grade is exact RGBA after the existing 120ms score background animation.
+  await page.waitForTimeout(220);
   const tile=await f.locator('#scoreTable tbody td.scoreCell').first().evaluate(el=>({
      background:getComputedStyle(el).backgroundColor,
      grade:el.className,alpha:el.style.getPropertyValue('--score-tile-overlay')
