@@ -33,7 +33,8 @@ jobs:
           node --check scripts/r50-adsense-owner-qa.mjs
           npm run build:cloudflare
           node scripts/r50-adsense-owner-qa.mjs local
-          test ! -e dist/ads.txt
+          test -f dist/ads.txt
+          grep -Fx 'google.com, pub-2734957009365610, DIRECT, f08c47fec0942fa0' dist/ads.txt
 
   live-owner-meta:
     name: Production GET ownership meta (after main merge)

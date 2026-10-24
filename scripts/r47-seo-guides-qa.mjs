@@ -48,8 +48,8 @@ for(const lang of ['ja','en']){
     lang+' search intent must match real feature text');
   assert(!/seodata\.dev|trenzhub|246,000|33,100/.test(home),
     'Unverified external keyword volume must not appear in the site');
-  assert(!/adsbygoogle|ca-pub-|googletagmanager\.com/.test(home),
-    'GA4 and AdSense must remain inactive');
+  assert(!/adsbygoogle|googletagmanager\.com/.test(home),
+    'No live AdSense script or GA4; owner verification meta is permitted');
 
   assert(home.includes('href="/'+lang+'/chart-guide.html"'),'chart guide must have a real landing-page link');
   assert(home.includes('href="/'+lang+'/png-guide.html"'),'PNG guide must have a real landing-page link');

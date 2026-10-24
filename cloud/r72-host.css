@@ -1,0 +1,35 @@
+/* R72: charcoal home chrome; functional launcher and bottom-sheet logic unchanged. */
+:root{--bg:#191b1c;--text:#f2f0ea;--muted:#afb5b3}
+html,body,#basicRoot,#basicFrame{background:#191b1c}
+#extLauncher{
+  border-color:#d67e60;border-radius:9px;
+  background:#d4684c;color:#fff;box-shadow:0 5px 14px rgba(0,0,0,.25)
+}
+#extLauncher:hover{background:#c75b40}
+.launchIcon{border-radius:5px;background:rgba(255,255,255,.18)}
+.launchSub{color:#fff2eb}
+#extBackdrop{background:rgba(10,10,10,.66);backdrop-filter:blur(4px)}
+#extSheet{background:#252729;border-color:#484b4c;border-radius:13px 13px 0 0}
+.extHead{background:#252729;border-color:#494d4f}
+.extGroupTitle{color:#e9b08e}
+.extCard{
+  background:#333739;border-color:#585c5b;color:#f5f0e9;
+  border-radius:6px;box-shadow:none
+}
+.extCard:hover{background:#3b403e;border-color:#d48a6b}
+.extCard span{color:#b6bdbb}
+#extClose{background:#333739;border-color:#565b5b;color:#f4f0eb}
+.extExamplesInfo a{color:#e8b095}
+body.homeHost .globalLocaleBar{
+  background:#242729;color:#e7e5df;border-bottom-color:#484c4e
+}
+body.homeHost .globalHomeBtn{
+  background:#303538;color:#f1ede6;border-color:#606968;border-radius:5px
+}
+body.homeHost .globalLocaleSwitch{background:#33383a;border-color:#595e60;border-radius:5px}
+body.homeHost .globalLocaleSwitch button.active{background:#d4684c;color:#fff}
+body.homeHost :is(button,a):focus-visible{outline:3px solid #f0ac7c;outline-offset:2px}
+@media(max-width:600px){
+  #extLauncher{border-radius:7px;box-shadow:0 3px 10px rgba(0,0,0,.22)}
+  .launchIcon{border-radius:5px}
+}

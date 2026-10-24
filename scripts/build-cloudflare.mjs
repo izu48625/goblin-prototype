@@ -14,7 +14,8 @@ const files=[
   'editor.html',
   'base.html',
   'my.html',
-  'robots.txt'
+  'robots.txt',
+  'ads.txt'
 ];
 
 await rm(out,{recursive:true,force:true});
