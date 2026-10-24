@@ -39,6 +39,50 @@
     return ['chart-guide.html','png-guide.html','examples.html'].includes(name)?name:null;
   };
   const current=()=>landingLang()||legalLang()||readingLang()||normalize(localStorage.getItem(KEY)||localStorage.getItem(LEGACY)||navigator.language||'ja');
+
+  /* R81: local preference only; no account, cookie, analytics or network calls.
+     Shared by Home iframe, extensions, Discover and guides. */
+  const THEME_KEY='statsMaker.uiTheme';
+  const themeRead=()=>{try{return localStorage.getItem(THEME_KEY)==='dark'?'dark':'light'}catch{return 'light'}};
+  const themeCurrent=()=>document.documentElement.dataset.smTheme==='dark'?'dark':'light';
+  const themeButtons=()=>{
+    const dark=themeCurrent()==='dark';
+    const en=current()==='en';
+    document.querySelectorAll('[data-sm-theme-toggle]').forEach(b=>{
+      b.setAttribute('aria-pressed',String(dark));
+      b.setAttribute('aria-label',dark?(en?'Switch to light mode':'ライトモードに切替'):(en?'Switch to dark mode':'ダークモードに切替'));
+      b.title=b.getAttribute('aria-label');
+      b.textContent=b.dataset.smThemeToggle==='icon'?(dark?'☀':'☾')
+        :dark?(en?'☀ Light mode':'☀ ライトモード'):en?'☾ Dark mode':'☾ ダークモード';
+    });
+  };
+  const themeApply=(value,persist=false)=>{
+    const mode=value==='dark'?'dark':'light';
+    if(persist){try{localStorage.setItem(THEME_KEY,mode)}catch{}}
+    document.documentElement.dataset.smTheme=mode;
+    themeButtons();
+    window.dispatchEvent(new CustomEvent('statsmaker:themechange',{detail:{theme:mode}}));
+  };
+  window.SM_THEME={
+    get:themeCurrent,
+    set:mode=>themeApply(mode,true),
+    toggle:()=>themeApply(themeCurrent()==='dark'?'light':'dark',true)
+  };
+  themeApply(themeRead());
+  if(!document.querySelector('link[data-sm-theme-style]')){
+    const link=document.createElement('link');
+    link.rel='stylesheet';link.href='/cloud/r81-theme.css?v=r81p1';
+    link.dataset.smThemeStyle='r81';
+    document.head.appendChild(link);
+  }
+  document.addEventListener('click',event=>{
+    const button=event.target?.closest?.('[data-sm-theme-toggle]');
+    if(button){event.preventDefault();window.SM_THEME.toggle();}
+  });
+  window.addEventListener('storage',event=>{
+    if(event.key===THEME_KEY)themeApply(themeRead());
+  });
+
   // Browser/CDN rewrites may expose an embedded Home as /base/ instead of
   // /base/index.html. Check the frame relationship, never the URL spelling.
   // All embedded views borrow the parent's single fixed language/Home bar.
@@ -94,6 +138,7 @@
         link.href=previewUrl(new URL('/'+lang+'/legal.html#'+section,location.origin).href);
       }
     }
+    themeButtons();
     bar.setAttribute('aria-label',lang==='ja'?'表示言語を切り替える':'Choose display language');
     document.querySelectorAll('[data-sm-legal-link]').forEach(link=>{
       const section=link.dataset.smLegalLink;
@@ -167,7 +212,7 @@
     bar=document.createElement('div');
     bar.className='globalLocaleBar';
     bar.setAttribute('role','group');
-    bar.innerHTML='<nav class="globalNavLinks" aria-label="Site navigation"><a class="globalHomeBtn" href="index.html?fresh=1" aria-label="ホームを開く">HOME</a><a class="globalDiscoverBtn" href="discover.html" aria-label="Discoverを開く">Discover</a><a class="globalIntroBtn" href="/ja/" aria-label="STATS MAKERの紹介ページ">紹介</a><details class="globalSupportMenu"><summary>ヘルプ</summary><div class="globalSupportPanel"><a data-global-guide="chart" href="/ja/chart-guide.html">グラフの作り方・能力比較</a><a data-global-guide="png" href="/ja/png-guide.html">PNG保存・共有</a><a data-global-guide="examples" href="/ja/examples.html">完成グラフの作例</a><div class="globalSupportDivider" aria-hidden="true"></div><a data-global-support="terms" href="/ja/legal.html#terms">利用規約</a><a data-global-support="privacy" href="/ja/legal.html#privacy">プライバシー</a><a data-global-support="contact" href="/ja/legal.html#contact">お問い合わせ</a></div></details></nav><div class="globalLocaleControls"><span class="globalLocaleLabel">表示言語</span><div class="globalLocaleSwitch"><button type="button" data-global-lang="ja" aria-label="日本語">JA</button><button type="button" data-global-lang="en" aria-label="English">EN</button></div></div>';
+    bar.innerHTML='<nav class="globalNavLinks" aria-label="Site navigation"><a class="globalHomeBtn" href="index.html?fresh=1" aria-label="ホームを開く">HOME</a><a class="globalDiscoverBtn" href="discover.html" aria-label="Discoverを開く">Discover</a><a class="globalIntroBtn" href="/ja/" aria-label="STATS MAKERの紹介ページ">紹介</a><details class="globalSupportMenu"><summary>ヘルプ</summary><div class="globalSupportPanel"><a data-global-guide="chart" href="/ja/chart-guide.html">グラフの作り方・能力比較</a><a data-global-guide="png" href="/ja/png-guide.html">PNG保存・共有</a><a data-global-guide="examples" href="/ja/examples.html">完成グラフの作例</a><div class="globalSupportDivider" aria-hidden="true"></div><a data-global-support="terms" href="/ja/legal.html#terms">利用規約</a><a data-global-support="privacy" href="/ja/legal.html#privacy">プライバシー</a><a data-global-support="contact" href="/ja/legal.html#contact">お問い合わせ</a><button type="button" class="r81-help-theme" data-sm-theme-toggle="menu" aria-pressed="false">☾ ダークモード</button></div></details></nav><div class="globalLocaleControls"><span class="globalLocaleLabel">表示言語</span><div class="globalLocaleSwitch"><button type="button" data-global-lang="ja" aria-label="日本語">JA</button><button type="button" data-global-lang="en" aria-label="English">EN</button></div></div>';
     document.body.prepend(bar);
     bar.querySelector('.globalHomeBtn').href=previewUrl(new URL(landingLang()?'/index.html?lang='+current():homePath(),location.href).href);
     bar.querySelector('.globalDiscoverBtn').href=previewUrl(new URL((landingLang()||legalLang()||readingLang())?'/discover.html?lang='+current():(legalLang()?'/discover.html':(location.pathname.startsWith('/app/')?'../discover.html':'discover.html')),location.href).href);
