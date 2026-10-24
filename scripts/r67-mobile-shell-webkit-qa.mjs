@@ -110,7 +110,17 @@ try {
   const homeOverflow=await frame.locator('body').evaluate(()=>{
     const root=document.documentElement;
     return {difference:root.scrollWidth-innerWidth,rootWidth:root.scrollWidth,
-      viewport:innerWidth,offenders:[...document.body.querySelectorAll('*')]
+      viewport:innerWidth,containers:[
+        '.app','.topbar','.titleArea','.titleHeading','.descriptionGroup',
+        '.savedSheetGroup','.topActions','.workspace','.sheetPanel',
+        '.sheetToolbar','.compactTools','.coreActions',
+        '#normalSheetView','.tableWrap','#scoreTable'
+      ].map(sel=>{const el=document.querySelector(sel);if(!el)return {sel,missing:true};
+        const r=el.getBoundingClientRect(),cs=getComputedStyle(el);
+        return {sel,left:Math.round(r.left),right:Math.round(r.right),
+          width:Math.round(r.width),scroll:el.scrollWidth,overflowX:cs.overflowX,
+          minWidth:cs.minWidth,maxWidth:cs.maxWidth}
+      }),offenders:[...document.body.querySelectorAll('*')]
         .filter(el=>{const r=el.getBoundingClientRect();return r.right>innerWidth+2||r.left< -2})
         .slice(0,16).map(el=>{const r=el.getBoundingClientRect();return {
           tag:el.tagName,id:el.id,class:String(el.className).slice(0,70),
