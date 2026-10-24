@@ -21,6 +21,7 @@
 <script type="application/ld+json">{"@context":"https://schema.org","@type":"WebSite","name":"Stats Maker","url":"https://statsmaker.app/","description":"キャラクターの能力値やスポーツ選手のステータスを比較。レーダーチャート・ランキング表・Tier表・評価シートを作成し、PNG保存や共同採点で共有できます。","inLanguage":["en","ja"]}</script>
 <link rel="stylesheet" href="/cloud/global-locale.css?v=r48helpSpacing1">
 <script defer src="/cloud/global-locale.js?v=r47guideNav1"></script>
+<link rel="stylesheet" href="/cloud/r71-showcase.css?v=r71p1">
 <style>
 :root{color-scheme:dark}*{box-sizing:border-box}body{margin:0;background:#07101f;color:#edf4ff;font:16px/1.65 system-ui,-apple-system,BlinkMacSystemFont,sans-serif}a{color:#b8ceff}main,header,footer{width:min(1080px,calc(100% - 38px));margin:auto}header{padding:19px 0;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:10px}header a{font-weight:800;text-decoration:none}header nav{display:flex;gap:14px;font-size:14px}.hero{padding:55px 0 45px}h1{font-size:clamp(29px,5.4vw,55px);line-height:1.15;max-width:850px;margin:12px 0 18px}h2{font-size:clamp(22px,3.6vw,30px);line-height:1.3}.eyebrow{color:#93baff;font-weight:900;font-size:12px;letter-spacing:.13em}.lead{max-width:790px;color:#b6c8df;font-size:18px}.actions{display:flex;flex-wrap:wrap;gap:12px;margin-top:25px}.actions a{border-radius:10px;padding:13px 18px;background:#416ee0;color:white;text-decoration:none;font-weight:850}.actions a.secondary{background:#18314f;border:1px solid #5277a3}section{padding:24px 0}.grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:15px}.grid article{border:1px solid #2b4564;border-radius:14px;background:#102039;padding:16px 20px}h3{font-size:17px;margin:4px 0}p{color:#bac8db}article p{margin-bottom:4px}ol{display:grid;gap:10px;padding-left:24px}details{padding:15px;border-bottom:1px solid #334964}summary{cursor:pointer;font-weight:800}footer{border-top:1px solid #29405c;padding:22px 0 40px;color:#8fa8c8;font-size:13px}@media(max-width:680px){.hero{padding:28px 0 22px}.grid{grid-template-columns:1fr}.lead{font-size:16px}section{padding:16px 0}}
 
@@ -42,6 +43,17 @@
 
 <main>
 <section class="hero"><div class="eyebrow">グラフ・評価メーカー</div><h1>評価や比較を、見せたくなるグラフに。</h1><p class="lead">Stats Makerは、好きなキャラクター・スポーツ選手・映画・ゲームなどを採点し、ランキングやグラフとして共有できるWebツールです。</p><div class="actions"><a href="../index.html?lang=ja">グラフを作成する</a><a class="secondary" href="../discover.html?lang=ja">公開作品を探す</a></div></section>
+<section id="visual-examples" class="r71Showcase" aria-labelledby="visual-examples-heading">
+<h2 id="visual-examples-heading">作れるグラフを、完成画像で見る</h2>
+<p>6つの創作チームを同じ4項目で採点し、<strong>Stats Maker自身で生成したオリジナル画像</strong>を並べました。画像を選ぶと元データや読み方を確認できます。</p>
+<div class="r71ShowcaseRail" aria-label="グラフ作例">
+<a class="r71ShowcaseCard" href="/ja/examples.html#radar"><img src="/ja/example-images/sample-radar.png" width="1080" height="1080" loading="eager" decoding="async" alt="創作チームの能力値を比較するレーダーチャート"><span class="r71CardCopy"><strong>レーダーで強みを比較</strong><small>4つの項目でチームごとの特徴を発見。</small></span></a>
+<a class="r71ShowcaseCard" href="/ja/examples.html#ranking"><img src="/ja/example-images/sample-ranking.png" width="1080" height="1080" loading="lazy" decoding="async" alt="創作した6チームの平均点ランキングカード"><span class="r71CardCopy"><strong>ランキングで順番を確認</strong><small>6チームの平均点と順位を一覧で比較。</small></span></a>
+<a class="r71ShowcaseCard" href="/ja/examples.html#tier"><img src="/ja/example-images/sample-tier.png" width="1080" height="1080" loading="lazy" decoding="async" alt="創作した6チームを得点別に並べたTier表"><span class="r71CardCopy"><strong>Tier表でグループ分け</strong><small>同じ採点結果を段階評価として表示。</small></span></a>
+</div>
+<p class="r71SectionLinks"><a href="/ja/examples.html">採点データつきの3作例を見る →</a> <a href="/index.html?lang=ja">自分のグラフを作成 →</a></p>
+</section>
+<section class="r71Categories" aria-labelledby="r71CategoryHeading"><h2 id="r71CategoryHeading">カテゴリから公開作品を探す</h2><p>実際に公開されている作品をカテゴリで絞り込みます。該当作品がない場合は空の結果を表示します。</p><nav class="r71CategoryRail" aria-label="作品カテゴリ"><a href="/discover.html?lang=ja&category=manga_anime" data-category="manga_anime">アニメ・漫画<span aria-hidden="true">→</span></a><a href="/discover.html?lang=ja&category=game" data-category="game">ゲーム<span aria-hidden="true">→</span></a><a href="/discover.html?lang=ja&category=sports" data-category="sports">スポーツ<span aria-hidden="true">→</span></a><a href="/discover.html?lang=ja&category=movie_tv" data-category="movie_tv">映画・ドラマ<span aria-hidden="true">→</span></a><a href="/discover.html?lang=ja&view=community" data-category="community">みんなで評価<span aria-hidden="true">→</span></a></nav></section>
 <section><h2>レーダーチャート・ランキング・Tier表を作成</h2><div class="grid"><article><h3>ランキングカード・Tier表</h3><p>好きな作品や人物を評価してランキング・Tier表を作れます。</p></article><article><h3>レーダー・棒・ドットグラフ</h3><p>複数の評価項目をわかりやすく比較できます。</p></article><article><h3>散布図・象限・範囲グラフ</h3><p>対象ごとの特徴や傾向、差を視覚化できます。</p></article><article><h3>リングゲージ・ステータスカード</h3><p>評価結果をSNSでシェアしやすい画像にします。</p></article></div></section>
 <section><h2>使い方は簡単</h2><ol><li>比較したい対象と評価項目を入力する。</li><li>点数を付け、好みのグラフ形式を選ぶ。</li><li>画像として保存、または作品を公開・共有する。</li></ol></section>
 <section><h2>好きなものを評価して共有</h2><p>アニメ・漫画のキャラクター評価、スポーツ選手比較、映画ランキング、ゲームTier表などを作れます。Community対応作品ならほかの人も採点に参加できます。</p><p>キャラクターの攻撃・防御・素早さなどの能力値や、スポーツ選手の速度・技術・持久力を同じ評価項目で採点すれば、レーダーチャートで強みを比較し、ランキングカードやTier表にも展開できます。<a href="/ja/chart-guide.html#character-stats">キャラクター能力比較の手順</a>・<a href="/ja/chart-guide.html#player-stats">選手比較の例</a>を紹介しています。</p><div class="actions"><a href="../index.html?lang=ja">グラフを作成する</a></div></section>
@@ -72,15 +84,7 @@
 <p>画像の保存と、後で編集するためのデータ保存・バックアップは別の操作です。再編集したい場合は、ブラウザ内のデータを残し、必要に応じてバックアップも保管してください。第三者の画像や文章を使うときは権利関係を確認しましょう。</p>
 <div class="actions"><a href="../index.html?lang=ja">グラフを作成する</a></div>
 </section>
-<section id="visual-examples" aria-labelledby="visual-examples-heading">
-<h2 id="visual-examples-heading">完成イメージで選べるグラフの作例</h2>
-<p>6つの創作チームを同じ4項目で採点し、レーダー・ランキング・Tier表の3つの画像にしました。<strong>Stats Maker自身の画像出力</strong>で作成した作例とともに、元の点数、平均値、グラフごとの向き・不向きを確認できます。</p>
-<div class="grid">
-<article><a href="/ja/examples.html#radar"><img src="/ja/example-images/sample-radar.png" width="1080" height="1080" loading="lazy" alt="RedチームとBlueチームの4能力を比較したレーダーチャート作例" style="width:100%;height:auto;display:block;border-radius:8px"></a><h3>レーダー：複数の特徴</h3><p>攻撃や守備などの能力差を一目で見る。</p></article>
-<article><a href="/ja/examples.html#ranking"><img src="/ja/example-images/sample-ranking.png" width="1080" height="1080" loading="lazy" alt="6チームの平均点を並べたランキングカードの作例" style="width:100%;height:auto;display:block;border-radius:8px"></a><h3>ランキング：点数と順位</h3><p>平均点で並べ、順位や点差を確認する。</p></article>
-</div>
-<p><a href="/ja/examples.html">3つの作例と採点データ、Tier表まで詳しく見る →</a></p>
-</section>
+
 <section id="detailed-guides" aria-labelledby="detailed-guides-heading"><h2 id="detailed-guides-heading">具体例つきの使い方ガイド</h2><p>グラフの選び方を迷ったら、3チームのサンプルスコアを使った<a href="/ja/chart-guide.html">レーダーチャート・Tier表・ランキング表の作り方</a>へ。完成後の保存先や再編集については<a href="/ja/png-guide.html">PNG画像の保存・共有ガイド</a>で確認できます。</p></section>
 <section><h2>よくある質問</h2><details><summary>どんなものを作れますか？</summary><p>評価シート、レーダーチャート、ランキングカード、Tier表などを作成し、PNG画像で保存できます。</p></details><details><summary>アカウント登録は必要？</summary><p>基本機能は登録なしで使えます。ブラウザのデータを消す場合に備えてバックアップをおすすめします。</p></details><details><summary>結果を共有できますか？</summary><p>はい。PNG画像として保存したり、公開作品のURLを共有したりできます。</p></details><details><summary>みんなで採点できますか？</summary><p>はい。作成者がCommunity参加を許可した公開作品では、ほかの人も評価に参加できます。自分だけの画像を作る場合は公開する必要はありません。</p></details></section>
 </main>

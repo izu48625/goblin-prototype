@@ -1,0 +1,51 @@
+/* R71: real Stats Maker exports provide the landing page color, not decorative hero gradients. */
+.r71Showcase,.r71Categories{min-width:0}
+.r71Showcase h2,.r71Categories h2{margin-bottom:9px}
+.r71Showcase>p,.r71Categories>p{margin-top:0}
+.r71ShowcaseRail{
+  display:flex;gap:13px;overflow-x:auto;overscroll-behavior-inline:contain;
+  scroll-snap-type:x mandatory;scroll-padding-inline:2px;
+  padding:4px 2px 13px;scrollbar-width:thin;scrollbar-color:#486180 transparent
+}
+.r71ShowcaseCard{
+  display:flex;flex:0 0 clamp(220px,30.5%,330px);min-width:0;flex-direction:column;
+  overflow:hidden;border:1px solid #365577;border-radius:15px;
+  background:#102039;color:#e9f2ff;text-decoration:none;
+  scroll-snap-align:start;transition:border-color .15s ease,transform .15s ease
+}
+.r71ShowcaseCard:hover{border-color:#8caafa;transform:translateY(-2px)}
+.r71ShowcaseCard:focus-visible,.r71CategoryRail a:focus-visible{outline:2px solid #b4ccff;outline-offset:3px}
+.r71ShowcaseCard img{display:block;aspect-ratio:1/1;width:100%;height:auto;object-fit:contain;background:#0a1325}
+.r71CardCopy{display:grid;align-content:start;gap:4px;min-height:85px;padding:10px 13px}
+.r71CardCopy strong{font-size:15px;line-height:1.45}
+.r71CardCopy small{font-size:12px;line-height:1.5;color:#b6c9e3}
+.r71SectionLinks{display:flex;gap:9px 21px;flex-wrap:wrap;margin-top:10px}
+.r71SectionLinks a{font-weight:750;font-size:14px}
+.r71CategoryRail{
+  display:flex;gap:9px;overflow-x:auto;padding:3px 2px 12px;
+  scroll-snap-type:x proximity;scrollbar-width:thin;scrollbar-color:#486180 transparent
+}
+.r71CategoryRail a{
+  flex:none;min-height:49px;display:flex;align-items:center;gap:9px;
+  padding:10px 12px;border:1px solid #344e6e;border-radius:12px;
+  background:#102039;text-decoration:none;color:#dfecfc;
+  font-size:13px;font-weight:850;scroll-snap-align:start
+}
+.r71CategoryRail a:hover{background:#19314d;border-color:#80a5d4}
+.r71CategoryRail a::before{content:"";height:10px;width:10px;flex:none;border-radius:3px;background:#7fa7ef}
+.r71CategoryRail a[data-category="manga_anime"]::before{background:#b585f0}
+.r71CategoryRail a[data-category="game"]::before{background:#7299fc}
+.r71CategoryRail a[data-category="sports"]::before{background:#62caa8}
+.r71CategoryRail a[data-category="movie_tv"]::before{background:#ea9d73}
+.r71CategoryRail a[data-category="community"]::before{background:#67d6a2}
+.r71CategoryRail a span{color:#91accc}
+@media(max-width:680px){
+  .hero{padding-top:22px;padding-bottom:19px}
+  .r71ShowcaseRail{gap:10px;margin-right:-19px;padding-right:19px}
+  .r71ShowcaseCard{flex-basis:min(72vw,275px)}
+  .r71CardCopy{min-height:74px;padding:9px 11px}
+  .r71CardCopy strong{font-size:14px}
+  .r71CardCopy small{font-size:11px}
+  .r71CategoryRail{margin-right:-19px;padding-right:19px}
+}
+@media(prefers-reduced-motion:reduce){.r71ShowcaseCard{transition:none}}

@@ -211,3 +211,61 @@ button,input{font:inherit}
 
 /* R35 P2: Legal links wrap without pushing mobile navigation. */
 .footer{flex-wrap:wrap}
+
+
+/* R71: reveal truthful Public score previews without new OG-image/DB requests.
+   Each card uses the already validated Public snapshot loaded for the current page. */
+.workMainLink .workVisual{
+  min-height:157px;margin:10px 0 0;padding:13px 14px;
+  border-color:#3c5478;border-radius:11px;
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.045);
+}
+.workMainLink .visualTop{font-size:9px;color:#99b4d5}
+.workMainLink .visualRows{margin-top:13px;gap:11px}
+.workMainLink .visualRow{grid-template-columns:24px minmax(0,1fr) 40px;gap:8px}
+.workMainLink .visualRank{width:24px;height:24px;font-size:10px;color:#d9e8ff}
+.workMainLink .visualName{font-size:11px;color:#f0f5ff}
+.workMainLink .visualTrack{height:7px;margin-top:5px}
+.workMainLink .visualValue{font-size:12px;color:#e0ebff}
+.workMainLink .visualRow:nth-child(2) .visualTrack i{background:linear-gradient(90deg,#8d71dd,#bd98ec)}
+.workMainLink .visualRow:nth-child(3) .visualTrack i{background:linear-gradient(90deg,#49bda0,#8be0c1)}
+.workMainLink .emptyVisual{min-height:157px}
+.workMainLink .emptyVisual b{font-size:12px}
+.workMainLink:focus-visible{outline:2px solid #a7c4ff;outline-offset:3px;border-radius:9px}
+.categoryRail{scroll-snap-type:x proximity;scroll-padding-inline:2px}
+.categoryBtn{scroll-snap-align:start;display:inline-flex;align-items:center;gap:7px}
+.categoryBtn:not([data-category="all"])::before{
+  content:"";height:8px;width:8px;border-radius:2px;background:#7798ca
+}
+.categoryBtn[data-category="sports"]::before{background:#55c5aa}
+.categoryBtn[data-category="manga_anime"]::before{background:#b587ec}
+.categoryBtn[data-category="movie_tv"]::before{background:#e6a075}
+.categoryBtn[data-category="game"]::before{background:#7c9aff}
+.categoryBtn[data-category="food"]::before{background:#debb69}
+.categoryBtn[data-category="music"]::before{background:#de88b8}
+.categoryBtn[data-category="books"]::before{background:#b39777}
+.categoryBtn[data-category="travel"]::before{background:#78b8dc}
+.categoryBtn[data-category="tech"]::before{background:#79cbd1}
+.categoryBtn[data-category="lifestyle"]::before{background:#8bc38e}
+.categoryBtn:focus-visible,.browseTab:focus-visible,.sortBtn:focus-visible{outline:2px solid #b2cbff;outline-offset:2px}
+@media(max-width:520px){
+  .workTitle{-webkit-line-clamp:2;font-size:14px;line-height:1.35}
+  .workMainLink .workVisual{min-height:142px;margin-top:8px;padding:11px}
+  .workMainLink .visualRows{gap:9px;margin-top:10px}
+  .workMainLink .visualName{font-size:10px}
+  .workMainLink .visualRow{grid-template-columns:18px minmax(0,1fr) 30px;gap:5px}
+  .workMainLink .visualRank{width:18px;height:20px;font-size:9px}
+  .workMainLink .visualValue{font-size:11px}
+}
+@media(min-width:370px) and (max-width:520px){
+  .discoverGrid{grid-template-columns:repeat(2,minmax(0,1fr))}
+  .workCard{padding:9px 8px}
+  .workMainLink .workVisual{min-height:139px;padding:10px 7px}
+  .workMainLink .visualTop{font-size:7px}
+  .workMainLink .visualRows{gap:9px}
+  .workMainLink .visualName{font-size:9px}
+  .workMainLink .visualValue{font-size:10px}
+  .workTitle{font-size:13px}
+  .workDesc{font-size:9px}
+  .compactFoot{gap:4px}
+}
