@@ -18,8 +18,11 @@ export async function clickBasic(frame,id){
 }
 export async function openVisuals(page){
  const original=page.locator('#extLauncher');
- if(await original.isVisible())return original.click();
- return page.frameLocator('#basicFrame').locator('#r80VisualsBtn').click();
+ if(await original.isVisible())await original.click();
+ else await page.frameLocator('#basicFrame').locator('#r80VisualsBtn').click();
+ // The responsive shortcut uses cross-window postMessage, not a synchronous
+ // in-document click. Wait for the real popup before testing its operations.
+ await page.locator('#extSheet').waitFor({state:'visible',timeout:10000});
 }
 export async function focusSearch(frame){
  const search=frame.locator('#searchInput');
