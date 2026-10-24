@@ -18,7 +18,7 @@ for(const engine of [chromium,webkit]){
   const errors=[];page.on('pageerror',e=>errors.push(e.message));
   assert.equal((await page.goto(BASE+'/index.html?lang=ja',{waitUntil:'load'})).status(),200);
   const f=page.frameLocator('#basicFrame');
-  await f.locator('#scoreTable tbody tr:first-child td.scoreCell').waitFor({state:'visible'});
+  await f.locator('#scoreTable tbody tr:first-child td.scoreCell').first().waitFor({state:'visible'});
   const style=async()=>f.locator('body').evaluate(()=>{
     const get=s=>{const el=document.querySelector(s);if(!el)throw Error('missing selector '+s);
       const c=getComputedStyle(el);return {background:c.backgroundColor,color:c.color,placeholder:c.getPropertyValue('--score-tile-overlay')}};
