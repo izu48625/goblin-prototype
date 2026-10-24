@@ -1,120 +1,105 @@
-/* R78 — make the editable sheet header shorter on iPhone.
-   Does not hide, remove, collapse or reorder any user data/actions.
-   On narrow viewports, the optional description and saved-sheet selector
-   share the second line; the title keeps full width and prominence.
-   This stylesheet intentionally does not touch the score table/heat tiles. */
-@media (max-width:760px){
+/* R78 — clear and compact score-sheet header with an explicit 3-field
+   layout. Native inputs and handlers remain unchanged, as do scoring,
+   local saves, sheet menu, heat tints and exports. */
+.topbar .titleArea{
+  display:grid;
+  grid-template-columns:minmax(0,1fr) minmax(150px,240px);
+  grid-template-rows:auto auto;
+  column-gap:9px;
+  row-gap:5px;
+  align-items:end;
+  min-width:0;
+}
+.topbar .titleArea>.titleHeading{
+  grid-column:1;grid-row:1;min-width:0;
+}
+.topbar .titleArea>.descriptionGroup{
+  grid-column:1;grid-row:2;min-width:0;
+}
+.topbar .titleArea>.savedSheetGroup{
+  grid-column:2;grid-row:1/3;min-width:0;align-self:end;
+}
+.topbar .titleArea .descInput{margin-top:0}
+@media(max-width:760px){
   .topbar.panel{
     padding:5px 7px 8px;
     gap:6px;
     margin-bottom:0;
   }
   .topbar .titleArea{
-    display:grid;
     grid-template-columns:minmax(0,1fr) minmax(136px,44%);
-    grid-template-rows:auto auto auto;
+    grid-template-rows:auto auto;
     column-gap:8px;
-    row-gap:4px;
-    align-items:end;
+    row-gap:5px;
     min-width:0;
   }
-  /* The former first wrapper need not consume its own layout row.
-     The label/title/description remain the original native inputs. */
-  .topbar .titleArea>div:first-child{
-    display:contents;
+  .topbar .titleArea>.titleHeading{
+    grid-column:1/-1;grid-row:1;
+    min-width:0;
   }
-  .topbar .titleArea>div:first-child>.fieldLabel{
-    grid-column:1 / -1;
-    grid-row:1;
-    margin:0;
-    align-self:center;
+  .topbar .titleArea>.descriptionGroup{
+    grid-column:1;grid-row:2;
+    min-width:0;align-self:end;
+  }
+  .topbar .titleArea>.savedSheetGroup{
+    grid-column:2;grid-row:2;
+    min-width:0;align-self:end;
+  }
+  .topbar .titleHeading>.fieldLabel{
+    margin:0 0 4px;
+    font-size:10px;
     line-height:1.2;
     color:#596368;
-    font-size:10px;
   }
-  .topbar .titleArea>#titleInput,
-  .topbar .titleArea>div:first-child>#titleInput{
-    grid-column:1 / -1;
-    grid-row:2;
-    min-width:0;
-    width:100%;
-    height:42px;
-    min-height:42px;
+  .topbar .titleHeading>#titleInput{
+    display:block;width:100%;min-width:0;
+    height:42px;min-height:42px;
     padding:0 10px;
-    font-size:16px; /* iOS Safari: do not zoom when focusing */
+    font-size:16px;
     line-height:1.2;
   }
-  .topbar .titleArea>div:first-child>#descInput{
-    grid-column:1;
-    grid-row:3;
-    min-width:0;
-    width:100%;
-    height:42px;
-    min-height:42px;
-    margin:0;
-    padding:0 10px;
-    font-size:16px; /* iOS Safari: do not zoom when focusing */
-    color:#343d42;
-    background:#fff;
+  .topbar .descriptionGroup>#descInput{
+    display:block;width:100%;min-width:0;
+    height:42px;min-height:42px;
+    margin:0;padding:0 10px;
+    font-size:16px;
+    background:#fff;color:#343d42;
   }
-  .topbar .titleArea>div:last-child{
-    grid-column:2;
-    grid-row:3;
-    min-width:0;
-    align-self:end;
-  }
-  .topbar .titleArea .savedSheetHead{
+  .topbar .savedSheetGroup .savedSheetHead{
     margin:0 0 3px;
     min-height:0;
   }
-  .topbar .titleArea .savedSheetHead .fieldLabel{
+  .topbar .savedSheetGroup .savedSheetHead .fieldLabel{
     margin:0;
-    color:#596368;
     font-size:10px;
     line-height:1.2;
+    color:#596368;
   }
-  .topbar .titleArea #sheetSelect{
-    width:100%;
-    min-width:0;
-    height:42px;
-    min-height:42px;
+  .topbar .savedSheetGroup #sheetSelect{
+    width:100%;min-width:0;
+    height:42px;min-height:42px;
     padding:0 21px 0 9px;
-    font-size:16px; /* iOS focus behavior / touch access */
-    background:#fff;
-    color:#292f33;
+    font-size:16px;
+    background:#fff;color:#292f33;
     text-overflow:ellipsis;
   }
   .topbar .topActions{
-    gap:6px;
-    align-items:stretch;
-    width:100%;
+    gap:6px;align-items:stretch;width:100%;
   }
   .topbar .topActions>.btn{
-    min-height:44px;
-    height:44px;
+    min-height:44px;height:44px;
     border-radius:6px;
   }
-  /* Preserve the "•••" popup anchored to the action row. */
-  .topbar .topActions .mobileHeaderMoreMenu{
-    top:48px;
-  }
-  /* The editor workspace follows directly after the header, without
-     the extra section gap that previously read as a third card. */
-  .app .workspace{
-    gap:8px;
-  }
+  .topbar .topActions .mobileHeaderMoreMenu{top:48px}
+  .app .workspace{gap:8px}
 }
-/* At narrow 320px, both small controls still receive usable width.
-   Do not hide the description or move the saved selector into a menu. */
 @media(max-width:360px){
   .topbar .titleArea{
     grid-template-columns:minmax(0,1fr) minmax(130px,43%);
     column-gap:6px;
   }
-  .topbar .titleArea>div:first-child>#descInput{
-    padding-left:8px;
-    padding-right:6px;
+  .topbar .descriptionGroup>#descInput{
+    padding-left:8px;padding-right:6px;
   }
-  .topbar .titleArea #sheetSelect{padding-left:7px}
+  .topbar .savedSheetGroup #sheetSelect{padding-left:7px}
 }
-/* Full-width desktop and tablet widths keep their established layout. */
