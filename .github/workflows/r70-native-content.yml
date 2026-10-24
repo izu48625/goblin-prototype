@@ -12,7 +12,7 @@ on:
       - '.github/workflows/r70-native-content.yml'
   workflow_dispatch:
 permissions:
-  contents: write
+  contents: read
 jobs:
   examples-and-readiness:
     if: github.event_name == 'workflow_dispatch' || (github.event.pull_request.head.repo.full_name == github.repository && github.head_ref == 'r70-adsense-content-examples-20261024')
@@ -20,9 +20,6 @@ jobs:
     timeout-minutes: 25
     steps:
       - uses: actions/checkout@v4
-        with:
-          ref: r70-adsense-content-examples-20261024
-          persist-credentials: true
       - uses: actions/setup-node@v4
         with:
           node-version: '22'
@@ -52,14 +49,3 @@ jobs:
           node scripts/r70-showcase-browser-qa.mjs
           node scripts/r47-seo-guides-qa.mjs
           node scripts/r34-seo-edge-test.mjs
-      - name: Commit generated real PNGs to this PR branch only
-        run: |
-          git add ja/example-images/sample-radar.png ja/example-images/sample-ranking.png ja/example-images/sample-tier.png
-          if git diff --cached --quiet; then
-            echo 'R70: PNGs already reproducible and committed'
-          else
-            git config user.name 'github-actions[bot]'
-            git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
-            git commit -m 'R70: add native generated original Stats Maker PNG examples'
-            git push origin HEAD:r70-adsense-content-examples-20261024
-          fi
