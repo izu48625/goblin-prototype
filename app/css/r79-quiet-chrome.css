@@ -1,0 +1,66 @@
+/* R79: final legibility and quiet selection for extended editor CHROME only.
+   NEVER apply these rules to #previewRoot/.visual or exported templates. */
+body.editor-body .source-quick-bar{
+  background:#faf9f6;border-bottom:1px solid #e1ddd6;color:#303b40
+}
+body.editor-body .source-quick-lead{border-right:1px solid #d6d2ca}
+body.editor-body .source-quick-lead b,
+body.editor-body .source-quick-select>span{
+  color:#535f65!important
+}
+body.editor-body .source-quick-lead span{
+  color:#303b40!important;font-weight:850
+}
+body.editor-body .source-quick-select select{
+  background:#fff;color:#2e373c;border:1px solid #d6d3cc
+}
+body.editor-body .source-quick-chip{
+  background:#fff;color:#515c60;border:1px solid #dedbd4
+}
+body.editor-body .source-quick-chip.active{
+  background:#e5ebe5;color:#315d4c;border-color:#c6d7cb
+}
+body.editor-body .panel-tab.active,
+body.editor-body .mobile-tab.active{
+  background:#f2f0eb;color:#30383b;
+  border-bottom-color:#af6c54
+}
+body.editor-body .panel-tab:not(.active),
+body.editor-body .mobile-tab:not(.active){color:#626c70}
+body.editor-body .seg-btn.active,
+body.editor-body .topn-btn.active{
+  background:#eae7e0;color:#28353a;border-color:#d7d2c8
+}
+body.editor-body .source-check,
+body.editor-body .source-highlight-row,
+body.editor-body .tier-manual-row,
+body.editor-body .weight-row{
+  color:#354044;background:#fff;border-color:#e1ded8
+}
+body.editor-body .source-check:has(input:checked),
+body.editor-body .source-highlight-row:has(input[type="checkbox"]:checked){
+  color:#315d4c;background:#edf4ee;border-color:#bcd4c4
+}
+body.editor-body .source-picker-count,
+body.editor-body .source-picker-help,
+body.editor-body .source-highlight-name{color:#525f64}
+body.editor-body .source-info-card,
+body.editor-body .export-preview-card{
+  background:#fff;color:#303b40;border-color:#d9d6d0
+}
+body.editor-body .export-preview-head b,
+body.editor-body .export-preview-head span{
+  color:#303b40
+}
+body.editor-body .export-preview-head button{
+  background:#fff;color:#323c42;border:1px solid #d9d6d0
+}
+body.editor-body .export-preview-image-wrap{
+  background:#f5f3ef;border-color:#d9d6d0
+}
+body.editor-body .export-preview-modal{
+  background:rgba(31,36,38,.4)
+}
+body.editor-body :is(.panel-tab,.mobile-tab,.seg-btn,.source-quick-chip):focus-visible{
+  outline:3px solid #b77c69;outline-offset:2px
+}
