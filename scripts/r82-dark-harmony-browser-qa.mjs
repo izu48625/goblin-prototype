@@ -41,7 +41,14 @@ for(const engine of [chromium,webkit]){
   await f.locator('#r81ThemeBtn').click();
   await f.locator('html[data-sm-theme="dark"]').waitFor();
   await f.locator('link[data-sm-theme-harmony]').waitFor({state:'attached'});
-  await f.locator('body').evaluate(()=>document.fonts?.ready);
+  await f.locator('body').evaluate(async()=>{
+    for(let n=0;n<60;n++){
+      const link=document.querySelector('link[data-sm-theme-harmony]');
+      if(link?.sheet?.cssRules?.length)break;
+      await new Promise(r=>setTimeout(r,50));
+    }
+    await new Promise(r=>requestAnimationFrame(()=>requestAnimationFrame(r)));
+  });
   const dark=await style();
   const surfaces=['head','fixed','sortRow','thumb','row','empty','titleInput'];
   for(const key of surfaces){
