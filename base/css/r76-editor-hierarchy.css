@@ -14,7 +14,7 @@ html,body{background:var(--r76-canvas)}
 
 /* Turn the two large bordered rectangles into quietly separated regions. */
 .topbar.panel{
-  background:transparent;
+  background:var(--r76-canvas);
   border:0;
   border-radius:0;
   box-shadow:none;
