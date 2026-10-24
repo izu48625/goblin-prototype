@@ -1,4 +1,4 @@
-import {openVisuals} from './r80-qa-click.mjs';
+import {openVisuals,clickBasic} from './r80-qa-click.mjs';
 import assert from 'node:assert/strict';
 import {readFile} from 'node:fs/promises';
 import {chromium} from 'playwright';
@@ -101,7 +101,7 @@ try{
   // browser navigation the tray may already be expanded: never click to
   // inadvertently close it before attempting Restore.
   const tray=home.locator('#utilityBar');
-  if(!(await tray.isVisible()))await home.locator('#moreToolsBtn').click();
+  if(!(await tray.isVisible()))await clickBasic(home,'moreToolsBtn');
   await tray.waitFor({state:'visible',timeout:15000});
   const restore=home.locator('#importJsonBtn');
   // Do not fail on an instantaneous isVisible() read while Safari/Chromium
