@@ -1,3 +1,4 @@
+import {openVisuals} from './r80-qa-click.mjs';
 import assert from 'node:assert/strict';
 import {chromium,webkit} from 'playwright';
 const BASE='http://127.0.0.1:4173';
@@ -75,7 +76,7 @@ for(const engine of [chromium,webkit]){
     assert(await frame.locator('#mobileHeaderMoreMenu').isVisible(),'Header popup broken');
     await frame.locator('#mobileHeaderMoreBtn').click();
    }
-   await page.locator('#extLauncher').click();
+   await openVisuals(page);
    assert(await page.locator('#extSheet').isVisible(),'Visual tools launcher broken');
    await page.locator('#extClose').click();
    console.log('R78 '+engine.name()+' '+width+'px native input, no overlap, controls PASS');
