@@ -45,7 +45,7 @@ for(const engine of [chromium,webkit]){
    assert(styles.outer.borderL==='0px','Outer title card still boxed '+JSON.stringify(styles.outer));
    assert(styles.sheet.borderL==='0px','Outer sheet card still boxed '+JSON.stringify(styles.sheet));
    assert(luminosity(styles.sort.bg)>.8,'Sort strip remains dark '+JSON.stringify(styles.sort));
-   assert(contrast(styles.sort.bg,styles.arrow.fg)>=4.5,'Sort arrows illegible '+JSON.stringify(styles.arrow));
+   assert(contrast(styles.sort.bg,styles.arrow.fg)>=4.5,'Sort arrows illegible on inherited light strip '+JSON.stringify({strip:styles.sort,arrow:styles.arrow}));
    assert(contrast(styles.sort.bg,styles.label.fg)>=4.5,'Metric title illegible '+JSON.stringify(styles.label));
    assert(luminosity(styles.table.bg)>.9,'Blank scoring cell darkened');
    assert(styles.overflow<=2,'Document viewport overflow '+width+' '+JSON.stringify(styles));
