@@ -1,0 +1,40 @@
+/* R76: make the bottom launcher a secondary but easy-to-tap action.
+   Visual declutter only: leave the original fixed position, iframe viewport
+   reservation, bottom-sheet behavior, click handlers and iOS safe area intact. */
+#extLauncher{
+  border:1px solid #b4543e;
+  min-height:54px;
+  height:54px;
+  border-radius:7px;
+  padding:8px 14px;
+  gap:10px;
+  box-shadow:0 2px 9px rgba(89,57,43,.13);
+}
+#extLauncher .launchIcon{
+  width:33px;height:33px;font-size:23px;
+  border-radius:5px;
+}
+#extLauncher .launchTitle{
+  font-size:14px;
+  letter-spacing:0;
+}
+#extLauncher .launchSub{
+  font-size:10px;color:#fff6f1
+}
+#extLauncher:hover{box-shadow:0 3px 11px rgba(89,57,43,.2)}
+@media(max-width:600px){
+  /* Original #basicRoot reserves 56px; a 48px launcher stays within it. */
+  #extLauncher{
+    right:10px;left:10px;
+    min-height:48px;height:48px;
+    bottom:calc(7px + env(safe-area-inset-bottom));
+    padding:5px 11px;
+    border-radius:7px;
+    box-shadow:0 2px 8px rgba(89,57,43,.14);
+  }
+  #extLauncher .launchIcon{
+    left:12px;width:29px;height:29px;
+    border-radius:5px;font-size:19px
+  }
+  #extLauncher .launchTitle{font-size:13px}
+}
