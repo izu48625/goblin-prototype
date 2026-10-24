@@ -1,0 +1,44 @@
+name: R71 Visual Showcase and Discover Safety QA
+on:
+  pull_request:
+    paths:
+      - 'ja/index.html'
+      - 'en/index.html'
+      - 'discover.html'
+      - 'cloud/discover.js'
+      - 'cloud/discover.css'
+      - 'cloud/r71-showcase.css'
+      - 'scripts/r71-*.mjs'
+      - '.github/workflows/r71-visual-qa.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  visual-and-privacy:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - run: |
+          node --check cloud/discover.js
+          node scripts/r71-visual-static-qa.mjs
+          node scripts/r39-discover-pagination-qa.mjs
+          node scripts/r43-discover-gateway-qa.mjs
+          npm run build:cloudflare
+      - name: Install local browsers
+        run: |
+          npm install --no-save playwright@1.56.1
+          npx playwright install --with-deps chromium webkit
+      - name: Start localhost-only bundle server
+        run: |
+          python3 -m http.server 4173 --bind 127.0.0.1 --directory dist >/tmp/r71-http.log 2>&1 &
+          for i in $(seq 1 30); do
+            if curl -fsS http://127.0.0.1:4173/ja/ >/dev/null; then exit 0; fi
+            sleep 1
+          done
+          exit 1
+      - name: Check WebKit and Chromium in 320, 390 and 1180px
+        run: node scripts/r71-visual-browser-qa.mjs
