@@ -8,7 +8,7 @@ for(const id of ['titleInput','descInput','sheetSelect','publishBtn','newSheetBt
  'mobileHeaderMoreBtn','mobileHeaderMoreMenu','scoreTable','addRowBtn','scoreColorToggleBtn']){
  assert(html.includes('id="'+id+'"'),'Existing control missing '+id);
 }
-assert(css.includes('@media (max-width:760px)'));
+assert(/@media\\s*\\(max-width:\\s*760px\\)/.test(css));
 assert(css.includes('>.titleHeading')&&css.includes('>.descriptionGroup')&&css.includes('>.savedSheetGroup'));
 assert(html.includes('class="titleHeading"')&&html.includes('class="descriptionGroup"')&&html.includes('class="savedSheetGroup"'));
 assert(!css.includes('display:contents'));
