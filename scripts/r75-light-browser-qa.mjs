@@ -1,3 +1,4 @@
+import {clickBasic,openVisuals} from './r80-qa-click.mjs';
 import assert from 'node:assert/strict';
 import {chromium,webkit} from 'playwright';
 const BASE='http://127.0.0.1:4173';
@@ -63,14 +64,14 @@ for(const engine of [chromium,webkit]){
    assert.equal(tile.layer,'none','No glossy texture in grade tint');
    const toggle=frame.locator('#scoreColorToggleBtn');
    assert.equal(await toggle.getAttribute('aria-pressed'),'true');
-   await toggle.click();
+   await clickBasic(frame,'scoreColorToggleBtn');
    await page.waitForTimeout(240);
    const off=await frame.locator('#scoreTable tbody tr:first-child td.scoreCell').first().evaluate(el=>getComputedStyle(el).backgroundColor);
    assert.equal(off,'rgb(255, 255, 255)','OFF must be white');
    await toggle.click();
    assert.equal(await toggle.getAttribute('aria-pressed'),'true');
    // New bottom sheet also uses paper, not the former dark backdrop.
-   await page.locator('#extLauncher').click();
+   await openVisuals(page);
    const ext=await page.locator('#extSheet').evaluate(el=>({bg:getComputedStyle(el).backgroundColor,fg:getComputedStyle(el).color}));
    assert(luminosity(ext.bg)>.8&&contrast(ext.bg,ext.fg)>=4.5,'Extension picker should be light');
    await page.locator('#extClose').click();

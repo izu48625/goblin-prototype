@@ -1,0 +1,125 @@
+/* R81: mobile scoring interface, with direct primary commands.
+   Scoring, exports, native graphic templates and local persistence untouched. */
+.r81-theme-btn{width:42px;min-width:42px;min-height:42px;font-size:21px;line-height:1;padding:0;display:grid;place-items:center}
+.r81-options-head{display:none}
+.r81-search-close{display:none}
+@media(max-width:760px){
+  .topbar.panel{position:relative;padding-top:5px;padding-bottom:4px!important}
+  .topbar .titleHeading>.fieldLabel{
+    min-height:44px;padding-right:0;display:flex;align-items:center;
+    font-size:10px
+  }
+  .topbar .topActions{
+    position:absolute!important;top:5px!important;right:7px!important;
+    display:flex!important;flex-wrap:nowrap!important;align-items:center;
+    width:auto!important;gap:4px!important;z-index:35
+  }
+  .topbar .topActions :is(#publishBtn,#newSheetBtn){
+    display:flex!important;justify-content:center;align-items:center;
+    flex:0 0 auto!important;width:auto!important;min-width:65px;
+    min-height:42px!important;height:42px!important;padding:0 8px!important;
+    color:#fff;font-size:11px!important;line-height:1!important;
+    border-radius:6px!important;white-space:nowrap
+  }
+  .topbar .topActions #publishBtn{background:#33725d!important;border-color:#33725d!important}
+  .topbar .topActions #newSheetBtn{background:#ab513c!important;border-color:#ab513c!important}
+  .topbar .topActions #editorHomeBtn{display:none!important}
+  .topbar .topActions #r81ThemeBtn,
+  .topbar .topActions #mobileHeaderMoreBtn{
+    display:flex!important;justify-content:center;align-items:center;
+    flex:0 0 39px!important;min-width:39px!important;width:39px!important;
+    min-height:42px!important;height:42px!important;padding:0!important;
+    border:1px solid #d3cfc8!important;border-radius:6px!important;
+    background:#fff!important;color:#3d464a!important
+  }
+  .topbar .topActions #r81ThemeBtn{font-size:22px!important;font-weight:500}
+  .topbar .topActions #mobileHeaderMoreBtn{font-size:22px!important;letter-spacing:normal!important}
+  .topbar .topActions #mobileHeaderMoreMenu{
+    top:48px!important;right:0!important;width:155px;z-index:100
+  }
+  /* Fix the old flex layout that squeezed settings into a 100px sidebar. */
+  .sheetPanel .sheetToolbar{
+    display:block!important;width:100%;padding:7px 8px!important;
+    position:relative
+  }
+  .sheetPanel .sheetToolbar .toolLeft.compactTools{
+    width:100%;display:grid!important;grid-template-columns:minmax(0,1fr);gap:5px
+  }
+  .sheetPanel .r80-options-panel:not(.hidden){
+    position:static!important;display:grid!important;
+    clear:both;grid-template-columns:minmax(0,1fr)!important;
+    width:100%!important;min-width:0!important;max-width:none!important;
+    margin:8px 0 2px;padding:6px 10px 8px;
+    gap:0;border:1px solid #e0dcd4;border-radius:7px;
+    background:#fbfaf7;color:#303a3e
+  }
+  .sheetPanel .r80-options-panel.hidden{display:none!important}
+  .sheetPanel .r81-options-head{
+    display:flex;justify-content:space-between;align-items:center;
+    min-height:43px;border-bottom:1px solid #e6e2da;padding:0 2px 5px
+  }
+  .r81-options-head strong{font-size:13px;color:#30383d}
+  .r81-options-head #r81OptionsClose{
+    width:auto;min-height:37px;padding:0 8px;background:transparent;
+    color:#656d71;border:0;font-size:12px;white-space:nowrap
+  }
+  .sheetPanel .r80-options-panel>button:not(#r81OptionsClose){
+    display:grid!important;grid-template-columns:minmax(0,1fr) minmax(84px,auto)!important;
+    justify-content:normal;align-items:center;gap:12px;
+    width:100%!important;min-width:0;min-height:51px!important;
+    padding:7px 4px!important;background:transparent;border:0;
+    border-bottom:1px solid #ece9e3;border-radius:0;
+    white-space:normal;text-align:left;line-height:1.45;
+    font-size:13px!important;color:#343d40
+  }
+  .sheetPanel .r80-options-panel>button:last-child{border-bottom:0}
+  .r81-option-title{min-width:0;font-weight:850;font-size:13px;color:inherit}
+  .r81-option-value{
+    min-width:0;font-size:11px;text-align:right;
+    font-weight:700;color:#626c70;white-space:normal
+  }
+  #r81ColorStatus[aria-label="OFF"]{color:#717b7b}
+  .sheetPanel .coreActions{
+    display:grid!important;grid-template-columns:1.05fr .86fr .7fr .92fr;
+    overflow:visible!important;width:100%;gap:5px;padding:0
+  }
+  .sheetPanel .coreActions :is(#addRowBtn,#addColBtn,#r80OptionsBtn,#r80VisualsBtn){
+    display:flex!important;justify-content:center;align-items:center;
+    width:100%!important;min-width:0!important;max-width:none!important;
+    height:43px!important;min-height:43px!important;
+    padding:0 2px!important;font-size:11px!important;border-radius:6px
+  }
+  .sheetPanel .coreActions #r80SearchBtn{display:none!important}
+  .sheetPanel .filterBar.r80-search-open{
+    display:grid!important;grid-template-columns:minmax(0,1fr) auto!important;gap:7px
+  }
+  .sheetPanel .filterBar .r81-search-close{
+    display:inline-flex;align-items:center;justify-content:center;
+    min-height:42px;min-width:66px;background:#f2f0ec;color:#465054;
+    border:1px solid #ddd9d1;border-radius:6px;font-size:12px
+  }
+  .sheetPanel .filterBar:not(.r80-search-open){display:none!important}
+  .sheetPanel .filterBar #searchInput{width:100%;min-width:0;font-size:16px}
+  .sheetPanel #scoreSettingsPanel{
+    display:flex;flex-wrap:wrap;width:calc(100% - 16px);
+    background:#f8f7f3;color:#354044
+  }
+  .sheetPanel #scoreSettingsPanel.hidden{display:none!important}
+  .sheetPanel #utilityBar{background:#f8f7f3;color:#354044}
+  .topbar :is(#publishBtn,#newSheetBtn,#r81ThemeBtn,#mobileHeaderMoreBtn):focus-visible,
+  .sheetPanel :is(#r80OptionsBtn,#r80VisualsBtn,#r81OptionsClose,#r81SearchClose):focus-visible{
+    outline:3px solid #a56955;outline-offset:2px
+  }
+}
+@media(max-width:360px){
+  .topbar .topActions{gap:3px!important}
+  .topbar .topActions :is(#publishBtn,#newSheetBtn){
+    min-width:60px;padding:0 5px!important;font-size:10px!important
+  }
+  .topbar .topActions :is(#r81ThemeBtn,#mobileHeaderMoreBtn){
+    min-width:36px!important;width:36px!important;flex-basis:36px!important
+  }
+  .sheetPanel .coreActions :is(#addRowBtn,#addColBtn,#r80OptionsBtn,#r80VisualsBtn){
+    font-size:10px!important
+  }
+}

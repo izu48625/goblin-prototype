@@ -69,7 +69,7 @@ for(const engine of [chromium,webkit]){
    await frame.locator('#sheetViewBtn').click();
    assert(await frame.locator('#normalSheetView').isVisible(),'Return to sheet');
    await openVisuals(page);
-   assert(await page.locator('#extSheet').isVisible(),'Extension sheet still opens');
+   await page.locator('#extSheet').waitFor({state:'visible'});
    await page.locator('#extClose').click();
    assert(!await page.locator('#extSheet').isVisible(),'Extension sheet still closes');
    console.log('R76 '+engine.name()+' '+width+'px border hierarchy, sorting, controls, extension PASS');

@@ -7,13 +7,13 @@ const css=await read('base/css/r80-scoring-first.css'),hostCss=await read('cloud
 assert(html.includes('r80-scoring-first.css?v=r80p1'));
 assert(html.includes('r80-scoring-first.js?v=r80p1'));
 assert(host.includes('r80-no-sticky-launcher.css?v=r80p1'));
-for(const id of ['mobileHeaderMoreBtn','r80PublishAction','r80NewAction',
- 'newSheetBtn','publishBtn','r80SearchBtn','r80OptionsBtn','r80VisualsBtn',
+for(const id of ['mobileHeaderMoreBtn','r81ThemeBtn','r81OptionsClose',
+ 'newSheetBtn','publishBtn','r81SearchAction','r80OptionsBtn','r80VisualsBtn',
  'r80ScaleAction','r80ColorAction','r80MoreAction','scoreSettingsBtn',
  'scoreColorToggleBtn','moreToolsBtn','searchInput','scoreTable']){
   assert(html.includes('id="'+id+'"'),'Missing control '+id);
 }
-assert(js.includes("$('publishBtn')?.click()")&&js.includes("$('newSheetBtn')?.click()"));
+assert(js.includes("$('scoreSettingsBtn')?.click()")&&js.includes("$('moreToolsBtn')?.click()"));
 assert(js.includes("window.parent.postMessage({type:'statsmaker:open-extensions'},location.origin)"));
 const launcher=await read('app/src/launcher.js');
 assert(launcher.includes('event.origin!==location.origin||event.source!==frame.contentWindow'),

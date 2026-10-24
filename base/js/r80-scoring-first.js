@@ -1,76 +1,82 @@
-/* R80 — mobile-only scoring-first progressive disclosure.
- * All existing actions remain in app.js; call their established click handlers.
- * No saves, sorting, score colors, grades or visibility privacy logic here. */
+/* R81: scoring-first menus without hiding essential actions. Original actions
+ * are called through app.js and continue to persist/grade as before. */
 (()=>{
   'use strict';
   const $=id=>document.getElementById(id);
-  const actionBtn=$('mobileHeaderMoreBtn'), actionMenu=$('mobileHeaderMoreMenu');
-  const searchBtn=$('r80SearchBtn'),searchBar=$('filterBar');
-  const optionsBtn=$('r80OptionsBtn'),optionsPanel=$('r80OptionsPanel');
-  const lang=()=>window.SM_I18N?.getLanguage?.()||document.documentElement.lang||'ja';
-  const isEnglish=()=>String(lang()).toLowerCase().startsWith('en');
+  const menuBtn=$('mobileHeaderMoreBtn'),menu=$('mobileHeaderMoreMenu');
+  const optionsBtn=$('r80OptionsBtn'),options=$('r80OptionsPanel');
+  const filter=$('filterBar'),search=$('searchInput');
+  const searchAction=$('r81SearchAction');
+  const isEnglish=()=>String(window.SM_I18N?.getLanguage?.()||document.documentElement.lang||'ja').startsWith('en');
   const closeOptions=()=>{
-    optionsPanel.classList.add('hidden');
+    options.classList.add('hidden');
     optionsBtn.setAttribute('aria-expanded','false');
   };
+  const closeActions=()=>{
+    menu?.classList.add('hidden');
+    menuBtn?.setAttribute('aria-expanded','false');
+  };
+  const setSearchVisible=show=>{
+    filter.classList.toggle('r80-search-open',show);
+    searchAction.setAttribute('aria-expanded',String(show));
+    $('r81SearchStatus').textContent=show?(isEnglish()?'Shown':'表示中'):(isEnglish()?'Open ›':'開く ›');
+    if(show)search.focus();
+  };
   const closeSearch=({clear=false}={})=>{
-    const input=$('searchInput');
-    if(clear&&input?.value){
-      input.value='';
-      input.dispatchEvent(new Event('input',{bubbles:true}));
+    if(clear&&search.value){
+      search.value='';
+      search.dispatchEvent(new Event('input',{bubbles:true}));
     }
-    /* Never silently conceal an active filter: otherwise table rows could
-       appear missing with no visible search explaining why. */
-    if(input?.value)return;
-    searchBar.classList.remove('r80-search-open');
-    searchBtn.setAttribute('aria-expanded','false');
+    /* Keep a nonempty active filter visible until the user clears it. */
+    if(!search.value)setSearchVisible(false);
   };
-  const closeActionMenu=()=>{
-    actionMenu?.classList.add('hidden');
-    actionBtn?.setAttribute('aria-expanded','false');
+  const updateScale=()=>{
+    $('r80ScaleStatus').textContent=$('currentScaleBadge')?.textContent||'100点満点';
   };
-  const updateScaleStatus=()=>{
-    const label=$('currentScaleBadge')?.textContent||'100点満点';
-    $('r80ScaleStatus').textContent=label;
-  };
-  const updateColorStatus=()=>{
-    const enabled=$('scoreColorToggleBtn')?.getAttribute('aria-pressed')!=='false';
-    $('r80ColorAction').textContent=(isEnglish()?'Score colors: ':'採点の色：')+(enabled?'ON':'OFF');
-    $('r80ColorAction').setAttribute('aria-pressed',String(enabled));
+  const updateColor=()=>{
+    const on=$('scoreColorToggleBtn')?.getAttribute('aria-pressed')!=='false';
+    $('r81ColorStatus').textContent=on?'ON':'OFF';
+    $('r81ColorStatus').setAttribute('aria-label',on?'ON':'OFF');
+    $('r80ColorAction').setAttribute('aria-pressed',String(on));
   };
   const updateLabels=()=>{
-    actionBtn?.setAttribute('aria-label',isEnglish()?'Actions menu':'操作メニュー');
-    actionBtn.textContent=isEnglish()?'Actions ⋯':'操作 ⋯';
-    searchBtn.setAttribute('aria-label',isEnglish()?'Search subjects':'対象を検索');
-    optionsBtn.textContent=isEnglish()?'Settings':'設定';
-    $('r80VisualsBtn').textContent=isEnglish()?'+ Visuals':'＋ 拡張';
-    $('r80ScaleAction').firstChild.textContent=isEnglish()?'Scoring settings ':'採点設定 ';
-    $('r80MoreAction').textContent=isEnglish()?'Other tools':'その他の操作';
-    updateScaleStatus();updateColorStatus();
+    const en=isEnglish();
+    menuBtn.setAttribute('aria-label',en?'Other sheet actions':'シートのその他の操作');
+    menuBtn.textContent='⋯';
+    optionsBtn.textContent=en?'Settings':'設定';
+    $('r80VisualsBtn').textContent=en?'＋ Visuals':'＋ 拡張';
+    $('r81OptionsTitle').textContent=en?'View & score settings':'表示・採点の設定';
+    $('r81OptionsClose').textContent=en?'Close ×':'閉じる ×';
+    $('r81OptionsClose').setAttribute('aria-label',en?'Close settings':'設定を閉じる');
+    $('r80ScaleAction').querySelector('.r81-option-title').textContent=en?'Score scale':'点数の設定';
+    $('r80ColorAction').querySelector('.r81-option-title').textContent=en?'Score cell colors':'採点セルの色';
+    searchAction.querySelector('.r81-option-title').textContent=en?'Search subjects':'対象を検索';
+    $('r80MoreAction').querySelector('.r81-option-title').textContent=en?'More tools':'その他の機能';
+    $('r80MoreAction').querySelector('.r81-option-value').textContent=en?'Backup, export ›':'バックアップ・画像出力 ›';
+    $('r81SearchClose').textContent=en?'Close ×':'閉じる ×';
+    $('r81SearchStatus').textContent=filter.classList.contains('r80-search-open')?(en?'Shown':'表示中'):(en?'Open ›':'開く ›');
+    updateScale();updateColor();
   };
-  $('r80PublishAction').addEventListener('click',()=>{
-    closeActionMenu();$('publishBtn')?.click();
-  });
-  $('r80NewAction').addEventListener('click',()=>{
-    closeActionMenu();$('newSheetBtn')?.click();
-  });
-  searchBtn.addEventListener('click',()=>{
-    const opening=!searchBar.classList.contains('r80-search-open');
-    if(opening){searchBar.classList.add('r80-search-open');searchBtn.setAttribute('aria-expanded','true');closeOptions();$('searchInput')?.focus();}
-    else{closeSearch({clear:true});}
-  });
   optionsBtn.addEventListener('click',()=>{
-    const opening=optionsPanel.classList.contains('hidden');
-    optionsPanel.classList.toggle('hidden',!opening);
+    const opening=options.classList.contains('hidden');
+    options.classList.toggle('hidden',!opening);
     optionsBtn.setAttribute('aria-expanded',String(opening));
     if(opening)closeSearch();
   });
+  $('r81OptionsClose').addEventListener('click',closeOptions);
   $('r80ScaleAction').addEventListener('click',()=>{
     closeOptions();$('scoreSettingsBtn')?.click();
   });
   $('r80ColorAction').addEventListener('click',()=>{
-    $('scoreColorToggleBtn')?.click();updateColorStatus();
+    $('scoreColorToggleBtn')?.click();updateColor();
   });
+  searchAction.addEventListener('click',()=>{
+    const opening=!filter.classList.contains('r80-search-open');
+    closeOptions();
+    if(opening)setSearchVisible(true);
+    else closeSearch({clear:true});
+  });
+  $('r81SearchClose').addEventListener('click',()=>closeSearch({clear:true}));
   $('r80MoreAction').addEventListener('click',()=>{
     closeOptions();$('moreToolsBtn')?.click();
   });
@@ -78,26 +84,19 @@
     try{window.parent.postMessage({type:'statsmaker:open-extensions'},location.origin)}catch{}
   });
   document.addEventListener('click',e=>{
-    /* Proxy clicks on the original hidden Color button are synthetic: keep
-       this settings panel open after toggling the preference. */
     if(!e.isTrusted)return;
-    if(!optionsPanel.contains(e.target)&&e.target!==optionsBtn)closeOptions();
+    if(!options.contains(e.target)&&e.target!==optionsBtn)closeOptions();
+    if(!menu?.contains(e.target)&&e.target!==menuBtn)closeActions();
   });
   document.addEventListener('keydown',e=>{
-    if(e.key==='Escape'){
-      closeOptions();closeActionMenu();
-      if(!$('searchInput')?.value)closeSearch();
-    }
+    if(e.key==='Escape'){closeOptions();closeActions();if(!search.value)closeSearch();}
   });
-  const scale=$('currentScaleBadge');
-  if(scale&&typeof MutationObserver!=='undefined'){
-    new MutationObserver(updateScaleStatus).observe(scale,{childList:true,subtree:true,characterData:true});
-  }
-  const col=$('scoreColorToggleBtn');
-  if(col&&typeof MutationObserver!=='undefined'){
-    new MutationObserver(updateColorStatus).observe(col,{attributes:true,attributeFilter:['aria-pressed']});
-  }
-  if($('searchInput')?.value){searchBar.classList.add('r80-search-open');searchBtn.setAttribute('aria-expanded','true');}
+  const scale=$('currentScaleBadge'),color=$('scoreColorToggleBtn');
+  if(scale&&typeof MutationObserver!=='undefined')
+    new MutationObserver(updateScale).observe(scale,{childList:true,subtree:true,characterData:true});
+  if(color&&typeof MutationObserver!=='undefined')
+    new MutationObserver(updateColor).observe(color,{attributes:true,attributeFilter:['aria-pressed']});
+  if(search.value)setSearchVisible(true);
   window.addEventListener('statsmaker:languagechange',updateLabels);
   updateLabels();
 })();

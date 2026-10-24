@@ -1,0 +1,214 @@
+/* R81 opt-in night workspace. Pref = statsMaker.uiTheme.
+ * Light remains default; Project.style, generated artwork, OG/export canvas and
+ * the 7 exact scoring-grade translucent RGBA values are NEVER mutated. */
+.globalSupportPanel .r81-help-theme{
+  display:block;width:100%;min-height:44px;margin-top:4px;
+  border:1px solid var(--sm-nav-border,#d2cfc7);border-radius:5px;
+  color:var(--sm-nav-fg,#30373b);background:var(--sm-nav-panel,#fff);
+  font:800 13px system-ui,-apple-system,sans-serif;
+  text-align:left;padding:9px 10px;cursor:pointer
+}
+.globalSupportPanel .r81-help-theme:focus-visible,
+[data-sm-theme-toggle]:focus-visible{outline:3px solid #b97b64;outline-offset:2px}
+html[data-sm-theme=dark]{
+  color-scheme:dark;
+  --bg:#202427;--panel:#303537;--panel2:#353b3d;--panel3:#3b4243;
+  --text:#f0efeb;--muted:#c0c9c7;--line:#515a5b;--line2:#657071;
+  --r79-page:#202427;--r79-paper:#303537;--r79-soft:#363c3d;
+  --r79-rule:#4b5353;--r79-line:#56605f;--r79-text:#f1efeb;
+}
+html[data-sm-theme=dark],html[data-sm-theme=dark] body{
+  background:#202427!important;color:#f0efeb!important;color-scheme:dark
+}
+/* Shared navigation, even when earlier light-theme CSS has hard-coded white. */
+html[data-sm-theme=dark] .globalLocaleBar,
+html[data-sm-theme=dark] body.r73-light-page .globalLocaleBar,
+html[data-sm-theme=dark] body.homeHost .globalLocaleBar,
+html[data-sm-theme=dark] body.editor-body .globalLocaleBar{
+  --sm-nav-bg:#252a2c;--sm-nav-fg:#f2eee9;--sm-nav-panel:#353b3d;
+  --sm-nav-border:#606969;--sm-nav-muted:#cbd1d0;--sm-nav-hover:#42494b;
+  background:#252a2c!important;color:#f2eee9!important;border-color:#535c5c!important
+}
+html[data-sm-theme=dark] :is(body.homeHost,body.editor-body,body.r73-light-page)
+.globalLocaleBar :is(.globalHomeBtn,.globalDiscoverBtn,.globalIntroBtn,.globalSupportMenu>summary,
+.globalLocaleSwitch,.globalSupportPanel){
+  background:#353b3d!important;color:#f2eee9!important;border-color:#646c6d!important
+}
+html[data-sm-theme=dark] .globalLocaleBar :is(.globalSupportPanel a,.globalLocaleSwitch button){
+  color:#e0e5e2!important
+}
+html[data-sm-theme=dark] .globalLocaleBar .globalLocaleSwitch button.active{
+  background:#b65b45!important;color:#fff!important
+}
+/* Home shell and extension selector (not card artwork). */
+html[data-sm-theme=dark] body.homeHost,
+html[data-sm-theme=dark] body.homeHost :is(#basicRoot,#basicFrame,#extSheet){
+  background:#202427!important;color:#f0efeb!important
+}
+html[data-sm-theme=dark] body.homeHost #extSheet{
+  border-color:#5d6766!important;background:#303638!important
+}
+html[data-sm-theme=dark] body.homeHost .extHead{
+  background:#303638!important;border-color:#596160!important
+}
+html[data-sm-theme=dark] body.homeHost :is(.extCard,#extClose,.langSwitch,#extLauncher){
+  background:#383f40!important;color:#eeefea!important;border-color:#626b6b!important
+}
+html[data-sm-theme=dark] body.homeHost :is(.extCard span,.extHead p,.extGroupTitle){
+  color:#c0c7c6!important
+}
+html[data-sm-theme=dark] body.homeHost .extExamplesInfo a{color:#d8c0ad}
+/* Scoring editor: mild graphite rather than old navy. */
+html[data-sm-theme=dark] body:has(#scoreTable){
+  background:#202427!important;color:#f0efeb!important
+}
+html[data-sm-theme=dark] body:has(#scoreTable) :is(.topbar.panel,.sheetPanel.panel,.sidePanel.panel,
+.sheetPanel .sheetToolbar,.sheetPanel .filterBar,.overviewPanel,.overviewGrid,.fitPanel,.fitControls,
+.chartBox,.columnManage,.emptyAddRow){
+  background:#303537!important;color:#f0efeb!important;border-color:#4d5656!important
+}
+html[data-sm-theme=dark] body:has(#scoreTable) :is(.fieldLabel,.brandTitle,.sectionTitle,
+.sectionTop,.sectionTitle,.overviewName,.overviewAvgValue,.rankName,.rankNo,.rankScore,
+.summaryValue,.compareStatValue){
+  color:#eceeea!important
+}
+html[data-sm-theme=dark] body:has(#scoreTable) :is(.hint,.brandSub,.overviewNote,
+.overviewAvgGrade,.zoomReadout,.eyebrow){
+  color:#c1c9c8!important
+}
+html[data-sm-theme=dark] body:has(#scoreTable) :is(.titleInput,.descInput,.sheetSelect,
+#searchInput,.filterSelect,.select){
+  background:#383f40!important;color:#f3f1ec!important;border-color:#737b7a!important;
+  color-scheme:dark
+}
+html[data-sm-theme=dark] body:has(#scoreTable)
+:is(.titleInput,.descInput,#searchInput)::placeholder{
+  color:#c1c9c8!important;opacity:1
+}
+html[data-sm-theme=dark] body:has(#scoreTable) :is(.modeStrip,.settingsDrawer,
+#scoreSettingsPanel,.utilityBar,.sheetPanel .r80-options-panel){
+  background:#353b3c!important;color:#f0efeb!important;border-color:#596160!important
+}
+html[data-sm-theme=dark] body:has(#scoreTable) :is(#sheetViewBtn,#overviewViewBtn,#fitViewBtn,
+#r80OptionsBtn,#r80VisualsBtn,#addRowBtn,#addColBtn,
+#r81ThemeBtn,#mobileHeaderMoreBtn,#r81OptionsClose){
+  color:#e9ece8!important;background:#3b4243!important;border-color:#687070!important
+}
+html[data-sm-theme=dark] body:has(#scoreTable)
+:is(#sheetViewBtn,#overviewViewBtn,#fitViewBtn).active{
+  background:#505858!important;color:#fff!important;
+  box-shadow:inset 0 -2px 0 #cf957a!important
+}
+html[data-sm-theme=dark] body:has(#scoreTable) :is(.r81-options-head,.r80-options-panel>button){
+  border-color:#586160!important;color:#eff0eb!important;background:transparent!important
+}
+html[data-sm-theme=dark] body:has(#scoreTable) :is(.r81-option-title,.r81-options-head strong){
+  color:#eff0eb!important
+}
+html[data-sm-theme=dark] body:has(#scoreTable) :is(.r81-option-value,#r80ScaleStatus){
+  color:#c9d0cd!important
+}
+html[data-sm-theme=dark] body:has(#scoreTable) #r81SearchClose{
+  background:#3b4243;color:#eee;border-color:#697271
+}
+html[data-sm-theme=dark] body:has(#scoreTable) :is(.overviewCard,.sidePanel.panel,.rankRow,.rankRow.top1,
+.rankRow.top2,.rankRow.top3,.compareStat,.compareCard,.summaryBox,.fitViewport){
+  background:#353b3d!important;color:#f0efeb!important;border-color:#596362!important;
+  background-image:none!important
+}
+html[data-sm-theme=dark] body:has(#scoreTable) .overviewCardTop{
+  background:#3b4243!important;border-color:#5f6868!important;color:#eeefeb!important
+}
+html[data-sm-theme=dark] body:has(#scoreTable) .overviewMetrics{background:#555e5e!important}
+html[data-sm-theme=dark] body:has(#scoreTable)
+.overviewMetric:not(.heat-e):not(.heat-d):not(.heat-c):not(.heat-b):not(.heat-a):not(.heat-s):not(.heat-ss){
+  background:#353b3d!important;color:#f0efeb!important
+}
+html[data-sm-theme=dark] body:has(#scoreTable) .overviewMetrics .overviewMetric
+:is(.overviewMetricName,.overviewMetricValue){color:#eff0eb!important}
+html[data-sm-theme=dark] body:has(#scoreTable) :is(.progressPill,.rankThumb,.fitThumb){
+  background:#454c4d!important;color:#e0e4e1!important;border-color:#687070!important
+}
+html[data-sm-theme=dark] body:has(#scoreTable) :is(#scoreTable,.fitTable){
+  background:#303537!important;color:#f0efeb!important
+}
+html[data-sm-theme=dark] body:has(#scoreTable)
+:is(#scoreTable,.fitTable) :is(th,.indexHead,.nameHead,.fitName){
+  background:#3d4546!important;color:#eef1ee!important;border-color:#626b6a!important
+}
+html[data-sm-theme=dark] body:has(#scoreTable)
+:is(#scoreTable,.fitTable) tbody tr{background:#32393a!important}
+html[data-sm-theme=dark] body:has(#scoreTable)
+:is(#scoreTable,.fitTable) td:not(.scoreCell){
+  background:#363d3e!important;color:#eef0eb!important;border-color:#606969!important
+}
+html[data-sm-theme=dark] body:has(#scoreTable) :is(#scoreTable,.fitTable)
+td.scoreCell:not(.heat-e):not(.heat-d):not(.heat-c):not(.heat-b):not(.heat-a):not(.heat-s):not(.heat-ss){
+  background:#363d3e!important;color:#eff0eb!important;border-color:#626b6a!important
+}
+html[data-sm-theme=dark] body:has(#scoreTable) :is(.nameInput,.scoreInput,.colInput,.fitNameInput,
+.fitMetricInput,.fitScoreInput){color:#f4f3ee!important}
+html[data-sm-theme=dark] body:has(#scoreTable) :is(.chartBox,.fitControls,.fitViewport){
+  background:#303537!important;color:#f0efeb!important
+}
+html[data-sm-theme=dark] body:has(#scoreTable) :is(.filterBar #searchInput,.scaleGroup){
+  background:#3d4546!important;color:#f0efeb!important;border-color:#697372!important
+}
+html[data-sm-theme=dark] body:has(#scoreTable) #publishDialogBackdrop .publishDialog{
+  background:#303637!important;color:#f0efeb!important;border-color:#616a69!important
+}
+html[data-sm-theme=dark] body:has(#scoreTable)
+:is(.publishChoice,.publishPreviewCard,.publishNotice,.publishWarning,.publishCategorySelect){
+  background:#383f41!important;color:#f0efeb!important;border-color:#626b6b!important
+}
+/* Extended editor CHROME; deliberately omit #previewRoot/.visual artwork. */
+html[data-sm-theme=dark] body.editor-body{
+  background:#202427!important;color:#f0efeb!important
+}
+html[data-sm-theme=dark] body.editor-body :is(.editor-header,.editor-sidebar,.panel-tabs,.panel-content,
+.mobile-bottom-tabs,.mobile-sheet,.mobile-sheet-head,.preview-toolbar,.source-quick-bar,
+.export-preview-card,.export-preview-head,.export-preview-actions){
+  background:#303638!important;color:#f0efeb!important;border-color:#596261!important
+}
+html[data-sm-theme=dark] body.editor-body :is(.editor-header input,.panel-content input,
+.panel-content select,.panel-content textarea,.source-quick-select select){
+  background:#3e4647!important;color:#f0efeb!important;border-color:#6b7473!important
+}
+html[data-sm-theme=dark] body.editor-body :is(.editor-header .btn,.mobile-tab,.panel-tab,
+.seg-btn,.source-quick-chip,.source-quick-select select,.more-menu button){
+  background:#3d4546!important;color:#eceeeb!important;border-color:#687070!important
+}
+html[data-sm-theme=dark] body.editor-body :is(.panel-tab.active,.mobile-tab.active,.seg-btn.active){
+  background:#50595a!important;color:#fff!important;border-bottom-color:#ce9681!important
+}
+html[data-sm-theme=dark] body.editor-body :is(.editor-header .btn.primary,#exportBtn){
+  background:#a9533e!important;color:white!important;border-color:#a9533e!important
+}
+html[data-sm-theme=dark] body.editor-body .preview-area{
+  background-color:#343a3b!important; /* neutral workbench only, not chart itself */
+}
+html[data-sm-theme=dark] body.editor-body :is(.more-menu,.sheet-head,.source-info-card){
+  background:#343c3e!important;color:#eff0ec!important;border-color:#66706e!important
+}
+/* Discover and explanatory content. Keep independent artwork thumbnails. */
+html[data-sm-theme=dark] body.r73-light-page{
+  --bg:#202427;--panel:#303637;--panel2:#3a4243;
+  --line:#535d5c;--line2:#66716f;--text:#f1f0ec;--muted:#c4ccca;
+  background:#202427!important;color:#f1f0ec!important
+}
+html[data-sm-theme=dark] body.r73-light-page :is(.wrap,.hero,.feature,
+.article-card,.content-card,.guide-card,.workCard,.privacyNote,.faq details,
+table,article,.browseTabs,.searchBox,.sortBtn,.refreshBtn,.moreBtn,.categoryBtn,
+.browseTab,.tab,.card,.panel,.section-card){
+  background-color:#303637!important;color:#f1f0ec!important;border-color:#586160!important
+}
+html[data-sm-theme=dark] body.r73-light-page :is(h1,h2,h3,p,.lead,.meta,.hint,.stat,
+.eyebrow,header,footer,td,th,label,summary){
+  color:#f0efea!important
+}
+html[data-sm-theme=dark] body.r73-light-page :is(input,select,textarea){
+  background:#3b4344!important;color:#f1efec!important;border-color:#697371!important
+}
+html[data-sm-theme=dark] body.r73-light-page :is(.searchBox input)::placeholder{
+  color:#c5ccca!important
+}

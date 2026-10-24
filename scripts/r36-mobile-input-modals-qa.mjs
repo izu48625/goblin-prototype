@@ -40,7 +40,7 @@ try{
         return r?{height:r.height,width:r.width}:null};
       return {overflow:document.documentElement.scrollWidth-innerWidth,
         tools:rect('#r80OptionsBtn'),score:rect('#scoreTable .scoreInput'),
-        search:rect('#r80SearchBtn')};
+        search:rect('#r80OptionsBtn')};
     });
     assert(geometry.overflow<=2,'Home horizontal page overflow at '+size.width+': '+geometry.overflow);
     assert(geometry.tools.height>=40,'More action touch target too small');

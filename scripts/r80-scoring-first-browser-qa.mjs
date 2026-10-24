@@ -16,8 +16,8 @@ for(const engine of [chromium,webkit]){
    if(width<500){
      assert(!await page.locator('#extLauncher').isVisible(),'Floating CTA still covers score table');
      assert(await frame.locator('#r80VisualsBtn').isVisible());
-     assert(!await frame.locator('#publishBtn').isVisible());
-     assert(!await frame.locator('#newSheetBtn').isVisible());
+     assert(await frame.locator('#publishBtn').isVisible());
+     assert(await frame.locator('#newSheetBtn').isVisible());
      assert(!await frame.locator('#searchInput').isVisible(),'Search should be progressive');
      const geometry=await frame.locator('body').evaluate(()=>{
        const box=sel=>{const el=document.querySelector(sel),r=el?.getBoundingClientRect();return r?{top:r.top,bottom:r.bottom,h:r.height}:null};
@@ -27,20 +27,18 @@ for(const engine of [chromium,webkit]){
      assert(geometry.overflow<=2,'Editor viewport overflow '+width+' '+JSON.stringify(geometry));
      assert(geometry.header.h<165,'Header still overly tall '+JSON.stringify(geometry));
      assert(geometry.toolbar.h<115,'Quick controls exceed two rows '+JSON.stringify(geometry));
-     await frame.locator('#mobileHeaderMoreBtn').click();
-     assert(await frame.locator('#r80PublishAction').isVisible());
-     await frame.locator('#r80PublishAction').click();
-     assert(await frame.locator('#publishDialogBackdrop').isVisible(),'Publish via menu broken');
+     await frame.locator('#publishBtn').click();
+     assert(await frame.locator('#publishDialogBackdrop').isVisible(),'Direct Publish broken');
      await frame.locator('#publishCloseBtn').click();
-     await frame.locator('#mobileHeaderMoreBtn').click();
      const before=await frame.locator('#sheetSelect option').count();
-     await frame.locator('#r80NewAction').click();
-     assert((await frame.locator('#sheetSelect option').count())>before,'New sheet via menu failed');
-     await frame.locator('#r80SearchBtn').click();
-     assert(await frame.locator('#searchInput').isVisible(),'Search progressive reveal broken');
+     await frame.locator('#newSheetBtn').click();
+     assert((await frame.locator('#sheetSelect option').count())>before,'Direct New failed');
+     await frame.locator('#r80OptionsBtn').click();
+     await frame.locator('#r81SearchAction').click();
+     assert(await frame.locator('#searchInput').isVisible(),'Search from Settings broken');
      await frame.locator('#searchInput').fill('sample');
-     await frame.locator('#r80SearchBtn').click();
-     assert(!await frame.locator('#searchInput').isVisible(),'Search should close by icon');
+     await frame.locator('#r81SearchClose').click();
+     assert(!await frame.locator('#searchInput').isVisible(),'Search should close by its dismiss button');
      await frame.locator('#r80OptionsBtn').click();
      assert(await frame.locator('#r80ScaleAction').isVisible(),'Score options hidden');
      await frame.locator('#r80ColorAction').click();

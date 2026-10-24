@@ -18,6 +18,7 @@
 <link rel="stylesheet" href="css/r78-compact-header.css?v=r78p1">
 <link rel="stylesheet" href="css/r79-quiet-interface.css?v=r79p1">
 <link rel="stylesheet" href="css/r80-scoring-first.css?v=r80p1">
+<link rel="stylesheet" href="css/r81-clear-settings.css?v=r81p1">
 </head>
 <body data-build="R25-P4" data-sm-ad-page="home">
 <div id="viewOnlyBanner" class="viewOnlyBanner hidden">
@@ -57,10 +58,9 @@
       <button id="editorHomeBtn" class="btn editorHomeBtn" type="button" aria-label="HOME: 新しい空のシートを開く" title="新しい空のシートを開く">HOME</button>
       <button id="publishBtn" class="btn publishBtn" type="button" data-i18n="publish.button" onclick="document.getElementById('publishDialogBackdrop')?.classList.remove('hidden');document.getElementById('publishResult')?.classList.add('hidden');">公開する</button>
       <button id="newSheetBtn" class="btn primary" type="button" data-i18n="action.new">＋ 新規</button>
-      <button id="mobileHeaderMoreBtn" class="btn mobileHeaderMoreBtn mobileOnly" type="button" aria-expanded="false" aria-controls="mobileHeaderMoreMenu" aria-label="操作メニュー">操作 ⋯</button>
+      <button id="r81ThemeBtn" class="btn r81-theme-btn" data-sm-theme-toggle="icon" type="button" aria-pressed="false" aria-label="ダークモードへ切替" title="ライト／ダーク切替">☾</button>
+      <button id="mobileHeaderMoreBtn" class="btn mobileHeaderMoreBtn mobileOnly" type="button" aria-expanded="false" aria-controls="mobileHeaderMoreMenu" aria-label="シートのその他の操作">⋯</button>
       <div id="mobileHeaderMoreMenu" class="mobileHeaderMoreMenu mobileOnly hidden">
-        <button id="r80PublishAction" class="mobileHeaderMenuBtn r80-menu-publish" type="button" data-i18n="publish.button">公開する</button>
-        <button id="r80NewAction" class="mobileHeaderMenuBtn r80-menu-new" type="button" data-i18n="action.new">＋ 新規</button>
         <button id="mobileDuplicateBtn" class="mobileHeaderMenuBtn" type="button" data-i18n="action.duplicate">複製</button>
         <button id="mobileDeleteBtn" class="mobileHeaderMenuBtn danger" type="button" data-i18n="action.delete">削除</button>
       </div>
@@ -115,15 +115,16 @@
             <button id="scoreSettingsBtn" class="btn small" type="button" data-i18n="action.scoringSettings">採点設定</button>
             <span id="currentScaleBadge" class="currentScaleBadge" role="status" aria-live="polite">100点満点</span>
             <button id="moreToolsBtn" class="btn small" type="button" data-i18n="action.more">その他</button>
-            <button id="r80SearchBtn" class="btn small r80-mobile-tool" type="button" aria-controls="filterBar" aria-expanded="false" aria-label="検索">⌕</button>
             <button id="r80OptionsBtn" class="btn small r80-mobile-tool" type="button" aria-controls="r80OptionsPanel" aria-expanded="false" aria-label="採点設定と表示オプション">設定</button>
             <button id="r80VisualsBtn" class="btn small r80-mobile-tool" type="button" aria-label="拡張グラフを開く">＋ 拡張</button>
           </div>
         </div>
         <div id="r80OptionsPanel" class="r80-options-panel hidden" role="group" aria-label="採点の設定">
-          <button id="r80ScaleAction" type="button">採点設定 <span id="r80ScaleStatus">100点満点</span></button>
-          <button id="r80ColorAction" type="button">採点の色：ON</button>
-          <button id="r80MoreAction" type="button">その他の操作</button>
+          <div class="r81-options-head"><strong id="r81OptionsTitle">表示・採点の設定</strong><button id="r81OptionsClose" type="button" aria-label="設定を閉じる">閉じる ×</button></div>
+          <button id="r80ScaleAction" type="button"><span class="r81-option-title">点数の設定</span><span id="r80ScaleStatus" class="r81-option-value">100点満点</span></button>
+          <button id="r80ColorAction" type="button" aria-pressed="true"><span class="r81-option-title">採点セルの色</span><span id="r81ColorStatus" class="r81-option-value">ON</span></button>
+          <button id="r81SearchAction" type="button" aria-controls="filterBar" aria-expanded="false"><span class="r81-option-title">対象を検索</span><span class="r81-option-value" id="r81SearchStatus">開く ›</span></button>
+          <button id="r80MoreAction" type="button"><span class="r81-option-title">その他の機能</span><span class="r81-option-value">バックアップ・画像出力 ›</span></button>
         </div>
       </div>
 
@@ -149,6 +150,7 @@
 
       <div class="filterBar" id="filterBar">
         <input id="searchInput" class="searchInput" type="search" placeholder="対象名・メモを検索" data-i18n-placeholder="filter.search">
+        <button id="r81SearchClose" type="button" class="r81-search-close">閉じる ×</button>
         <button id="scoreColorToggleBtn" class="scoreColorToggle is-on" type="button"
           aria-pressed="true" aria-label="採点タイルの色を切り替える"
           data-i18n-aria="filter.colorToggleAria">色 ON</button>
