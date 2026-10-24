@@ -40,7 +40,7 @@ for(const engine of [chromium,webkit]){
   assert(luminance(light.thumb.background)>.60,'Light image add button should stay light');
   await f.locator('#r81ThemeBtn').click();
   await f.locator('html[data-sm-theme="dark"]').waitFor();
-  await f.locator('link[data-sm-theme-harmony]').waitFor();
+  await f.locator('link[data-sm-theme-harmony]').waitFor({state:'attached'});
   await f.locator('body').evaluate(()=>document.fonts?.ready);
   const dark=await style();
   const surfaces=['head','fixed','sortRow','thumb','row','empty','titleInput'];
