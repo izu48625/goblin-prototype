@@ -93,6 +93,13 @@ function openExtension(type){
   }
 }
 $("extLauncher").addEventListener("click",()=>backdrop.classList.remove("hidden"));
+/* Same-origin bridge: mobile Home toolbar opens the existing extension picker
+ * without an overlay hiding the bottom score rows. */
+window.addEventListener("message",event=>{
+  if(event.origin!==location.origin||event.source!==frame.contentWindow)return;
+  if(event.data?.type==="statsmaker:open-extensions")
+    backdrop.classList.remove("hidden");
+});
 $("extClose").addEventListener("click",()=>backdrop.classList.add("hidden"));
 backdrop.addEventListener("click",event=>{if(event.target===backdrop)backdrop.classList.add("hidden")});
 frame.addEventListener("load",()=>{
