@@ -70,6 +70,9 @@
     try{window.parent.postMessage({type:'statsmaker:open-extensions'},location.origin)}catch{}
   });
   document.addEventListener('click',e=>{
+    /* Proxy clicks on the original hidden Color button are synthetic: keep
+       this settings panel open after toggling the preference. */
+    if(!e.isTrusted)return;
     if(!optionsPanel.contains(e.target)&&e.target!==optionsBtn)closeOptions();
   });
   document.addEventListener('keydown',e=>{
