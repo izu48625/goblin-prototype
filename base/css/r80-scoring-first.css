@@ -1,0 +1,121 @@
+/* R80 / Scoring first. Explicit mobile-only visual hierarchy, no scoring-data edits. */
+.r80-mobile-tool,.r80-options-panel{display:none}
+@media(max-width:760px){
+  /* Saving & publishing is infrequent: one clearly labelled actions menu, on
+     the title-label line rather than an additional 44px command strip. */
+  .topbar.panel{position:relative;padding-top:6px}
+  .topbar .titleHeading>.fieldLabel{padding-right:85px;min-height:30px;display:flex;align-items:center}
+  .topbar .topActions{
+    position:absolute!important;top:3px;right:7px;left:auto;
+    width:auto!important;display:flex!important;
+    gap:0!important;z-index:35;
+  }
+  .topbar .topActions :is(#publishBtn,#newSheetBtn,#editorHomeBtn){
+    display:none!important
+  }
+  .topbar .topActions #mobileHeaderMoreBtn{
+    display:flex!important;width:86px!important;height:33px!important;
+    min-height:33px!important;min-width:86px;
+    flex:0 0 86px;padding:0 8px;
+    border:1px solid #d5d1c8;border-radius:6px;background:#fff;
+    color:#3c4549;font-size:12px!important;letter-spacing:0
+  }
+  .topbar .topActions #mobileHeaderMoreMenu{
+    display:grid!important;
+    right:0;top:38px;left:auto;z-index:150;
+    width:185px;padding:5px;background:#fff;color:#293238;
+    border:1px solid #d7d4cd;border-radius:8px;
+    box-shadow:0 8px 22px rgba(34,38,37,.13)
+  }
+  .topbar .topActions #mobileHeaderMoreMenu.hidden{display:none!important}
+  #mobileHeaderMoreMenu .mobileHeaderMenuBtn{
+    display:flex;align-items:center;
+    color:#364145;background:#fff;border:0;
+    width:100%;min-height:44px;padding:0 11px;
+    border-radius:5px;font-size:13px;font-weight:750
+  }
+  #mobileHeaderMoreMenu .mobileHeaderMenuBtn:hover{background:#f4f2ed}
+  #mobileHeaderMoreMenu .r80-menu-publish{color:#29644f}
+  #mobileHeaderMoreMenu .r80-menu-new{color:#a04e3b}
+  #mobileHeaderMoreMenu .mobileHeaderMenuBtn.danger{
+    color:#a44045;border-top:1px solid #e8e3dc;border-radius:0
+  }
+  /* The toolbar owns only two rows: view modes and quick scoring actions. */
+  .sheetPanel .sheetToolbar{padding:7px 8px;background:#fff}
+  .sheetPanel .compactTools{gap:5px}
+  .sheetPanel .modeStrip{
+    padding:2px;min-height:39px;gap:2px;
+    background:#f5f4f0;border-radius:6px
+  }
+  .sheetPanel .modeStrip .viewModeBtn{
+    min-height:35px;height:35px;padding:0 2px;
+    font-size:11px;border-radius:5px
+  }
+  .sheetPanel .coreActions{
+    display:flex;flex-wrap:nowrap;align-items:center;
+    gap:4px;overflow-x:auto;-webkit-overflow-scrolling:touch;
+    scrollbar-width:none;padding:1px 0 3px
+  }
+  .sheetPanel .coreActions::-webkit-scrollbar{display:none}
+  .sheetPanel .coreActions :is(#scoreSettingsBtn,#currentScaleBadge,#moreToolsBtn){
+    display:none!important
+  }
+  .sheetPanel .coreActions #addRowBtn,
+  .sheetPanel .coreActions #addColBtn,
+  .sheetPanel .coreActions .r80-mobile-tool{
+    flex:0 0 auto;width:auto;min-height:42px;height:42px;
+    padding:0 8px;font-size:11px;font-weight:750;
+    background:#fff;color:#394347;
+    border:1px solid #dcd8d1;border-radius:6px;
+    box-shadow:none;white-space:nowrap
+  }
+  .sheetPanel .coreActions .r80-mobile-tool{display:inline-flex!important;align-items:center;justify-content:center}
+  .sheetPanel .coreActions #r80SearchBtn{
+    width:39px;padding:0;font-size:23px;font-weight:500
+  }
+  .sheetPanel .coreActions #r80OptionsBtn{background:#f6f4ef}
+  .sheetPanel .coreActions #r80VisualsBtn{
+    color:#94513e;background:#faf3ef;border-color:#e4cfc5
+  }
+  .sheetPanel .coreActions .r80-mobile-tool[aria-expanded="true"]{
+    border-color:#b88777;background:#f2e8e2;color:#793a2c
+  }
+  /* Original score settings, More and color controls are still present and
+     invoked programmatically from this visible options menu. */
+  .sheetPanel .r80-options-panel{
+    display:grid;grid-template-columns:1fr;
+    gap:2px;padding:6px;margin:5px 0 2px;
+    background:#fcfbf8;border:1px solid #e3dfd7;
+    border-radius:7px
+  }
+  .sheetPanel .r80-options-panel.hidden{display:none!important}
+  .r80-options-panel button{
+    width:100%;min-height:42px;
+    display:flex;align-items:center;justify-content:space-between;
+    gap:8px;padding:0 12px;text-align:left;
+    color:#374144;background:transparent;border:0;
+    border-radius:5px;font:750 12px/1.3 inherit
+  }
+  .r80-options-panel button:hover{background:#f0eee9}
+  #r80ScaleStatus{color:#626b70;font-weight:650;font-size:11px}
+  .sheetPanel .filterBar{
+    display:grid;grid-template-columns:minmax(0,1fr)!important;
+    padding:8px;border-top:1px solid #e5e2dc;
+    background:#fff
+  }
+  .sheetPanel .filterBar:not(.r80-search-open){display:none!important}
+  .sheetPanel #scoreColorToggleBtn{display:none!important}
+  .sheetPanel #searchInput{min-height:42px;height:42px;font-size:16px}
+  .sheetPanel #scoreSettingsPanel{
+    margin:5px 8px 8px;border:1px solid #e4dfd6;border-radius:7px;
+  }
+  .sheetPanel #utilityBar{margin:5px 8px 8px}
+  .workspace{gap:6px}
+  .topbar.panel{margin-bottom:0}
+  .sheetPanel.panel{border-top:1px solid #e6e2dc}
+  .sheetPanel .tableWrap{border-top:1px solid #e5e2dc}
+  .sheetPanel .r80-mobile-tool:focus-visible,
+  #mobileHeaderMoreMenu button:focus-visible,.r80-options-panel button:focus-visible{
+    outline:3px solid #ad745f;outline-offset:2px
+  }
+}
