@@ -1,0 +1,43 @@
+name: R79 Quiet Light UI and Grading Safety
+on:
+  pull_request:
+    paths:
+      - 'base/index.html'
+      - 'app/editor.html'
+      - 'base/css/r79-quiet-interface.css'
+      - 'app/css/r79-quiet-chrome.css'
+      - 'scripts/r79-*.mjs'
+      - '.github/workflows/r79-quiet-ui-qa.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  light-ui-and-score-safety:
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Static theme, grades, no ads
+        run: |
+          node scripts/r79-quiet-ui-static-qa.mjs
+          node scripts/r78-compact-static-qa.mjs
+          npm run build:cloudflare
+          test -s dist/base/css/r79-quiet-interface.css
+          test -s dist/app/css/r79-quiet-chrome.css
+      - name: Install browsers
+        run: |
+          npm install --no-save playwright@1.56.1
+          npx playwright install --with-deps chromium webkit
+      - name: Serve build
+        run: |
+          python3 -m http.server 4173 --bind 127.0.0.1 --directory dist >/tmp/r79-server.log 2>&1 &
+          for i in $(seq 1 30); do
+            if curl -fsS http://127.0.0.1:4173/index.html >/dev/null; then exit 0; fi
+            sleep 1
+          done
+          exit 1
+      - name: Chromium/WebKit responsive UI + chart isolation
+        run: node scripts/r79-quiet-ui-browser-qa.mjs
