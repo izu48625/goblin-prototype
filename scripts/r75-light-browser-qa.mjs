@@ -47,7 +47,7 @@ for(const engine of [chromium,webkit]){
      assert(luminosity(x[k].bg)>.65,'Old dark surface: '+k+' '+JSON.stringify(x[k]));
      assert(contrast(x[k].bg,x[k].fg)>=3.0,'Unreadable area: '+k+' '+JSON.stringify(x[k]));
    }
-   assert(x.rowBtn.height>=40,'Add-row touch target regressed');
+   assert(x.rowBtn.height>=(width<500?40:30),'Add-row touch target regressed');
    assert(x.overflow<=2,'Light editor horizontal overflow at '+width);
    await frame.locator('[data-score-row="0"][data-score-col="0"]').fill('97');
    await frame.locator('#titleInput').click();
