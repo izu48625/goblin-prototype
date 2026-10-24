@@ -1,0 +1,107 @@
+/* R72: editorial, work-led brand treatment. Public bilingual landing pages only.
+   Original charts remain the source of visual color; no decorative AI gradients. */
+body[data-sm-localized-landing]{
+  color-scheme:light;background:#f6f5f1;color:#20242b;
+  font-family:system-ui,-apple-system,BlinkMacSystemFont,"Noto Sans JP",sans-serif;
+}
+body[data-sm-localized-landing] a{color:#235e66;text-decoration-color:#8fc0be;text-underline-offset:3px}
+body[data-sm-localized-landing] main,
+body[data-sm-localized-landing] footer{width:min(1120px,calc(100% - 36px))}
+body[data-sm-localized-landing] .hero{
+  position:relative;margin-top:16px;padding:clamp(30px,5.2vw,70px) clamp(19px,4.6vw,62px);
+  border:1px solid #e3dfd6;border-radius:4px;
+  background:#fff;
+}
+body[data-sm-localized-landing] .hero::before{
+  content:"";position:absolute;top:0;left:0;bottom:0;width:6px;background:#df6c52
+}
+body[data-sm-localized-landing] .eyebrow{
+  color:#ae523d;letter-spacing:.065em;font-size:12px;font-weight:800
+}
+body[data-sm-localized-landing] h1{
+  max-width:900px;margin:12px 0 18px;
+  font-size:clamp(33px,5.4vw,62px);font-weight:850;
+  color:#20242b;letter-spacing:-.04em;line-height:1.14;
+}
+body[data-sm-localized-landing] h2{color:#252930;letter-spacing:-.025em}
+body[data-sm-localized-landing] h3{color:#252930}
+body[data-sm-localized-landing] p,
+body[data-sm-localized-landing] .lead{color:#555d63}
+body[data-sm-localized-landing] .lead{max-width:790px;font-size:clamp(16px,1.8vw,19px)}
+body[data-sm-localized-landing] .actions a{
+  min-height:48px;display:inline-flex;align-items:center;justify-content:center;
+  padding:12px 20px;border:1px solid #c8543d;border-radius:5px;
+  background:#c8543d;color:#fff;text-decoration:none;font-weight:850;
+  box-shadow:none
+}
+body[data-sm-localized-landing] .actions a.secondary{
+  background:#fff;border-color:#b8b6b0;color:#292d34
+}
+body[data-sm-localized-landing] .actions a:hover{filter:brightness(.96)}
+body[data-sm-localized-landing] section:not(.hero){
+  border-bottom:1px solid #dedbd4;padding-top:27px;padding-bottom:30px
+}
+body[data-sm-localized-landing] .grid article{
+  border:1px solid #dedbd4;background:#fff;border-radius:5px;
+  padding:17px 19px;box-shadow:none
+}
+body[data-sm-localized-landing] .grid article p{color:#60666b;font-size:14px}
+body[data-sm-localized-landing] .grid article h3{font-size:16px}
+body[data-sm-localized-landing] .r71ShowcaseRail{gap:14px;scrollbar-color:#b8b9b4 transparent}
+body[data-sm-localized-landing] .r71ShowcaseCard{
+  background:#fff;border:1px solid #d7d4cb;color:#272b31;
+  border-radius:5px;box-shadow:0 3px 12px rgba(32,36,43,.035)
+}
+body[data-sm-localized-landing] .r71ShowcaseCard:hover{
+  border-color:#b46d59;transform:translateY(-2px)
+}
+body[data-sm-localized-landing] .r71ShowcaseCard img{background:#ecebea}
+body[data-sm-localized-landing] .r71CardCopy strong{color:#22262d}
+body[data-sm-localized-landing] .r71CardCopy small{color:#62686d}
+body[data-sm-localized-landing] .r71CategoryRail a{
+  min-height:50px;background:#fff;border:1px solid #d7d4cc;
+  color:#2d3136;border-radius:5px;font-size:14px
+}
+body[data-sm-localized-landing] .r71CategoryRail a span{color:#71777b}
+body[data-sm-localized-landing] .r71CategoryRail a:hover{background:#fbf0e9;border-color:#d09b8d}
+body[data-sm-localized-landing] details{
+  border-color:#dedbd4;color:#282c32
+}
+body[data-sm-localized-landing] details[open]{background:#fff}
+body[data-sm-localized-landing] summary{color:#292e34}
+body[data-sm-localized-landing] footer{
+  border-color:#dedbd4;color:#60676d
+}
+body[data-sm-localized-landing] .globalLocaleBar{
+  background:#fff;color:#4d555c;border-bottom:1px solid #dedbd4
+}
+body[data-sm-localized-landing] .globalHomeBtn{
+  background:#fff;color:#303940;border:1px solid #c8cac4;border-radius:5px
+}
+body[data-sm-localized-landing] .globalLocaleSwitch{
+  background:#efeee9;border-color:#dad9d2;border-radius:5px
+}
+body[data-sm-localized-landing] .globalLocaleSwitch button{color:#515960}
+body[data-sm-localized-landing] .globalLocaleSwitch button.active{
+  background:#292d32;color:#fff;box-shadow:none
+}
+body[data-sm-localized-landing] :is(a,button,summary):focus-visible{
+  outline:3px solid #007f83;outline-offset:3px
+}
+@media(max-width:680px){
+  body[data-sm-localized-landing] main,
+  body[data-sm-localized-landing] footer{width:calc(100% - 28px)}
+  body[data-sm-localized-landing] .hero{
+    padding:29px 19px 25px;margin-top:10px
+  }
+  body[data-sm-localized-landing] section:not(.hero){
+    padding-top:23px;padding-bottom:23px
+  }
+  body[data-sm-localized-landing] .grid article{padding:13px 14px}
+  body[data-sm-localized-landing] .grid article h3{font-size:15px}
+  body[data-sm-localized-landing] .grid article p{font-size:13px}
+  body[data-sm-localized-landing] .r71ShowcaseRail{
+    margin-right:-14px;padding-right:14px;gap:10px
+  }
+  body[data-sm-localized-landing] .r71CategoryRail{margin-right:-14px;padding-right:14px}
+}
