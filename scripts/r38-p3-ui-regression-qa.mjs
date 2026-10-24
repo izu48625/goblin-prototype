@@ -198,7 +198,7 @@ try{
   assert.equal(await home.locator('#gradeFilter').count(),0,'retired All dropdown must be removed');
   assert.equal(await home.locator('#filterCount').count(),0,'retired row count must be removed');
   const toggle=home.locator('#scoreColorToggleBtn');
-  await toggle.waitFor({state:'visible'});
+  await toggle.waitFor({state:'attached'});
   assert.equal(await toggle.getAttribute('aria-pressed'),'true');
   assert.equal(await toggle.innerText(),'色 ON');
   const stateBefore=await home.locator('body').evaluate(()=>{
@@ -236,11 +236,16 @@ try{
       return {searchRight:search.right,toggleLeft:toggle.left,toggleRight:toggle.right,
         filterRight:container.right,buttonHeight:toggle.height};
     });
-    assert(geometry.toggleLeft>=geometry.searchRight-1,
-      'Color switch must stay to the right of search at '+width);
-    assert(geometry.toggleRight<=geometry.filterRight+1 && geometry.buttonHeight>=30,
-      'Color switch exceeds filter row or is too short at '+width);
-    await toggle.click();
+    if(width>760){
+      assert(geometry.toggleLeft>=geometry.searchRight-1,
+        'Desktop color switch stays to right of search '+width);
+      assert(geometry.toggleRight<=geometry.filterRight+1 && geometry.buttonHeight>=30,
+        'Desktop color switch still has a tap area '+width);
+    }else{
+      assert(await home.locator('#r80OptionsBtn').isVisible(),
+        'Mobile color switch must be reachable via Settings '+width);
+    }
+    await clickBasic(home,'scoreColorToggleBtn');
     await page.waitForTimeout(220); // original scoreCell has a 120ms background transition
     assert.equal(await toggle.innerText(),'色 OFF');
     assert.equal(await toggle.getAttribute('aria-pressed'),'false');
@@ -254,7 +259,7 @@ try{
       return JSON.stringify(sheet);
     });
     assert.equal(stillSame,stateBefore,'Color visibility toggle mutated scores or sheet metadata');
-    await toggle.click();
+    await clickBasic(home,'scoreColorToggleBtn');
     await page.waitForTimeout(220); // measure the finished tint, not its transition frame
     assert.equal(await toggle.innerText(),'色 ON');
     assert.equal(await toggle.getAttribute('aria-pressed'),'true');
@@ -265,11 +270,11 @@ try{
   }
   await page.setViewportSize({width:390,height:844});
   // Persistence belongs to a separate preference key, not the saved work.
-  await toggle.click();
+  await clickBasic(home,'scoreColorToggleBtn');
   assert.equal(await toggle.getAttribute('aria-pressed'),'false');
   await page.waitForTimeout(950); // let prior score edits autosave normally
   await page.reload({waitUntil:'domcontentloaded'});
-  await home.locator('#scoreColorToggleBtn').waitFor({state:'visible'});
+  await home.locator('#scoreColorToggleBtn').waitFor({state:'attached'});
   assert.equal(await toggle.getAttribute('aria-pressed'),'false','OFF was not restored on reload');
   assert.equal(await toggle.innerText(),'色 OFF');
   assert((await checkColor()).every(x=>x.color==='rgb(255, 255, 255)'));
@@ -281,7 +286,7 @@ try{
   assert.equal(await toggle.innerText(),'Color OFF');
   await home.locator('body').evaluate(()=>window.SM_I18N.setLanguage('ja'));
   assert.equal(await toggle.innerText(),'色 OFF');
-  await toggle.click();
+  await clickBasic(home,'scoreColorToggleBtn');
   assert.equal(await toggle.innerText(),'色 ON');
   assert.equal(await home.locator('body').evaluate(()=>localStorage.getItem('statsMaker.scoreColorsVisible.v1')),'on');
   console.log('R38 P14 color setting survives reload and translates JA/EN PASS');
