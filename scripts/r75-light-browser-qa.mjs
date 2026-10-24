@@ -51,6 +51,8 @@ for(const engine of [chromium,webkit]){
    assert(x.overflow<=2,'Light editor horizontal overflow at '+width);
    await frame.locator('[data-score-row="0"][data-score-col="0"]').fill('97');
    await frame.locator('#titleInput').click();
+   // The original scoring UI deliberately animates its RGBA transition (120ms).
+   await page.waitForTimeout(240);
    const tile=await frame.locator('#scoreTable tbody tr:first-child td.scoreCell').first().evaluate(el=>({
      color:getComputedStyle(el).backgroundColor,
      alpha:el.style.getPropertyValue('--score-tile-overlay'),
