@@ -1,0 +1,51 @@
+name: R70 AdSense Original Content and Native PNGs
+on:
+  pull_request:
+    paths:
+      - 'scripts/r70-*.mjs'
+      - 'ja/**'
+      - 'en/**'
+      - 'worker/seo.js'
+      - 'index.html'
+      - 'app/src/launcher.js'
+      - 'cloud/global-locale.js'
+      - '.github/workflows/r70-native-content.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  examples-and-readiness:
+    if: github.event_name == 'workflow_dispatch' || (github.event.pull_request.head.repo.full_name == github.repository && github.head_ref == 'r70-adsense-content-examples-20261024')
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Build files and install local headless browser
+        run: |
+          npm run build:cloudflare
+          npm install --no-save playwright@1.56.1
+          npx playwright install --with-deps chromium webkit
+      - name: Start a localhost-only HTTP server
+        run: |
+          python3 -m http.server 4173 --bind 127.0.0.1 --directory dist >/tmp/r70-http.log 2>&1 &
+          for i in $(seq 1 30); do
+            if curl -fsS http://127.0.0.1:4173/ja/ >/dev/null; then exit 0; fi
+            sleep 1
+          done
+          exit 1
+      - name: Generate three real 1080px PNGs using Stats Maker's own renderer
+        env:
+          BASE_URL: http://127.0.0.1:4173
+        run: node scripts/r70-generate-native-examples.mjs
+      - name: Rebuild Cloudflare bundle with generated PNGs
+        run: npm run build:cloudflare
+      - name: Verify content quality, privacy and existing SEO
+        run: |
+          node --check scripts/r70-adsense-content-qa.mjs
+          node scripts/r70-adsense-content-qa.mjs
+          node scripts/r70-showcase-browser-qa.mjs
+          node scripts/r47-seo-guides-qa.mjs
+          node scripts/r34-seo-edge-test.mjs

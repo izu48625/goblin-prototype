@@ -37,6 +37,11 @@ window.SM_LAUNCHER_SET_LANGUAGE=setLanguage;
 function renderLanguage(){
   const u=UI[language];
   $("launcherTitle").textContent=u.launcherTitle;$("launcherSub").textContent=u.launcherSub;$("pickerTitle").textContent=u.pickerTitle;$("pickerDesc").textContent=u.pickerDesc;
+  const examples=$("extExamplesLink");
+  if(examples){
+    examples.href=language==="en"?"/en/examples.html":"/ja/examples.html";
+    examples.textContent=language==="en"?"See finished chart examples and instructions →":"完成グラフの作例と作り方を見る →";
+  }
   const host=$("extGroups");host.innerHTML="";
   ["popular","compare","ranking","number","creative"].forEach(group=>{
     const items=EXTENSIONS.filter(x=>x[0]===group);if(!items.length)return;
