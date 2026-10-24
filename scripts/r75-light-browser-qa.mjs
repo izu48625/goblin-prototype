@@ -64,6 +64,7 @@ for(const engine of [chromium,webkit]){
    const toggle=frame.locator('#scoreColorToggleBtn');
    assert.equal(await toggle.getAttribute('aria-pressed'),'true');
    await toggle.click();
+   await page.waitForTimeout(240);
    const off=await frame.locator('#scoreTable tbody tr:first-child td.scoreCell').first().evaluate(el=>getComputedStyle(el).backgroundColor);
    assert.equal(off,'rgb(255, 255, 255)','OFF must be white');
    await toggle.click();
