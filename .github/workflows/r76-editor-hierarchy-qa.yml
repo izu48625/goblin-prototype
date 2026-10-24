@@ -1,0 +1,44 @@
+name: R76 Editor Hierarchy and Touch Regression
+on:
+  pull_request:
+    paths:
+      - 'index.html'
+      - 'base/index.html'
+      - 'base/css/r76-editor-hierarchy.css'
+      - 'cloud/r76-launcher.css'
+      - 'scripts/r76-*.mjs'
+      - '.github/workflows/r76-editor-hierarchy-qa.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  readable-uncluttered-scoring:
+    runs-on: ubuntu-latest
+    timeout-minutes: 22
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Static, score transparency and AdSense safeguards
+        run: |
+          node scripts/r76-editor-hierarchy-static-qa.mjs
+          node scripts/r75-light-static-qa.mjs
+          node scripts/r72-readiness-qa.mjs
+          npm run build:cloudflare
+          test -s dist/base/css/r76-editor-hierarchy.css
+          test -s dist/cloud/r76-launcher.css
+      - name: Install Chromium/WebKit
+        run: |
+          npm install --no-save playwright@1.56.1
+          npx playwright install --with-deps chromium webkit
+      - name: Serve local static build
+        run: |
+          python3 -m http.server 4173 --bind 127.0.0.1 --directory dist >/tmp/r76-server.log 2>&1 &
+          for i in $(seq 1 30); do
+            if curl -fsS http://127.0.0.1:4173/index.html >/dev/null; then exit 0; fi
+            sleep 1
+          done
+          exit 1
+      - name: Cross-browser 320/390/1180, scoring, sort, menu and launcher
+        run: node scripts/r76-editor-hierarchy-browser-qa.mjs
