@@ -168,6 +168,12 @@ html[data-sm-theme="dark"] body:has(#scoreTable)
 td.scoreCell:not(.heat-e):not(.heat-d):not(.heat-c):not(.heat-b):not(.heat-a):not(.heat-s):not(.heat-ss){
   background:var(--r82-table-alt)!important
 }
+/* Dark grid lines must also reach tinted score cells; the tint/background
+   declaration is intentionally untouched, preserving exact rgba alpha. */
+html[data-sm-theme="dark"] body:has(#scoreTable)
+#scoreTable tbody td:is(.scoreCell,.avgCell){
+  border-color:var(--r82-rule)!important
+}
 /* Don't touch any scored td.heat-* colors: keep their exact RGBA/alpha. */
 html[data-sm-theme="dark"] body:has(#scoreTable) #scoreTable
 :is(.nameInput,.scoreInput,.avgValue,.grade){
