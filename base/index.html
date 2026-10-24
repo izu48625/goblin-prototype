@@ -15,6 +15,7 @@
 <link rel="stylesheet" href="css/r74-score-harmony.css?v=r74p1">
 <link rel="stylesheet" href="css/r75-light-editor.css?v=r75p1">
 <link rel="stylesheet" href="css/r76-editor-hierarchy.css?v=r76p1">
+<link rel="stylesheet" href="css/r78-compact-header.css?v=r78p1">
 </head>
 <body data-build="R25-P4" data-sm-ad-page="home">
 <div id="viewOnlyBanner" class="viewOnlyBanner hidden">
@@ -35,15 +36,16 @@
     </div>
 
     <div class="titleArea">
-      <div>
+      <div class="titleHeading">
         <div class="fieldLabel" data-i18n="field.title">表題</div>
         <input id="titleInput" class="titleInput" value="" placeholder="例：歴代ジャンプ主人公評価" aria-label="表題" data-i18n-placeholder="field.titlePlaceholder" data-i18n-aria="field.title">
+      </div>
+      <div class="descriptionGroup">
         <input id="descInput" class="descInput" value="" placeholder="この表の説明（任意）" aria-label="説明" data-i18n-placeholder="field.descriptionPlaceholder" data-i18n-aria="field.description">
       </div>
-      <div>
+      <div class="savedSheetGroup">
         <div class="savedSheetHead">
           <div class="fieldLabel" data-i18n="field.savedSheets">保存シート</div>
-
         </div>
         <select id="sheetSelect" class="sheetSelect" aria-label="保存シート" data-i18n-aria="field.savedSheets"></select>
       </div>
