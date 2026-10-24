@@ -1,6 +1,7 @@
 /* R73: complete neutral chrome for the Local-first basic editor.
    Intentionally does NOT alter score colors, heat-* overlay, input dimensions,
-   exported charts, sheet data, sorting or iPhone layout. */
+   exported charts, sheet data, sorting or iPhone layout.
+   Score table backing #101b30 is screenshot-locked; never restyle it. */
 :root{
   --bg:#191b1c;--panel:#25282a;--panel2:#2d3032;--panel3:#373b3d;
   --text:#f3f1ec;--muted:#b5bebc;--line:#494d4e;--line2:#62686a;
@@ -69,9 +70,6 @@ body{background:#191b1c}
 .sheetPanel .tableWrap,.tableWrap,.fitViewport{
   background:#262a2b;border-color:#454a4b
 }
-#scoreTable,#scoreTable table,.fitTable,.overviewGrid{
-  background:#262a2b
-}
 #scoreTable th,#scoreTable td,.fitTable th,.fitTable td{
   border-color:#4f5354
 }
@@ -81,10 +79,6 @@ body{background:#191b1c}
 #scoreTable td.nameCell,#scoreTable td.indexCell,
 .fitTable td.nameCell,.fitTable td.indexCell{
   background:#2e3233;color:#f1eee8
-}
-#scoreTable td.scoreCell:not([class*="heat-"]),
-#scoreTable td.avgCell:not([class*="heat-"]){
-  background-color:#2a2e30
 }
 #scoreTable .metricSortBtn:hover,#scoreTable .metricSortBtn.active,
 #scoreTable .avgSortBtn.active{background:#5d5046;color:#fff}
