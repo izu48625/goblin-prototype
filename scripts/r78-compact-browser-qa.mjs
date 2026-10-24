@@ -5,7 +5,7 @@ for(const engine of [chromium,webkit]){
  const browser=await engine.launch({headless:true});
  try{
   for(const width of [320,375,390,430,1180]){
-   const context=await browser.newContext({viewport:{width,height:844},isMobile:width<500,hasTouch:width<500,locale:'ja-JP'});
+   const context=await browser.newContext({viewport:{width,height:width===320?568:width===375?560:844},isMobile:width<500,hasTouch:width<500,locale:'ja-JP'});
    await context.route('https://*.supabase.co/**',route=>route.abort());
    await context.route('https://cdn.jsdelivr.net/**',route=>route.fulfill({
     status:200,contentType:'application/javascript',body:'window.supabase={createClient:()=>({})};'
@@ -57,6 +57,16 @@ for(const engine of [chromium,webkit]){
    await frame.locator('#sheetSelect').click();
    assert.equal(await frame.locator('#titleInput').inputValue(),'R78入力確認');
    assert.equal(await frame.locator('#descInput').inputValue(),'省スペースでも編集できる');
+   await frame.locator('#scoreTable .scoreInput').first().fill('82');
+   await frame.locator('#scoreTable .scoreInput').first().press('Tab');
+   const overflowDebug=await frame.locator('body').evaluate(()=>{
+     const d=document.documentElement;
+     return {over:d.scrollWidth-innerWidth,scrollWidth:d.scrollWidth,innerWidth,
+       large:[...document.querySelectorAll('body *')].filter(el=>el.getBoundingClientRect().right>innerWidth+2)
+         .slice(0,12).map(el=>({tag:el.tagName,id:el.id,cls:String(el.className).slice(0,55),
+           right:Math.round(el.getBoundingClientRect().right),width:Math.round(el.getBoundingClientRect().width)}))};
+   });
+   assert(overflowDebug.over<=2,'After scoring input there must be no whole-page overflow at '+width+' '+JSON.stringify(overflowDebug));
    const oldRows=await frame.locator('#scoreTable tbody tr').count();
    await frame.locator('#addRowBtn').click();
    assert((await frame.locator('#scoreTable tbody tr').count())>oldRows,'Scoring table behavior lost');
