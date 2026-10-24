@@ -44,6 +44,10 @@
   .topbar .titleArea>.savedSheetGroup{
     grid-column:2;grid-row:2;
     min-width:0;align-self:end;
+    /* WebKit's native SELECT can have scrollWidth wider than its border
+       when a saved sheet has a long name. Contain only that text overflow;
+       do not interfere with the independently scrollable scoring table. */
+    overflow:hidden;
   }
   .topbar .titleHeading>.fieldLabel{
     margin:0 0 4px;
