@@ -1,0 +1,78 @@
+/* R74 — editor palette harmony.
+   The numeric grid is a deliberately dark scoring surface: never overwrite
+   R38's screenshot-locked rgba heat tiles or their #101b30 backing.
+   Only surrounding commands, field labels and controls are restyled. */
+:root{
+ --sm-editor-primary:#b64d35;
+ --sm-editor-action:#4b4038;
+ --sm-editor-action-border:#a78066;
+ --sm-editor-quiet:#35393b;
+ --sm-editor-fg:#f3f0e9;
+}
+#addRowBtn,#addColBtn{
+ background:var(--sm-editor-action);
+ border:1px solid var(--sm-editor-action-border);
+ color:var(--sm-editor-fg);
+ box-shadow:none;
+}
+#addRowBtn:hover,#addColBtn:hover{
+ background:#635044;border-color:#e0af89;color:#fff;
+}
+#currentScaleBadge,.currentScaleBadge{
+ background:#463e33;border:1px solid #947958;
+ border-radius:5px;color:#f2dfc5;
+ font-weight:900;box-shadow:none
+}
+#scoreSettingsBtn,#moreToolsBtn{
+ background:#35393b;border:1px solid #656b6a;
+ color:#f2efe8;box-shadow:none;
+}
+#sheetViewBtn,#overviewViewBtn,#fitViewBtn{
+ border-radius:5px
+}
+#sheetViewBtn.active,#overviewViewBtn.active,#fitViewBtn.active{
+ background:#665044;color:#fff;border-color:#d6a17d;
+}
+#scoreColorToggleBtn,
+#scoreColorToggleBtn.is-on,
+#scoreColorToggleBtn[aria-pressed="true"]{
+ color:#fff;background:#286558;border:1px solid #78a995;
+ box-shadow:none
+}
+#scoreColorToggleBtn[aria-pressed="false"]{
+ background:#343a3a;border-color:#747a77;color:#d7dfd9
+}
+#scoreColorToggleBtn:focus-visible{outline-color:#f0b68a}
+#searchInput.searchInput{
+ color:#f4f0e9;border-color:#737a78;background:#2a2e30;
+}
+#searchInput.searchInput::placeholder{color:#aeb5b3;opacity:1}
+#scoreTable td.nameCell .nameInput::placeholder,
+#scoreTable td.nameCell input::placeholder{
+ color:#aeb5b8;opacity:1
+}
+#scoreTable .metricSortBtn.active::after,
+#scoreTable .avgSortBtn.active::after{
+ color:#f0cba9
+}
+#scoreTable td.nameCell,
+#scoreTable td.indexCell{
+ color:#e7e7e2
+}
+.topbar .fieldLabel{color:#c8cdcb}
+.topbar .descInput::placeholder{color:#b9c1c0}
+#moreToolsBtn:hover,#scoreSettingsBtn:hover{
+ border-color:#d3a383
+}
+:where(#addRowBtn,#addColBtn,#scoreSettingsBtn,#moreToolsBtn,
+ #scoreColorToggleBtn,#sheetViewBtn,#overviewViewBtn,#fitViewBtn):focus-visible{
+ outline:3px solid #e9b18a;outline-offset:2px
+}
+@media(max-width:760px){
+ #addRowBtn,#addColBtn,#scoreSettingsBtn,#moreToolsBtn{
+   min-height:44px;border-radius:5px
+ }
+ #currentScaleBadge{border-radius:5px}
+}
+/* Explicitly no selectors for graded .scoreCell/.avgCell backgrounds,
+   --score-tile-overlay, exported graph template or numeric value logic. */

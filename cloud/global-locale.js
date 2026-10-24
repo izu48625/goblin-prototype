@@ -30,7 +30,15 @@
     ?document.body.dataset.smLocalizedLanding:'';
   const legalLang=()=>['en','ja'].includes(document.body?.dataset.smLegalPage)
     ?document.body.dataset.smLegalPage:'';
-  const current=()=>landingLang()||legalLang()||normalize(localStorage.getItem(KEY)||localStorage.getItem(LEGACY)||navigator.language||'ja');
+  // Article language is authoritative, just like /ja/ and /en/ introductions.
+  // The original article text must not silently flip language in-place.
+  const readingLang=()=>['en','ja'].includes(document.body?.dataset.smReadingPage)
+    ?document.body.dataset.smReadingPage:'';
+  const articleName=()=>{
+    const name=location.pathname.split('/').pop();
+    return ['chart-guide.html','png-guide.html','examples.html'].includes(name)?name:null;
+  };
+  const current=()=>landingLang()||legalLang()||readingLang()||normalize(localStorage.getItem(KEY)||localStorage.getItem(LEGACY)||navigator.language||'ja');
   // Browser/CDN rewrites may expose an embedded Home as /base/ instead of
   // /base/index.html. Check the frame relationship, never the URL spelling.
   // All embedded views borrow the parent's single fixed language/Home bar.
@@ -104,6 +112,12 @@
       location.assign(previewUrl(new URL('/'+lang+'/legal.html'+location.hash,location.origin).href));
       return;
     }
+    if(readingLang()&&articleName()){
+      // Switch to the exact JA/EN counterpart of the current guide/example.
+      // Keep in-page anchors; never convert an article into a mismatched language.
+      location.assign(previewUrl(new URL('/'+lang+'/'+articleName()+location.hash,location.origin).href));
+      return;
+    }
     if(landingLang()){
       // Selecting JA or EN on an intro page opens the corresponding real
       // localized page, not a reload of the previous language.
@@ -125,7 +139,7 @@
     // No scoring or public-data writes happen on a display-language change.
     location.reload();
   }
-  const homePath=()=>legalLang()?'/index.html?fresh=1':(location.pathname.startsWith('/app/')?'../index.html?fresh=1':'index.html?fresh=1');
+  const homePath=()=>legalLang()||readingLang()?'/index.html?lang='+current():(location.pathname.startsWith('/app/')?'../index.html?fresh=1':'index.html?fresh=1');
   function openHome(event){
     event.preventDefault();
     const frame=document.getElementById('basicFrame');
@@ -143,10 +157,10 @@
   }
   function mount(){
     if(document.querySelector('.globalLocaleBar'))return;
-    if(landingLang()||legalLang()){
+    if(landingLang()||legalLang()||readingLang()){
       try{
-        localStorage.setItem(KEY,landingLang()||legalLang());
-        localStorage.setItem(LEGACY,landingLang()||legalLang());
+        localStorage.setItem(KEY,landingLang()||legalLang()||readingLang());
+        localStorage.setItem(LEGACY,landingLang()||legalLang()||readingLang());
       }catch{}
     }
     document.body.classList.add('hasGlobalLocaleBar');
@@ -156,7 +170,7 @@
     bar.innerHTML='<nav class="globalNavLinks" aria-label="Site navigation"><a class="globalHomeBtn" href="index.html?fresh=1" aria-label="ホームを開く">HOME</a><a class="globalDiscoverBtn" href="discover.html" aria-label="Discoverを開く">Discover</a><a class="globalIntroBtn" href="/ja/" aria-label="STATS MAKERの紹介ページ">紹介</a><details class="globalSupportMenu"><summary>ヘルプ</summary><div class="globalSupportPanel"><a data-global-guide="chart" href="/ja/chart-guide.html">グラフの作り方・能力比較</a><a data-global-guide="png" href="/ja/png-guide.html">PNG保存・共有</a><a data-global-guide="examples" href="/ja/examples.html">完成グラフの作例</a><div class="globalSupportDivider" aria-hidden="true"></div><a data-global-support="terms" href="/ja/legal.html#terms">利用規約</a><a data-global-support="privacy" href="/ja/legal.html#privacy">プライバシー</a><a data-global-support="contact" href="/ja/legal.html#contact">お問い合わせ</a></div></details></nav><div class="globalLocaleControls"><span class="globalLocaleLabel">表示言語</span><div class="globalLocaleSwitch"><button type="button" data-global-lang="ja" aria-label="日本語">JA</button><button type="button" data-global-lang="en" aria-label="English">EN</button></div></div>';
     document.body.prepend(bar);
     bar.querySelector('.globalHomeBtn').href=previewUrl(new URL(landingLang()?'/index.html?lang='+current():homePath(),location.href).href);
-    bar.querySelector('.globalDiscoverBtn').href=previewUrl(new URL(landingLang()?'/discover.html?lang='+current():(legalLang()?'/discover.html':(location.pathname.startsWith('/app/')?'../discover.html':'discover.html')),location.href).href);
+    bar.querySelector('.globalDiscoverBtn').href=previewUrl(new URL((landingLang()||legalLang()||readingLang())?'/discover.html?lang='+current():(legalLang()?'/discover.html':(location.pathname.startsWith('/app/')?'../discover.html':'discover.html')),location.href).href);
     // Preserve a compact navigation bar on iPhone; close the dropdown on
     // outside click or Escape, rather than adding another wide fixed tab.
     document.addEventListener('click',event=>{

@@ -23,7 +23,7 @@ for(const lang of ['ja','en']){
   assert(!page.includes('adsbygoogle.js'));
   for(const suffix of ['legal.html','chart-guide.html','png-guide.html','examples.html']){
     const file=await read(lang+'/'+suffix);
-    assert(file.includes('r73-reading.css?v=r73p1'),'Light reading stylesheet missing on '+lang+'/'+suffix);
+    assert(/r73-reading\.css\?v=r(?:73|74)p1/.test(file),'Light reading stylesheet missing on '+lang+'/'+suffix);
     assert(file.includes('r73-reading'),'Page not tagged '+lang+'/'+suffix);
     assert(file.includes('content="#f6f5f1"'),'iPhone theme color not neutral '+suffix);
     assert(!file.includes('adsbygoogle.js'));
