@@ -69,7 +69,8 @@
   }[locale];
 
   // Landing page category links use only known filters (no unbounded searches).
-  const incoming=new URLSearchParams(window.location.search);
+  const incoming=typeof URLSearchParams==='function'
+    ?new URLSearchParams(window.location?.search||''):{get:()=>null};
   const initialCategory=incoming.get('category');
   const initialView=incoming.get('view');
   const state={
@@ -474,7 +475,7 @@
     button.addEventListener('click',()=>{
       state.view=button.dataset.view==='community'?'community':'all';
       window.SM_ANALYTICS?.event('discover_filter',{filter_type:state.view});
-      document.querySelectorAll('.browseTab').forEach(btn=>{btn.classList.toggle('active',btn===button);btn.setAttribute('aria-pressed',String(btn===button));});
+      document.querySelectorAll('.browseTab').forEach(btn=>{btn.classList.toggle('active',btn===button);btn.setAttribute?.('aria-pressed',String(btn===button));});
       reload();
     });
   });
@@ -484,7 +485,7 @@
       const requested=button.dataset.category||'all';
       state.category=categories.includes(requested)?requested:'all';
       window.SM_ANALYTICS?.event('discover_filter',{filter_type:'category'});
-      document.querySelectorAll('.categoryBtn').forEach(btn=>{btn.classList.toggle('active',btn===button);btn.setAttribute('aria-pressed',String(btn===button));});
+      document.querySelectorAll('.categoryBtn').forEach(btn=>{btn.classList.toggle('active',btn===button);btn.setAttribute?.('aria-pressed',String(btn===button));});
       reload();
     });
   });
@@ -504,11 +505,11 @@
   // Match the visual selection to a validated deep link before the first RPC.
   document.querySelectorAll('.categoryBtn').forEach(button=>{
     button.classList.toggle('active',button.dataset.category===state.category);
-    button.setAttribute('aria-pressed',String(button.dataset.category===state.category));
+    button.setAttribute?.('aria-pressed',String(button.dataset.category===state.category));
   });
   document.querySelectorAll('.browseTab').forEach(button=>{
     button.classList.toggle('active',button.dataset.view===state.view);
-    button.setAttribute('aria-pressed',String(button.dataset.view===state.view));
+    button.setAttribute?.('aria-pressed',String(button.dataset.view===state.view));
   });
   reload();
 })();
