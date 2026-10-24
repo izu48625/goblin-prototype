@@ -1,3 +1,4 @@
+import {clickBasic} from './r80-qa-click.mjs';
 import assert from 'node:assert/strict';
 import {chromium} from 'playwright';
 
@@ -38,8 +39,8 @@ try{
       const rect=id=>{const e=document.querySelector(id),r=e?.getBoundingClientRect();
         return r?{height:r.height,width:r.width}:null};
       return {overflow:document.documentElement.scrollWidth-innerWidth,
-        tools:rect('#moreToolsBtn'),score:rect('#scoreTable .scoreInput'),
-        search:rect('#searchInput')};
+        tools:rect('#r80OptionsBtn'),score:rect('#scoreTable .scoreInput'),
+        search:rect('#r80SearchBtn')};
     });
     assert(geometry.overflow<=2,'Home horizontal page overflow at '+size.width+': '+geometry.overflow);
     assert(geometry.tools.height>=40,'More action touch target too small');
@@ -53,7 +54,7 @@ try{
     assert.equal(await home.locator('body').evaluate(()=>
       window.__statsMakerGetActiveSheet()?.rows?.[0]?.scores?.[0]),81);
     const tray=home.locator('#utilityBar');
-    if(!(await tray.isVisible()))await home.locator('#moreToolsBtn').click();
+    if(!(await tray.isVisible()))await clickBasic(home,'moreToolsBtn');
     await tray.waitFor({state:'visible'});
     const utility=await home.locator('#importJsonBtn').evaluate(e=>({
       height:e.getBoundingClientRect().height,font:parseFloat(getComputedStyle(e).fontSize)
