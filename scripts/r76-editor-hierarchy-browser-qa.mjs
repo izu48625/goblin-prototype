@@ -1,3 +1,4 @@
+import {clickBasic,openVisuals} from './r80-qa-click.mjs';
 import assert from 'node:assert/strict';
 import {chromium,webkit} from 'playwright';
 const base='http://127.0.0.1:4173';
@@ -59,15 +60,15 @@ for(const engine of [chromium,webkit]){
    await frame.locator('#addRowBtn').click();
    assert((await frame.locator('#scoreTable tbody tr').count())>rowCount,
      'Add row must still function after visual redesign');
-   await frame.locator('#scoreSettingsBtn').click();
+   await clickBasic(frame,'scoreSettingsBtn');
    assert(await frame.locator('#scoreSettingsPanel').isVisible(),
      'Scoring settings remain accessible');
-   await frame.locator('#scoreSettingsBtn').click();
+   await clickBasic(frame,'scoreSettingsBtn');
    await frame.locator('#overviewViewBtn').click();
    assert(await frame.locator('#overviewSheetView').isVisible(),'Overview button functionality');
    await frame.locator('#sheetViewBtn').click();
    assert(await frame.locator('#normalSheetView').isVisible(),'Return to sheet');
-   await page.locator('#extLauncher').click();
+   await openVisuals(page);
    assert(await page.locator('#extSheet').isVisible(),'Extension sheet still opens');
    await page.locator('#extClose').click();
    assert(!await page.locator('#extSheet').isVisible(),'Extension sheet still closes');
