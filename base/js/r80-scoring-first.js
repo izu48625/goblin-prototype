@@ -13,7 +13,15 @@
     optionsPanel.classList.add('hidden');
     optionsBtn.setAttribute('aria-expanded','false');
   };
-  const closeSearch=()=>{
+  const closeSearch=({clear=false}={})=>{
+    const input=$('searchInput');
+    if(clear&&input?.value){
+      input.value='';
+      input.dispatchEvent(new Event('input',{bubbles:true}));
+    }
+    /* Never silently conceal an active filter: otherwise table rows could
+       appear missing with no visible search explaining why. */
+    if(input?.value)return;
     searchBar.classList.remove('r80-search-open');
     searchBtn.setAttribute('aria-expanded','false');
   };
@@ -49,7 +57,7 @@
   searchBtn.addEventListener('click',()=>{
     const opening=!searchBar.classList.contains('r80-search-open');
     if(opening){searchBar.classList.add('r80-search-open');searchBtn.setAttribute('aria-expanded','true');closeOptions();$('searchInput')?.focus();}
-    else{closeSearch();}
+    else{closeSearch({clear:true});}
   });
   optionsBtn.addEventListener('click',()=>{
     const opening=optionsPanel.classList.contains('hidden');
