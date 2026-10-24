@@ -67,7 +67,8 @@ jobs:
           test -s dist/ja/index.html
           test -s dist/en/index.html
           test -s dist/robots.txt
-          test ! -e dist/ads.txt
+          test -s dist/ads.txt
+          grep -Fx 'google.com, pub-2734957009365610, DIRECT, f08c47fec0942fa0' dist/ads.txt
 
   mobile-and-editor-regression:
     name: iPhone-equivalent, 40x10, save and published scores (mock only)
