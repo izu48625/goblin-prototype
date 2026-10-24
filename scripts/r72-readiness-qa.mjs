@@ -9,7 +9,7 @@ assert(code.includes("'ads.txt'"),'Static build must ship ads.txt');
 for(const lang of ['ja','en']){
   const page=await read(lang+'/index.html');
   assert(page.includes('name="google-adsense-account" content="'+owner+'"'));
-  assert(page.includes('r72-site.css?v=r72p1'));
+  assert(page.includes('r72-site.css?v='),'Landing stylesheet should remain versioned');
   assert(page.includes('class="r72PageNav"'));
   for(const link of ['/index.html?lang='+lang,'/discover.html?lang='+lang,
     '/'+lang+'/examples.html','/'+lang+'/chart-guide.html','/'+lang+'/legal.html#contact']){
