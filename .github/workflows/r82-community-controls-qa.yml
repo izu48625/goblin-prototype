@@ -38,4 +38,4 @@ jobs:
       - name: Real Community Homepage score input and structural hide check
         env:
           BASE_URL: http://127.0.0.1:4173
-        run: node scripts/production-smoke.mjs browser-community-home
+        run: node scripts/production-smoke.mjs browser-community-structure
