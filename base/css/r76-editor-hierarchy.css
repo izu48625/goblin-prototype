@@ -1,0 +1,308 @@
+/* R76 — editorial hierarchy for the light, Local-first scoring editor.
+   Aim: let the scoring GRID lead. No data, controls, dimensions or heat-tile
+   colors are changed. Undo by removing this single last stylesheet. */
+:root{
+  --r76-canvas:#f6f5f1;
+  --r76-white:#fff;
+  --r76-ink:#292f33;
+  --r76-muted:#687176;
+  --r76-rule:#e4e1da;
+  --r76-input:#cfcdc6;
+}
+html,body{background:var(--r76-canvas)}
+.app{padding-top:6px}
+
+/* Turn the two large bordered rectangles into quietly separated regions. */
+.topbar.panel{
+  background:transparent;
+  border:0;
+  border-radius:0;
+  box-shadow:none;
+  padding:8px 10px 11px;
+  margin-bottom:0;
+}
+.sheetPanel.panel{
+  background:var(--r76-white);
+  border:0;
+  border-top:1px solid var(--r76-rule);
+  border-radius:0;
+  box-shadow:none;
+}
+.workspace{gap:12px}
+.sidePanel.panel{
+  border:1px solid var(--r76-rule);
+  border-radius:6px;
+  box-shadow:none;
+}
+
+/* Only editable fields and the actual table retain explicit borders. */
+.topbar :is(.titleInput,.descInput,.sheetSelect){
+  border:1px solid var(--r76-input);
+  border-radius:5px;
+  box-shadow:none;
+  background:#fff;
+}
+.topbar .fieldLabel{color:#5b6468;font-size:10px;font-weight:780}
+.topbar .descInput{
+  border-color:#dedbd5;
+  background:#fcfbf9;
+}
+.titleArea{gap:8px}
+.savedSheetHead{margin-bottom:2px}
+.topActions{gap:7px}
+.topActions .btn:not(.primary):not(.publishBtn){
+  color:#414b4e;background:#fff;
+  border:1px solid #d5d2cb;
+  box-shadow:none;
+}
+.topActions .btn.publishBtn{background:#357461;border-color:#357461;color:#fff}
+.topActions .btn.primary{background:#b4543e;border-color:#b4543e;color:#fff}
+
+/* A single slim toolbar, not a second framed dashboard. */
+.sheetPanel .sheetToolbar{
+  border:0;
+  padding:12px 10px 10px;
+  background:#fff;
+}
+.compactTools{gap:9px}
+.modeStrip{
+  background:#f3f1eb;
+  border:0;
+  border-radius:6px;
+  padding:3px;
+  gap:3px;
+}
+#sheetViewBtn,#overviewViewBtn,#fitViewBtn{
+  border:0;
+  border-radius:4px;
+  color:#626a6e;
+  background:transparent;
+  box-shadow:none;
+}
+:is(#sheetViewBtn,#overviewViewBtn,#fitViewBtn).active{
+  border:0;background:#31373b;color:#fff;
+  box-shadow:0 1px 2px rgba(0,0,0,.07);
+}
+:is(#sheetViewBtn,#overviewViewBtn,#fitViewBtn):not(.active):hover{
+  background:#e7e5df;color:#353d42
+}
+
+/* One visible command layer (+row/+metric) and one quieter configuration
+   layer (settings/scale/more), without hiding or relocating any features. */
+.coreActions{
+  align-items:center;
+  gap:6px;
+}
+.coreActions #addRowBtn,.coreActions #addColBtn{
+  background:#fff;
+  border:1px solid #d9d6cf;
+  color:#a14d38;
+  border-radius:5px;
+  box-shadow:none;
+  font-weight:850;
+}
+.coreActions :is(#addRowBtn,#addColBtn):hover{
+  background:#faf1ed;
+  border-color:#caac9f;
+}
+.coreActions :is(#scoreSettingsBtn,#moreToolsBtn){
+  background:transparent;
+  border:1px solid transparent;
+  color:#505d63;
+  box-shadow:none;
+}
+.coreActions :is(#scoreSettingsBtn,#moreToolsBtn):hover{
+  border-color:#d4d0c7;
+  background:#f3f1ec;
+}
+#currentScaleBadge{
+  background:#f0eee8;
+  color:#61574b;
+  border:0;
+  border-radius:5px;
+  box-shadow:none;
+  padding:0 9px;
+  font-weight:750;
+}
+#scoreColorToggleBtn{
+  border:0;
+  border-radius:5px;
+  box-shadow:none;
+}
+#scoreColorToggleBtn[aria-pressed="true"]{
+  background:#387765;color:#fff;
+}
+#scoreColorToggleBtn[aria-pressed="false"]{
+  background:#eceae4;color:#5c6668;
+}
+.settingsDrawer{
+  border:1px solid var(--r76-rule);
+  background:#fbfaf7;
+  border-radius:6px;
+  margin:0 10px 8px;
+}
+#utilityBar{
+  background:#fbfaf7;
+  border:1px solid var(--r76-rule);
+  border-radius:6px;
+  margin:0 10px 8px;
+}
+
+/* Filter acts as a slim divider before the actual scoring data. */
+.sheetPanel .filterBar{
+  background:#fff;
+  border:0;
+  border-top:1px solid var(--r76-rule);
+  border-bottom:1px solid var(--r76-rule);
+  padding:10px 10px;
+  gap:9px;
+}
+.filterBar #searchInput.searchInput{
+  border:1px solid #d7d5ce;
+  color:#313940;
+  background:#fcfbf9;
+  border-radius:5px;
+}
+.filterBar #searchInput.searchInput:focus{
+  border-color:#a65b49;
+  background:#fff;
+}
+.filterBar #searchInput.searchInput::placeholder{color:#798084}
+#scoreColorToggleBtn{
+  min-height:40px;
+}
+
+/* Soft unobtrusive grid. Important: do NOT change R75 heat backgrounds,
+   score input values, row heights or sorting JavaScript. */
+.sheetPanel .tableWrap{
+  background:#fff;border:0;
+}
+#scoreTable{
+  border-collapse:separate;
+  border-spacing:0;
+}
+#scoreTable :is(th,td){
+  border-color:#e2e0da;
+}
+#scoreTable :is(.indexHead,.nameHead,.metricHead,.avgHead){
+  color:#31383d;
+  background:#f0eee9;
+}
+#scoreTable :is(.metricHeaderBox,.avgHeaderBox){
+  grid-template-rows:minmax(29px,1fr) 25px;
+}
+#scoreTable :is(.metricHeaderMain,.avgHeaderMain){
+  color:#363d42;
+  background:#f0eee9;
+}
+#scoreTable .metricHeaderInput{
+  background:transparent;
+  color:#323a40;
+  font-size:12px;
+  height:28px;
+  font-weight:850;
+  border:1px solid transparent;
+}
+#scoreTable .metricHeaderInput:hover{
+  background:#f9f8f5;
+  border-color:#dad7cf;
+}
+#scoreTable .metricHeaderInput:focus{
+  color:#30373c;
+  background:#fff;
+  border-color:#a85b46;
+  box-shadow:none;
+  outline:2px solid #bd8a7d;
+  outline-offset:-2px;
+}
+#scoreTable .headerSortRow{
+  background:#f0eee9;
+  border-top:1px solid #e1ded7;
+}
+#scoreTable .headerSortBtn{
+  background:transparent;
+  color:#68757b;
+  border:0;
+  font-size:12px;
+  min-height:25px;
+}
+#scoreTable .headerSortBtn+.headerSortBtn{
+  border-left:1px solid #e1ded7;
+}
+#scoreTable .headerSortBtn:hover,
+#scoreTable .headerSortBtn:focus-visible{
+  background:#dfe2dd;
+  color:#242f33;
+}
+#scoreTable .headerSortBtn[aria-pressed="true"],
+#scoreTable .headerSortBtn.active{
+  background:#e2e7e1;
+  color:#2c5b51;
+}
+#scoreTable :is(.nameCell,.indexCell){
+  background:#faf9f6;
+}
+/* The pale score cells and translucent score bands keep their R75/R38 palette;
+   never recolor scoreCell, avgCell or the --score-tile-overlay variable. */
+
+/* Maintain affordance, but avoid another strong boxed row. */
+.emptyAddRow{
+  border-top:1px solid var(--r76-rule);
+  background:#fff;
+  padding:6px 10px;
+}
+#addRowWideBtn{
+  border:1px dashed #d2d0c9;
+  color:#7d5b50;
+  background:#fbfaf7;
+}
+.columnManage{border-top:1px solid var(--r76-rule);background:#fff}
+
+/* Keep keyboard/touch access while softening repeated outlines. */
+:is(#addRowBtn,#addColBtn,#scoreSettingsBtn,#moreToolsBtn,
+ #sheetViewBtn,#overviewViewBtn,#fitViewBtn,
+ #scoreColorToggleBtn,.headerSortBtn):focus-visible{
+  outline:3px solid #b97d68;
+  outline-offset:2px
+}
+
+@media(max-width:760px){
+  .app{padding:4px 5px max(9px,env(safe-area-inset-bottom))}
+  .topbar.panel{
+    padding:7px 6px 11px;
+    margin-bottom:0;
+  }
+  .titleArea{gap:6px}
+  .topbar .fieldLabel{font-size:9px;margin-bottom:4px}
+  .topbar .descInput{margin-top:6px}
+  .topbar .topActions{gap:6px}
+  .sheetPanel .sheetToolbar{
+    padding:10px 8px 8px;
+  }
+  .compactTools{gap:8px}
+  .coreActions{
+    gap:5px;
+    padding-bottom:2px;
+    /* Preserve single-row scroll access for 320px; no clipped actions. */
+    overflow-x:auto;
+    -webkit-overflow-scrolling:touch;
+  }
+  .coreActions .btn.small{
+    min-height:42px;
+    padding:0 10px;
+    font-size:11px;
+  }
+  #currentScaleBadge{
+    display:inline-flex;
+    align-items:center;
+    min-height:42px;
+    white-space:nowrap;
+  }
+  .sheetPanel .filterBar{
+    padding:8px;
+    gap:8px;
+  }
+  #scoreTable .metricHeaderInput{
+    font-size:11px;
+  }
+}
