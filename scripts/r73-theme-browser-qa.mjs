@@ -58,8 +58,9 @@ for(const engine of [chromium,webkit]){
     assert(colors.overflow<=2,'Open menu causes horizontal overflow '+lang+' '+width);
     await page.keyboard.press('Escape');
     for(const path of ['legal.html','chart-guide.html','examples.html']){
-     const result=await page.goto(base+'/'+lang+'/'+path,{waitUntil:'domcontentloaded'});
+     const result=await page.goto(base+'/'+lang+'/'+path,{waitUntil:'load'});
      assert.equal(result.status(),200);
+     await page.waitForFunction(()=>!!document.querySelector('link[href*="r73-reading.css"]')?.sheet,null,{timeout:12000});
      const c2=await page.evaluate(()=>({
        bg:getComputedStyle(document.body).backgroundColor,
        color:getComputedStyle(document.body).color,
