@@ -9,7 +9,9 @@ for(const id of ['titleInput','descInput','sheetSelect','publishBtn','newSheetBt
  assert(html.includes('id="'+id+'"'),'Existing control missing '+id);
 }
 assert(css.includes('@media (max-width:760px)'));
-assert(css.includes('display:contents'));
+assert(css.includes('>.titleHeading')&&css.includes('>.descriptionGroup')&&css.includes('>.savedSheetGroup'));
+assert(html.includes('class="titleHeading"')&&html.includes('class="descriptionGroup"')&&html.includes('class="savedSheetGroup"'));
+assert(!css.includes('display:contents'));
 assert(css.includes('grid-column:1 / -1'));
 assert(css.includes('grid-column:2'));
 assert(css.includes('font-size:16px'));
