@@ -46,7 +46,7 @@ for(const engine of [chromium,webkit]){
   const surfaces=['head','fixed','sortRow','thumb','row','empty','titleInput'];
   for(const key of surfaces){
    assert(luminance(dark[key].background)<.16,
-      'Dark UI still has a bright/light patch: '+key+' '+JSON.stringify(dark[key]));
+      'Dark UI still has a bright/light patch: '+key+' '+JSON.stringify(dark[key])+' DOM '+JSON.stringify(await f.locator('#scoreTable tbody td.scoreCell').first().evaluate(el=>({classes:el.className,css:getComputedStyle(el).backgroundColor,style:el.getAttribute('style'),body:document.body.className,theme:document.documentElement.dataset.smTheme,rule:el.matches('td.scoreCell:not(.heat-e):not(.heat-d):not(.heat-c):not(.heat-b):not(.heat-a):not(.heat-s):not(.heat-ss)')}))));
   }
   assert.equal(dark.head.background,dark.fixed.background,
     'Metric header has different surface than Target column');
