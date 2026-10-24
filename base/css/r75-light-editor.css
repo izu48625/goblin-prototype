@@ -101,11 +101,13 @@ body {background:#f6f5f1}
 .filterBar,.sheetPanel .filterBar {
   background:#f5f4ef;border-color:#dfdcd5
 }
+.filterBar #searchInput.searchInput,#searchInput.searchInput,
 .filterBar .searchInput,#searchInput,#gradeFilter{
   background:#fff;border:1px solid #c6c7c0;
   color:#242a2e;border-radius:5px
 }
-#searchInput::placeholder,.filterBar .searchInput::placeholder{
+#searchInput.searchInput::placeholder,#searchInput::placeholder,
+.filterBar .searchInput::placeholder{
   color:#6d767b;opacity:1
 }
 #scoreColorToggleBtn,#scoreColorToggleBtn.is-on,
