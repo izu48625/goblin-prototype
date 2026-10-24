@@ -1,0 +1,277 @@
+/* R75 / Stats Maker unified LIGHT scoring workspace
+ * Matches Discover/landing's warm neutral canvas.
+ * Preserves data, template rendering and score grade RGBA mapping exactly.
+ * New white score backing is an intentional design change: the SAME
+ * translucent tints are now composed over light paper (not old navy).
+ */
+:root {
+  color-scheme:light;
+  --bg:#f6f5f1;
+  --panel:#fff;
+  --panel2:#f0eee8;
+  --panel3:#ebe9e2;
+  --text:#252930;
+  --muted:#626b70;
+  --line:#d9d7d0;
+  --line2:#c7c6be;
+  --accent:#b64d35;
+  --danger:#b63f4a;
+  --shadow:0 3px 12px rgba(33,37,41,.035);
+  --radius:6px;
+}
+html,body {background:#f6f5f1;color:#252930;color-scheme:light}
+body {background:#f6f5f1}
+.app {color:#252930}
+.panel,.topbar.panel,.sheetPanel.panel,.sidePanel.panel {
+  background:#fff;border:1px solid #d9d7d0;
+  color:#252930;box-shadow:none;border-radius:6px;
+}
+.topbar.panel {background:#fff;border-color:#d9d7d0}
+.topbar .fieldLabel,.fieldLabel {color:#555f63}
+.topbar :is(.titleInput,.descInput,.sheetSelect),
+.titleInput,.descInput,.sheetSelect {
+  background:#fff;border:1px solid #c8c6bf;
+  color:#252930;border-radius:5px;box-shadow:none;
+}
+.topbar :is(.titleInput,.descInput,.sheetSelect):focus,
+.titleInput:focus,.descInput:focus,.sheetSelect:focus {
+  background:#fff;border-color:#b64d35;
+  outline:2px solid #bd715f;outline-offset:1px
+}
+.topbar .titleInput::placeholder,.topbar .descInput::placeholder,
+.titleInput::placeholder,.descInput::placeholder {
+  color:#707980;opacity:1
+}
+.brandTitle,.sectionTitle,.sheetLabel {color:#252930}
+.brandSub {color:#697174}
+.brandMark {background:#262d31;color:#fff;border-radius:4px}
+.btn,.btn:not(.primary):not(.publishBtn),
+.topbar .topActions .btn:not(.primary):not(.publishBtn),
+.topActions .btn:not(.primary):not(.publishBtn),
+.coreActions .btn,.coreActions .btn.small,.utilityBtn,
+.utilityBtn:not(.primary){
+  color:#30353a;background:#fff;border:1px solid #cbc9c1;
+  box-shadow:none;border-radius:5px
+}
+.btn:hover,.btn:not(.primary):hover,.coreActions .btn:hover,.utilityBtn:hover {
+  color:#24282c;background:#f0eee8;border-color:#aaaba3
+}
+.topbar .topActions .btn.primary,.coreActions .btn.primary,.btn.primary,
+#newSheetBtn {
+  background:#b64d35;border-color:#b64d35;color:#fff;
+  box-shadow:none;border-radius:5px
+}
+.topbar .topActions .btn.publishBtn,.publishBtn {
+  background:#2b715e;color:#fff;border-color:#2b715e
+}
+.btn.danger,#deleteSheetBtn,.mobileHeaderMenuBtn.danger{
+  color:#b43d47;background:#fff;border-color:#d2abae
+}
+.mobileHeaderMoreMenu,.topbar .mobileHeaderMoreBtn,
+.mobileHeaderMenuBtn,.mobileHeaderMenuBtn:not(.danger) {
+  background:#fff;color:#2d3337;border-color:#cecbc3
+}
+.mobileHeaderMenuBtn:hover {background:#f2efe9}
+.sheetPanel .sheetToolbar,.sheetToolbar {
+  background:#fff;border-bottom:1px solid #dfdcd5
+}
+.modeStrip,.scaleGroup,.viewTabs,.scaleGroup,.settingsDrawer,
+.sheetPanel .settingsDrawer {
+  background:#f5f3ee;border-color:#dedbd4;color:#293038
+}
+.viewModeBtn,#sheetViewBtn,#overviewViewBtn,#fitViewBtn,
+.viewTab,.scaleBtn,.weightBtn,.fitControlBtn,.rankModeBtn,
+#scoreSettingsBtn,#moreToolsBtn {
+  background:#fff;color:#364046;border:1px solid #d3d0c8;
+  border-radius:5px;box-shadow:none
+}
+:is(#sheetViewBtn,#overviewViewBtn,#fitViewBtn,.viewTab,.scaleBtn,.weightBtn,.fitControlBtn,.rankModeBtn).active{
+  color:#fff;background:#30373b;border-color:#30373b
+}
+#addRowBtn,#addColBtn {
+  color:#9d4937;background:#fff3ee;border:1px solid #d6a696;box-shadow:none;
+}
+#addRowBtn:hover,#addColBtn:hover {
+  color:#8d3326;background:#fae4dc;border-color:#bd7868
+}
+#currentScaleBadge,.currentScaleBadge {
+  background:#efe9de;color:#574839;border-color:#d6c7ad;
+  box-shadow:none;border-radius:5px
+}
+.filterBar,.sheetPanel .filterBar {
+  background:#f5f4ef;border-color:#dfdcd5
+}
+.filterBar .searchInput,#searchInput,#gradeFilter{
+  background:#fff;border:1px solid #c6c7c0;
+  color:#242a2e;border-radius:5px
+}
+#searchInput::placeholder,.filterBar .searchInput::placeholder{
+  color:#6d767b;opacity:1
+}
+#scoreColorToggleBtn,#scoreColorToggleBtn.is-on,
+#scoreColorToggleBtn[aria-pressed="true"]{
+  color:#fff;background:#2c7967;border:1px solid #2c7967
+}
+#scoreColorToggleBtn[aria-pressed="false"]{
+  background:#fff;color:#40484b;border-color:#c5c7c0
+}
+.settingsDrawerLabel,.scaleLabel,.weightToggleLabel {
+  color:#505d62
+}
+.sheetPanel .columnManage,.columnManage{
+  color:#32393d;background:#f9f8f4;border-color:#dfdcd5
+}
+.columnChip,.coreBadge,.columnManage .columnChip {
+  color:#3c4348;background:#fff;border-color:#dbd9d2
+}
+.columnDeleteBtn {color:#98555a}
+.utilityBar,.emptyAddRow {
+  background:#faf9f6;border-color:#dfdcd5
+}
+.utilityBtn.primary{background:#2e7464;color:#fff;border-color:#2e7464}
+.sheetPanel .tableWrap,.tableWrap,.fitViewport {
+  background:#fff;border-color:#d8d5ce
+}
+/* Important: the grade itself stays genuine 7-band translucent rgba.
+ * Only the underlay switches to white; do not turn the heat overlay opaque. */
+#scoreTable,.fitTable,.overviewMetrics {
+  background-color:#ffffff
+}
+#scoreTable tbody tr,.fitTable tbody tr {
+  background-color:#ffffff
+}
+#scoreTable tbody tr:nth-child(even),
+.fitTable tbody tr:nth-child(even){
+  background-color:#fdfcfb
+}
+#scoreTable th,#scoreTable td,.fitTable th,.fitTable td {
+  border-color:#d9d7d1;color:#293038
+}
+#scoreTable thead th,#scoreTable th,
+.fitTable thead th,.fitTable th,
+.indexHead,.nameHead {
+  background:#eeede8;color:#343a3e
+}
+#scoreTable td.nameCell,#scoreTable td.indexCell,
+.fitTable td.nameCell,.fitTable td.indexCell{
+  background:#f9f8f5;color:#374047
+}
+#scoreTable .nameInput,#scoreTable .colInput,
+#scoreTable .scoreInput,.fitScoreInput,
+.fitMetricInput,.fitNameInput{
+  color:#232b30
+}
+#scoreTable .nameInput::placeholder,
+#scoreTable .colInput::placeholder,#scoreTable .scoreInput::placeholder,
+.fitScoreInput::placeholder {
+  color:#6a757b;opacity:1
+}
+#scoreTable td.scoreCell,#scoreTable td.avgCell,
+.fitTable td.fitScoreCell,.fitTable td.fitAverageCell,
+.overviewMetric {
+  background-color:#fff;background-image:none;box-shadow:none
+}
+/* Scored cells retain R38's more specific :is(.heat-*) selector from style.css.
+ * Reapply exact translucent tint after neutral blank cells for clarity. */
+#scoreTable td.scoreCell:is(.heat-e,.heat-d,.heat-c,.heat-b,.heat-a,.heat-s,.heat-ss),
+#scoreTable td.avgCell:is(.heat-e,.heat-d,.heat-c,.heat-b,.heat-a,.heat-s,.heat-ss),
+.fitTable td.fitScoreCell:is(.heat-e,.heat-d,.heat-c,.heat-b,.heat-a,.heat-s,.heat-ss),
+.fitTable td.fitAverageCell:is(.heat-e,.heat-d,.heat-c,.heat-b,.heat-a,.heat-s,.heat-ss),
+.overviewMetric:is(.heat-e,.heat-d,.heat-c,.heat-b,.heat-a,.heat-s,.heat-ss){
+  background-color:var(--score-tile-overlay,transparent);
+  background-image:none;box-shadow:none
+}
+body.score-colors-off #scoreTable td.scoreCell,
+body.score-colors-off #scoreTable td.avgCell,
+body.score-colors-off .fitTable td.fitScoreCell,
+body.score-colors-off .fitTable td.fitAverageCell,
+body.score-colors-off .overviewMetric {
+  background-color:#fff!important;
+  background-image:none!important;box-shadow:none!important
+}
+#scoreTable .scoreInput:focus,#scoreTable .nameInput:focus,
+#scoreTable .colInput:focus,
+.fitScoreInput:focus,.fitMetricInput:focus,.fitNameInput:focus {
+  background:rgba(255,255,255,.74);color:#252930;
+  outline:2px solid #b64d35;outline-offset:-2px;
+  box-shadow:none
+}
+#scoreTable .metricSortBtn,#scoreTable .avgSortBtn,
+#scoreTable .headerSortBtn,.headerSortBtn {
+  color:#323940;background:transparent;border-color:#d7d3cb
+}
+#scoreTable .metricSortBtn.active,#scoreTable .avgSortBtn.active{
+  background:#ede0d8;color:#44322f
+}
+#scoreTable .metricSortBtn.active::after,#scoreTable .avgSortBtn.active::after{
+  color:#9a4b38
+}
+.thumbBtn,.rankThumb,.overviewThumb {
+  background:#f0efea;color:#565f65;border-color:#cbc9c3
+}
+.rowDelete,.metricEditBtn{color:#9a6065}
+.rowDelete:hover,.metricEditBtn:hover{color:#a73541;background:#f8e9e8}
+.overviewCard,.summaryBox,.rankRow,.stat,.compareStat,.compareCard {
+  background:#fff;border-color:#dedbd4;color:#273036
+}
+.overviewCardTop {background:#f2f0ea;border-color:#dfdcd6}
+.overviewMetricName,.rankNo,.rankGrade,.summaryLabel,.compareStatLabel,
+.status,.hint,.imageNote{color:#5f6a6e}
+.overviewGrid,.summaryGrid {background:#fff}
+.fitPanel,.fitTable,.fitControls{background:#fff;color:#263037}
+.fitControlBtn.active,.weightBtn.active,.scaleBtn.active {
+  background:#2d373b;color:#fff;border-color:#2d373b
+}
+.chips,.compareLegend{color:#4e5b60}
+.chip,.chip:not(.active) {
+  background:#fff;color:#424e53;border-color:#d5d2ca
+}
+.chip.active{background:#e9ece5;border-color:#8c9c8f;color:#253632}
+.chartBox{background:#faf9f6;border-color:#ddd9d2}
+.barTrack{background:#e5e5e0}
+.barName{color:#4a575b}
+.weightInput,.select,.publishCategorySelect {
+  background:#fff;color:#273038;border:1px solid #c8c6c0
+}
+.weightInput:focus,.select:focus,.publishCategorySelect:focus{
+  border-color:#b64d35;outline:2px solid #ba7968
+}
+.remixContextPanel,.communityJoinPanel{
+  background:#fff;border-color:#d9d7d0;color:#293139
+}
+.remixContextHelp,.communityJoinNotice,.communityJoinStatus,
+.remixSourceTitle{color:#4d5960}
+.remixContextCopy .eyebrow,.communityJoinPanel .eyebrow{color:#a7533e}
+.viewOnlyBanner{
+  background:#fff;color:#252b31;border-bottom:1px solid #d7d4cd
+}
+.noteDialog,.weightDialog,.importDialog,.sharePreviewDialog,.publishDialog {
+  background:#fff;color:#273036;border:1px solid #cbc9c2;
+  box-shadow:0 18px 60px rgba(0,0,0,.18)
+}
+.noteDialog p,.weightDialog p,.importDialog p,.publishDialog p,
+.publishDialogHead p{color:#626c70}
+.noteDialog :is(input,textarea,select),
+.weightDialog :is(input,textarea,select),
+.importDialog :is(input,textarea,select),
+.sharePreviewDialog :is(input,textarea,select),
+.publishDialog :is(input,textarea,select){
+  background:#fff;color:#263137;border-color:#c7c7c0
+}
+.weightDialogInfo,.publishResult,.sharePreviewActions{
+  background:#f4f2ed;color:#38454b;border-color:#dedbd3
+}
+.publishSettingHelp,.contactHint,.publishResultLabel{color:#606e72}
+.sharePreviewDialog img{background:#fff}
+:where(button,input,select,textarea,a,summary):focus-visible{
+  outline:3px solid #ae624f;outline-offset:2px
+}
+@media(max-width:760px){
+  .topbar.panel,.sheetPanel.panel,.sidePanel.panel{border-radius:6px}
+  #addRowBtn,#addColBtn,#scoreSettingsBtn,#moreToolsBtn{
+    min-height:44px
+  }
+  .topbar .titleInput,.topbar .descInput,.topbar .sheetSelect{
+    border-radius:5px
+  }
+}
