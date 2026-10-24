@@ -233,7 +233,7 @@ async function httpSmoke(){
   const view=new DataView(bytes.buffer,bytes.byteOffset,bytes.byteLength);
   const width=view.getUint32(16);
   const height=view.getUint32(20);
-  assert(width===1200&&height===630,`Unexpected OGP size: ${width}x${height}`);
+  assert(width===600&&height===315,`Unexpected Cloudflare Free OGP size: ${width}x${height}`);
 
   console.log('HTTP smoke PASS');
 }
