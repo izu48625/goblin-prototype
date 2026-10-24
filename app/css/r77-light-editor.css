@@ -1,0 +1,228 @@
+/* R77 — Stats Maker's light editing chrome, matching Discover and the
+   basic editor. Applies exclusively to the app interface, not to project
+   artwork. The #previewRoot / .visual tree is deliberately untouched. */
+:root{
+  color-scheme:light;
+  --bg:#f6f5f1;
+  --panel:#fff;
+  --panel2:#f2f0eb;
+  --line:#ddd9d1;
+  --text:#292f33;
+  --muted:#667177;
+  --accent:#ad513b;
+  --accent2:#c17d68;
+  --ok:#32765e;
+  --danger:#b74953;
+  --radius:6px;
+  --shadow:0 8px 20px rgba(32,39,39,.08);
+}
+html,body.editor-body{background:#f6f5f1;color:#292f33;color-scheme:light}
+
+/* The global locale navigation is the same bright bar used on Discover. */
+body.editor-body .globalLocaleBar{
+  --sm-nav-bg:#fff;
+  --sm-nav-fg:#292e33;
+  --sm-nav-panel:#fff;
+  --sm-nav-border:#d1cfc7;
+  --sm-nav-muted:#535c62;
+  --sm-nav-hover:#f2f0ea;
+  background:#fff;color:#292e33;
+  border-bottom:1px solid #dedbd4
+}
+body.editor-body .globalLocaleBar :is(.globalHomeBtn,.globalDiscoverBtn,.globalIntroBtn,.globalSupportMenu>summary){
+  background:#fff;color:#292e33;border:1px solid #d1cfc7;
+  border-radius:5px;box-shadow:none
+}
+body.editor-body .globalLocaleBar :is(.globalHomeBtn,.globalDiscoverBtn,.globalIntroBtn,.globalSupportMenu>summary):hover{
+  color:#292e33;background:#f2f0ea
+}
+body.editor-body .globalLocaleBar .globalSupportPanel{
+  background:#fff;border-color:#d1cfc7;box-shadow:0 9px 24px rgba(0,0,0,.11)
+}
+body.editor-body .globalLocaleBar .globalSupportPanel a{color:#292e33;background:transparent}
+body.editor-body .globalLocaleBar .globalSupportPanel a:hover{
+  color:#292e33;background:#f2f0ea
+}
+body.editor-body .globalLocaleBar .globalSupportDivider{background:#dedbd4}
+body.editor-body .globalLocaleBar .globalLocaleSwitch{
+  background:#eeece7;border:1px solid #d1cfc7
+}
+body.editor-body .globalLocaleBar .globalLocaleSwitch button{
+  color:#515d61
+}
+body.editor-body .globalLocaleBar .globalLocaleSwitch button.active{
+  background:#292e33;color:#fff
+}
+
+/* Main editor chrome: the graph preview remains exactly as designed. */
+.editor-header{
+  background:#fff;border-bottom:1px solid #e0ddd6;
+  color:#292e33;backdrop-filter:none
+}
+.editor-back-btn{
+  background:#f5f4f0;border:1px solid #d5d2cb;
+  color:#30373b;border-radius:6px
+}
+.editor-back-btn svg{stroke:#384148}
+.project-title-input{color:#292f33}
+.project-title-input:focus{
+  background:#fff;border-color:#bd7e6a;
+  box-shadow:none;outline:2px solid #e3b6a8;outline-offset:1px
+}
+.save-state,.mobile-save-state{color:#5b686c}
+.save-state.saving,.mobile-save-state.saving{color:#8b6635}
+.save-state.error,.mobile-save-state.error{color:#b33f4d}
+.editor-header :is(.btn,.btn.ghost),.preview-toolbar .btn,.zoom-controls .btn{
+  color:#313b40;background:#fff;border:1px solid #d0cec7;
+  box-shadow:none;border-radius:6px
+}
+.editor-header #exportBtn,.editor-header .btn.primary,
+.sheet-export-btn,.export-preview-actions .btn.primary{
+  background:#b4543e;color:#fff;border-color:#b4543e;
+}
+.editor-header #exportBtn:hover,.sheet-export-btn:hover{
+  background:#a44532;border-color:#a44532
+}
+.more-menu{
+  background:#fff;border:1px solid #d5d2ca;color:#2a3338;
+  border-radius:7px;box-shadow:0 12px 26px rgba(0,0,0,.12)
+}
+.more-menu button{color:#313a40}
+.more-menu button:hover{background:#f2f0eb;color:#28333a}
+
+.editor-sidebar{background:#fff;border-right:1px solid #e0ddd6}
+.panel-tabs{background:#fff;border-bottom:1px solid #e0ddd6}
+.panel-tab,.mobile-tab{background:transparent;color:#6d7578;font-weight:850}
+.panel-tab.active,.mobile-tab.active{
+  color:#293236;background:#f0eee8;border-bottom-color:#b4543e;
+}
+.panel-content{background:#fff}
+.panel-section{border-color:#e8e5df}
+.panel-section-title,.panel-section-title.panel-section-toggle{
+  color:#a5523d
+}
+.field label{color:#4e5b60}
+.input,.select,.textarea,.color-input{
+  background:#fff;color:#293238;border:1px solid #cccac3;
+  border-radius:6px
+}
+:is(.input,.select,.textarea):focus{
+  background:#fff;outline:2px solid #b56b55;
+  border-color:#b56b55;outline-offset:1px
+}
+.data-row,.source-check,.source-highlight-row,.option-toggle,
+.template-choice:not(.active),.image-manager,.import-preview{
+  background:#faf9f6;border:1px solid #dcd9d2;
+  border-radius:6px;color:#343e42
+}
+.data-row-head,.data-import-title{color:#303a40}
+.drag-label,.source-picker-help,.source-picker-count,
+.image-manager-label,.data-import-sub,.import-preview-more{color:#667176}
+.icon-btn,.seg-btn,.topn-btn,.sheet-actions button{
+  background:#fff;color:#3b4549;border:1px solid #d0cdc6;
+  border-radius:6px
+}
+.seg-btn.active,.topn-btn.active,.import-mode button.active,
+.image-shape-row button.active{
+  background:#31383b;border-color:#31383b;color:#fff
+}
+.theme-btn.active,.template-choice.active{
+  outline:2px solid #b86c55;outline-offset:1px
+}
+.section-chevron{border-color:#d5d1c9;color:#4e5d60}
+.image-dropzone,.import-preview-row,.source-info-card,
+.sheet-editor-wrap,.sheet-editor-footer,.heatmap-editor-scroll,
+.data-import .import-text{
+  background:#faf9f6;color:#343e44;border-color:#d8d5ce
+}
+.image-drop-copy b,.source-info-card b,.import-preview-row b{color:#30383c}
+.image-drop-copy small,.source-info-card span{color:#6b7478}
+.sheet-editor-table th,.heatmap-editor-table th{
+  background:#f0eee9;color:#313940;border-color:#dbd8d0
+}
+.sheet-editor-table td,.heatmap-editor-table td{
+  background:#fff;color:#343e42;border-color:#e0ddd7
+}
+.sheet-cell{color:#293239}
+.sheet-cell:focus{
+  background:#fff;color:#293239;border-color:#ad6551
+}
+.source-quick-bar{
+  background:#faf9f6;border-bottom:1px solid #dedbd4;
+  color:#334047
+}
+.source-quick-lead b,.source-highlight-name{color:#343d42}
+.source-quick-select select,.source-highlight-color{
+  background:#fff;color:#303b3f;border:1px solid #d0cdc5
+}
+.source-quick-chip{
+  background:#fff;color:#46545a;border:1px solid #d9d6cf
+}
+.source-quick-chip.active{background:#2e6f5f;color:#fff;border-color:#2e6f5f}
+
+/* On light canvas, the checkerboard should be barely visible, not slate. */
+.preview-area{
+  background-color:#f6f5f1;
+  background-image:
+    linear-gradient(45deg,#eceae4 25%,transparent 25%),
+    linear-gradient(-45deg,#eceae4 25%,transparent 25%),
+    linear-gradient(45deg,transparent 75%,#eceae4 75%),
+    linear-gradient(-45deg,transparent 75%,#eceae4 75%);
+  background-size:22px 22px;
+  background-position:0 0,0 11px,11px -11px,-11px 0;
+}
+.preview-toolbar{
+  background:#fff;border-bottom:1px solid #dedbd4;
+  color:#2d3539
+}
+.type-badge{color:#ab563d}
+.zoom-label{color:#5b6569}
+.canvas-shell{box-shadow:0 10px 30px rgba(24,31,32,.12)}
+
+/* No changes to #canvasShell transforms, #previewRoot, .visual, rendering,
+   template styles, transparent exports or image download pipelines. */
+.mobile-bottom-tabs{
+  background:#fff;border-top:1px solid #dcd9d1;
+  backdrop-filter:none;
+}
+.mobile-tab{color:#5a6468}
+.mobile-tab.active{
+  background:#efece6;color:#292f33;
+  border-bottom:3px solid #b4543e
+}
+.mobile-sheet{
+  background:#fff;color:#293238;border:1px solid #dcd9d1;
+  box-shadow:0 -16px 35px rgba(0,0,0,.12);
+}
+.mobile-sheet-head{
+  background:#fff;border-bottom:1px solid #e3e0d9;color:#293238
+}
+.mobile-sheet-title{color:#293238}
+.sheet-handle{background:#b7b5ad}
+.sheet-icon-btn,.sheet-done-btn{
+  background:#fff;border:1px solid #cfcac3;color:#313b40;
+  border-radius:6px
+}
+.sheet-done-btn{
+  background:#2e7562;border-color:#2e7562;color:#fff
+}
+.sheet-backdrop:not(.hidden){background:rgba(25,32,34,.25)}
+.export-preview-card{background:#fff;color:#293238;border-color:#dcd9d1}
+.export-preview-head,.export-preview-help{color:#465159}
+.export-preview-actions .btn.ghost{
+  color:#293238;background:#fff;border-color:#d0cdc6
+}
+:where(.editor-header,.preview-toolbar,.mobile-bottom-tabs,.mobile-sheet,.editor-sidebar)
+  :is(button,a,input,select,textarea):focus-visible{
+  outline:3px solid #ba7c67;outline-offset:2px
+}
+@media(max-width:760px){
+  /* Original 54px header, bottom tabs, sheet and iOS input font sizes stay intact. */
+  .editor-header{background:#fff;border-bottom-color:#dedbd4}
+  .mobile-bottom-tabs{background:#fff}
+  .mobile-tab.active{color:#293238;background:#efece6}
+  .preview-toolbar{background:#fff}
+  .mobile-sheet{background:#fff}
+  .mobile-sheet-head{background:#fff}
+  .source-quick-bar{background:#faf9f6}
+}

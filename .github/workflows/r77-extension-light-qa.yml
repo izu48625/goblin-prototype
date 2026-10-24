@@ -1,0 +1,44 @@
+name: R77 Light Extension Workspace
+on:
+  pull_request:
+    paths:
+      - 'index.html'
+      - 'app/editor.html'
+      - 'app/css/r77-light-editor.css'
+      - 'cloud/r77-launcher.css'
+      - 'scripts/r77-*.mjs'
+      - '.github/workflows/r77-extension-light-qa.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  editor-visual-safety:
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Verify CSS scope, RGBA, no new ads or monetization
+        run: |
+          node scripts/r77-editor-light-static-qa.mjs
+          node scripts/r76-editor-hierarchy-static-qa.mjs
+          node scripts/r75-light-static-qa.mjs
+          npm run build:cloudflare
+          test -s dist/app/css/r77-light-editor.css
+          test -s dist/cloud/r77-launcher.css
+      - name: Install actual Chromium and WebKit
+        run: |
+          npm install --no-save playwright@1.56.1
+          npx playwright install --with-deps chromium webkit
+      - name: Serve local build only
+        run: |
+          python3 -m http.server 4173 --bind 127.0.0.1 --directory dist >/tmp/r77-server.log 2>&1 &
+          for i in $(seq 1 30); do
+            if curl -fsS http://127.0.0.1:4173/index.html >/dev/null; then exit 0; fi
+            sleep 1
+          done
+          exit 1
+      - name: Verify real extension selection, contrast, mobile drawers, original dark artwork
+        run: node scripts/r77-editor-light-browser-qa.mjs
