@@ -1,3 +1,4 @@
+import {clickBasic} from './r80-qa-click.mjs';
 import assert from 'node:assert/strict';
 import {readFile} from 'node:fs/promises';
 import {chromium} from 'playwright';
@@ -96,7 +97,7 @@ try{
 
   // A real JSON export must include both sheets, large text and embedded images.
   let exportBtn=home.locator('#exportJsonBtn');
-  if(!(await exportBtn.isVisible()))await home.locator('#moreToolsBtn').click();
+  if(!(await exportBtn.isVisible()))await clickBasic(home,'moreToolsBtn');
   const [download]=await Promise.all([page.waitForEvent('download'),exportBtn.click()]);
   const exported=JSON.parse(await readFile(await download.path(),'utf8'));
   assert.equal(exported.library.sheets.length,2);
@@ -106,7 +107,7 @@ try{
 
   // Restoring a valid JSON file preserves every row, image and the prior Undo.
   const importBtn=home.locator('#importJsonBtn');
-  if(!(await importBtn.isVisible()))await home.locator('#moreToolsBtn').click();
+  if(!(await importBtn.isVisible()))await clickBasic(home,'moreToolsBtn');
   await importBtn.click();
   await home.locator('#importFileInput').setInputFiles({
     name:'r37p3.json',mimeType:'application/json',
@@ -140,7 +141,7 @@ try{
   });
   const alternative=structuredClone(exported);
   alternative.library.sheets[0].title='THIS RESTORE MUST FAIL';
-  if(!(await importBtn.isVisible()))await home.locator('#moreToolsBtn').click();
+  if(!(await importBtn.isVisible()))await clickBasic(home,'moreToolsBtn');
   await importBtn.click();
   await home.locator('#importFileInput').setInputFiles({
     name:'quota.json',mimeType:'application/json',
