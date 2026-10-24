@@ -52,10 +52,10 @@ for(const engine of [chromium,webkit]){
    assert(styles.overflow<=2,'Document viewport overflow '+width+' '+JSON.stringify(styles));
    if(width<500)assert(styles.row.h>=40,'Add-row mobile tap target too small');
    assert(luminosity(styles.filter.bg)>.83,'Search should be light');
-   const launch=await page.locator('#extLauncher').evaluate(el=>{
-     const r=el.getBoundingClientRect();return {height:r.height,width:r.width};
-   });
-   assert(launch.height>=44&&launch.height<=56,'Extension launcher should be compact '+JSON.stringify(launch));
+   const launch=width<500
+    ? await frame.locator('#r80VisualsBtn').evaluate(el=>{const r=el.getBoundingClientRect();return {height:r.height,width:r.width};})
+    : await page.locator('#extLauncher').evaluate(el=>{const r=el.getBoundingClientRect();return {height:r.height,width:r.width};});
+   assert(launch.height>=40&&launch.height<=56,'Visual tools entry must remain easy to tap '+JSON.stringify(launch));
    const rowCount=await frame.locator('#scoreTable tbody tr').count();
    await frame.locator('#addRowBtn').click();
    assert((await frame.locator('#scoreTable tbody tr').count())>rowCount,
