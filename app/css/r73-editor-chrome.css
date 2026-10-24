@@ -1,0 +1,69 @@
+/* R73: chart-editor CHROME ONLY. Exported graph canvas and .preview-root
+   are NOT restyled: users may deliberately select navy/blue chart templates. */
+:root{
+  --bg:#191b1c;--panel:#25282a;--panel2:#303436;
+  --line:#494f50;--text:#f3f0eb;--muted:#afb8b7;
+  --accent:#d5a078;--accent2:#dfb38d;--radius:8px;
+}
+html,body{background:#191b1c;color:#f3f0eb}
+.editor-header{
+  background:#25282a;border-bottom-color:#515758;backdrop-filter:none
+}
+.editor-sidebar{background:#25282a;border-right-color:#515758}
+.panel-tabs{background:#2b3031;border-bottom-color:#505556}
+.panel-tab,.mobile-tab{color:#b3bdbc;font-weight:900}
+.panel-tab.active,.mobile-tab.active{
+  color:#fff;background:#414341;border-bottom-color:#de9d75
+}
+.preview-area{
+  background-color:#242728;
+  background-image:
+    linear-gradient(45deg,#292c2d 25%,transparent 25%),
+    linear-gradient(-45deg,#292c2d 25%,transparent 25%),
+    linear-gradient(45deg,transparent 75%,#292c2d 75%),
+    linear-gradient(-45deg,transparent 75%,#292c2d 75%)
+}
+.preview-toolbar{
+  background:#282c2e;border-color:#515658;color:#efede8
+}
+.type-badge{color:#dda881}
+.zoom-label{color:#c4cdca}
+.editor-header .btn,.preview-toolbar .btn,.zoom-controls .btn{
+  background:#363b3d;border-color:#5d6765;color:#f1eee9;border-radius:6px
+}
+.editor-header .btn.primary,.editor-header #exportBtn,.sheet-export-btn{
+  background:#b64d35;border-color:#b64d35;color:#fff
+}
+.project-title-input{color:#f1ede8}
+.project-title-input:focus{background:#303638;border-color:#d69a78}
+.editor-back-btn{background:#333839;border-color:#636968;color:#f4efe8}
+.panel-section-title{color:#d2a688}
+.field label{color:#bac4c0}
+.input,.select,.textarea{
+  background:#303537;border-color:#66706b;color:#f6f1ea;border-radius:6px
+}
+.input:focus,.select:focus,.textarea:focus{
+  border-color:#dda57e;outline-color:#dda57e
+}
+.mobile-bottom-tabs{
+  background:#262a2c;border-top:1px solid #53595b;
+}
+.mobile-sheet,.mobile-sheet-head{
+  background:#282b2d;border-color:#565c5d;color:#f3f0eb
+}
+.sheet-icon-btn,.sheet-done-btn{
+  background:#3b4042;border-color:#687071;color:#f1eee9
+}
+.mobile-sheet .panel-section-title{color:#d4a886}
+.more-menu,.export-preview-card{
+  background:#292d2f;border-color:#545b5b;color:#efede9
+}
+.more-menu button{color:#f0ede8}
+@media(max-width:760px){
+  .mobile-bottom-tabs{border-top-color:#555c5e}
+  .mobile-tab{min-height:52px;color:#b5c0bf}
+  .mobile-tab.active{color:#fff;background:#414341}
+  .preview-toolbar{background:#282c2e}
+}
+/* Intentionally do not set styles on .preview-root, .player-card,
+   chart templates, export canvas, .canvas-shell or user-defined charts. */

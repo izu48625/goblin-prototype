@@ -1,0 +1,105 @@
+/* R73: complete neutral chrome for the Local-first basic editor.
+   Intentionally does NOT alter score colors, heat-* overlay, input dimensions,
+   exported charts, sheet data, sorting or iPhone layout.
+   Score table backing #101b30 is screenshot-locked; never restyle it. */
+:root{
+  --bg:#191b1c;--panel:#25282a;--panel2:#2d3032;--panel3:#373b3d;
+  --text:#f3f1ec;--muted:#b5bebc;--line:#494d4e;--line2:#62686a;
+  --accent:#e0a47b;--radius:8px
+}
+html,body{background:#191b1c;color:#f3f1ec}
+body{background:#191b1c}
+.panel,.topbar.panel,.sheetPanel.panel,.sidePanel.panel{
+  background:#25282a;border-color:#494d4e;box-shadow:none;border-radius:7px
+}
+.topbar .titleInput,.topbar .descInput,.topbar .sheetSelect{
+  background:#303436;border:1px solid #646b6b;color:#f3f1ec;
+  border-radius:5px
+}
+.topbar .titleInput::placeholder,.topbar .descInput::placeholder{
+  color:#a9b3b4;opacity:1
+}
+.topbar .titleInput:focus,.topbar .descInput:focus,.topbar .sheetSelect:focus{
+  background:#33383a;border-color:#e0a47b;outline:2px solid #e0a47b;outline-offset:1px
+}
+.topbar .topActions .btn:not(.primary):not(.publishBtn),
+.topActions .btn:not(.primary):not(.publishBtn){
+  background:#363a3c;border:1px solid #656a6a;color:#f0eee8
+}
+.topbar .topActions .btn.primary,
+.coreActions .btn.primary,.btn.primary{
+  background:#b64d35;border-color:#b64d35;color:#fff;box-shadow:none
+}
+.topbar .topActions .btn.publishBtn,.publishBtn{
+  background:#2a6756;border-color:#548b79;color:#fff
+}
+.topbar .mobileHeaderMoreBtn,.mobileHeaderMenuBtn,.mobileHeaderMoreMenu{
+  background:#363b3e;border-color:#5c6264;color:#f0ede7
+}
+.mobileHeaderMenuBtn:hover{background:#464b4c;color:#fff}
+.topbar .fieldLabel{color:#c3c6c1}
+.sheetPanel .sheetToolbar,.sheetToolbar{
+  background:#2c3032;border-bottom:1px solid #494d4e
+}
+.coreActions .btn,.utilityBtn,.utilityBtn:not(.primary),
+.coreActions .btn.small,.btn:not(.primary):not(.publishBtn){
+  background:#363b3d;border-color:#656b6b;color:#f2efe7;border-radius:5px
+}
+.coreActions .btn:hover,.utilityBtn:hover{background:#464b4c;border-color:#d7a181}
+.utilityBtn.primary{background:#2f6f65;color:#fff;border-color:#518e7c}
+.viewModeBtn,.viewTab,.scaleBtn,.fitControlBtn,
+#moreToolsBtn,#scoreSettingsBtn,.weightBtn,.rankModeBtn{
+  background:#33383a;color:#e5e8e1;border:1px solid #606669;border-radius:5px
+}
+:is(.viewModeBtn,.viewTab,.scaleBtn,.fitControlBtn,.weightBtn,.rankModeBtn).active{
+  background:#655244;color:#fff;border-color:#d39b79
+}
+.filterBar,.sheetPanel .filterBar{
+  background:#292d2f;border-color:#454c4d
+}
+.filterBar .searchInput,#searchInput,#gradeFilter{
+  background:#24282a;color:#f1eee8;border-color:#696f70;border-radius:5px
+}
+.filterBar .searchInput::placeholder,#searchInput::placeholder{color:#a3adaf;opacity:1}
+.scoreColorToggle{
+  background:#2c514a;color:#f2f6f3;border:1px solid #598878;border-radius:5px
+}
+.scoreColorToggle.active,.scoreColorToggle[aria-pressed="true"]{
+  background:#2e6255;color:#fff;border-color:#71ab91
+}
+.sheetPanel .tableWrap,.tableWrap,.fitViewport{
+  background:#262a2b;border-color:#454a4b
+}
+#scoreTable th,#scoreTable td,.fitTable th,.fitTable td{
+  border-color:#4f5354
+}
+#scoreTable th,.fitTable th,.indexHead,.nameHead{
+  background:#34393a;color:#f1eee8
+}
+#scoreTable td.nameCell,#scoreTable td.indexCell,
+.fitTable td.nameCell,.fitTable td.indexCell{
+  background:#2e3233;color:#f1eee8
+}
+#scoreTable .metricSortBtn:hover,#scoreTable .metricSortBtn.active,
+#scoreTable .avgSortBtn.active{background:#5d5046;color:#fff}
+#scoreTable .headerSortBtn,.headerSortBtn{
+  background:#34393a;border-color:#52585a;color:#eceee7
+}
+#scoreTable .headerSortBtn:hover,.headerSortBtn:hover{background:#45494a}
+.rankRow,.stat,.summaryBox,.overviewMetric:not([class*="heat-"]){
+  background:#303436;border-color:#4d5354
+}
+.viewTabs,.scaleGroup{background:#2e3234;border-color:#565c5d}
+.thumbBtn{background:#373c3d;border-color:#6b7070;color:#e1e6e1}
+#saveBadge{color:#b9cac2}
+:where(button,input,select,textarea,a):focus-visible{
+  outline:3px solid #e2a47c;outline-offset:2px
+}
+@media(max-width:760px){
+  .topbar.panel,.sheetPanel.panel{border-radius:7px}
+  .topbar .titleInput,.topbar .descInput,.topbar .sheetSelect{
+    border-radius:5px
+  }
+  .coreActions .btn,.topbar .topActions .btn{border-radius:5px}
+}
+/* Keep genuine R26/R38 score-tile color overlay untouched by rules above. */

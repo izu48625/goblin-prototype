@@ -22,6 +22,22 @@ body[data-sm-localized-landing] .r72PageNav a:hover{
  }
 }
 
+/* R73: secondary link directory follows the gallery and article,
+   rather than duplicating the main navigation above the hero. */
+body[data-sm-localized-landing] .r73MoreLinks{
+  margin-top:28px;border-top:1px solid #dcd8cf;padding-top:12px
+}
+body[data-sm-localized-landing] .r73MoreLinks .r72PageNav{
+  margin:0;gap:4px
+}
+body[data-sm-localized-landing] .r73MoreLinks .r72PageNav a{
+  min-height:38px;background:transparent;border:0;
+  color:#425057;text-decoration:underline;text-underline-offset:3px;
+  padding:6px 10px
+}
+body[data-sm-localized-landing] .r73MoreLinks .r72PageNav a:hover{
+  background:#eae6df
+}
 /* R72: editorial, work-led brand treatment. Public bilingual landing pages only.
    Original charts remain the source of visual color; no decorative AI gradients. */
 body[data-sm-localized-landing]{
@@ -54,8 +70,8 @@ body[data-sm-localized-landing] .lead{color:#555d63}
 body[data-sm-localized-landing] .lead{max-width:790px;font-size:clamp(16px,1.8vw,19px)}
 body[data-sm-localized-landing] .actions a{
   min-height:48px;display:inline-flex;align-items:center;justify-content:center;
-  padding:12px 20px;border:1px solid #c8543d;border-radius:5px;
-  background:#c8543d;color:#fff;text-decoration:none;font-weight:850;
+  padding:12px 20px;border:1px solid #b64d35;border-radius:5px;
+  background:#b64d35;color:#fff;text-decoration:none;font-weight:850;
   box-shadow:none
 }
 body[data-sm-localized-landing] .actions a.secondary{

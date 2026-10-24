@@ -109,3 +109,81 @@ html.embeddedSiteFrame #editorHomeBtn{display:none!important}
   .globalSupportMenu>summary{padding:0 6px}
   .globalLocaleSwitch button{min-width:30px;padding:2px 4px;font-size:11px}
 }
+
+
+/* R73: the same navigation semantics in both themes.
+   Keep 44px bar and existing JS; improve legibility without changing routes. */
+.globalLocaleBar{
+  --sm-nav-bg:#25282a;
+  --sm-nav-fg:#f2f0ea;
+  --sm-nav-panel:#303436;
+  --sm-nav-border:#575b5b;
+  --sm-nav-muted:#b8c0bc;
+  --sm-nav-hover:#414644;
+  background:var(--sm-nav-bg);color:var(--sm-nav-fg);
+  border-bottom-color:var(--sm-nav-border);
+}
+.globalLocaleBar .globalHomeBtn,
+.globalLocaleBar .globalDiscoverBtn,
+.globalLocaleBar .globalIntroBtn,
+.globalLocaleBar .globalSupportMenu>summary{
+  background:var(--sm-nav-panel);color:var(--sm-nav-fg);
+  border:1px solid var(--sm-nav-border);border-radius:5px;
+  box-shadow:none;text-decoration:none;
+}
+.globalLocaleBar .globalSupportMenu>summary:hover,
+.globalLocaleBar .globalSupportMenu[open]>summary,
+.globalLocaleBar :is(.globalHomeBtn,.globalDiscoverBtn,.globalIntroBtn):hover{
+  background:var(--sm-nav-hover);color:var(--sm-nav-fg);
+  border-color:var(--sm-nav-muted);
+}
+.globalLocaleBar .globalSupportPanel{
+  background:var(--sm-nav-bg);border:1px solid var(--sm-nav-border);
+  box-shadow:0 12px 30px rgba(0,0,0,.20);border-radius:7px;
+}
+.globalLocaleBar .globalSupportPanel a{
+  color:var(--sm-nav-fg);background:transparent;
+  border-radius:4px;font-size:13px;min-height:44px;
+}
+.globalLocaleBar .globalSupportPanel a:hover,
+.globalLocaleBar .globalSupportPanel a:focus-visible{
+  color:var(--sm-nav-fg);background:var(--sm-nav-hover);
+}
+.globalLocaleBar .globalSupportDivider{background:var(--sm-nav-border)}
+.globalLocaleBar .globalLocaleSwitch{
+  background:var(--sm-nav-panel);border:1px solid var(--sm-nav-border);
+  border-radius:6px;box-shadow:none
+}
+.globalLocaleBar .globalLocaleSwitch button{color:var(--sm-nav-muted);border-radius:4px}
+.globalLocaleBar .globalLocaleSwitch button.active{
+  background:#b64d35;color:#fff;box-shadow:none
+}
+.globalLocaleBar :is(a,button,summary):focus-visible{
+  outline:3px solid #54a49c;outline-offset:2px
+}
+/* Readable light header for Discover, landing and localized reading pages.
+   Explicit selector beats earlier R72 landing link color rules. */
+body.r73-light-page .globalLocaleBar{
+  --sm-nav-bg:#fff;
+  --sm-nav-fg:#292e33;
+  --sm-nav-panel:#fff;
+  --sm-nav-border:#d1cfc7;
+  --sm-nav-muted:#535c62;
+  --sm-nav-hover:#f2f0ea;
+}
+body.r73-light-page .globalLocaleBar .globalSupportPanel a{
+  color:#292e33;
+}
+body.r73-light-page .globalLocaleBar .globalSupportPanel a:hover,
+body.r73-light-page .globalLocaleBar .globalSupportPanel a:focus-visible{
+  color:#1c262a;background:#f0ede6
+}
+body.r73-light-page .globalLocaleBar .globalLocaleSwitch button.active{
+  background:#292e33;color:#fff
+}
+@media(max-width:600px){
+  .globalLocaleBar .globalSupportPanel{
+    width:min(260px,calc(100vw - 16px));
+    padding:8px
+  }
+}

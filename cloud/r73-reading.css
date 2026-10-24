@@ -1,0 +1,99 @@
+/* R73: cohesive light reading experience for guides, examples and legal policy.
+   Overrides legacy inline dark style without altering actual article wording. */
+:root{color-scheme:light}
+html,body.r73-reading{
+  background:#f6f5f1;color:#252a30;color-scheme:light
+}
+body.r73-reading :is(h1,h2,h3){color:#24282e;letter-spacing:-.02em}
+body.r73-reading :is(p,li){color:#515a61}
+body.r73-reading a{color:#28585e;text-decoration-color:#a1b9b8;text-underline-offset:3px}
+body.r73-reading strong{color:#282e33}
+body.r73-reading :is(header,main,footer){
+  max-width:100%;
+}
+body.r73-reading header:not(.globalLocaleBar){
+  border-bottom-color:#dfdcd4
+}
+body.r73-reading header a.brand{color:#252a30}
+body.r73-reading header nav a{color:#3a484b}
+body.r73-reading .eyebrow{color:#a54f3c}
+body.r73-reading .lead{color:#4b5559}
+body.r73-reading .intro{padding-top:clamp(22px,4vw,48px)}
+body.r73-reading .hero{padding-top:clamp(20px,4vw,43px)}
+body.r73-reading h1{line-height:1.18}
+body.r73-reading section+section,
+body.r73-reading .explain{
+  border-top-color:#dfdcd4
+}
+body.r73-reading .actions a,
+body.r73-reading .contactForm button{
+  display:inline-flex;align-items:center;justify-content:center;
+  min-height:45px;background:#b64d35;color:#fff;
+  border:1px solid #b64d35;border-radius:5px;text-decoration:none;
+  font-weight:850
+}
+body.r73-reading .actions a.secondary{
+  background:#fff;color:#292d32;border:1px solid #b8b6b0
+}
+body.r73-reading :is(.figure,section.note,.tablewrap,.tableFrame){
+  border:1px solid #dbd8d0;border-radius:6px;background:#fff
+}
+body.r73-reading .figure{padding:10px}
+body.r73-reading .figure img{
+  display:block;max-width:100%;height:auto
+}
+body.r73-reading .figure figcaption{color:#59646b}
+body.r73-reading .tag{
+  color:#665344;background:#faf2e8;
+  border-color:#dfc8b6;border-radius:4px
+}
+body.r73-reading table{color:#32373b}
+body.r73-reading :is(th,td){
+  background:#fff;border-color:#dedbd4;color:#30373b
+}
+body.r73-reading thead,
+body.r73-reading thead th{
+  background:#f0eee8;color:#293036
+}
+body.r73-reading summary{
+  color:#2d3438;cursor:pointer;
+  padding:4px 0
+}
+body.r73-reading details{border-color:#dedbd4}
+body.r73-reading section.note{padding:17px 19px}
+body.r73-reading section.note :is(h2,h3,p){color:#30383c}
+body.r73-reading footer{
+  border-top-color:#dfdcd4;color:#697179
+}
+body.r73-reading :is(a,button,summary,input,select,textarea):focus-visible{
+  outline:3px solid #247e82;outline-offset:3px
+}
+/* Legal: preserve distinct sections and contact form, but remove the navy. */
+body.r73-reading[data-sm-legal-page]{
+  --bg:#f6f5f1;--panel:#fff;--border:#dad7ce;
+  --text:#272b30;--muted:#58616a;
+}
+body.r73-reading[data-sm-legal-page] .legalHero{padding:22px 0 24px}
+body.r73-reading[data-sm-legal-page] .backLink{color:#376569}
+body.r73-reading[data-sm-legal-page] .sectionNav a{
+  background:#fff;border:1px solid #d4d0c7;color:#343d41;
+  border-radius:5px;min-height:43px;display:inline-flex;align-items:center;justify-content:center
+}
+body.r73-reading[data-sm-legal-page] section{
+  border:1px solid #dedbd4;background:#fff;border-radius:6px;
+  padding:clamp(18px,3vw,26px)
+}
+body.r73-reading[data-sm-legal-page] section strong{color:#282f33}
+body.r73-reading[data-sm-legal-page] .contactForm :is(input,select,textarea){
+  background:#fff;color:#262d31;border:1px solid #bdbdb6;
+  border-radius:5px;font-size:16px;min-height:44px
+}
+body.r73-reading[data-sm-legal-page] .contactStatus{color:#345e61}
+body.r73-reading[data-sm-legal-page] .contactForm button:disabled{
+  opacity:.55
+}
+body.r73-reading[data-sm-legal-page] .legalFooter{border-color:#dfdcd4;color:#656d72}
+@media(max-width:520px){
+  body.r73-reading[data-sm-legal-page] section{padding:19px 14px}
+  body.r73-reading .actions a{min-height:46px}
+}
