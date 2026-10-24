@@ -1,3 +1,4 @@
+import {clickBasic} from './r80-qa-click.mjs';
 import assert from 'node:assert/strict';
 import {chromium} from 'playwright';
 
@@ -127,7 +128,7 @@ try{
     imported.sheets[0].title='RESTORED '+name;
     imported.sheets[0].rows[39].scores[9]=scale===100?99:9.9;
     const importButton=home.locator('#importJsonBtn');
-    if(!(await importButton.isVisible()))await home.locator('#moreToolsBtn').click();
+    if(!(await importButton.isVisible()))await clickBasic(home,'moreToolsBtn');
     await importButton.click();
     await home.locator('#importFileInput').setInputFiles({
       name:'r37-backup.json',mimeType:'application/json',
@@ -154,7 +155,7 @@ try{
       'Restore checkpoint changed original sheet IDs, scores or metadata');
     // Undo is an explicit user action. Confirm that all 400 data cells AND
     // the other sheet return, not just the heading.
-    if(!(await importButton.isVisible()))await home.locator('#moreToolsBtn').click();
+    if(!(await importButton.isVisible()))await clickBasic(home,'moreToolsBtn');
     await importButton.click();
     await home.locator('#undoLastRestoreBtn').waitFor({state:'visible',timeout:10000});
     await home.locator('#undoLastRestoreBtn').click();
