@@ -1,0 +1,43 @@
+/* R77 extension launcher: deliberately a quiet outlined action instead of
+   the former full-width saturated banner. Bottom safe-area / iframe reserve
+   and launch click handlers are preserved. */
+#extLauncher{
+  background:#fff;color:#9f4835;border:1px solid #d6b4a9;
+  border-radius:8px;box-shadow:0 2px 7px rgba(35,40,38,.075);
+  gap:8px;justify-content:center;
+  min-height:48px;height:48px;
+  padding:7px 13px
+}
+#extLauncher .launchIcon{
+  position:static;width:29px;height:29px;flex:none;
+  border-radius:6px;background:#f5e6df;color:#a34c38;
+  font-size:20px;
+}
+#extLauncher .launchCopy{flex:0 1 auto;width:auto}
+#extLauncher .launchTitle{font-size:13px;color:#954330;font-weight:850}
+#extLauncher .launchSub{color:#8f5d50;font-size:9px}
+#extLauncher:hover{
+  background:#faf1ec;color:#8f3a2a;border-color:#c68c7a;
+  box-shadow:0 3px 9px rgba(35,40,38,.11)
+}
+#extLauncher:focus-visible{outline:3px solid #b86b54;outline-offset:2px}
+@media(max-width:600px){
+  #extLauncher{
+    /* Width/position materially changed from the old orange full-width bar. */
+    left:50%;right:auto;
+    transform:translateX(-50%);
+    width:min(202px,calc(100vw - 24px));
+    min-height:48px;height:48px;
+    bottom:calc(7px + env(safe-area-inset-bottom));
+    padding:6px 12px;border-radius:8px;
+    box-shadow:0 2px 7px rgba(35,40,38,.075)
+  }
+  #extLauncher:hover{transform:translateX(-50%)}
+  #extLauncher:active{transform:translateX(-50%) scale(.98)}
+  #extLauncher .launchIcon{
+    position:static;width:29px;height:29px;
+    border-radius:6px;font-size:20px
+  }
+  #extLauncher .launchCopy{width:auto;text-align:left}
+  #extLauncher .launchTitle{font-size:13px}
+}
