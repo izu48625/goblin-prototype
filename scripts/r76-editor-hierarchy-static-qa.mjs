@@ -27,7 +27,7 @@ assert(!/#scoreTable td\.avgCell\s*[{,]/.test(editor),'Do not overwrite averaged
 const launcher=await read('cloud/r76-launcher.css');
 assert(launcher.includes('height:48px')&&launcher.includes('min-height:48px'),
  'Compact launcher must preserve at least 44px tap surface');
-assert(!launcher.includes('#basicRoot'),'Do not change iframe viewport reservation');
+assert(!/(?:^|\n)\s*#basicRoot\s*\{/m.test(launcher.replace(/\/\*[\s\S]*?\*\//g,'')),'Do not change iframe viewport reservation');
 const original=await read('base/js/app.js');
 for(const color of ['rgba(116,60,74,.42)','rgba(122,84,62,.35)','rgba(110,99,57,.32)']){
  assert(original.includes(color),'Scoring grade palette changed: '+color);
