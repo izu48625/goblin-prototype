@@ -4,7 +4,7 @@
 .r81-options-head{display:none}
 .r81-search-close{display:none}
 @media(max-width:760px){
-  .topbar.panel{position:relative;padding-top:5px}
+  .topbar.panel{position:relative;padding-top:5px;padding-bottom:4px!important}
   .topbar .titleHeading>.fieldLabel{
     min-height:44px;padding-right:0;display:flex;align-items:center;
     font-size:10px
