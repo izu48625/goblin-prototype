@@ -21,7 +21,8 @@ for(const engine of [chromium,webkit]){
     assert(await frame.locator('#newSheetBtn').isVisible(),'New must be visible directly');
     assert.equal(await frame.locator('#r80SearchBtn').count(),0,'Magnifier still present');
     const layout=await frame.locator('body').evaluate(()=>{
-     const r=sel=>{const e=document.querySelector(sel);const a=e.getBoundingClientRect();return {x:a.x,y:a.y,w:a.width,h:a.height,right:a.right}};\n     const label=document.querySelector('.titleHeading .fieldLabel');const range=document.createRange();range.selectNodeContents(label);const labelTextRight=range.getBoundingClientRect().right;
+     const r=sel=>{const e=document.querySelector(sel);const a=e.getBoundingClientRect();return {x:a.x,y:a.y,w:a.width,h:a.height,right:a.right}};
+     const label=document.querySelector('.titleHeading .fieldLabel');const range=document.createRange();range.selectNodeContents(label);const labelTextRight=range.getBoundingClientRect().right;
      return {publish:r('#publishBtn'),newSheet:r('#newSheetBtn'),theme:r('#r81ThemeBtn'),
        menu:r('#mobileHeaderMoreBtn'),title:r('.titleHeading .fieldLabel'),labelTextRight,
        overflow:document.documentElement.scrollWidth-innerWidth};

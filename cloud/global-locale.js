@@ -52,8 +52,8 @@
       b.setAttribute('aria-pressed',String(dark));
       b.setAttribute('aria-label',dark?(en?'Switch to light mode':'ライトモードに切替'):(en?'Switch to dark mode':'ダークモードに切替'));
       b.title=b.getAttribute('aria-label');
-      b.textContent=b.dataset.smThemeToggle==='icon'?(dark?'☀':'☾')
-        :dark?(en?'☀ Light mode':'☀ ライトモード'):en?'☾ Dark mode':'☾ ダークモード';
+      b.textContent=b.dataset.smThemeToggle==='icon'?(dark?'☼':'☾')
+        :dark?(en?'☼ Light mode':'☼ ライトモード'):en?'☾ Dark mode':'☾ ダークモード';
     });
   };
   const themeApply=(value,persist=false)=>{
@@ -73,6 +73,14 @@
     const link=document.createElement('link');
     link.rel='stylesheet';link.href='/cloud/r81-theme.css?v=r81p1';
     link.dataset.smThemeStyle='r81';
+    document.head.appendChild(link);
+  }
+  /* Load R82 AFTER the original theme layer; keeps the light design and all
+     saved chart artwork untouched while repairing the night-mode score grid. */
+  if(!document.querySelector('link[data-sm-theme-harmony]')){
+    const link=document.createElement('link');
+    link.rel='stylesheet';link.href='/cloud/r82-dark-harmony.css?v=r82p1';
+    link.dataset.smThemeHarmony='r82';
     document.head.appendChild(link);
   }
   document.addEventListener('click',event=>{

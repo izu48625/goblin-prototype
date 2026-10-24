@@ -1,3 +1,4 @@
+import {clickBasic} from './r80-qa-click.mjs';
 import assert from 'node:assert/strict';
 import {chromium} from 'playwright';
 const BASE=process.env.BASE_URL||'https://statsmaker.app';
@@ -36,7 +37,7 @@ try{
   const baseline=await home.locator('body').evaluate(()=>
     JSON.parse(localStorage.getItem('statsMakerV014Library')));
   const originalId=baseline.activeId;
-  await home.locator('#moreToolsBtn').click();
+  await clickBasic(home,'moreToolsBtn');
   await home.locator('#importJsonBtn').click();
   assert(await home.locator('#undoLastRestoreBtn').isHidden(),
     'Undo restore should be unavailable before first import');

@@ -1,0 +1,260 @@
+/* R82 — consistent graphite night scoring interface.
+   Scoped ONLY to opted-in dark UI with a native score table.
+   Never recolor project artwork, grade RGBA overlays or PNG previews. */
+html[data-sm-theme="dark"] body:has(#scoreTable){
+  --r82-page:#1d2226;
+  --r82-surface:#292f33;
+  --r82-surface-raised:#30373b;
+  --r82-control:#363e42;
+  --r82-table-head:#353d41;
+  --r82-table-row:#2d3539;
+  --r82-table-alt:#30383b;
+  --r82-rule:#4c5558;
+  --r82-ink:#f2f2ed;
+  --r82-subtle:#c5cdcc;
+  --r82-muted:#acb9be;
+  --r82-terracotta:#cd8d76;
+  --r82-green:#78ad9a;
+  background:var(--r82-page)!important;color:var(--r82-ink)!important;
+}
+html[data-sm-theme="dark"] body:has(#scoreTable) .app{
+  background:var(--r82-page);color:var(--r82-ink)
+}
+/* Nav stays a subdued charcoal, not the same color as form fields. */
+html[data-sm-theme="dark"] body:has(#scoreTable) .topbar.panel{
+  background:var(--r82-page)!important;
+  border:0!important;color:var(--r82-ink)!important
+}
+html[data-sm-theme="dark"] body:has(#scoreTable) .sheetPanel.panel{
+  background:var(--r82-surface)!important;
+  border-color:var(--r82-rule)!important;
+  color:var(--r82-ink)!important
+}
+html[data-sm-theme="dark"] body:has(#scoreTable)
+:is(.titleInput,.descInput,.sheetSelect,#searchInput){
+  background:var(--r82-control)!important;color:var(--r82-ink)!important;
+  border:1px solid #687173!important;
+}
+html[data-sm-theme="dark"] body:has(#scoreTable)
+:is(.titleInput,.descInput,.nameInput,.scoreInput,#searchInput)::placeholder{
+  color:#b9c2c4!important;opacity:1!important
+}
+html[data-sm-theme="dark"] body:has(#scoreTable)
+:is(.fieldLabel,.savedSheetHead,.currentScaleBadge,.brandSub){
+  color:#d2d8d6!important
+}
+html[data-sm-theme="dark"] body:has(#scoreTable) .sheetPanel .sheetToolbar{
+  background:var(--r82-surface)!important;border-color:var(--r82-rule)!important
+}
+html[data-sm-theme="dark"] body:has(#scoreTable) .sheetPanel .modeStrip{
+  background:#343b3f!important;border:0!important
+}
+html[data-sm-theme="dark"] body:has(#scoreTable) .sheetPanel
+:is(#sheetViewBtn,#overviewViewBtn,#fitViewBtn){
+  color:var(--r82-subtle)!important;background:transparent!important;
+  border:1px solid transparent!important;box-shadow:none!important
+}
+html[data-sm-theme="dark"] body:has(#scoreTable) .sheetPanel
+:is(#sheetViewBtn,#overviewViewBtn,#fitViewBtn).active{
+  color:var(--r82-ink)!important;
+  background:#4b5356!important;
+  border-color:#687274!important;
+  box-shadow:inset 0 -2px 0 var(--r82-terracotta)!important
+}
+html[data-sm-theme="dark"] body:has(#scoreTable) .sheetPanel
+:is(#addRowBtn,#addColBtn,#r80OptionsBtn,#r80VisualsBtn){
+  background:var(--r82-control)!important;color:var(--r82-ink)!important;
+  border:1px solid #666f70!important
+}
+html[data-sm-theme="dark"] body:has(#scoreTable) .topbar .topActions
+:is(#r81ThemeBtn,#mobileHeaderMoreBtn){
+  color:var(--r82-ink)!important;
+  background:var(--r82-control)!important;border:1px solid #697273!important;
+  box-shadow:none!important
+}
+html[data-sm-theme="dark"] body:has(#scoreTable) .topbar .topActions #publishBtn{
+  color:#fff!important;background:#3b7868!important;border-color:#3b7868!important
+}
+html[data-sm-theme="dark"] body:has(#scoreTable) .topbar .topActions #newSheetBtn{
+  color:#fff!important;background:#ab5d49!important;border-color:#ab5d49!important
+}
+html[data-sm-theme="dark"] body:has(#scoreTable)
+:is(.mobileHeaderMoreMenu,.sheetPanel .r80-options-panel,.sheetPanel #scoreSettingsPanel,
+.sheetPanel #utilityBar,.settingsDrawer){
+  background:var(--r82-surface-raised)!important;color:var(--r82-ink)!important;
+  border-color:var(--r82-rule)!important
+}
+html[data-sm-theme="dark"] body:has(#scoreTable) .mobileHeaderMoreMenu
+.mobileHeaderMenuBtn{
+  background:transparent!important;color:var(--r82-ink)!important
+}
+html[data-sm-theme="dark"] body:has(#scoreTable) .mobileHeaderMoreMenu
+.mobileHeaderMenuBtn.danger{color:#f1a1a5!important}
+html[data-sm-theme="dark"] body:has(#scoreTable) .sheetPanel
+:is(.r81-option-title,.r81-options-head strong){color:var(--r82-ink)!important}
+html[data-sm-theme="dark"] body:has(#scoreTable) .sheetPanel
+:is(.r81-option-value,#r80ScaleStatus,#r81OptionsClose){
+  color:var(--r82-subtle)!important
+}
+html[data-sm-theme="dark"] body:has(#scoreTable) .sheetPanel
+.r80-options-panel>button{border-color:#4a5456!important}
+html[data-sm-theme="dark"] body:has(#scoreTable) .sheetPanel .filterBar{
+  background:var(--r82-surface)!important
+}
+/* Primary bug: all columns, including metrics and the secondary sort row,
+   must share one continuous DARK table heading. R81 missed nested children. */
+html[data-sm-theme="dark"] body:has(#scoreTable)
+#scoreTable thead :is(th,.metricHead,.avgHead,.indexHead,.nameHead,.deleteHead){
+  background:var(--r82-table-head)!important;
+  background-color:var(--r82-table-head)!important;
+  background-image:none!important;color:var(--r82-ink)!important;
+  border-color:var(--r82-rule)!important;
+}
+html[data-sm-theme="dark"] body:has(#scoreTable)
+#scoreTable thead :is(.metricHeaderBox,.metricHeaderMain,.avgHeaderBox,.avgHeaderMain){
+  background:transparent!important;color:var(--r82-ink)!important
+}
+html[data-sm-theme="dark"] body:has(#scoreTable)
+#scoreTable thead :is(.metricHeaderInput,.avgHeaderMain){
+  color:var(--r82-ink)!important;
+  background:transparent!important;border-color:transparent!important
+}
+html[data-sm-theme="dark"] body:has(#scoreTable)
+#scoreTable .metricHeaderInput:focus{
+  background:#455156!important;border-color:var(--r82-terracotta)!important;
+  color:#fff!important;outline:2px solid var(--r82-terracotta)!important
+}
+html[data-sm-theme="dark"] body:has(#scoreTable)
+#scoreTable .headerSortRow{
+  background:#3b4448!important;
+  border-color:var(--r82-rule)!important
+}
+html[data-sm-theme="dark"] body:has(#scoreTable)
+#scoreTable .headerSortBtn{
+  background:transparent!important;color:#d0d8d8!important;
+  border-color:var(--r82-rule)!important
+}
+html[data-sm-theme="dark"] body:has(#scoreTable)
+#scoreTable .headerSortBtn:is(:hover,:focus-visible){
+  color:#fff!important;background:#4e595d!important
+}
+/* A restrained pair of row surfaces, instead of bright control squares. */
+html[data-sm-theme="dark"] body:has(#scoreTable)
+:is(.sheetPanel .tableWrap,#scoreTable,#scoreTable tbody){
+  background:var(--r82-table-row)!important;border-color:var(--r82-rule)!important
+}
+html[data-sm-theme="dark"] body:has(#scoreTable)
+#scoreTable tbody tr{background:var(--r82-table-row)!important}
+html[data-sm-theme="dark"] body:has(#scoreTable)
+#scoreTable tbody tr:nth-child(even){background:var(--r82-table-alt)!important}
+html[data-sm-theme="dark"] body:has(#scoreTable)
+#scoreTable tbody td:is(.indexCell,.nameCell,.deleteCell){
+  color:var(--r82-ink)!important;background:var(--r82-table-row)!important;
+  border-color:var(--r82-rule)!important
+}
+html[data-sm-theme="dark"] body:has(#scoreTable)
+#scoreTable tbody tr:nth-child(even) td:is(.indexCell,.nameCell,.deleteCell){
+  background:var(--r82-table-alt)!important
+}
+html[data-sm-theme="dark"] body:has(#scoreTable)
+#scoreTable tbody td.scoreCell:not(.heat-e):not(.heat-d):not(.heat-c):not(.heat-b):not(.heat-a):not(.heat-s):not(.heat-ss),
+html[data-sm-theme="dark"] body:has(#scoreTable)
+#scoreTable tbody td.avgCell:not(.heat-e):not(.heat-d):not(.heat-c):not(.heat-b):not(.heat-a):not(.heat-s):not(.heat-ss){
+  background:var(--r82-table-row)!important;color:var(--r82-ink)!important;
+  border-color:var(--r82-rule)!important
+}
+html[data-sm-theme="dark"] body:has(#scoreTable)
+#scoreTable tbody tr:nth-child(even)
+td.scoreCell:not(.heat-e):not(.heat-d):not(.heat-c):not(.heat-b):not(.heat-a):not(.heat-s):not(.heat-ss){
+  background:var(--r82-table-alt)!important
+}
+/* Dark grid lines must also reach tinted score cells; the tint/background
+   declaration is intentionally untouched, preserving exact rgba alpha. */
+html[data-sm-theme="dark"] body:has(#scoreTable)
+#scoreTable tbody td:is(.scoreCell,.avgCell){
+  border-color:var(--r82-rule)!important
+}
+/* Don't touch any scored td.heat-* colors: keep their exact RGBA/alpha. */
+html[data-sm-theme="dark"] body:has(#scoreTable) #scoreTable
+:is(.nameInput,.scoreInput,.avgValue,.grade){
+  color:var(--r82-ink)!important
+}
+html[data-sm-theme="dark"] body:has(#scoreTable)
+#scoreTable .nameInput::placeholder{
+  color:#bac4c5!important;opacity:1!important
+}
+html[data-sm-theme="dark"] body:has(#scoreTable)
+#scoreTable .scoreInput::placeholder{
+  color:#d3dcdd!important;opacity:1!important
+}
+html[data-sm-theme="dark"] body:has(#scoreTable)
+#scoreTable .thumbBtn{
+  background:#40494d!important;color:#e9eae5!important;
+  border:1px solid #6e7879!important;box-shadow:none!important
+}
+html[data-sm-theme="dark"] body:has(#scoreTable)
+#scoreTable .thumbBtn:not(:has(img)):hover{
+  background:#4d595d!important;border-color:#8f9b9a!important
+}
+html[data-sm-theme="dark"] body:has(#scoreTable)
+#scoreTable :is(.rowDelete,.rowMove,.rowNoteBtn,.removeImg,.metricEditBtn){
+  color:var(--r82-subtle)!important;background:transparent!important
+}
+html[data-sm-theme="dark"] body:has(#scoreTable)
+#scoreTable :is(.rowDelete,.rowMove,.rowNoteBtn,.removeImg,.metricEditBtn):hover{
+  color:#fff!important;background:#474f53!important
+}
+html[data-sm-theme="dark"] body:has(#scoreTable) .emptyAddRow{
+  background:var(--r82-surface)!important;border-color:var(--r82-rule)!important
+}
+html[data-sm-theme="dark"] body:has(#scoreTable) .emptyAddRow button{
+  background:var(--r82-control)!important;color:var(--r82-ink)!important;
+  border-color:#687274!important
+}
+/* Score colors OFF must be neutral graphite, not the R75 white backing.
+   ON retains the identical 7 band RGBA values and existing grade thresholds. */
+html[data-sm-theme="dark"] body.score-colors-off:has(#scoreTable)
+#scoreTable tbody td:is(.scoreCell,.avgCell),
+html[data-sm-theme="dark"] body.score-colors-off:has(#scoreTable)
+:is(.fitTable td.fitScoreCell,.fitTable td.fitAverageCell,.overviewMetrics .overviewMetric){
+  background-color:var(--r82-table-row)!important;
+  background-image:none!important;box-shadow:none!important
+}
+/* Remaining Home views share the same graphite backing and readable labels. */
+html[data-sm-theme="dark"] body:has(#scoreTable)
+:is(.overviewPanel,.overviewGrid,.overviewCard,.fitPanel,.fitViewport,.fitControls){
+  background:var(--r82-surface)!important;color:var(--r82-ink)!important;
+  border-color:var(--r82-rule)!important
+}
+html[data-sm-theme="dark"] body:has(#scoreTable) :is(.overviewCardTop,.fitTable th,.fitTable thead th){
+  background:var(--r82-table-head)!important;color:var(--r82-ink)!important;
+  border-color:var(--r82-rule)!important
+}
+html[data-sm-theme="dark"] body:has(#scoreTable) :is(.fitTable,.fitTable tbody tr,.overviewMetrics){
+  background:var(--r82-table-row)!important;color:var(--r82-ink)!important
+}
+html[data-sm-theme="dark"] body:has(#scoreTable)
+.fitTable :is(td.fitName,td.fitIndex,td.fitScoreCell:not([class*="heat-"])){
+  background:var(--r82-table-row)!important;color:var(--r82-ink)!important;
+  border-color:var(--r82-rule)!important
+}
+html[data-sm-theme="dark"] body:has(#scoreTable)
+:is(.fitNameInput,.fitMetricInput,.fitScoreInput,.overviewMetricName,
+.overviewMetricValue,.overviewName,.overviewAvgValue){
+  color:var(--r82-ink)!important
+}
+html[data-sm-theme="dark"] body:has(#scoreTable)
+:is(.overviewMetricName,.overviewMetricValue,.overviewMetricValue span,
+.overviewAvgGrade,.fitScoreInput)::placeholder{
+  color:#b9c3c5!important
+}
+html[data-sm-theme="dark"] body:has(#scoreTable)
+:is(.fitThumb,.overviewThumb){
+  background:#40494d!important;color:#e9eae5!important;border-color:#6e7879!important
+}
+/* Restore clear keyboard focus without changing field values. */
+html[data-sm-theme="dark"] body:has(#scoreTable)
+:is(.metricHeaderInput,.scoreInput,.nameInput,.fitScoreInput):focus{
+  outline:2px solid var(--r82-terracotta)!important;outline-offset:-2px;
+  box-shadow:none!important;background-color:rgba(71,80,82,.25)
+}

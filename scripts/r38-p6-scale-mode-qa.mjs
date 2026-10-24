@@ -1,3 +1,4 @@
+import {clickBasic} from './r80-qa-click.mjs';
 import assert from 'node:assert/strict';
 import {readFile} from 'node:fs/promises';
 import {chromium,webkit} from 'playwright';
@@ -40,7 +41,7 @@ try{
   assert(before.every(x=>x.grade==='heat-e'), 'Initial 8 is 8/100, not 8/10');
   assert.equal(new Set(before.map(x=>x.color)).size,1,
     'Screenshot regression cannot be demonstrated on initial 100-point mode');
-  await home.locator('#scoreSettingsBtn').click();
+  await clickBasic(home,'scoreSettingsBtn');
   await home.locator('#scaleMismatchHint').waitFor({state:'visible',timeout:6000});
   assert((await home.locator('#scaleMismatchHint').innerText()).includes('8点'));
   const savedBefore=await home.locator('body').evaluate(()=>window.__statsMakerGetActiveSheet().rows[0].scores.slice(0,4));
