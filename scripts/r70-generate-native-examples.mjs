@@ -56,7 +56,7 @@ try{
             note:'',category:'',imageRef:null,enabled:true}));
         p.settings.topN=6;
         p.settings.showCategory=false;
-        p.settings.unit='PTS / 100';
+        p.settings.unit='';
       }
       if(type==='tier-list'){
         p.data.items=teams.map((t,i)=>({id:'tier_item_'+i,name:t.name,
