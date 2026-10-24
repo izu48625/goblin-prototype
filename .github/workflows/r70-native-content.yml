@@ -30,7 +30,7 @@ jobs:
         run: |
           npm run build:cloudflare
           npm install --no-save playwright@1.56.1
-          npx playwright install --with-deps chromium
+          npx playwright install --with-deps chromium webkit
       - name: Start a localhost-only HTTP server
         run: |
           python3 -m http.server 4173 --bind 127.0.0.1 --directory dist >/tmp/r70-http.log 2>&1 &
@@ -49,6 +49,7 @@ jobs:
         run: |
           node --check scripts/r70-adsense-content-qa.mjs
           node scripts/r70-adsense-content-qa.mjs
+          node scripts/r70-showcase-browser-qa.mjs
           node scripts/r47-seo-guides-qa.mjs
           node scripts/r34-seo-edge-test.mjs
       - name: Commit generated real PNGs to this PR branch only
