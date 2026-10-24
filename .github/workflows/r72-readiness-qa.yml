@@ -1,0 +1,35 @@
+name: R72 Brand and AdSense Static Readiness
+on:
+  pull_request:
+    paths:
+      - 'index.html'
+      - 'base/index.html'
+      - 'base/css/r72-editor.css'
+      - 'ja/index.html'
+      - 'en/index.html'
+      - 'discover.html'
+      - 'cloud/r72-*.css'
+      - 'ads.txt'
+      - 'scripts/build-cloudflare.mjs'
+      - 'scripts/r72-readiness-qa.mjs'
+      - '.github/workflows/r72-readiness-qa.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  brand-policy-integrity:
+    runs-on: ubuntu-latest
+    timeout-minutes: 8
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Check public content, links, privacy and owner tag
+        run: node scripts/r72-readiness-qa.mjs
+      - name: Rebuild static assets and check ads.txt packaged
+        run: |
+          npm run build:cloudflare
+          node scripts/r72-readiness-qa.mjs
+      - name: Check R71 Public gallery and no extra requests
+        run: node scripts/r71-visual-static-qa.mjs
