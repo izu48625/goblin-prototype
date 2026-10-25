@@ -30,6 +30,9 @@ jobs:
       - name: HTTP production smoke
         run: node scripts/production-smoke.mjs http
 
+      - name: R83 read-only production guide and sitemap audit
+        run: node scripts/r83-public-audit.mjs
+
       - name: Install Playwright
         run: |
           npm install --no-save playwright@1.56.1
