@@ -1,6 +1,7 @@
 import assert from 'node:assert/strict';
 import {readFile} from 'node:fs/promises';
 import {staticSitemap} from '../worker/seo.js';
+import {weightedAverage,rankSample} from '../cloud/scoring-guide.mjs';
 
 const read=path=>readFile(new URL('../'+path,import.meta.url),'utf8');
 const expected=[
@@ -13,6 +14,11 @@ for(const [joy,budget,travel,average,joyWeighted,budgetWeighted] of expected){
   assert.equal(Number(((joy*2+budget+travel)/4).toFixed(2)),joyWeighted);
   assert.equal(Number(((joy+budget*3+travel)/5).toFixed(2)),budgetWeighted);
 }
+assert.equal(weightedAverage([9,5,8],[2,1,1]),7.75);
+assert.deepEqual(rankSample([1,1,1]).map(a=>[a.index,a.rank]),[[0,1],[1,1],[2,3]]);
+assert.deepEqual(rankSample([2,1,1]).map(a=>a.index),[0,1,2]);
+assert.deepEqual(rankSample([1,3,1]).map(a=>a.index),[2,1,0]);
+assert.throws(()=>weightedAverage([9,4,5],[1,0,1]),RangeError);
 const worker=await read('worker/seo.js');
 const sitemap=await staticSitemap().text();
 const global=await read('cloud/global-locale.js');
@@ -31,7 +37,11 @@ for(const lang of ['ja','en']){
   assert.equal((html.match(/<h1\b/g)||[]).length,1,'Expected a single H1');
   assert.equal((html.match(/<section\b/g)||[]).length,7,'Expected seven complete useful sections');
   assert.equal((html.match(/<section\b/g)||[]).length,(html.match(/<\/section>/g)||[]).length,'Unclosed section');
-  assert.equal((html.match(/<table\b/g)||[]).length,2,'Expected reproducible rubric and score tables');
+  assert.equal((html.match(/<table\b/g)||[]).length,3,'Expected rubric, source scores, and interactive ranking table');
+  assert(html.includes('id="scoringPlayground"'),'Interactive ranking must be present');
+  assert.equal((html.match(/type="range"/g)||[]).length,3,'Three weighting controls required');
+  assert(html.includes('aria-live="polite"'),'Accessible score result announcement required');
+  assert(html.includes('/cloud/scoring-guide.mjs?v=r83p2'),'Module script not loaded');
   assert(html.includes('https://statsmaker.app/ja/scoring-guide.html'));
   assert(html.includes('https://statsmaker.app/en/scoring-guide.html'));
   assert(html.includes('7.75')&&html.includes('7.25')&&html.includes('7.80'),'Weighted scores missing');
@@ -44,9 +54,12 @@ for(const lang of ['ja','en']){
   assert(worker.includes("'"+'/'+lang+'/scoring-guide.html'+"'"),'Work sitemap code omits guide');
   assert(!/adsbygoogle\.js|googletagmanager\.com|google-analytics\.com|service_role|sb_secret_/i.test(html),'Unexpected ad, tracking, or private key');
 }
+const moduleCode=await read('cloud/scoring-guide.mjs');
+assert(moduleCode.includes('export function weightedAverage'),'No reusable calculation model');
+assert(!/fetch\(|localStorage|sessionStorage|XMLHttpRequest|sendBeacon|google-analytics|adsbygoogle/i.test(moduleCode),'Playground must not track or send data');
 const index=await read('index.html');
 const config=await read('cloud/analytics-config.js');
 assert(index.includes('name="google-adsense-account"'),'Do not remove approved owner verification');
 assert(!index.includes('adsbygoogle.js'),'Keep live ad delivery off until approval');
 assert(config.includes('enabled:false')&&config.includes("measurementId:''"),'GA4 must stay disabled');
-console.log('R83 QA PASS: two original practical guides, arithmetic, JA/EN, links, sitemap, privacy, ad-free');
+console.log('R83 QA PASS: two original interactive guides, ranking logic, arithmetic, JA/EN, sitemap, privacy, ad-free');
