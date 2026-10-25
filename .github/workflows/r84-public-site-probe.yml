@@ -1,0 +1,22 @@
+name: R84 Remote AdSense Readiness Production Probe
+on:
+  pull_request:
+    paths:
+      - '.github/workflows/r84-public-site-probe.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+jobs:
+  public-content-probe:
+    runs-on: ubuntu-latest
+    timeout-minutes: 8
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Probe public R83 content without credentials or writes
+        env:
+          BASE_URL: https://statsmaker.app
+        run: node scripts/r83-public-audit.mjs
