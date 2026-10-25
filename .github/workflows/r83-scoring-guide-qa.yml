@@ -9,6 +9,7 @@ on:
       - 'ja/examples.html'
       - 'en/examples.html'
       - 'cloud/global-locale.js'
+      - 'cloud/scoring-guide.mjs'
       - 'worker/seo.js'
       - 'scripts/r83-scoring-guide-qa.mjs'
       - '.github/workflows/r83-scoring-guide-qa.yml'
