@@ -1,0 +1,29 @@
+name: R83 Original Scoring Guide and AdSense Readiness
+on:
+  pull_request:
+    paths:
+      - 'ja/scoring-guide.html'
+      - 'en/scoring-guide.html'
+      - 'ja/index.html'
+      - 'en/index.html'
+      - 'ja/examples.html'
+      - 'en/examples.html'
+      - 'cloud/global-locale.js'
+      - 'cloud/scoring-guide.mjs'
+      - 'worker/seo.js'
+      - 'scripts/r83-scoring-guide-qa.mjs'
+      - 'scripts/r83-public-audit.mjs'
+      - '.github/workflows/production-smoke.yml'
+      - '.github/workflows/r83-scoring-guide-qa.yml'
+  workflow_dispatch:
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Run arithmetic, content and privacy QA
+        run: node scripts/r83-scoring-guide-qa.mjs

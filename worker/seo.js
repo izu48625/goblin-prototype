@@ -140,7 +140,7 @@ const sitemapLoc=(loc,last)=>{
   return '<url><loc>'+xml(loc)+'</loc>'+(updated?'<lastmod>'+updated+'</lastmod>':'')+'</url>';
 };
 export function staticSitemap(){
-  return response(sitemapWrap(['/ja/','/en/','/ja/chart-guide.html','/en/chart-guide.html','/ja/png-guide.html','/en/png-guide.html','/ja/examples.html','/en/examples.html','/discover'].map(p=>sitemapLoc(ORIGIN+p)).join('')),'application/xml; charset=utf-8');
+  return response(sitemapWrap(['/ja/','/en/','/ja/chart-guide.html','/en/chart-guide.html','/ja/png-guide.html','/en/png-guide.html','/ja/examples.html','/en/examples.html','/ja/scoring-guide.html','/en/scoring-guide.html','/discover'].map(p=>sitemapLoc(ORIGIN+p)).join('')),'application/xml; charset=utf-8');
 }
 export async function sitemapIndex(){
   let count;
