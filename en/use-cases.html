@@ -1,0 +1,161 @@
+<!doctype html>
+<html lang="en"><head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#f6f5f1">
+<title>Five Practical Chart Use Cases | Stats Maker</title>
+<meta name="description" content="Five independently authored Stats Maker examples: invented café ratings, two-axis walking routes, study trend, target-versus-actual chart, and a fictional character stat card. Source numbers and native app PNGs included.">
+<meta name="robots" content="index,follow">
+<link rel="canonical" href="https://statsmaker.app/en/use-cases.html">
+<link rel="alternate" hreflang="ja" href="https://statsmaker.app/ja/use-cases.html">
+<link rel="alternate" hreflang="en" href="https://statsmaker.app/en/use-cases.html">
+<link rel="alternate" hreflang="x-default" href="https://statsmaker.app/en/use-cases.html">
+<meta property="og:type" content="article"><meta property="og:site_name" content="Stats Maker">
+<meta property="og:title" content="Five first-party chart use cases">
+<meta property="og:description" content="Five independently authored Stats Maker examples: invented café ratings, two-axis walking routes, study trend, target-versus-actual chart, and a fictional character stat card. Source numbers and native app PNGs included.">
+<meta property="og:url" content="https://statsmaker.app/en/use-cases.html">
+<meta property="og:image" content="https://statsmaker.app/ja/example-images/usecase-routes.png">
+<meta name="twitter:card" content="summary_large_image">
+<style>
+*{box-sizing:border-box}html,body{margin:0;background:#f6f5f1;color:#252a30;font:16px/1.7 system-ui,-apple-system,BlinkMacSystemFont,sans-serif}
+main,footer{width:min(1050px,calc(100% - 34px));margin:auto}main{padding:20px 0 45px}
+h1{font-size:clamp(30px,5vw,47px);line-height:1.2;margin:10px 0 16px}h2{font-size:clamp(21px,3.2vw,28px);line-height:1.3;margin:0 0 10px}
+h3{font-size:17px;line-height:1.35;margin:18px 0 5px}p{color:#515a61;margin:8px 0 14px}
+strong{color:#282e33}a{color:#28585e;text-underline-offset:3px}.eyebrow{color:#a54f3c;font-size:12px;font-weight:800;letter-spacing:.09em}
+.hero{padding:21px 0 28px}.hero .lead{max-width:870px;font-size:17px}
+.actions{display:flex;gap:10px;flex-wrap:wrap;margin:18px 0}.actions a{display:inline-flex;align-items:center;min-height:45px;padding:11px 15px;border-radius:5px;background:#b64d35;color:#fff!important;font-weight:750;text-decoration:none}
+.actions a.secondary{background:#fff;color:#2d3439!important;border:1px solid #bbb8b1}
+.index{display:flex;gap:8px 14px;flex-wrap:wrap;padding:18px 0;border-block:1px solid #dfdcd4}.index a{font-weight:700}
+.case{padding:30px 0;border-bottom:1px solid #dfdcd4;scroll-margin-top:55px}.caseHead{max-width:860px}
+.two{display:grid;grid-template-columns:minmax(0,410px) minmax(0,1fr);gap:26px;align-items:start;margin-top:19px}
+figure{margin:0;min-width:0;background:#fff;padding:10px;border:1px solid #dbd8d0;border-radius:6px}
+figure img{display:block;width:100%;height:auto;border-radius:4px;background:#e8e8e5}
+figcaption{font-size:12px;line-height:1.6;color:#576169;padding:10px 3px 0}
+.tableFrame{border:1px solid #dedbd4;border-radius:6px;background:#fff;overflow-x:auto;max-width:100%}
+table{border-collapse:collapse;width:100%;font-size:14px}th,td{padding:9px 11px;border-bottom:1px solid #e2dfd9;text-align:right;white-space:nowrap}
+th:first-child,td:first-child{text-align:left}thead th{background:#f0eee8;font-weight:800}tr:last-child td{border-bottom:0}
+.note{background:#fff;padding:18px;border:1px solid #dfdcd4;border-radius:6px;margin-top:23px}
+footer{border-top:1px solid #ddd9d2;padding:23px 0 40px;font-size:13px;color:#58616a}
+footer a{margin-right:14px}a:focus-visible{outline:3px solid #247e82;outline-offset:3px}
+@media(max-width:740px){.two{grid-template-columns:1fr;gap:14px}.case{padding:23px 0}.hero .lead{font-size:16px}figure{max-width:540px}}
+</style>
+<link rel="stylesheet" href="/cloud/global-locale.css?v=r74p1">
+<link rel="stylesheet" href="/cloud/r73-reading.css?v=r74p1">
+</head>
+<body class="r73-light-page r73-reading" data-sm-reading-page="en">
+<main>
+<section class="hero"><div class="eyebrow">STATS MAKER · USE CASES</div>
+<h1>Five original examples, five different chart tasks</h1><p class="lead">Explore five separate decisions that call for five different visual formats. Each example includes the exact made-up scores, a native Stats Maker PNG, what the picture tells you, and steps to make it yourself. Everything here is invented for demonstration; no real person, venue, study result or trademark is rated.</p>
+<div class="actions"><a href="/index.html?lang=en">Start creating</a><a class="secondary" href="/en/examples.html">Original three-chart walkthrough</a></div>
+</section>
+<nav class="index" aria-label="Jump to example">
+<a href="#cafe">1. A fictional café menu</a>
+<a href="#routes">2. Choose between fictional walking routes</a>
+<a href="#study">3. An eight-week fictional study diary</a>
+<a href="#plan">4. Compare fictional weekly targets with results</a>
+<a href="#hero">5. A fictional adventurer stat card</a>
+</nav>
+<section class="case" id="cafe">
+<div class="caseHead"><div class="eyebrow">CASE 1 · BAR</div>
+<h2>A fictional café menu</h2><p>Five invented drinks are given personal preference scores on the same 0–100 scale. A horizontal bar chart makes a single-criterion ranking readable.</p></div>
+<div class="two"><figure>
+<img src="/ja/example-images/usecase-cafe.png" width="1080" height="1080" decoding="async" loading="eager" alt="A native Stats Maker bar showing fictional cafe data">
+<figcaption>Actual PNG exported by Stats Maker using the exact sample numbers in the adjacent table.</figcaption>
+</figure>
+<div class="explainer">
+<h3>What this helps you see</h3><p><strong>Sort five drinks at a glance</strong>。 Citrus Tea scores 92, versus 68 for Cloud Milk: a 24-point gap. These are invented preference ratings, not sales, reviews, or real café data.</p>
+<div class="tableFrame" role="region" tabindex="0" aria-label="Source scores (scrollable)">
+<table><thead><tr><th scope="col">Drink</th><th scope="col">Preference / 100</th></tr></thead><tbody><tr><th scope="row">Citrus Tea</th><td>92</td></tr>
+<tr><th scope="row">Mint Cocoa</th><td>84</td></tr>
+<tr><th scope="row">Berry Latte</th><td>78</td></tr>
+<tr><th scope="row">Spice Chai</th><td>73</td></tr>
+<tr><th scope="row">Cloud Milk</th><td>68</td></tr></tbody></table></div>
+<h3>How to recreate it</h3><p>Choose Bar Chart, add five drinks and their scores, then show horizontal bars with value labels, ordered from highest to lowest.</p>
+<h3>What not to infer</h3><p>Unlike sales or measured popularity, personal scores are opinions rather than objective facts.</p>
+</div></div>
+</section>
+<section class="case" id="routes">
+<div class="caseHead"><div class="eyebrow">CASE 2 · QUADRANT</div>
+<h2>Choose between fictional walking routes</h2><p>Plot four imaginary walking routes using Quietness and Access rather than turning everything into a single total rank.</p></div>
+<div class="two"><figure>
+<img src="/ja/example-images/usecase-routes.png" width="1080" height="1080" decoding="async" loading="lazy" alt="A native Stats Maker quadrant showing fictional routes data">
+<figcaption>Actual PNG exported by Stats Maker using the exact sample numbers in the adjacent table.</figcaption>
+</figure>
+<div class="explainer">
+<h3>What this helps you see</h3><p><strong>Balance calm surroundings and ease of access</strong>。 Hill Trail scores 92 for quietness but just 35 for access. City Walk is the opposite, at 40 and 95. The best choice depends on the goal.</p>
+<div class="tableFrame" role="region" tabindex="0" aria-label="Source scores (scrollable)">
+<table><thead><tr><th scope="col">Route</th><th scope="col">Quietness</th><th scope="col">Access</th></tr></thead><tbody><tr><th scope="row">Riverside</th><td>85</td><td>65</td></tr>
+<tr><th scope="row">Hill Trail</th><td>92</td><td>35</td></tr>
+<tr><th scope="row">City Walk</th><td>40</td><td>95</td></tr>
+<tr><th scope="row">Garden Loop</th><td>73</td><td>80</td></tr></tbody></table></div>
+<h3>How to recreate it</h3><p>Select Quadrant and set Quietness as X, Access as Y. Plot four routes and split both dimensions at 50.</p>
+<h3>What not to infer</h3><p>These are hypothetical routes; there are no real travel-time or safety measurements.</p>
+</div></div>
+</section>
+<section class="case" id="study">
+<div class="caseHead"><div class="eyebrow">CASE 3 · IMAGE-LINE</div>
+<h2>An eight-week fictional study diary</h2><p>Track a made-up self-rating over eight weeks, including setbacks. A trend view answers a different question from a ranked scorecard.</p></div>
+<div class="two"><figure>
+<img src="/ja/example-images/usecase-study.png" width="1600" height="900" decoding="async" loading="lazy" alt="A native Stats Maker image-line showing fictional study data">
+<figcaption>Actual PNG exported by Stats Maker using the exact sample numbers in the adjacent table.</figcaption>
+</figure>
+<div class="explainer">
+<h3>What this helps you see</h3><p><strong>Read change over time, not rank</strong>。 W1 starts at 35 and W8 ends at 82, up 47 points. The series also dips in W3 and W7; the path matters, not just the endpoints.</p>
+<div class="tableFrame" role="region" tabindex="0" aria-label="Source scores (scrollable)">
+<table><thead><tr><th scope="col">Week</th><th scope="col">Self-rating / 100</th></tr></thead><tbody><tr><th scope="row">W1</th><td>35</td></tr>
+<tr><th scope="row">W2</th><td>45</td></tr>
+<tr><th scope="row">W3</th><td>42</td></tr>
+<tr><th scope="row">W4</th><td>58</td></tr>
+<tr><th scope="row">W5</th><td>60</td></tr>
+<tr><th scope="row">W6</th><td>70</td></tr>
+<tr><th scope="row">W7</th><td>67</td></tr>
+<tr><th scope="row">W8</th><td>82</td></tr></tbody></table></div>
+<h3>How to recreate it</h3><p>Choose Image Line and name eight items W1–W8. Without uploaded imagery, the same chart renderer uses its ordinary color background; show labels and values.</p>
+<h3>What not to infer</h3><p>These are fictional self-ratings, not educational research or measured improvement.</p>
+</div></div>
+</section>
+<section class="case" id="plan">
+<div class="caseHead"><div class="eyebrow">CASE 4 · RANGE</div>
+<h2>Compare fictional weekly targets with results</h2><p>Four made-up activity plans each have a target and a completion score. Range / Dumbbell reveals the size and direction of each gap.</p></div>
+<div class="two"><figure>
+<img src="/ja/example-images/usecase-plan.png" width="1080" height="1080" decoding="async" loading="lazy" alt="A native Stats Maker range showing fictional plan data">
+<figcaption>Actual PNG exported by Stats Maker using the exact sample numbers in the adjacent table.</figcaption>
+</figure>
+<div class="explainer">
+<h3>What this helps you see</h3><p><strong>Find over- and under-target activities</strong>。 Cleaning moves from target 50 to done 90, a +40-point difference. Sleep goes from 85 to 70, a −15-point difference.</p>
+<div class="tableFrame" role="region" tabindex="0" aria-label="Source scores (scrollable)">
+<table><thead><tr><th scope="col">Activity</th><th scope="col">Target / 100</th><th scope="col">Done / 100</th></tr></thead><tbody><tr><th scope="row">Reading</th><td>70</td><td>65</td></tr>
+<tr><th scope="row">Fitness</th><td>75</td><td>80</td></tr>
+<tr><th scope="row">Cleaning</th><td>50</td><td>90</td></tr>
+<tr><th scope="row">Sleep</th><td>85</td><td>70</td></tr></tbody></table></div>
+<h3>How to recreate it</h3><p>Open Range / Dumbbell. Enter Target and Done for every activity, then enable differences and show both source scores.</p>
+<h3>What not to infer</h3><p>These are illustrative scores, not real lifestyle or health measurements.</p>
+</div></div>
+</section>
+<section class="case" id="hero">
+<div class="caseHead"><div class="eyebrow">CASE 5 · STAT-CARD</div>
+<h2>A fictional adventurer stat card</h2><p>A one-page profile for an original character, Mira, with six rated strengths. It is not based on another game or copyrighted character.</p></div>
+<div class="two"><figure>
+<img src="/ja/example-images/usecase-hero.png" width="1080" height="1080" decoding="async" loading="lazy" alt="A native Stats Maker stat-card showing fictional hero data">
+<figcaption>Actual PNG exported by Stats Maker using the exact sample numbers in the adjacent table.</figcaption>
+</figure>
+<div class="explainer">
+<h3>What this helps you see</h3><p><strong>Explain one character's profile in a card</strong>。 Speed leads at 88 while Tactics is lowest at 67. Overall 78 is the rounded mean of the six category scores (77.67), not an official power level.</p>
+<div class="tableFrame" role="region" tabindex="0" aria-label="Source scores (scrollable)">
+<table><thead><tr><th scope="col">Stat</th><th scope="col">Score / 100</th></tr></thead><tbody><tr><th scope="row">Power</th><td>84</td></tr>
+<tr><th scope="row">Guard</th><td>72</td></tr>
+<tr><th scope="row">Speed</th><td>88</td></tr>
+<tr><th scope="row">Tactics</th><td>67</td></tr>
+<tr><th scope="row">Support</th><td>74</td></tr>
+<tr><th scope="row">Focus</th><td>81</td></tr></tbody></table></div>
+<h3>How to recreate it</h3><p>Use Stat Card, enter the character name and six stats, then keep images optional for a fully typographic result.</p>
+<h3>What not to infer</h3><p>Mira is a fictional tutorial character with no third-party artwork.</p>
+</div></div>
+</section>
+<section class="note"><h2>Use the chart type that answers your question</h2>
+<p>For one score across several candidates, use bars. For two competing priorities, try Quadrant. For a sequence of weeks, use a line. To compare a plan with a result, use Range. For a single subject with several attributes, choose Stat Card. None of these fictional scores claims to represent measurements from a real business, person, location, or study.</p>
+<p>These five chart exports are generated using the app's native Canvas rendering code. Images may be shared as samples, but an exported PNG is not an editable source sheet.</p>
+<div class="actions"><a href="/index.html?lang=en">Start creating</a><a class="secondary" href="/en/scoring-guide.html">How to set fair scores</a></div></section>
+</main>
+<footer>Stats Maker · <a href="/en/">Overview</a> · <a href="/en/examples.html">More examples</a> · <a href="/en/chart-guide.html">Chart guide</a> · <a href="/en/legal.html#privacy">Privacy</a> · <a href="/en/legal.html#contact">Contact</a></footer>
+<script src="/cloud/global-locale.js?v=r84usecases1"></script>
+</body></html>
