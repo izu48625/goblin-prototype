@@ -1,0 +1,73 @@
+name: R84 Five Real Native Use-Case PNGs
+on:
+  pull_request:
+    paths:
+      - 'scripts/r84-*.mjs'
+      - 'scripts/r84-use-cases-data.json'
+      - 'ja/use-cases.html'
+      - 'en/use-cases.html'
+      - 'ja/index.html'
+      - 'en/index.html'
+      - 'ja/examples.html'
+      - 'en/examples.html'
+      - 'worker/seo.js'
+      - 'cloud/global-locale.js'
+      - '.github/workflows/r84-native-usecases.yml'
+permissions:
+  contents: write
+jobs:
+  native-examples:
+    if: github.event.pull_request.head.repo.full_name == github.repository && github.head_ref == 'r84-diverse-native-use-cases-20261026'
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.ref }}
+          persist-credentials: true
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Build Cloudflare Free static bundle and install local-only browsers
+        run: |
+          npm run build:cloudflare
+          npm install --no-save playwright@1.56.1
+          npx playwright install --with-deps chromium webkit
+      - name: Serve isolated local site (not production)
+        run: |
+          python3 -m http.server 4173 --bind 127.0.0.1 --directory dist >/tmp/r84-http.log 2>&1 &
+          for i in $(seq 1 30); do
+            if curl -fsS http://127.0.0.1:4173/ja/ >/dev/null; then exit 0; fi
+            sleep 1
+          done
+          exit 1
+      - name: Generate five honest Stats Maker Canvas PNGs
+        env:
+          BASE_URL: http://127.0.0.1:4173
+        run: node scripts/r84-generate-use-cases.mjs
+      - name: Rebuild with generated screenshots
+        run: npm run build:cloudflare
+      - name: Test complete examples, contents, privacy, and existing SEO
+        run: |
+          node scripts/r84-native-usecases-qa.mjs
+          node scripts/r83-scoring-guide-qa.mjs
+          node scripts/r70-adsense-content-qa.mjs
+          node scripts/r47-seo-guides-qa.mjs
+          node scripts/r34-seo-edge-test.mjs
+      - name: Check Chromium and WebKit desktop/mobile layout
+        env:
+          BASE_URL: http://127.0.0.1:4173
+        run: node scripts/r84-usecases-browser-qa.mjs
+      - name: Commit only the five generated first-party PNG assets to this PR
+        env:
+          EXPECTED_BRANCH: r84-diverse-native-use-cases-20261026
+        run: |
+          test "${{ github.head_ref }}" = "$EXPECTED_BRANCH"
+          test "${{ github.event.pull_request.head.repo.full_name }}" = "${{ github.repository }}"
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add ja/example-images/usecase-cafe.png ja/example-images/usecase-routes.png ja/example-images/usecase-study.png ja/example-images/usecase-plan.png ja/example-images/usecase-hero.png
+          if ! git diff --cached --quiet; then
+            git commit -m 'R84: genuine native Stats Maker example PNGs (five distinct formats)'
+            git push origin "HEAD:$EXPECTED_BRANCH"
+          fi
