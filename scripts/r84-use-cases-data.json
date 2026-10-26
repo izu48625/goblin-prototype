@@ -1,0 +1,278 @@
+{
+  "notice": "All labels and values are fictional examples. No real-world outcomes or official data.",
+  "cases": [
+    {
+      "slug": "cafe",
+      "type": "bar",
+      "width": 1080,
+      "height": 1080,
+      "title": "Cafe Menu | Taste Ratings",
+      "subtitle": "FICTIONAL MENU · PERSONAL SCORES",
+      "theme": "pastel",
+      "ja": {
+        "title": "架空カフェのドリンク比較",
+        "lead": "架空の5種類のドリンクを、同じ100点満点の好み尺度で採点。棒グラフは一項目の順位と点差を読むのに向いています。",
+        "use": "5つの飲み物を一目で並べる",
+        "insight": "Citrus Tea 92点とCloud Milk 68点の差は24点。ただし、これは創作例の主観評価であり、実際の店舗や味覚調査ではありません。",
+        "how": "Bar Chartを選び、評価対象5件と好みの点数を入力。今回は順位順に並べ、横向きの棒と数値ラベルを表示しています。",
+        "warning": "「人気度」「売上」のような実測データとは違い、好みの点数に客観的な正解はありません。"
+      },
+      "en": {
+        "title": "A fictional café menu",
+        "lead": "Five invented drinks are given personal preference scores on the same 0–100 scale. A horizontal bar chart makes a single-criterion ranking readable.",
+        "use": "Sort five drinks at a glance",
+        "insight": "Citrus Tea scores 92, versus 68 for Cloud Milk: a 24-point gap. These are invented preference ratings, not sales, reviews, or real café data.",
+        "how": "Choose Bar Chart, add five drinks and their scores, then show horizontal bars with value labels, ordered from highest to lowest.",
+        "warning": "Unlike sales or measured popularity, personal scores are opinions rather than objective facts."
+      },
+      "fields": [
+        "Drink",
+        "Preference / 100"
+      ],
+      "rows": [
+        [
+          "Citrus Tea",
+          92
+        ],
+        [
+          "Mint Cocoa",
+          84
+        ],
+        [
+          "Berry Latte",
+          78
+        ],
+        [
+          "Spice Chai",
+          73
+        ],
+        [
+          "Cloud Milk",
+          68
+        ]
+      ]
+    },
+    {
+      "slug": "routes",
+      "type": "quadrant",
+      "width": 1080,
+      "height": 1080,
+      "title": "Weekend Routes | Two Priorities",
+      "subtitle": "IMAGINARY ROUTES · 0-100",
+      "theme": "sports",
+      "ja": {
+        "title": "架空の散歩ルートを2軸で選ぶ",
+        "lead": "架空の散歩コース4案を「静かさ」と「行きやすさ」で評価。総合順位を作らず、自分の目的に合う位置を確認する作例です。",
+        "use": "静けさかアクセスか、優先条件で見る",
+        "insight": "Hill Trailは静かさ92点でもアクセス35点。一方City Walkは静かさ40点・アクセス95点。どちらが最適かは目的次第で、一律の最優秀ルートはありません。",
+        "how": "Quadrantを選び、X軸に静かさ、Y軸に行きやすさを設定して4つの候補を入力。50点を境に4領域を使い分けています。",
+        "warning": "実在の散歩道、移動時間、安全性を調査した数値ではありません。"
+      },
+      "en": {
+        "title": "Choose between fictional walking routes",
+        "lead": "Plot four imaginary walking routes using Quietness and Access rather than turning everything into a single total rank.",
+        "use": "Balance calm surroundings and ease of access",
+        "insight": "Hill Trail scores 92 for quietness but just 35 for access. City Walk is the opposite, at 40 and 95. The best choice depends on the goal.",
+        "how": "Select Quadrant and set Quietness as X, Access as Y. Plot four routes and split both dimensions at 50.",
+        "warning": "These are hypothetical routes; there are no real travel-time or safety measurements."
+      },
+      "fields": [
+        "Route",
+        "Quietness",
+        "Access"
+      ],
+      "rows": [
+        [
+          "Riverside",
+          85,
+          65
+        ],
+        [
+          "Hill Trail",
+          92,
+          35
+        ],
+        [
+          "City Walk",
+          40,
+          95
+        ],
+        [
+          "Garden Loop",
+          73,
+          80
+        ]
+      ]
+    },
+    {
+      "slug": "study",
+      "type": "image-line",
+      "width": 1600,
+      "height": 900,
+      "title": "Study Habit | 8-Week Diary",
+      "subtitle": "IMAGINARY SELF-RATING · 0-100",
+      "theme": "light",
+      "ja": {
+        "title": "学習習慣の8週間を線で追う",
+        "lead": "架空の8週間の自己評価を時系列に並べた例。点数が上がり続けるのではなく、途中で下がる週もあることを表しています。",
+        "use": "順位ではなく、変化の方向を確認する",
+        "insight": "W1は35点、W8は82点で47点上昇。一方W3とW7は直前週から下がります。始点と終点だけを比べず、途中の変化も読み取ります。",
+        "how": "Image Lineを開き、8つの項目をW1〜W8として設定。画像未設定なら色背景でも描画でき、今回は数値とラベルを出している例です。",
+        "warning": "自己評価の架空データであり、学習成果や教育研究の実測値ではありません。"
+      },
+      "en": {
+        "title": "An eight-week fictional study diary",
+        "lead": "Track a made-up self-rating over eight weeks, including setbacks. A trend view answers a different question from a ranked scorecard.",
+        "use": "Read change over time, not rank",
+        "insight": "W1 starts at 35 and W8 ends at 82, up 47 points. The series also dips in W3 and W7; the path matters, not just the endpoints.",
+        "how": "Choose Image Line and name eight items W1–W8. Without uploaded imagery, the same chart renderer uses its ordinary color background; show labels and values.",
+        "warning": "These are fictional self-ratings, not educational research or measured improvement."
+      },
+      "fields": [
+        "Week",
+        "Self-rating / 100"
+      ],
+      "rows": [
+        [
+          "W1",
+          35
+        ],
+        [
+          "W2",
+          45
+        ],
+        [
+          "W3",
+          42
+        ],
+        [
+          "W4",
+          58
+        ],
+        [
+          "W5",
+          60
+        ],
+        [
+          "W6",
+          70
+        ],
+        [
+          "W7",
+          67
+        ],
+        [
+          "W8",
+          82
+        ]
+      ]
+    },
+    {
+      "slug": "plan",
+      "type": "range",
+      "width": 1080,
+      "height": 1080,
+      "title": "Weekly Plans | Target vs Done",
+      "subtitle": "FICTIONAL PLANS · 0-100",
+      "theme": "light",
+      "ja": {
+        "title": "目標と実績の差を見比べる",
+        "lead": "4つの生活習慣に設定した架空の「目標値」と「実施値」を比較。差を見るなら順位よりもRange / Dumbbell形式が役立ちます。",
+        "use": "予定を達成した項目と未達成を区別する",
+        "insight": "Cleaningは目標50点に対して実施90点で+40点。一方Sleepは85点に対して70点で−15点。同じ形式で改善と未達成の両方を示せます。",
+        "how": "Range / Dumbbellを選び、各対象にTargetとDoneの2値を入力。差の表示をONにし、元の2値を併記すると判断しやすくなります。",
+        "warning": "実際の健康状態や生活実績を記録したものではありません。"
+      },
+      "en": {
+        "title": "Compare fictional weekly targets with results",
+        "lead": "Four made-up activity plans each have a target and a completion score. Range / Dumbbell reveals the size and direction of each gap.",
+        "use": "Find over- and under-target activities",
+        "insight": "Cleaning moves from target 50 to done 90, a +40-point difference. Sleep goes from 85 to 70, a −15-point difference.",
+        "how": "Open Range / Dumbbell. Enter Target and Done for every activity, then enable differences and show both source scores.",
+        "warning": "These are illustrative scores, not real lifestyle or health measurements."
+      },
+      "fields": [
+        "Activity",
+        "Target / 100",
+        "Done / 100"
+      ],
+      "rows": [
+        [
+          "Reading",
+          70,
+          65
+        ],
+        [
+          "Fitness",
+          75,
+          80
+        ],
+        [
+          "Cleaning",
+          50,
+          90
+        ],
+        [
+          "Sleep",
+          85,
+          70
+        ]
+      ]
+    },
+    {
+      "slug": "hero",
+      "type": "stat-card",
+      "width": 1080,
+      "height": 1080,
+      "title": "Mira | Explorer Profile",
+      "subtitle": "FICTIONAL CHARACTER · 0-100",
+      "theme": "neon",
+      "ja": {
+        "title": "創作キャラクターのステータスカード",
+        "lead": "架空の冒険者Miraを6つの能力で表したカード例。強みの見せ方を確認するためのキャラクター評価で、既存ゲームや作品の登場人物ではありません。",
+        "use": "一人の特徴をカード一枚で伝える",
+        "insight": "Speed 88点が最高で、Tactics 67点が最低。総合78点は6項目の単純平均77.67を四捨五入した値で、実力を保証する数値ではありません。",
+        "how": "Stat Cardにキャラクター名と6つの能力を入力。画像を使わずに背景と数値だけで成立する例にしています。",
+        "warning": "Miraは説明用の架空人物で、他社のキャラクターや画像は使用していません。"
+      },
+      "en": {
+        "title": "A fictional adventurer stat card",
+        "lead": "A one-page profile for an original character, Mira, with six rated strengths. It is not based on another game or copyrighted character.",
+        "use": "Explain one character's profile in a card",
+        "insight": "Speed leads at 88 while Tactics is lowest at 67. Overall 78 is the rounded mean of the six category scores (77.67), not an official power level.",
+        "how": "Use Stat Card, enter the character name and six stats, then keep images optional for a fully typographic result.",
+        "warning": "Mira is a fictional tutorial character with no third-party artwork."
+      },
+      "fields": [
+        "Stat",
+        "Score / 100"
+      ],
+      "rows": [
+        [
+          "Power",
+          84
+        ],
+        [
+          "Guard",
+          72
+        ],
+        [
+          "Speed",
+          88
+        ],
+        [
+          "Tactics",
+          67
+        ],
+        [
+          "Support",
+          74
+        ],
+        [
+          "Focus",
+          81
+        ]
+      ]
+    }
+  ]
+}
