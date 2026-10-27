@@ -1,0 +1,86 @@
+name: R92 Scoped R89 Stale PR Runs Cleanup
+on:
+  push:
+    paths:
+      - '.github/workflows/r92-cleanup-stale-r89.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pull-requests: read
+  actions: write
+
+concurrency:
+  group: r92-r89-stale-run-cleanup
+  cancel-in-progress: false
+
+jobs:
+  cancel-only-obsolete-r89:
+    if: github.repository == 'izu48625/goblin-prototype'
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - name: Cancel obsolete R89 PR runs, protect latest head and main
+        uses: actions/github-script@v7
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          script: |
+            const owner = context.repo.owner;
+            const repo = context.repo.repo;
+            const number = 233;
+            const expectedBranch = 'r89-adsense-home-i18n-sample-edit-20261027';
+            const {data: pr} = await github.rest.pulls.get({owner,repo,pull_number:number});
+            if(pr.state !== 'open' || pr.merged_at){
+              core.info('R89 already closed or merged; no cancellations.');
+              return;
+            }
+            if(pr.head.repo?.full_name !== owner+'/'+repo ||
+               pr.head.ref !== expectedBranch ||
+               pr.base.ref !== 'main') {
+              core.setFailed('R89 PR identity/branch changed; refusing any cancellation.');
+              return;
+            }
+            const latest = pr.head.sha;
+            if(!/^[0-9a-f]{40}$/.test(latest)){
+              core.setFailed('Missing exact latest SHA');
+              return;
+            }
+            const runs = await github.paginate(github.rest.actions.listWorkflowRunsForRepo,{
+              owner,repo,branch:expectedBranch,event:'pull_request',per_page:100
+            });
+            // Strictly match the R89 branch, PR event, and superseded SHA.
+            // Never touch latest-head runs, main deployments or other branches.
+            const stale = runs.filter(run=>
+              run.event === 'pull_request' &&
+              run.head_branch === expectedBranch &&
+              run.head_sha !== latest &&
+              ['queued','in_progress','waiting','pending','requested'].includes(run.status));
+            core.info('Latest protected SHA: '+latest);
+            core.info('Total R89 PR runs: '+runs.length+'; stale candidates: '+stale.length);
+            if(stale.length>1000){
+              core.setFailed('Unexpectedly high count; manual review required.');
+              return;
+            }
+            let cancelled=0, alreadyCompleted=0,failed=0;
+            for(const run of stale){
+              try {
+                await github.rest.actions.cancelWorkflowRun({owner,repo,run_id:run.id});
+                core.info('Cancelled old R89 run '+run.id+' '+run.name+' ('+run.head_sha+')');
+                cancelled++;
+              } catch(e) {
+                if([409,422].includes(e.status)){
+                  alreadyCompleted++;
+                } else {
+                  core.error('Could not cancel '+run.id+': HTTP '+e.status+' '+e.message);
+                  failed++;
+                  if(e.status===401||e.status===403)break;
+                }
+              }
+            }
+            await core.summary
+              .addHeading('R89 obsolete PR workflow cleanup')
+              .addRaw('Protected latest: '+latest+'; candidates: '+stale.length+
+                      '; cancelled: '+cancelled+'; completed meanwhile: '+alreadyCompleted+
+                      '; failed: '+failed)
+              .write();
+            if(failed)core.setFailed('Some obsolete runs could not be cancelled; inspect logs.');
