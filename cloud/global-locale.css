@@ -184,6 +184,12 @@ body.r73-light-page .globalLocaleBar .globalLocaleSwitch button.active{
 @media(max-width:600px){
   .globalLocaleBar .globalSupportPanel{
     width:min(260px,calc(100vw - 16px));
-    padding:8px
+    padding:8px;
+    /* More Help links must remain reachable on a short iPhone viewport. */
+    box-sizing:border-box;
+    max-height:calc(100dvh - 57px - env(safe-area-inset-bottom));
+    overflow-y:auto;
+    overscroll-behavior:contain;
+    -webkit-overflow-scrolling:touch
   }
 }

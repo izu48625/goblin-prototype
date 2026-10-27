@@ -73,6 +73,8 @@ jobs:
   mobile-and-editor-regression:
     name: iPhone-equivalent, 40x10, save and published scores (mock only)
     runs-on: ubuntu-latest
+    container:
+      image: mcr.microsoft.com/playwright:v1.56.1-noble
     timeout-minutes: 35
     steps:
       - uses: actions/checkout@v4
@@ -83,7 +85,6 @@ jobs:
         run: |
           npm run build:cloudflare
           npm install --no-save playwright@1.56.1
-          npx playwright install --with-deps chromium webkit
       - name: Serve local static app; never contact production Supabase
         run: |
           python3 -m http.server 4173 --bind 127.0.0.1 --directory dist >/tmp/r38-p17-static.log 2>&1 &

@@ -1,0 +1,228 @@
+{
+  "notice": "Illustrative first-party sample data only; never official real-world ratings.",
+  "cases": [
+    {
+      "slug": "cafe",
+      "type": "bar",
+      "theme": "pastel",
+      "width": 1080,
+      "height": 1080,
+      "title": "Cafe Menu | Taste Ratings",
+      "subtitle": "SAMPLE MENU · PERSONAL SCORES",
+      "ja": {
+        "title": "カフェドリンクの好みを比較"
+      },
+      "en": {
+        "title": "Compare café drinks by preference"
+      },
+      "fields": [
+        "Drink",
+        "Preference / 100"
+      ],
+      "rows": [
+        [
+          "Citrus Tea",
+          92
+        ],
+        [
+          "Mint Cocoa",
+          84
+        ],
+        [
+          "Berry Latte",
+          78
+        ],
+        [
+          "Spice Chai",
+          73
+        ],
+        [
+          "Cloud Milk",
+          68
+        ]
+      ]
+    },
+    {
+      "slug": "routes",
+      "type": "quadrant",
+      "theme": "sports",
+      "width": 1080,
+      "height": 1080,
+      "title": "Weekend Routes | Two Priorities",
+      "subtitle": "SAMPLE ROUTES · 0-100",
+      "ja": {
+        "title": "散歩ルートを2軸で比較"
+      },
+      "en": {
+        "title": "Compare walking routes on two axes"
+      },
+      "fields": [
+        "Route",
+        "Quietness",
+        "Access"
+      ],
+      "rows": [
+        [
+          "Riverside",
+          85,
+          65
+        ],
+        [
+          "Hill Trail",
+          92,
+          35
+        ],
+        [
+          "City Walk",
+          40,
+          95
+        ],
+        [
+          "Garden Loop",
+          73,
+          80
+        ]
+      ]
+    },
+    {
+      "slug": "study",
+      "type": "image-line",
+      "theme": "light",
+      "width": 1600,
+      "height": 900,
+      "title": "Study Habit | 8-Week Diary",
+      "subtitle": "SAMPLE SELF-RATING · 0-100",
+      "ja": {
+        "title": "学習習慣の8週間を線で追う"
+      },
+      "en": {
+        "title": "An eight-week study diary example"
+      },
+      "fields": [
+        "Week",
+        "Self-rating / 100"
+      ],
+      "rows": [
+        [
+          "W1",
+          35
+        ],
+        [
+          "W2",
+          45
+        ],
+        [
+          "W3",
+          42
+        ],
+        [
+          "W4",
+          58
+        ],
+        [
+          "W5",
+          60
+        ],
+        [
+          "W6",
+          70
+        ],
+        [
+          "W7",
+          67
+        ],
+        [
+          "W8",
+          82
+        ]
+      ]
+    },
+    {
+      "slug": "plan",
+      "type": "range",
+      "theme": "light",
+      "width": 1080,
+      "height": 1080,
+      "title": "Weekly Plans | Target vs Done",
+      "subtitle": "SAMPLE PLANS · 0-100",
+      "ja": {
+        "title": "目標と実績の差を見比べる"
+      },
+      "en": {
+        "title": "Compare weekly targets with results"
+      },
+      "fields": [
+        "Activity",
+        "Target / 100",
+        "Done / 100"
+      ],
+      "rows": [
+        [
+          "Reading",
+          70,
+          65
+        ],
+        [
+          "Fitness",
+          75,
+          80
+        ],
+        [
+          "Cleaning",
+          50,
+          90
+        ],
+        [
+          "Sleep",
+          85,
+          70
+        ]
+      ]
+    },
+    {
+      "slug": "hero",
+      "type": "stat-card",
+      "theme": "neon",
+      "width": 1080,
+      "height": 1080,
+      "title": "Mira | Explorer Profile",
+      "subtitle": "ORIGINAL CHARACTER · 0-100",
+      "ja": {
+        "title": "創作キャラクターのステータスカード"
+      },
+      "en": {
+        "title": "An original adventurer stat card"
+      },
+      "fields": [
+        "Stat",
+        "Score / 100"
+      ],
+      "rows": [
+        [
+          "Power",
+          84
+        ],
+        [
+          "Guard",
+          72
+        ],
+        [
+          "Speed",
+          88
+        ],
+        [
+          "Tactics",
+          67
+        ],
+        [
+          "Support",
+          74
+        ],
+        [
+          "Focus",
+          81
+        ]
+      ]
+    }
+  ]
+}

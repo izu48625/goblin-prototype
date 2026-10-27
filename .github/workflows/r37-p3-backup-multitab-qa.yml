@@ -18,6 +18,8 @@ permissions:
 jobs:
   local-first-safety:
     runs-on: ubuntu-latest
+    container:
+      image: mcr.microsoft.com/playwright:v1.56.1-noble
     timeout-minutes: 22
     steps:
       - uses: actions/checkout@v4
@@ -35,7 +37,6 @@ jobs:
       - name: Isolated mobile Chrome backup, quota and stale tab test
         run: |
           npm install --no-save playwright@1.56.1
-          npx playwright install --with-deps chromium webkit
           python3 -m http.server 4173 --bind 127.0.0.1 --directory dist >/tmp/r37-p3.log 2>&1 &
           for i in $(seq 1 20); do
             if curl -fsS http://127.0.0.1:4173/index.html >/dev/null; then break; fi

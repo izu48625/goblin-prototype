@@ -1,0 +1,50 @@
+concurrency:
+  group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.run_id }}
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
+
+name: R89 AdSense UX & Editable Examples QA
+on:
+  pull_request:
+    paths:
+      - 'index.html'
+      - 'discover.html'
+      - 'app/src/launcher.js'
+      - 'cloud/discover.js'
+      - 'cloud/r89-**'
+      - 'ja/use-cases.html'
+      - 'en/use-cases.html'
+      - 'scripts/r89-**'
+      - '.github/workflows/r89-adsense-ux-qa.yml'
+permissions:
+  contents: read
+jobs:
+  ux-and-private-copy:
+    runs-on: ubuntu-latest
+    container:
+      image: mcr.microsoft.com/playwright:v1.56.1-noble
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with: {node-version: '22'}
+      - name: Build static Cloudflare bundle with preinstalled browser engines
+        run: |
+          npm run build:cloudflare
+          npm install --no-save playwright@1.56.1
+      - name: Serve isolated localhost site
+        run: |
+          python3 -m http.server 4173 --bind 127.0.0.1 --directory dist >/tmp/r89.log 2>&1 &
+          for i in $(seq 1 30); do
+            if curl -fsS http://127.0.0.1:4173/ja/ >/dev/null; then exit 0; fi
+            sleep 1
+          done
+          exit 1
+      - name: Verify full source, privacy and existing content
+        run: |
+          node scripts/r89-static-qa.mjs
+          node scripts/r34-seo-edge-test.mjs
+          node scripts/r65-free-efficiency-qa.mjs
+          node scripts/r84-native-usecases-qa.mjs
+          node scripts/r87-content-static-qa.mjs
+      - name: Test narrow iPhone Safari, Chrome and editable sample copy
+        run: node scripts/r89-browser-qa.mjs

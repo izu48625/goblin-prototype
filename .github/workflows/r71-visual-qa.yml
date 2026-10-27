@@ -20,6 +20,8 @@ permissions:
 jobs:
   visual-and-privacy:
     runs-on: ubuntu-latest
+    container:
+      image: mcr.microsoft.com/playwright:v1.56.1-noble
     timeout-minutes: 20
     steps:
       - uses: actions/checkout@v4
@@ -35,7 +37,6 @@ jobs:
       - name: Install local browsers
         run: |
           npm install --no-save playwright@1.56.1
-          npx playwright install --with-deps chromium webkit
       - name: Start localhost-only bundle server
         run: |
           python3 -m http.server 4173 --bind 127.0.0.1 --directory dist >/tmp/r71-http.log 2>&1 &
