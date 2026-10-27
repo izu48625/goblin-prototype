@@ -1,0 +1,109 @@
+{
+  "notice": "All six teams and values are original illustrative samples. Exact values match R70 native PNG sources; never official ratings.",
+  "cases": [
+    {
+      "slug": "radar",
+      "type": "radar",
+      "title": "Red vs Blue | Four Strengths",
+      "subtitle": "ILLUSTRATIVE SCORES · NOT REAL DATA",
+      "ja": {
+        "title": "レーダー：RedとBlueの4能力"
+      },
+      "en": {
+        "title": "Radar | Red vs Blue, four strengths"
+      }
+    },
+    {
+      "slug": "ranking",
+      "type": "ranking-card",
+      "title": "Six Teams | Average Ratings",
+      "subtitle": "ILLUSTRATIVE SCORES · NOT REAL DATA",
+      "ja": {
+        "title": "6チームの平均点ランキング"
+      },
+      "en": {
+        "title": "Six-team rating leaderboard"
+      }
+    },
+    {
+      "slug": "tier",
+      "type": "tier-list",
+      "title": "Six Teams | Tier Groups",
+      "subtitle": "ILLUSTRATIVE SCORES · NOT REAL DATA",
+      "ja": {
+        "title": "6チームのTier表"
+      },
+      "en": {
+        "title": "Six-team tier groups"
+      }
+    }
+  ],
+  "axes": [
+    "Attack",
+    "Defense",
+    "Speed",
+    "Teamwork"
+  ],
+  "teams": [
+    {
+      "name": "Green Team",
+      "scores": [
+        95,
+        90,
+        95,
+        90
+      ],
+      "color": "#38cda0"
+    },
+    {
+      "name": "Purple Team",
+      "scores": [
+        80,
+        85,
+        90,
+        80
+      ],
+      "color": "#ad8cff"
+    },
+    {
+      "name": "Red Team",
+      "scores": [
+        90,
+        60,
+        70,
+        90
+      ],
+      "color": "#ff887e"
+    },
+    {
+      "name": "Blue Team",
+      "scores": [
+        60,
+        90,
+        80,
+        70
+      ],
+      "color": "#74adff"
+    },
+    {
+      "name": "Yellow Team",
+      "scores": [
+        55,
+        60,
+        65,
+        60
+      ],
+      "color": "#e7be6b"
+    },
+    {
+      "name": "Gray Team",
+      "scores": [
+        40,
+        50,
+        55,
+        45
+      ],
+      "color": "#9ba5b5"
+    }
+  ]
+}
