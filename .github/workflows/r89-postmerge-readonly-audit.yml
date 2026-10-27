@@ -1,0 +1,17 @@
+name: R89 one-time read-only post-merge live audit
+on:
+  push:
+    branches: [r89-live-readonly-audit-20261028]
+permissions:
+  contents: read
+jobs:
+  live-audit:
+    runs-on: ubuntu-latest
+    timeout-minutes: 12
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Check deployed source-backed examples and safe visibility markers (GET only)
+        run: node scripts/r89-postmerge-readonly-audit.mjs
