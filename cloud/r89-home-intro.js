@@ -40,6 +40,7 @@
   function setLanguage(lang){
     const current=lang==='en'?'en':'ja', c=langCopy[current];
     intro.querySelector('h1').textContent=c.title;
+    intro.setAttribute('aria-label',current==='en'?'Stats Maker introduction':'Stats Makerの使い方');
     intro.querySelector('p').textContent=c.desc;
     const link=intro.querySelector('a');link.textContent=c.examples;link.href='/'+current+'/use-cases.html';
     const close=intro.querySelector('button');close.setAttribute('aria-label',c.close);close.title=c.close;
