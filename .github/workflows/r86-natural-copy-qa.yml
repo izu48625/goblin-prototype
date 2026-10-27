@@ -1,0 +1,33 @@
+name: R86 Natural Example Wording Regression
+on:
+  pull_request:
+    paths:
+      - 'ja/use-cases.html'
+      - 'en/use-cases.html'
+      - 'ja/examples.html'
+      - 'en/examples.html'
+      - 'ja/scoring-guide.html'
+      - 'en/scoring-guide.html'
+      - 'scripts/r84-use-cases-data.json'
+      - 'scripts/r86-natural-copy-qa.mjs'
+      - '.github/workflows/r86-natural-copy-qa.yml'
+permissions:
+  contents: read
+jobs:
+  natural-copy:
+    runs-on: ubuntu-latest
+    timeout-minutes: 8
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with: {node-version: '22'}
+      - name: Build original static assets
+        run: npm run build:cloudflare
+      - name: Check localized copy, genuine screenshots and existing AdSense safety checks
+        run: |
+          node scripts/r86-natural-copy-qa.mjs
+          node scripts/r84-native-usecases-qa.mjs
+          node scripts/r83-scoring-guide-qa.mjs
+          node scripts/r70-adsense-content-qa.mjs
+          node scripts/r47-seo-guides-qa.mjs
+          node scripts/r34-seo-edge-test.mjs
