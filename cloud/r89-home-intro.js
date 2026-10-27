@@ -61,6 +61,22 @@
   const stored=initial==='ja'||initial==='en'?initial:
     localStorage.getItem('statsMaker.locale')||localStorage.getItem('statsMakerV2Language')||navigator.language;
   setLanguage(String(stored||'ja').toLowerCase().startsWith('en')?'en':'ja');
-  intro.querySelector('button').addEventListener('click',()=>document.body.classList.add('r89IntroDismissed'));
+  const HIDDEN_KEY='statsMaker.r89HomeIntroHidden';
+  const preferenceRead=()=>{try{return localStorage.getItem(HIDDEN_KEY)==='1'}catch{return false}};
+  const preferenceWrite=hidden=>{try{
+    if(hidden)localStorage.setItem(HIDDEN_KEY,'1');
+    else localStorage.removeItem(HIDDEN_KEY);
+  }catch{/* Private browsing must not disable the intro controls. */}};
+  const requested=new URLSearchParams(location.search).get('intro')==='1';
+  if(requested)preferenceWrite(false);
+  if(!requested&&preferenceRead())document.body.classList.add('r89IntroDismissed');
+  intro.querySelector('button').addEventListener('click',()=>{
+    document.body.classList.add('r89IntroDismissed');preferenceWrite(true);
+  });
+  // Accessible "Show introduction" entry in the global Help menu.
+  window.addEventListener('statsmaker:home-intro-show',()=>{
+    preferenceWrite(false);document.body.classList.remove('r89IntroDismissed');
+    intro.querySelector('h1')?.focus?.({preventScroll:true});
+  });
   window.addEventListener('statsmaker:site-languagechange',e=>setLanguage(e.detail?.locale));
 })();
