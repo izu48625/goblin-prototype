@@ -1,0 +1,20 @@
+name: R94 one-time public content and sitemap review
+on:
+  push:
+    branches: [r89-live-readonly-audit-20261028]
+    paths:
+      - 'scripts/r94-live-content-audit.mjs'
+      - '.github/workflows/r94-live-content-audit.yml'
+permissions:
+  contents: read
+jobs:
+  content-audit:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Read-only live sitemap, editorials and Public SSR sample audit
+        run: node scripts/r94-live-content-audit.mjs
