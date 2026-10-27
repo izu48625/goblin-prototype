@@ -25,7 +25,12 @@
       categoryUnchanged:'カテゴリは変更されていません。',categoryStale:'他の端末で作品が更新されています。再読込してから操作してください。',
       categoryError:'カテゴリを更新できませんでした：',categoryUnset:'未設定',
       categoryHelp:'カテゴリは作品の持ち主だけが変更できます。同じ採点内容の作品は確認用に表示します（自動削除しません）。',
-      duplicate:'同じ採点データあり',
+      duplicate:'同じ採点内容あり',
+      suggest:'カテゴリ候補を表示',batchSave:'提案をまとめて保存',
+      suggestions:n=>`${n}件の候補を選択しました。まだ保存されていません。内容を確認してから保存してください。`,
+      noneSuggested:'安全に判定できるカテゴリ候補はありません。各作品で個別に設定できます。',
+      batchConfirm:n=>`${n}件のカテゴリを保存しますか？作品名・点数・公開範囲・共有URLは変更しません。`,
+      batchDone:(saved,total)=>`${saved}/${total}件のカテゴリを保存しました。残りは必要に応じて個別確認してください。`,
       categoryNames:{sports:'スポーツ',manga_anime:'漫画・アニメ',movie_tv:'映画・ドラマ',food:'フード',game:'ゲーム',music:'音楽',books:'本・文学',travel:'旅行・場所',tech:'テクノロジー',lifestyle:'ライフ・趣味',other:'その他'}
     },
     en:{
@@ -46,7 +51,12 @@
       categoryUnchanged:'Category is already up to date.',categoryStale:'This work changed on another device. Refresh and try again.',
       categoryError:'Could not update category: ',categoryUnset:'Uncategorized',
       categoryHelp:'Only the owner can update categories. Duplicate scoring data is highlighted for review; nothing is removed automatically.',
-      duplicate:'Same scoring data',
+      duplicate:'Same rating data',
+      suggest:'Suggest categories',batchSave:'Save suggested categories',
+      suggestions:n=>`${n} categories selected, not saved. Review each work before saving.`,
+      noneSuggested:'No confident category suggestions. You can classify each work manually.',
+      batchConfirm:n=>`Save categories for ${n} works? Titles, scores, visibility and share links stay unchanged.`,
+      batchDone:(saved,total)=>`Saved categories for ${saved}/${total} works. Review the others individually.`,
       categoryNames:{sports:'Sports',manga_anime:'Manga / Anime',movie_tv:'Movies / TV',food:'Food',game:'Games',music:'Music',books:'Books',travel:'Travel / Places',tech:'Technology',lifestyle:'Lifestyle / Hobbies',other:'Other'}
     }
   };
@@ -64,19 +74,37 @@
   }
   function stableSnapshot(topic){
     if(!topic?.snapshot||typeof topic.snapshot!=='object'||Array.isArray(topic.snapshot))return null;
-    // jsonb keys have deterministic order in PostgREST; no hashes or scores leave the browser.
+    // Serializes the full snapshot for optimistic locking, NOT duplicate scoring detection.
     return JSON.stringify(topic.snapshot);
+  }
+  function scoringFingerprint(topic){
+    const snap=topic?.snapshot;
+    if(!snap||typeof snap!=='object'||Array.isArray(snap)||!Array.isArray(snap.rows)||!Array.isArray(snap.criteria))return null;
+    // Preserve actual numeric scoring + criteria, but ignore purely editorial metadata,
+    // title, description and lineage. Category edits must never hide duplicated scores.
+    return JSON.stringify({rows:snap.rows,criteria:snap.criteria,scale:snap.scale,weighted:snap.weighted});
   }
   function duplicatesAmongOwnedWorks(){
     const seen=new Map(),matches=new Set();
     for(const topic of state.works){
-      const fingerprint=stableSnapshot(topic);
+      const fingerprint=scoringFingerprint(topic);
       if(!fingerprint)continue;
       const first=seen.get(fingerprint);
       if(first){matches.add(first);matches.add(topic.id)}
       else seen.set(fingerprint,topic.id);
     }
     return matches;
+  }
+  function suggestedCategory(topic){
+    // Advisory only; leave unrecognized topics untouched and never publish/change records.
+    if(topic?.visibility!=='public'||!['','other'].includes(categoryKey(topic)))return '';
+    const title=String(topic.title||'').normalize('NFKC').toLowerCase();
+    if(/サッカー|フットボール|football|soccer/.test(title))return 'sports';
+    if(/one\s*piece|ワンピース|漫画|アニメ|dragon\s*ball|ドラゴンボール|naruto|ナルト/.test(title))return 'manga_anime';
+    return '';
+  }
+  function suggestedEntries(){
+    return state.works.filter(w=>suggestedCategory(w)).map(w=>({id:w.id,category:suggestedCategory(w)}));
   }
 
   function $(id){return document.getElementById(id)}
@@ -116,6 +144,8 @@
     $('emptyHelp').textContent=c().emptyHelp;
     $('emptyBackBtn').textContent=c().openStats;
     $('r90CategoryHelp').textContent=c().categoryHelp;
+    $('r91SuggestBtn').textContent=c().suggest;
+    $('r91BatchSaveBtn').textContent=c().batchSave;
     renderWorks();
   }
   function setLocale(next){
@@ -238,6 +268,7 @@
     }
     state.works=Array.isArray(data)?data:[];
     renderWorks();
+    $('r91ReviewMessage').textContent='';
   }
 
   
@@ -277,15 +308,15 @@
     }
   }
 
-  async function updateCategory(topicId){
+  async function updateCategory(topicId,{deferRender=false}={}){
     if(!sb||!state.user)return;
     const work=state.works.find(item=>item.id===topicId);
     const select=document.querySelector(`[data-category-for="${CSS.escape(topicId)}"]`);
     const button=document.querySelector(`[data-save-category="${CSS.escape(topicId)}"]`);
-    if(!work||!select||!button)return;
+    if(!work||!select||!button)return false;
     const next=select.value;
-    if(!categoriesAllowed.has(next)){setStatus(c().categoryError+c().categoryUnset,'error');return}
-    if(categoryKey(work)===next){setStatus(c().categoryUnchanged);return}
+    if(!categoriesAllowed.has(next)){setStatus(c().categoryError+c().categoryUnset,'error');return false}
+    if(categoryKey(work)===next){setStatus(c().categoryUnchanged);return false}
     button.disabled=true;setStatus(c().categorySaving);
     try{
       // Fetch fresh owner-scoped snapshot before the edit; never use a stale local copy.
@@ -295,7 +326,7 @@
       if(!fresh||!fresh.snapshot||Array.isArray(fresh.snapshot)||typeof fresh.snapshot!=='object')
         throw Error('Invalid topic snapshot');
       if(fresh.updated_at!==work.updated_at||JSON.stringify(fresh.snapshot)!==stableSnapshot(work)){
-        await loadWorks();setStatus(c().categoryStale,'error');return;
+        await loadWorks();setStatus(c().categoryStale,'error');return false;
       }
       // Restrict the mutation to snapshot metadata plus its update timestamp.
       // The original title, scores, criteria, lineage, publication state and shares persist.
@@ -307,13 +338,49 @@
         .select('id,snapshot,snapshot_updated_at,updated_at')
         .maybeSingle();
       if(writeError)throw writeError;
-      if(!saved){await loadWorks();setStatus(c().categoryStale,'error');return}
+      if(!saved){await loadWorks();setStatus(c().categoryStale,'error');return false}
       work.snapshot=saved.snapshot;
       work.snapshot_updated_at=saved.snapshot_updated_at;
       work.updated_at=saved.updated_at;
-      renderWorks();setStatus(c().categorySaved,'ok');
-    }catch(error){setStatus(c().categoryError+(error?.message||String(error)),'error')}
+      if(!deferRender){renderWorks();setStatus(c().categorySaved,'ok');}
+      return true;
+    }catch(error){setStatus(c().categoryError+(error?.message||String(error)),'error');return false;}
     finally{button.disabled=false}
+  }
+
+  function previewSuggestions(){
+    const proposals=suggestedEntries();
+    let selected=0;
+    for(const proposal of proposals){
+      const select=document.querySelector(`[data-category-for="${CSS.escape(proposal.id)}"]`);
+      if(!select)continue;
+      select.value=proposal.category;
+      selected++;
+    }
+    $('r91ReviewMessage').textContent=selected?c().suggestions(selected):c().noneSuggested;
+    $('r91BatchSaveBtn').disabled=!selected;
+  }
+  async function saveSuggestedCategories(){
+    const proposals=suggestedEntries().filter(proposal=>{
+      const select=document.querySelector(`[data-category-for="${CSS.escape(proposal.id)}"]`);
+      // Save ONLY suggested values the owner has left selected, never unrelated edits.
+      return select?.value===proposal.category;
+    });
+    if(!proposals.length){setStatus(c().noneSuggested);return}
+    if(!window.confirm(c().batchConfirm(proposals.length)))return;
+    const button=$('r91BatchSaveBtn');
+    button.disabled=true;
+    let saved=0;
+    try{
+      for(const proposal of proposals){
+        if(!state.user)break;
+        const ok=await updateCategory(proposal.id,{deferRender:true});
+        if(!ok)break; // Stop on permission/stale error, avoid overwriting other changes.
+        saved++;
+      }
+      renderWorks();
+      $('r91ReviewMessage').textContent=c().batchDone(saved,proposals.length);
+    }finally{button.disabled=false}
   }
 
   async function copyShare(topicId){
@@ -332,6 +399,8 @@
     renderWorks();
   }));
   $('refreshBtn').addEventListener('click',refresh);
+  $('r91SuggestBtn').addEventListener('click',previewSuggestions);
+  $('r91BatchSaveBtn').addEventListener('click',saveSuggestedCategories);
   $('worksGrid').addEventListener('click',event=>{
     const save=event.target.closest('[data-save-visibility]');
     if(save){updateVisibility(save.dataset.saveVisibility);return;}
