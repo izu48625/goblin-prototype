@@ -10,24 +10,56 @@ on:
       - 'en/scoring-guide.html'
       - 'scripts/r84-use-cases-data.json'
       - 'scripts/r86-natural-copy-qa.mjs'
+      - 'ja/example-images/usecase-*.png'
       - '.github/workflows/r86-natural-copy-qa.yml'
 permissions:
-  contents: read
+  contents: write
 jobs:
   natural-copy:
+    if: github.event.pull_request.head.repo.full_name == github.repository && github.head_ref == 'r86-natural-sample-copy-20261027'
     runs-on: ubuntu-latest
-    timeout-minutes: 8
+    timeout-minutes: 22
     steps:
       - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.ref }}
+          persist-credentials: true
       - uses: actions/setup-node@v4
         with: {node-version: '22'}
-      - name: Build original static assets
-        run: npm run build:cloudflare
-      - name: Check localized copy, genuine screenshots and existing AdSense safety checks
+      - name: Build native source and isolated browser renderer
         run: |
+          npm run build:cloudflare
+          npm install --no-save playwright@1.56.1
+          npx playwright install --with-deps chromium
+      - name: Serve localhost-only Stats Maker for actual PNG rendering
+        run: |
+          python3 -m http.server 4173 --bind 127.0.0.1 --directory dist >/tmp/r86-http.log 2>&1 &
+          for i in $(seq 1 30); do
+            if curl -fsS http://127.0.0.1:4173/ja/ >/dev/null; then exit 0; fi
+            sleep 1
+          done
+          exit 1
+      - name: Re-render five actual native chart PNGs with revised image subtitles
+        run: node scripts/r84-generate-use-cases.mjs
+      - name: Bundle generated images and validate public content
+        run: |
+          npm run build:cloudflare
           node scripts/r86-natural-copy-qa.mjs
           node scripts/r84-native-usecases-qa.mjs
           node scripts/r83-scoring-guide-qa.mjs
           node scripts/r70-adsense-content-qa.mjs
           node scripts/r47-seo-guides-qa.mjs
           node scripts/r34-seo-edge-test.mjs
+      - name: Persist only updated first-party chart PNG files to the PR
+        env:
+          EXPECTED_BRANCH: r86-natural-sample-copy-20261027
+        run: |
+          test "${{ github.head_ref }}" = "$EXPECTED_BRANCH"
+          test "${{ github.event.pull_request.head.repo.full_name }}" = "${{ github.repository }}"
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add ja/example-images/usecase-cafe.png ja/example-images/usecase-routes.png ja/example-images/usecase-study.png ja/example-images/usecase-plan.png ja/example-images/usecase-hero.png
+          if ! git diff --cached --quiet; then
+            git commit -m 'R86: native example PNG subtitles use sample or original'
+            git push origin "HEAD:$EXPECTED_BRANCH"
+          fi
