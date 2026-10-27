@@ -7,7 +7,7 @@
       "width": 1080,
       "height": 1080,
       "title": "Cafe Menu | Taste Ratings",
-      "subtitle": "FICTIONAL MENU · PERSONAL SCORES",
+      "subtitle": "SAMPLE MENU · PERSONAL SCORES",
       "theme": "pastel",
       "ja": {
         "title": "カフェドリンクの好みを比較",
@@ -58,7 +58,7 @@
       "width": 1080,
       "height": 1080,
       "title": "Weekend Routes | Two Priorities",
-      "subtitle": "IMAGINARY ROUTES · 0-100",
+      "subtitle": "SAMPLE ROUTES · 0-100",
       "theme": "sports",
       "ja": {
         "title": "散歩ルートを2軸で比較",
@@ -110,7 +110,7 @@
       "width": 1600,
       "height": 900,
       "title": "Study Habit | 8-Week Diary",
-      "subtitle": "IMAGINARY SELF-RATING · 0-100",
+      "subtitle": "SAMPLE SELF-RATING · 0-100",
       "theme": "light",
       "ja": {
         "title": "学習習慣の8週間を線で追う",
@@ -173,7 +173,7 @@
       "width": 1080,
       "height": 1080,
       "title": "Weekly Plans | Target vs Done",
-      "subtitle": "FICTIONAL PLANS · 0-100",
+      "subtitle": "SAMPLE PLANS · 0-100",
       "theme": "light",
       "ja": {
         "title": "目標と実績の差を見比べる",
@@ -225,7 +225,7 @@
       "width": 1080,
       "height": 1080,
       "title": "Mira | Explorer Profile",
-      "subtitle": "FICTIONAL CHARACTER · 0-100",
+      "subtitle": "ORIGINAL CHARACTER · 0-100",
       "theme": "neon",
       "ja": {
         "title": "創作キャラクターのステータスカード",
