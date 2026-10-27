@@ -100,7 +100,7 @@
     document.querySelector('.privacyNote').textContent=copy.privacy;
     searchInput.placeholder=copy.search;
     // R89: first-party sample gallery follows Discover language and links.
-    const editorial=document.querySelector('.r87Editorial');
+    const editorial=document.querySelectorAll('.r87Editorial')[0];
     if(editorial){
       const en=locale==='en';
       editorial.querySelector('.r87EditorialOverline').textContent=en?'STATS MAKER EXAMPLES':'STATS MAKER 公式作例';
