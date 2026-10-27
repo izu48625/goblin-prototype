@@ -90,3 +90,10 @@ a{color:inherit}
 .r90CategoryControls .btn{min-height:37px;white-space:nowrap;font-size:10px}
 .r90CategoryControls select{max-width:100%}
 @media(max-width:390px){.r90CategoryControls{grid-template-columns:1fr auto}.r90CategoryControls label{grid-column:1/-1}}
+
+/* R91: recommendations are staged locally; owner explicitly confirms before any write. */
+.r91ReviewTools{display:flex;flex-wrap:wrap;gap:7px;margin:10px 0 0}
+.r91ReviewTools .btn{min-height:34px;font-size:10px}
+.r91ReviewTools .btn:disabled{opacity:.52;cursor:not-allowed}
+.r91ReviewMessage{min-height:0;margin:6px 0 0;color:var(--muted);font-size:10px;line-height:1.5}
+@media(max-width:390px){.r91ReviewTools{display:grid;grid-template-columns:1fr 1fr;gap:5px}.r91ReviewTools .btn{white-space:normal;line-height:1.3;padding:7px 6px}}
