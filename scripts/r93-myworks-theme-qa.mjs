@@ -35,7 +35,7 @@ for(const [engine,width] of [[webkit,390],[chromium,320],[chromium,1180]]){
    await page.goto(BASE+'/my.html',{waitUntil:'domcontentloaded'});
    await page.locator('.globalSupportMenu summary').waitFor();
    await page.waitForFunction(expected=>document.documentElement.dataset.smTheme===expected,mode);
-   await page.waitForFunction(()=>document.querySelector('#emptyTitle')?.offsetWidth>0);
+   await page.waitForFunction(()=>document.querySelector('#worksStatus')?.textContent?.includes('管理情報がありません'));
    const actual=await page.evaluate(()=>({
     bg:getComputedStyle(document.body).backgroundColor,
     panel:getComputedStyle(document.querySelector('.worksSection')).backgroundColor,
