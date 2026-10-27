@@ -1,0 +1,20 @@
+name: R92 one-time GET-only live navigation check
+on:
+  push:
+    branches: [r92-live-readonly-check-20261028]
+    paths:
+      - 'scripts/r92-live-readonly-check.mjs'
+      - '.github/workflows/r92-live-readonly-check.yml'
+permissions:
+  contents: read
+jobs:
+  live:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Verify deployed Home My Works link and non-indexed management page
+        run: node scripts/r92-live-readonly-check.mjs
