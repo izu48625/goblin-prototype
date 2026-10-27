@@ -71,14 +71,15 @@ export async function publicWorkHtml(id){
   // The legacy snapshot branch keeps test/old mock compatibility; the live
   // projection above never requests the complete snapshot.
   const snapshot=work.snapshot&&typeof work.snapshot==='object'&&!Array.isArray(work.snapshot)?work.snapshot:null;
-  const list=(snapshot&&Array.isArray(snapshot.rows)
+  const rowNames=(snapshot&&Array.isArray(snapshot.rows)
     ?snapshot.rows.slice(0,SEO_ROW_COUNT).map(row=>trim(row?.name,90))
-    :Array.from({length:SEO_ROW_COUNT},(_,i)=>trim(work['seo_row_'+i],90)))
-    .filter(Boolean);
-  const metrics=(snapshot&&Array.isArray(snapshot.criteria)
+    :Array.from({length:SEO_ROW_COUNT},(_,i)=>trim(work['seo_row_'+i],90)));
+  const metricNames=(snapshot&&Array.isArray(snapshot.criteria)
     ?snapshot.criteria.slice(0,SEO_METRIC_COUNT)
     :Array.from({length:SEO_METRIC_COUNT},(_,i)=>work['seo_metric_'+i]))
-    .map(row=>trim(typeof row==='string'?row:row?.name,90)).filter(Boolean);
+    .map(row=>trim(typeof row==='string'?row:row?.name,90));
+  const list=rowNames.filter(Boolean);
+  const metrics=metricNames.filter(Boolean);
   // Keep the author's own description exactly as written (up to the
   // existing display limit). Only a missing description gets a truthful
   // summary derived from this currently Public work's real snapshot.
@@ -111,18 +112,23 @@ export async function publicWorkHtml(id){
     .map(row=>Array.isArray(row)?row:[]);
   const scoreScale=Number(snapshot?.scale??work.seo_scale);
   const validScale=scoreScale===10||scoreScale===100?scoreScale:null;
-  const displayMetrics=metrics.slice(0,SEO_SCORE_COLUMNS);
-  const displaySubjects=list.slice(0,SEO_SCORE_ROWS);
-  const tableRows=displaySubjects.map((name,index)=>{
-    const scores=scoreRows[index]||[];
-    return '<tr><th scope="row">'+esc(name)+'</th>'+displayMetrics.map((_,metricIndex)=>{
-      const raw=scores[metricIndex];
-      const valid=(typeof raw==='number'&&Number.isFinite(raw)
-        &&raw>=0&&raw<=100)||(typeof raw==='string'&&raw.trim()!==''&&Number.isFinite(Number(raw))
-        &&Number(raw)>=0&&Number(raw)<=100);
+  // Always keep raw row/criterion indices aligned. Filtering blank labels
+  // before pairing would silently attach a different author's score to a name.
+  const displayedColumns=metricNames.slice(0,SEO_SCORE_COLUMNS)
+    .map((name,index)=>({name,index})).filter(x=>x.name);
+  const displayedRows=rowNames.slice(0,SEO_SCORE_ROWS)
+    .map((name,index)=>({name,scores:scoreRows[index]||[]})).filter(x=>x.name);
+  const displayMetrics=displayedColumns.map(x=>x.name);
+  const displaySubjects=displayedRows.map(x=>x.name);
+  const tableRows=displayedRows.map(row=>
+    '<tr><th scope="row">'+esc(row.name)+'</th>'+displayedColumns.map(col=>{
+      const raw=row.scores[col.index];
+      const numeric=(typeof raw==='number')?raw:(typeof raw==='string'&&raw.trim()!=='')?Number(raw):NaN;
+      const valid=raw!==null&&raw!==undefined&&typeof raw!=='boolean'&&
+        Number.isFinite(numeric)&&numeric>=0&&numeric<=(validScale||100);
       return '<td>'+(valid?esc(String(raw)):'—')+'</td>';
-    }).join('')+'</tr>';
-  });
+    }).join('')+'</tr>');
+  const alignedScores=displayedRows.map(row=>displayedColumns.map(col=>row.scores[col.index]));
   const scoreTable=displayMetrics.length&&displaySubjects.length&&scoreRows.some(row=>row.length>0)
     ?'<section class="seoScores"><h2>'+(en?'Published rating excerpt':'公開作品の採点データ')+'</h2>'+
       '<p>'+(en?'Scores reflect the creator’s assessment, not independently measured facts.':'点数は投稿者による評価で、客観的な実測値ではありません。')+
@@ -133,7 +139,7 @@ export async function publicWorkHtml(id){
       '<table><thead><tr><th scope="col">'+(en?'Subject':'比較対象')+'</th>'+
       displayMetrics.map(m=>'<th scope="col">'+esc(m)+'</th>').join('')+
       '</tr></thead><tbody>'+tableRows.join('')+'</tbody></table></div></section>':'';
-  const insights=publicScoreInsights(displaySubjects,displayMetrics,scoreRows,lang,validScale||100);
+  const insights=publicScoreInsights(displaySubjects,displayMetrics,alignedScores,lang,validScale||100);
   const insightHtml=insights.length
     ?'<section class="seoInsights"><h2>'+(en?'How to interpret these scores':'採点結果から読み取れること')+'</h2>'+
       '<p>'+(en?'Calculated only from the scored subjects and criteria in the excerpt above. These are creator-entered ratings, not verified objective measurements.'
