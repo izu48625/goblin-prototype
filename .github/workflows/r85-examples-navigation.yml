@@ -1,0 +1,40 @@
+name: R85 Visible Examples Navigation QA
+on:
+  pull_request:
+    paths:
+      - 'cloud/global-locale.js'
+      - 'cloud/global-locale.css'
+      - 'index.html'
+      - 'ja/index.html'
+      - 'en/index.html'
+      - 'scripts/r85-*.mjs'
+      - '.github/workflows/r85-examples-navigation.yml'
+permissions:
+  contents: read
+jobs:
+  examples-navigation:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with: {node-version: '22'}
+      - name: Build local-only site and browsers
+        run: |
+          npm run build:cloudflare
+          npm install --no-save playwright@1.56.1
+          npx playwright install --with-deps chromium webkit
+      - name: Serve local site only
+        run: |
+          python3 -m http.server 4173 --bind 127.0.0.1 --directory dist >/tmp/r85-http.log 2>&1 &
+          for i in $(seq 1 30); do
+            if curl -fsS http://127.0.0.1:4173/ja/ >/dev/null; then exit 0; fi
+            sleep 1
+          done
+          exit 1
+      - name: Verify direct nav, landing image links, and iPhone WebKit width
+        run: |
+          node scripts/r85-visible-examples-qa.mjs
+          node scripts/r70-adsense-content-qa.mjs
+          node scripts/r83-scoring-guide-qa.mjs
+          node scripts/r47-seo-guides-qa.mjs

@@ -92,7 +92,12 @@ try {
   assert(popup.left>=-2 && popup.right<=size.width+2
     && popup.top>=-2 && popup.bottom<=size.height+2,
     size.label+' HELP dropdown offscreen: '+JSON.stringify(popup));
-  assert.equal(await page.locator('.globalSupportPanel a').count(),6);
+  // About moved here to make examples visible in the fixed top navigation.
+  // Count actual shipped content destinations: About, five guides, three legal links.
+  assert.equal(await page.locator('.globalSupportPanel [data-global-about]').count(),1);
+  assert.equal(await page.locator('.globalSupportPanel [data-global-guide]').count(),5);
+  assert.equal(await page.locator('.globalSupportPanel [data-global-support]').count(),3);
+  assert.equal(await page.locator('.globalSupportPanel a').count(),9);
   await page.locator('.globalSupportMenu>summary').click();
 
   // Opening/closing extension selector MUST preserve the local HOME sheet.
