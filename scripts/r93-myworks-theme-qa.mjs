@@ -11,7 +11,7 @@ assert(html.includes('content="#f6f5f1"'));
 assert(html.includes('noindex,nofollow'));
 assert(css.includes('html:not([data-sm-theme="dark"])'));
 assert(css.includes('.r90CategorySelect'));
-const mock=String.raw\`
+const mock=String.raw`
 window.SM_SUPABASE={
  ready:true,
  client:{
@@ -19,7 +19,7 @@ window.SM_SUPABASE={
  },
  url:'https://mock.invalid'
 };
-\`;
+`;
 for(const [engine,width] of [[webkit,390],[chromium,320],[chromium,1180]]){
  const browser=await engine.launch({headless:true});
  try{
