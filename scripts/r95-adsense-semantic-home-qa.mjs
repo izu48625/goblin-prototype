@@ -2,8 +2,9 @@ import assert from 'node:assert/strict';
 import {readFile} from 'node:fs/promises';
 
 const home=await readFile(new URL('../index.html',import.meta.url),'utf8');
-const h1=[...home.matchAll(/<h1>(.*?)<\\/h1>/g)].map(x=>x[1]);
-assert.deepEqual(h1,['好きなものを採点・比較しよう'],'Home should have one prominent user-first heading');
+const h1Count=home.split('<h1>').length-1;
+assert.equal(h1Count,1,'Home should have one prominent H1 heading');
+assert(home.includes('<h1>好きなものを採点・比較しよう</h1>'));
 assert(home.includes('<h2>採点をグラフ・ランキング・Tier表で見比べる</h2>'));
 assert(home.includes('<h3>何から始める？</h3>'));
 assert(home.includes('<h3>完成した作例から選べます</h3>'));
