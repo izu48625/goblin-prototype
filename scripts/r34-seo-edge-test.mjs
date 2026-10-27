@@ -42,8 +42,8 @@ const fixture={
   id:publicId,title:'Best football players – '+malicious,
   description:'Rank the best football players & compare scores.',
   visibility:'public',language_code:'en',published_at:'2026-10-10T18:00:00Z',
-  snapshot:{rows:[{name:'Messi & Ronaldo'},{name:malicious},{name:'Neymar'}],
-    criteria:[{name:'Skill'},{name:'Goals'}]}
+  snapshot:{rows:[{name:'Messi & Ronaldo',scores:[8,9]},{name:malicious,scores:[null,5]},{name:'Neymar',scores:[7,6]}],
+    criteria:[{name:'Skill'},{name:'Goals'}],scale:10}
 };
 const publicSummary={id:publicId,visibility:'public',
   snapshot_updated_at:'2026-10-10T18:00:00Z'};
@@ -66,8 +66,14 @@ globalThis.fetch=async url=>{
     }});
     return r;
   }
-  if(u.searchParams.get('id'))return Response.json(
+  if(u.searchParams.get('id')){
+    const select=u.searchParams.get('select')||'';
+    assert(select.includes('seo_scores_0:snapshot->rows->0->scores'),
+      'The public score table should use bounded JSON path fields');
+    assert(!select.includes('snapshot,'),'Never fetch an entire snapshot for SEO');
+    return Response.json(
     u.searchParams.get('id')==='eq.'+publicId?[fixture]:[]);
+  }
   return Response.json([publicSummary,privateSummary]);
 };
 const env={ASSETS:{async fetch(){return new Response('asset-fallback',{status:200})}}};
@@ -106,6 +112,10 @@ try{
   assert(body.includes('/public.html?id='+publicId));
   assert(body.includes('Messi &amp; Ronaldo'));
   assert(body.includes('Rating criteria'));
+  assert(body.includes('Published rating excerpt'),'Search results must expose real Public score values');
+  assert(body.includes('>8</td>')&&body.includes('>9</td>'),'Use the author's real scores, not invented rankings');
+  assert(body.includes('>—</td>'),'Missing ratings must not become zeros');
+  assert(body.includes('Maximum score: 10 points'),'Use real scale for interpretations');
   assert(!body.includes(malicious),'Raw HTML in user submissions is unsafe');
   assert(!body.includes('<script>alert('));
   assert(body.includes('schema.org'));
