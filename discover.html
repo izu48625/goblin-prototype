@@ -19,6 +19,26 @@ try{
 }catch{}
 </script>
   <link rel="stylesheet" href="cloud/discover.css?v=r71p1">
+  <style>
+    .r87Editorial{margin:14px 0 20px;padding:13px 14px;border:1px solid #dcd8cf;border-radius:9px;background:#fff;color:#292f35}
+    .r87EditorialHeader{display:flex;align-items:end;justify-content:space-between;gap:10px 18px;flex-wrap:wrap;margin-bottom:11px}
+    .r87EditorialOverline{font-size:10px;letter-spacing:.08em;font-weight:900;color:#a6513d}
+    .r87Editorial h2{font-size:17px;line-height:1.35;margin:1px 0 3px}
+    .r87Editorial p{font-size:12px;color:#515b62;margin:0}
+    .r87EditorialAll{color:#7c3b2b;font-weight:800;font-size:12px;text-underline-offset:3px;white-space:nowrap}
+    .r87EditorialRail{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px}
+    .r87EditorialRail a{min-width:0;display:flex;gap:9px;align-items:center;padding:7px;border:1px solid #e0ded7;border-radius:6px;color:#2f363b;background:#f9f8f5;text-decoration:none;font-weight:750;font-size:12px}
+    .r87EditorialRail a:hover,.r87EditorialRail a:focus-visible{border-color:#b75f45;outline-offset:2px}
+    .r87EditorialRail img{width:63px;height:54px;object-fit:cover;flex:none;border-radius:3px}
+    .r87EditorialRail small{display:block;color:#7e8589;font-size:10px;font-weight:700}
+    @media(max-width:680px){
+      .r87Editorial{margin:10px 0 14px;padding:11px}
+      .r87EditorialRail{display:flex;gap:9px;overflow-x:auto;scroll-snap-type:x proximity;padding-bottom:6px}
+      .r87EditorialRail a{flex:0 0 min(66vw,225px);scroll-snap-align:start}
+      .r87EditorialRail img{width:50px;height:50px}
+      .r87Editorial p{font-size:11px}
+    }
+  </style>
   <link rel="stylesheet" href="cloud/global-locale.css?v=r73p1">
 <link rel="stylesheet" href="cloud/ad-layout.css?v=r32ad1">
   <link rel="stylesheet" href="cloud/r72-discover.css?v=r72p1">
@@ -41,6 +61,15 @@ try{
       <h1>みんなのStatsを見つける</h1>
       <p>公開された評価シートを検索して、結果を見たりRemixしたりできます。</p>
       <div class="privacyNote">Public作品のみ掲載。URL限定（Unlisted）はここには表示されません。</div>
+    </section>
+
+    <section class="r87Editorial" aria-labelledby="r87EditorialTitle">
+      <div class="r87EditorialHeader"><div><span class="r87EditorialOverline">STATS MAKER EDITORIAL</span><h2 id="r87EditorialTitle">グラフの使い道を完成例から探す</h2><p>以下はStats Maker公式が作成した説明用サンプルです。下のユーザー公開作品とは別のコンテンツです。</p></div><a class="r87EditorialAll" href="/ja/use-cases.html">5つの作例を見る</a></div>
+      <div class="r87EditorialRail">
+        <a href="/ja/use-cases.html#cafe"><img src="/ja/example-images/usecase-cafe.png" width="1080" height="1080" decoding="async" loading="lazy" alt="ドリンクを点数順に並べた棒グラフ"><span>カフェの好みを比較 <small>Bar</small></span></a>
+        <a href="/ja/use-cases.html#routes"><img src="/ja/example-images/usecase-routes.png" width="1080" height="1080" decoding="async" loading="lazy" alt="散歩ルートを2軸で比較する象限グラフ"><span>2つの条件を比べる <small>Quadrant</small></span></a>
+        <a href="/ja/use-cases.html#study"><img src="/ja/example-images/usecase-study.png" width="1600" height="900" decoding="async" loading="lazy" alt="8週間の学習習慣の推移を示す折れ線グラフ"><span>変化を線で追う <small>Line</small></span></a>
+      </div>
     </section>
 
     <nav class="browseTabs" aria-label="Browse mode">
