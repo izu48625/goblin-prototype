@@ -1,0 +1,33 @@
+/* R89: one compact, readable HTML heading above the instant editor.
+   Keep mobile editor and original 44px navigation; offer a dismissal. */
+body.homeHost:not(.communityShell) .r89HomeIntro{
+  position:fixed;top:44px;left:0;right:0;z-index:106;
+  height:49px;display:flex;align-items:center;gap:12px;
+  padding:6px max(14px,env(safe-area-inset-right));
+  border-bottom:1px solid #d9d6ce;background:#fbfaf7;color:#293138;
+  font:500 12px/1.4 system-ui,-apple-system,sans-serif;
+}
+.r89HomeIntroCopy{min-width:0;flex:1;display:flex;align-items:baseline;gap:12px}
+.r89HomeIntro h1{margin:0;flex:none;font-size:15px;font-weight:850;line-height:1.3;letter-spacing:-.02em}
+.r89HomeIntro p{margin:0;color:#636d70;font-size:12px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.r89HomeIntro a{flex:none;color:#285e68;font-size:12px;font-weight:800;text-underline-offset:3px}
+.r89HomeIntro button{
+  flex:none;border:0;background:transparent;color:#626d70;
+  padding:8px;min-width:34px;min-height:34px;cursor:pointer;font-size:18px;
+  border-radius:5px
+}
+.r89HomeIntro :is(button,a):focus-visible{outline:2px solid #b64d35;outline-offset:2px}
+body.hasGlobalLocaleBar.homeHost:not(.communityShell) #basicRoot{top:93px}
+body.homeHost:not(.communityShell):not(.hasGlobalLocaleBar) #basicRoot{top:49px}
+body.homeHost:not(.communityShell).r89IntroDismissed #basicRoot{top:44px}
+body.homeHost:not(.communityShell).r89IntroDismissed:not(.hasGlobalLocaleBar) #basicRoot{top:0}
+body.homeHost.r89IntroDismissed .r89HomeIntro,
+body.communityShell .r89HomeIntro{display:none!important}
+@media(max-width:680px){
+ body.homeHost:not(.communityShell) .r89HomeIntro{height:44px;gap:7px;padding:5px 9px}
+ .r89HomeIntro h1{font-size:12px;white-space:nowrap}
+ .r89HomeIntro p{display:none}
+ .r89HomeIntroCopy{gap:0}
+ .r89HomeIntro a{font-size:11px}
+ body.hasGlobalLocaleBar.homeHost:not(.communityShell) #basicRoot{top:88px}
+}
