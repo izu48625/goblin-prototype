@@ -42,6 +42,7 @@ function renderLanguage(){
     examples.href=language==="en"?"/en/examples.html":"/ja/examples.html";
     examples.textContent=language==="en"?"See finished chart examples and instructions →":"完成グラフの作例と作り方を見る →";
   }
+  window.SM_R89_LANGUAGE?.(language);
   const host=$("extGroups");host.innerHTML="";
   ["popular","compare","ranking","number","creative"].forEach(group=>{
     const items=EXTENSIONS.filter(x=>x[0]===group);if(!items.length)return;
