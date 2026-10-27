@@ -113,7 +113,7 @@ try{
   assert(body.includes('Messi &amp; Ronaldo'));
   assert(body.includes('Rating criteria'));
   assert(body.includes('Published rating excerpt'),'Search results must expose real Public score values');
-  assert(body.includes('>8</td>')&&body.includes('>9</td>'),'Use the author's real scores, not invented rankings');
+  assert(body.includes('>8</td>')&&body.includes('>9</td>'),"Use the author’s real scores, not invented rankings");
   assert(body.includes('>—</td>'),'Missing ratings must not become zeros');
   assert(body.includes('Maximum score: 10 points'),'Use real scale for interpretations');
   assert(!body.includes(malicious),'Raw HTML in user submissions is unsafe');
