@@ -1,0 +1,19 @@
+name: R84 One-Time Live Content Check
+on:
+  pull_request:
+    paths:
+      - '.github/workflows/r84-live-content-check.yml'
+      - 'scripts/r84-verify-public-once.mjs'
+permissions:
+  contents: read
+jobs:
+  readonly-live-pages-and-pngs:
+    runs-on: ubuntu-latest
+    timeout-minutes: 7
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Verify new production pages and native PNGs without any writes
+        run: node scripts/r84-verify-public-once.mjs
