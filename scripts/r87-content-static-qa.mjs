@@ -9,7 +9,7 @@ const distDiscover=await read('dist/discover.html');
 assert.equal(root,distRoot,'Cloudflare bundle must ship original home HTML');
 assert.equal(discover,distDiscover,'Cloudflare bundle must ship new Discover HTML');
 assert(root.includes('id="basicFrame"')&&root.includes("src='base/index.html"),'Keep immediate iframe editor');
-assert(root.includes('id="r87HomeGuide"')&&root.includes('<h1>採点をグラフ・ランキング・Tier表で見比べる</h1>'));
+assert(root.includes('id="r87HomeGuide"')&&root.includes('<h2>採点をグラフ・ランキング・Tier表で見比べる</h2>'));
 assert(root.includes('<summary>はじめての方へ')&&root.includes('href="/ja/use-cases.html"'));
 assert(root.includes('href="/ja/scoring-guide.html"')&&root.includes('href="/ja/legal.html#contact"'));
 assert(!root.includes('adsbygoogle.js')&&!root.includes('googletagmanager.com'));
