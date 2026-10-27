@@ -191,7 +191,7 @@
         <div class="workDate">${esc(c().updated)} ${esc(dateText(updated))}</div>
         <div class="r90CategoryControls">
           <label for="r90-cat-${esc(topic.id)}">${esc(c().category)}</label>
-          <select id="r90-cat-${esc(topic.id)}" class="visibilitySelect r90CategorySelect" data-category-for="${esc(topic.id)}">
+          <select id="r90-cat-${esc(topic.id)}" class="r90CategorySelect" data-category-for="${esc(topic.id)}">
             ${categoryOptions(categoryKey(topic))}
           </select>
           <button class="btn" type="button" data-save-category="${esc(topic.id)}">${esc(c().categorySave)}</button>
