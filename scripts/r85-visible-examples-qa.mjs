@@ -4,7 +4,7 @@ import {chromium,webkit} from 'playwright';
 const base='http://127.0.0.1:4173';
 const read=async path=>readFile(new URL('../'+path,import.meta.url),'utf8');
 const nav=await read('cloud/global-locale.js');
-assert(nav.includes('class="globalExamplesBtn"'), 'Need one-tap examples in shared top navigation');
+assert(nav.includes('class="globalIntroBtn globalExamplesBtn"'), 'Need one-tap examples in shared top navigation');
 assert(nav.includes('data-global-about'), 'Preserve About under Help menu');
 assert(nav.includes("'/'+lang+'/use-cases.html'"), 'Localized live use-case destination');
 for(const lang of ['ja','en']){
