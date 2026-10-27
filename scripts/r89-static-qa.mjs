@@ -56,7 +56,8 @@ for(const lang of ['ja','en']){
  assert(html.includes('r89-example-editor.js?v=r89p2'),'Missing original edit action '+lang);
  assert(html.includes('r89-example-editor.css?v=r89p2'));
  assert(html.includes('r89OriginalExamples'));
- assert.equal((html.match(/class="explain" id="/g)||[]).length,3);
+ const exampleIds=[...html.matchAll(/class="explain" id="([^"]+)"/g)].map(m=>m[1]);
+ assert.deepEqual(exampleIds,['method','radar','ranking','tier'],'Expected methods section and three editable original charts');
 }
 for(const p of ['ja/use-cases.html','en/use-cases.html']){
  const html=await read(p);assert(html.includes('r89-example-editor.js?v=r89p1'));
