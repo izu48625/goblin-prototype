@@ -15,7 +15,9 @@ for(const engine of [chromium,webkit]){
    assert.equal(await page.locator('#r87HomeGuide').count(),1);
    // The new educational text stays INSIDE the pre-existing extension sheet.
    assert.equal(await page.locator('#r87HomeGuide').isVisible(),false);
-   assert.equal(await page.locator('h1').count(),2,'Visible Home heading plus existing detailed help heading');
+   assert.equal(await page.locator('h1').count(),1,'The editorial Home has exactly one H1');
+   assert.equal(await page.locator('#r87HomeGuide h2').count(),1,'Detailed help is a nested H2');
+   assert.equal(await page.locator('#r87HomeGuide h3').count(),2,'Help subtopics are H3');
    assert.equal(await page.locator('#r89HomeIntro h1').isVisible(),true,'Visible first-party Home heading is required');
    // Existing extension selection is reachable without editing saved values.
    if(width>760){
