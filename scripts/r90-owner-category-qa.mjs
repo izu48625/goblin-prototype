@@ -17,7 +17,7 @@ const B='22222222-2222-4222-8222-222222222222';
 const C='33333333-3333-4333-8333-333333333333';
 const user='aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa';
 const foreign='bbbbbbbb-bbbb-4bbb-8bbb-bbbbbbbbbbbb';
-const mock=String.raw\`
+const mock=String.raw`
 (() => {
 const copy=x=>JSON.parse(JSON.stringify(x));
 const stamp='2026-10-27T02:00:00.000Z';
@@ -64,7 +64,7 @@ window.__R90_MOCK__={
 };
 window.SM_SUPABASE={ready:true,client,url:'https://fake.invalid',publishableKey:'mock'};
 })();
-\`;
+`;
 const specs=[['chromium',chromium,320],['webkit',webkit,390],['chromium',chromium,1180]];
 for(const [name,engine,width] of specs){
  const browser=await engine.launch({headless:true});
@@ -72,7 +72,7 @@ for(const [name,engine,width] of specs){
  const ctx=await browser.newContext({viewport:{width,height:840},locale:'ja-JP',isMobile:width<500,hasTouch:width<500});
  await ctx.route('**/cloud/supabase.js*',route=>route.fulfill({status:200,contentType:'application/javascript',body:mock}));
  await ctx.route('**/cdn.jsdelivr.net/npm/@supabase/supabase-js@2*',route=>route.fulfill({status:200,contentType:'application/javascript',body:'window.supabase={};'}));
- await ctx.route('**/*',route=>{const url=new URL(route.request().url());if(url.hostname==='127.0.0.1')return route.continue();if(/cdn.jsdelivr.net/.test(url.hostname))return route.continue();return route.abort()});
+ await ctx.route('https://*.supabase.co/**',route=>route.abort());
  const page=await ctx.newPage();
  const errors=[];page.on('pageerror',e=>errors.push(e.message));
  await page.goto(BASE+'/my.html',{waitUntil:'domcontentloaded'});
