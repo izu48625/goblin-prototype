@@ -133,6 +133,14 @@ export async function publicWorkHtml(id){
       '<table><thead><tr><th scope="col">'+(en?'Subject':'比較対象')+'</th>'+
       displayMetrics.map(m=>'<th scope="col">'+esc(m)+'</th>').join('')+
       '</tr></thead><tbody>'+tableRows.join('')+'</tbody></table></div></section>':'';
+  const insights=publicScoreInsights(displaySubjects,displayMetrics,scoreRows,lang,validScale||100);
+  const insightHtml=insights.length
+    ?'<section class="seoInsights"><h2>'+(en?'How to interpret these scores':'採点結果から読み取れること')+'</h2>'+
+      '<p>'+(en?'Calculated only from the scored subjects and criteria in the excerpt above. These are creator-entered ratings, not verified objective measurements.'
+                :'上の表に表示した範囲の採点値から計算しています。投稿者の評価をもとにした比較であり、客観的な実測・公式評価ではありません。')+'</p>'+
+      '<ul>'+insights.map(x=>'<li>'+esc(x)+'</li>').join('')+'</ul>'+
+      '<p><a href="'+ORIGIN+(en?'/en/scoring-guide.html':'/ja/scoring-guide.html')+'">'+
+       (en?'Learn how to compare ratings and choose weights':'採点基準と重み付けの考え方を見る')+'</a></p></section>':'';
   // Do not fabricate an English translation of Japanese user content.
   // Only genuinely English-authored works use lang=en.
   const jsonld=JSON.stringify({
@@ -158,7 +166,7 @@ export async function publicWorkHtml(id){
     '<div class="actions"><a href="'+viewer+'">'+open+'</a><a class="secondary" href="'+ORIGIN+(en?'/en/':'/ja/')+'">'+make+'</a></div>'+
     (list.length?'<section><h2>'+itemLabel+'</h2><ul>'+listHtml(list)+'</ul></section>':'')+
     (metrics.length?'<section><h2>'+metricLabel+'</h2><ul>'+listHtml(metrics)+'</ul></section>':'')+
-    scoreTable+
+    scoreTable+insightHtml+
     '</main><footer>Stats Maker — '+(en?'Charts, comparisons and ratings':'グラフ・評価・比較')+
     ' · <a href="'+viewer+'">'+open+'</a>'+
     ' · <a href="'+ORIGIN+(en?'/en/legal.html#terms':'/ja/legal.html#terms')+'">'+(en?'Terms':'利用規約')+'</a>'+
@@ -169,6 +177,46 @@ export async function publicWorkHtml(id){
   // after its owner switches it to private/unlisted.
   return response(html,'text/html; charset=utf-8',200,'no-store');
 }
+
+// R96: grounded, bounded editorial interpretation of the actual Public scores.
+// Inputs are the same six-by-five, Public-only projection used for the score table.
+// No author metadata, visibility, category, or database records are ever changed.
+export function publicScoreInsights(subjects,criteria,scoreRows,lang='ja',scale=100){
+  const en=lang==='en';
+  const max=scale===10?10:100;
+  const out=[];
+  if(!Array.isArray(subjects)||!Array.isArray(criteria)||!Array.isArray(scoreRows))return out;
+  for(let j=0;j<Math.min(3,criteria.length);j++){
+    const criterion=trim(criteria[j],90);
+    if(!criterion)continue;
+    const scores=[];
+    for(let i=0;i<Math.min(6,subjects.length);i++){
+      const name=trim(subjects[i],90),raw=scoreRows[i]?.[j];
+      if(!name||raw===null||raw===undefined||raw===''||typeof raw==='boolean')continue;
+      const value=typeof raw==='number'?raw:typeof raw==='string'?Number(raw):NaN;
+      if(!Number.isFinite(value)||value<0||value>max)continue;
+      scores.push({name,value});
+    }
+    if(scores.length<2)continue;
+    const hi=Math.max(...scores.map(x=>x.value)),lo=Math.min(...scores.map(x=>x.value));
+    const f=n=>String(Number(n.toFixed(2)));
+    const tops=scores.filter(x=>x.value===hi).map(x=>x.name);
+    const lows=scores.filter(x=>x.value===lo).map(x=>x.name);
+    if(hi===lo){
+      out.push(en
+        ?criterion+': all '+scores.length+' rated subjects have '+f(hi)+' points (a tie).'
+        :criterion+'：採点済み'+scores.length+'対象がすべて'+f(hi)+'点で同点です。');
+    }else{
+      // Compact named range, not an overall or official judgment.
+      const names=a=>a.slice(0,2).join(en?', ':'・')+(a.length>2?(en?' and others':'ほか'):'');
+      out.push(en
+        ?criterion+': '+names(tops)+' lead'+(tops.length===1?'s':'')+' with '+f(hi)+'; '+names(lows)+' '+(lows.length===1?'has':'have')+' '+f(lo)+' (spread '+f(hi-lo)+' points).'
+        :criterion+'：最高は'+names(tops)+'の'+f(hi)+'点、最低は'+names(lows)+'の'+f(lo)+'点。差は'+f(hi-lo)+'点です。');
+    }
+  }
+  return out;
+}
+
 const sitemapWrap=(content)=>xmlHead+'<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">'+content+'</urlset>';
 const sitemapLoc=(loc,last)=>{
   const updated=/^\d{4}-\d\d-\d\d/.test(String(last||''))?String(last).slice(0,10):'';
