@@ -1,0 +1,20 @@
+name: R91 one-time read-only production verification
+on:
+  push:
+    branches: [r91-live-readonly-check-20261028]
+    paths:
+      - 'scripts/r91-live-readonly-check.mjs'
+      - '.github/workflows/r91-live-readonly-check.yml'
+permissions:
+  contents: read
+jobs:
+  live:
+    runs-on: ubuntu-latest
+    timeout-minutes: 12
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Read-only R91 live owner-UI and public sitemap checks
+        run: node scripts/r91-live-readonly-check.mjs
