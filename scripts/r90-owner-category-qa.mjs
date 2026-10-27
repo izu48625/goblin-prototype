@@ -4,7 +4,7 @@ import {chromium,webkit} from 'playwright';
 
 const my=await readFile(new URL('../cloud/my.js',import.meta.url),'utf8');
 const markup=await readFile(new URL('../my.html',import.meta.url),'utf8');
-assert(markup.includes('id="r90CategoryHelp"')&&markup.includes('cloud/my.js?v=r90categories1'));
+assert(markup.includes('id="r90CategoryHelp"')&&markup.includes('cloud/my.js?v=r91review1'));
 for(const marker of ['data-save-category','categoriesAllowed.has(next)',".eq('owner_id',state.user.id)",".eq('updated_at',fresh.updated_at)",'duplicatesAmongOwnedWorks()', 'r90CategorySelect']){
  assert(my.includes(marker),'R90 missing safety/UI invariant '+marker);
 }
@@ -97,7 +97,7 @@ for(const [name,engine,width] of specs){
  assert.equal(after[1].snapshot.metadata,undefined);
  assert.equal(patch.id,A);
  assert.deepEqual(Object.keys(patch.patch).sort(),['snapshot','snapshot_updated_at']);
- assert.equal(await page.locator('.r90Duplicate').count(),0,'Distinct category metadata changes exact snapshot equality');
+ assert.equal(await page.locator('.r90Duplicate').count(),2,'Duplicate scoring content remains visible after metadata-only category edit');
  assert.equal(await page.locator('[data-category-for="'+C+'"]').inputValue(),'manga_anime');
  await page.evaluate(id=>window.__R90_MOCK__.externalEdit(id),B);
  await page.locator('[data-category-for="'+B+'"]').selectOption('sports');
