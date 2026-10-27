@@ -47,8 +47,8 @@
     const guide=document.getElementById('r87HomeGuide');
     if(guide){
       guide.querySelector('summary').textContent=c.guide;
-      guide.querySelector('h1').textContent=c.heading;
-      guide.querySelectorAll('h2').forEach((x,i)=>{if(c.sectionTitles[i])x.textContent=c.sectionTitles[i]});
+      guide.querySelector('h2').textContent=c.heading;
+      guide.querySelectorAll('h3').forEach((x,i)=>{if(c.sectionTitles[i])x.textContent=c.sectionTitles[i]});
       guide.querySelectorAll('.r87HomeGuideBody>p:not(.r87HomeGuideLinks)').forEach((x,i)=>{if(c.paragraphs[i])x.textContent=c.paragraphs[i]});
       guide.querySelectorAll('ol>li').forEach((x,i)=>{if(c.instructions[i])x.textContent=c.instructions[i]});
       guide.querySelectorAll('.r87HomeGuideLinks a').forEach((x,i)=>{

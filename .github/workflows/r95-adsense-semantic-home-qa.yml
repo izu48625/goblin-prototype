@@ -1,0 +1,24 @@
+name: R95 AdSense semantic Home QA
+on:
+  pull_request:
+    paths:
+      - 'index.html'
+      - 'scripts/r95-adsense-semantic-home-qa.mjs'
+      - '.github/workflows/r95-adsense-semantic-home-qa.yml'
+permissions:
+  contents: read
+jobs:
+  heading-and-editor:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Static head, guide hierarchy and app shell
+        run: |
+          node --check scripts/r95-adsense-semantic-home-qa.mjs
+          node scripts/r95-adsense-semantic-home-qa.mjs
+          npm run build:cloudflare
+          test -s dist/index.html
