@@ -1,0 +1,34 @@
+name: R93 My Works light and opt-in dark QA
+on:
+  pull_request:
+    paths:
+      - 'my.html'
+      - 'cloud/my.css'
+      - 'scripts/r93-myworks-theme-qa.mjs'
+      - '.github/workflows/r93-myworks-theme-qa.yml'
+permissions:
+  contents: read
+jobs:
+  management-theme:
+    runs-on: ubuntu-latest
+    container:
+      image: mcr.microsoft.com/playwright:v1.56.1-noble
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Build and verify My Works page
+        run: |
+          node --check scripts/r93-myworks-theme-qa.mjs
+          npm run build:cloudflare
+      - name: Test Safari/Chrome light and explicit dark
+        run: |
+          npm install --no-save playwright@1.56.1
+          python3 -m http.server 4173 --bind 127.0.0.1 --directory dist >/tmp/r93.log 2>&1 &
+          for i in $(seq 1 30); do
+            if curl -fsS http://127.0.0.1:4173/my.html >/dev/null; then break; fi
+            sleep 1
+          done
+          BASE_URL=http://127.0.0.1:4173 node scripts/r93-myworks-theme-qa.mjs
