@@ -1,0 +1,18 @@
+name: R87 Temporary Live AdSense Readiness Check
+on:
+  pull_request:
+    paths:
+      - 'scripts/r87-onetime-live-probe.mjs'
+      - '.github/workflows/r87-onetime-live-probe.yml'
+permissions:
+  contents: read
+jobs:
+  read-only-production:
+    runs-on: ubuntu-latest
+    timeout-minutes: 7
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with: {node-version: '22'}
+      - name: Verify published R87 content and live privacy protections
+        run: node scripts/r87-onetime-live-probe.mjs
