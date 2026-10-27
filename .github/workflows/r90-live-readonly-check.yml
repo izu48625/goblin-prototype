@@ -1,0 +1,20 @@
+name: R90 one-time GET-only production check
+on:
+  push:
+    branches: [r90-live-readonly-check-20261028]
+    paths:
+      - 'scripts/r90-live-readonly-check.mjs'
+      - '.github/workflows/r90-live-readonly-check.yml'
+permissions:
+  contents: read
+jobs:
+  read-only:
+    runs-on: ubuntu-latest
+    timeout-minutes: 12
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Inspect live owner-category UI and existing privacy without writes
+        run: node scripts/r90-live-readonly-check.mjs
