@@ -93,12 +93,13 @@ try {
     && popup.top>=-2 && popup.bottom<=size.height+2,
     size.label+' HELP dropdown offscreen: '+JSON.stringify(popup));
   // About moved here to make examples visible in the fixed top navigation.
-  // Count actual shipped destinations: About, five guides, Home intro, three legal links.
+  // Count actual shipped destinations: My Works, About, five guides, Home intro, three legal links.
   assert.equal(await page.locator('.globalSupportPanel [data-global-about]').count(),1);
   assert.equal(await page.locator('.globalSupportPanel [data-global-guide]').count(),5);
   assert.equal(await page.locator('.globalSupportPanel [data-global-intro]').count(),1);
   assert.equal(await page.locator('.globalSupportPanel [data-global-support]').count(),3);
-  assert.equal(await page.locator('.globalSupportPanel a').count(),10);
+  assert.equal(await page.locator('.globalSupportPanel [data-global-myworks]').count(),1);
+   assert.equal(await page.locator('.globalSupportPanel a').count(),11);
   // All links remain reachable even when the popup must scroll on short screens.
   const contact=page.locator('.globalSupportPanel [data-global-support="contact"]');
   await contact.scrollIntoViewIfNeeded();
