@@ -1,0 +1,161 @@
+<!doctype html>
+<html lang="ja"><head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#f6f5f1">
+<title>5つの実践作例｜グラフ・比較・ステータスを使い分ける | Stats Maker</title>
+<meta name="description" content="Stats Makerの実際の出力画像を使い、カフェ採点・散歩ルートの2軸比較・学習習慣の推移・目標と実績・創作キャラのステータスの5作例を紹介。数値と作り方も公開。">
+<meta name="robots" content="index,follow">
+<link rel="canonical" href="https://statsmaker.app/ja/use-cases.html">
+<link rel="alternate" hreflang="ja" href="https://statsmaker.app/ja/use-cases.html">
+<link rel="alternate" hreflang="en" href="https://statsmaker.app/en/use-cases.html">
+<link rel="alternate" hreflang="x-default" href="https://statsmaker.app/en/use-cases.html">
+<meta property="og:type" content="article"><meta property="og:site_name" content="Stats Maker">
+<meta property="og:title" content="Stats Maker公式の5つのグラフ実践作例">
+<meta property="og:description" content="Stats Makerの実際の出力画像を使い、カフェ採点・散歩ルートの2軸比較・学習習慣の推移・目標と実績・創作キャラのステータスの5作例を紹介。数値と作り方も公開。">
+<meta property="og:url" content="https://statsmaker.app/ja/use-cases.html">
+<meta property="og:image" content="https://statsmaker.app/ja/example-images/usecase-routes.png">
+<meta name="twitter:card" content="summary_large_image">
+<style>
+*{box-sizing:border-box}html,body{margin:0;background:#f6f5f1;color:#252a30;font:16px/1.7 system-ui,-apple-system,BlinkMacSystemFont,sans-serif}
+main,footer{width:min(1050px,calc(100% - 34px));margin:auto}main{padding:20px 0 45px}
+h1{font-size:clamp(30px,5vw,47px);line-height:1.2;margin:10px 0 16px}h2{font-size:clamp(21px,3.2vw,28px);line-height:1.3;margin:0 0 10px}
+h3{font-size:17px;line-height:1.35;margin:18px 0 5px}p{color:#515a61;margin:8px 0 14px}
+strong{color:#282e33}a{color:#28585e;text-underline-offset:3px}.eyebrow{color:#a54f3c;font-size:12px;font-weight:800;letter-spacing:.09em}
+.hero{padding:21px 0 28px}.hero .lead{max-width:870px;font-size:17px}
+.actions{display:flex;gap:10px;flex-wrap:wrap;margin:18px 0}.actions a{display:inline-flex;align-items:center;min-height:45px;padding:11px 15px;border-radius:5px;background:#b64d35;color:#fff!important;font-weight:750;text-decoration:none}
+.actions a.secondary{background:#fff;color:#2d3439!important;border:1px solid #bbb8b1}
+.index{display:flex;gap:8px 14px;flex-wrap:wrap;padding:18px 0;border-block:1px solid #dfdcd4}.index a{font-weight:700}
+.case{padding:30px 0;border-bottom:1px solid #dfdcd4;scroll-margin-top:55px}.caseHead{max-width:860px}
+.two{display:grid;grid-template-columns:minmax(0,410px) minmax(0,1fr);gap:26px;align-items:start;margin-top:19px}
+figure{margin:0;min-width:0;background:#fff;padding:10px;border:1px solid #dbd8d0;border-radius:6px}
+figure img{display:block;width:100%;height:auto;border-radius:4px;background:#e8e8e5}
+figcaption{font-size:12px;line-height:1.6;color:#576169;padding:10px 3px 0}
+.tableFrame{border:1px solid #dedbd4;border-radius:6px;background:#fff;overflow-x:auto;max-width:100%}
+table{border-collapse:collapse;width:100%;font-size:14px}th,td{padding:9px 11px;border-bottom:1px solid #e2dfd9;text-align:right;white-space:nowrap}
+th:first-child,td:first-child{text-align:left}thead th{background:#f0eee8;font-weight:800}tr:last-child td{border-bottom:0}
+.note{background:#fff;padding:18px;border:1px solid #dfdcd4;border-radius:6px;margin-top:23px}
+footer{border-top:1px solid #ddd9d2;padding:23px 0 40px;font-size:13px;color:#58616a}
+footer a{margin-right:14px}a:focus-visible{outline:3px solid #247e82;outline-offset:3px}
+@media(max-width:740px){.two{grid-template-columns:1fr;gap:14px}.case{padding:23px 0}.hero .lead{font-size:16px}figure{max-width:540px}}
+</style>
+<link rel="stylesheet" href="/cloud/global-locale.css?v=r74p1">
+<link rel="stylesheet" href="/cloud/r73-reading.css?v=r74p1">
+</head>
+<body class="r73-light-page r73-reading" data-sm-reading-page="ja">
+<main>
+<section class="hero"><div class="eyebrow">STATS MAKER · PRACTICAL EXAMPLES</div>
+<h1>5ジャンル・5種類の「作ってみたい」を形に</h1><p class="lead">同じ点数を別の絵に変えるだけでは、グラフの選び方は身につきません。このページでは用途の違う5つのテーマを選び、Stats Maker自身で書き出したPNG・元データ・読み取り方・再現手順をセットにしました。登場する商品や人物、ルート、評価はすべて説明用の創作です。</p>
+<div class="actions"><a href="/index.html?lang=ja">自分のグラフを作る</a><a class="secondary" href="/ja/examples.html">同じデータから3形式の作例</a></div>
+</section>
+<nav class="index" aria-label="作例へ移動">
+<a href="#cafe">1. 架空カフェのドリンク比較</a>
+<a href="#routes">2. 架空の散歩ルートを2軸で選ぶ</a>
+<a href="#study">3. 学習習慣の8週間を線で追う</a>
+<a href="#plan">4. 目標と実績の差を見比べる</a>
+<a href="#hero">5. 創作キャラクターのステータスカード</a>
+</nav>
+<section class="case" id="cafe">
+<div class="caseHead"><div class="eyebrow">作例 1 · BAR</div>
+<h2>架空カフェのドリンク比較</h2><p>架空の5種類のドリンクを、同じ100点満点の好み尺度で採点。棒グラフは一項目の順位と点差を読むのに向いています。</p></div>
+<div class="two"><figure>
+<img src="/ja/example-images/usecase-cafe.png" width="1080" height="1080" decoding="async" loading="eager" alt="Stats Makerのbar出力。創作架空カフェのドリンク比較のデータを示す">
+<figcaption>右表のサンプル数値を用いて、Stats Makerの実際のPNG出力機能で生成した画像。</figcaption>
+</figure>
+<div class="explainer">
+<h3>このグラフで見えること</h3><p><strong>5つの飲み物を一目で並べる</strong>。 Citrus Tea 92点とCloud Milk 68点の差は24点。ただし、これは創作例の主観評価であり、実際の店舗や味覚調査ではありません。</p>
+<div class="tableFrame" role="region" tabindex="0" aria-label="元データ表（横スクロール可）">
+<table><thead><tr><th scope="col">Drink</th><th scope="col">Preference / 100</th></tr></thead><tbody><tr><th scope="row">Citrus Tea</th><td>92</td></tr>
+<tr><th scope="row">Mint Cocoa</th><td>84</td></tr>
+<tr><th scope="row">Berry Latte</th><td>78</td></tr>
+<tr><th scope="row">Spice Chai</th><td>73</td></tr>
+<tr><th scope="row">Cloud Milk</th><td>68</td></tr></tbody></table></div>
+<h3>Stats Makerで再現する方法</h3><p>Bar Chartを選び、評価対象5件と好みの点数を入力。今回は順位順に並べ、横向きの棒と数値ラベルを表示しています。</p>
+<h3>読み違えないために</h3><p>「人気度」「売上」のような実測データとは違い、好みの点数に客観的な正解はありません。</p>
+</div></div>
+</section>
+<section class="case" id="routes">
+<div class="caseHead"><div class="eyebrow">作例 2 · QUADRANT</div>
+<h2>架空の散歩ルートを2軸で選ぶ</h2><p>架空の散歩コース4案を「静かさ」と「行きやすさ」で評価。総合順位を作らず、自分の目的に合う位置を確認する作例です。</p></div>
+<div class="two"><figure>
+<img src="/ja/example-images/usecase-routes.png" width="1080" height="1080" decoding="async" loading="lazy" alt="Stats Makerのquadrant出力。創作架空の散歩ルートを2軸で選ぶのデータを示す">
+<figcaption>右表のサンプル数値を用いて、Stats Makerの実際のPNG出力機能で生成した画像。</figcaption>
+</figure>
+<div class="explainer">
+<h3>このグラフで見えること</h3><p><strong>静けさかアクセスか、優先条件で見る</strong>。 Hill Trailは静かさ92点でもアクセス35点。一方City Walkは静かさ40点・アクセス95点。どちらが最適かは目的次第で、一律の最優秀ルートはありません。</p>
+<div class="tableFrame" role="region" tabindex="0" aria-label="元データ表（横スクロール可）">
+<table><thead><tr><th scope="col">Route</th><th scope="col">Quietness</th><th scope="col">Access</th></tr></thead><tbody><tr><th scope="row">Riverside</th><td>85</td><td>65</td></tr>
+<tr><th scope="row">Hill Trail</th><td>92</td><td>35</td></tr>
+<tr><th scope="row">City Walk</th><td>40</td><td>95</td></tr>
+<tr><th scope="row">Garden Loop</th><td>73</td><td>80</td></tr></tbody></table></div>
+<h3>Stats Makerで再現する方法</h3><p>Quadrantを選び、X軸に静かさ、Y軸に行きやすさを設定して4つの候補を入力。50点を境に4領域を使い分けています。</p>
+<h3>読み違えないために</h3><p>実在の散歩道、移動時間、安全性を調査した数値ではありません。</p>
+</div></div>
+</section>
+<section class="case" id="study">
+<div class="caseHead"><div class="eyebrow">作例 3 · IMAGE-LINE</div>
+<h2>学習習慣の8週間を線で追う</h2><p>架空の8週間の自己評価を時系列に並べた例。点数が上がり続けるのではなく、途中で下がる週もあることを表しています。</p></div>
+<div class="two"><figure>
+<img src="/ja/example-images/usecase-study.png" width="1600" height="900" decoding="async" loading="lazy" alt="Stats Makerのimage-line出力。創作学習習慣の8週間を線で追うのデータを示す">
+<figcaption>右表のサンプル数値を用いて、Stats Makerの実際のPNG出力機能で生成した画像。</figcaption>
+</figure>
+<div class="explainer">
+<h3>このグラフで見えること</h3><p><strong>順位ではなく、変化の方向を確認する</strong>。 W1は35点、W8は82点で47点上昇。一方W3とW7は直前週から下がります。始点と終点だけを比べず、途中の変化も読み取ります。</p>
+<div class="tableFrame" role="region" tabindex="0" aria-label="元データ表（横スクロール可）">
+<table><thead><tr><th scope="col">Week</th><th scope="col">Self-rating / 100</th></tr></thead><tbody><tr><th scope="row">W1</th><td>35</td></tr>
+<tr><th scope="row">W2</th><td>45</td></tr>
+<tr><th scope="row">W3</th><td>42</td></tr>
+<tr><th scope="row">W4</th><td>58</td></tr>
+<tr><th scope="row">W5</th><td>60</td></tr>
+<tr><th scope="row">W6</th><td>70</td></tr>
+<tr><th scope="row">W7</th><td>67</td></tr>
+<tr><th scope="row">W8</th><td>82</td></tr></tbody></table></div>
+<h3>Stats Makerで再現する方法</h3><p>Image Lineを開き、8つの項目をW1〜W8として設定。画像未設定なら色背景でも描画でき、今回は数値とラベルを出している例です。</p>
+<h3>読み違えないために</h3><p>自己評価の架空データであり、学習成果や教育研究の実測値ではありません。</p>
+</div></div>
+</section>
+<section class="case" id="plan">
+<div class="caseHead"><div class="eyebrow">作例 4 · RANGE</div>
+<h2>目標と実績の差を見比べる</h2><p>4つの生活習慣に設定した架空の「目標値」と「実施値」を比較。差を見るなら順位よりもRange / Dumbbell形式が役立ちます。</p></div>
+<div class="two"><figure>
+<img src="/ja/example-images/usecase-plan.png" width="1080" height="1080" decoding="async" loading="lazy" alt="Stats Makerのrange出力。創作目標と実績の差を見比べるのデータを示す">
+<figcaption>右表のサンプル数値を用いて、Stats Makerの実際のPNG出力機能で生成した画像。</figcaption>
+</figure>
+<div class="explainer">
+<h3>このグラフで見えること</h3><p><strong>予定を達成した項目と未達成を区別する</strong>。 Cleaningは目標50点に対して実施90点で+40点。一方Sleepは85点に対して70点で−15点。同じ形式で改善と未達成の両方を示せます。</p>
+<div class="tableFrame" role="region" tabindex="0" aria-label="元データ表（横スクロール可）">
+<table><thead><tr><th scope="col">Activity</th><th scope="col">Target / 100</th><th scope="col">Done / 100</th></tr></thead><tbody><tr><th scope="row">Reading</th><td>70</td><td>65</td></tr>
+<tr><th scope="row">Fitness</th><td>75</td><td>80</td></tr>
+<tr><th scope="row">Cleaning</th><td>50</td><td>90</td></tr>
+<tr><th scope="row">Sleep</th><td>85</td><td>70</td></tr></tbody></table></div>
+<h3>Stats Makerで再現する方法</h3><p>Range / Dumbbellを選び、各対象にTargetとDoneの2値を入力。差の表示をONにし、元の2値を併記すると判断しやすくなります。</p>
+<h3>読み違えないために</h3><p>実際の健康状態や生活実績を記録したものではありません。</p>
+</div></div>
+</section>
+<section class="case" id="hero">
+<div class="caseHead"><div class="eyebrow">作例 5 · STAT-CARD</div>
+<h2>創作キャラクターのステータスカード</h2><p>架空の冒険者Miraを6つの能力で表したカード例。強みの見せ方を確認するためのキャラクター評価で、既存ゲームや作品の登場人物ではありません。</p></div>
+<div class="two"><figure>
+<img src="/ja/example-images/usecase-hero.png" width="1080" height="1080" decoding="async" loading="lazy" alt="Stats Makerのstat-card出力。創作創作キャラクターのステータスカードのデータを示す">
+<figcaption>右表のサンプル数値を用いて、Stats Makerの実際のPNG出力機能で生成した画像。</figcaption>
+</figure>
+<div class="explainer">
+<h3>このグラフで見えること</h3><p><strong>一人の特徴をカード一枚で伝える</strong>。 Speed 88点が最高で、Tactics 67点が最低。総合78点は6項目の単純平均77.67を四捨五入した値で、実力を保証する数値ではありません。</p>
+<div class="tableFrame" role="region" tabindex="0" aria-label="元データ表（横スクロール可）">
+<table><thead><tr><th scope="col">Stat</th><th scope="col">Score / 100</th></tr></thead><tbody><tr><th scope="row">Power</th><td>84</td></tr>
+<tr><th scope="row">Guard</th><td>72</td></tr>
+<tr><th scope="row">Speed</th><td>88</td></tr>
+<tr><th scope="row">Tactics</th><td>67</td></tr>
+<tr><th scope="row">Support</th><td>74</td></tr>
+<tr><th scope="row">Focus</th><td>81</td></tr></tbody></table></div>
+<h3>Stats Makerで再現する方法</h3><p>Stat Cardにキャラクター名と6つの能力を入力。画像を使わずに背景と数値だけで成立する例にしています。</p>
+<h3>読み違えないために</h3><p>Miraは説明用の架空人物で、他社のキャラクターや画像は使用していません。</p>
+</div></div>
+</section>
+<section class="note"><h2>正解の図を一つに決めなくていい</h2>
+<p>1項目の順位なら棒、優先条件が2つなら象限、時系列なら折れ線、予定と結果の差ならRange、1人の特徴ならStat Cardが役立ちます。この作例に実在する店舗・人物・土地・調査結果の評価は含まれません。</p>
+<p>ここで使う画像はStats Maker本体と同じCanvas描画処理で制作した完成PNGです。PNG画像と後で数値を変更するための編集データは別物です。</p>
+<div class="actions"><a href="/index.html?lang=ja">自分のグラフを作る</a><a class="secondary" href="/ja/scoring-guide.html">採点基準の作り方</a></div></section>
+</main>
+<footer>Stats Maker · <a href="/ja/">サービス紹介</a> · <a href="/ja/examples.html">ほかの作例</a> · <a href="/ja/chart-guide.html">グラフの選び方</a> · <a href="/ja/legal.html#privacy">プライバシー</a> · <a href="/ja/legal.html#contact">お問い合わせ</a></footer>
+<script src="/cloud/global-locale.js?v=r84usecases1"></script>
+</body></html>

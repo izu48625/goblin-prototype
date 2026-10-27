@@ -36,7 +36,7 @@
     ?document.body.dataset.smReadingPage:'';
   const articleName=()=>{
     const name=location.pathname.split('/').pop();
-    return ['chart-guide.html','png-guide.html','examples.html','scoring-guide.html'].includes(name)?name:null;
+    return ['chart-guide.html','png-guide.html','examples.html','scoring-guide.html','use-cases.html'].includes(name)?name:null;
   };
   const current=()=>landingLang()||legalLang()||readingLang()||normalize(localStorage.getItem(KEY)||localStorage.getItem(LEGACY)||navigator.language||'ja');
 
@@ -133,11 +133,11 @@
       summary.textContent=lang==='ja'?'ヘルプ':'Help';
       summary.title=lang==='ja'?'グラフの作り方・PNG保存・利用規約など':'Chart guides, PNG export, terms and contact';
       help.setAttribute('aria-label',lang==='ja'?'サポートメニュー':'Support menu');
-      const guides={chart:['グラフの作り方・能力比較','Charts & comparisons'],png:['PNG保存・共有','Save & share PNG'],examples:['完成グラフの作例','Finished chart examples'],scoring:['公平な採点と重み付け','Fair ratings and weights']};
+      const guides={chart:['グラフの作り方・能力比較','Charts & comparisons'],png:['PNG保存・共有','Save & share PNG'],examples:['完成グラフの作例','Finished chart examples'],scoring:['公平な採点と重み付け','Fair ratings and weights'],usecases:['5つの実践作例','Five practical use cases']};
       for(const link of help.querySelectorAll('[data-global-guide]')){
         const kind=link.dataset.globalGuide;
         link.textContent=guides[kind][lang==='ja'?0:1];
-        link.href=previewUrl(new URL('/'+lang+'/'+(kind==='chart'?'chart-guide.html':kind==='png'?'png-guide.html':kind==='scoring'?'scoring-guide.html':'examples.html'),location.origin).href);
+        link.href=previewUrl(new URL('/'+lang+'/'+(kind==='chart'?'chart-guide.html':kind==='png'?'png-guide.html':kind==='scoring'?'scoring-guide.html':kind==='usecases'?'use-cases.html':'examples.html'),location.origin).href);
       }
       const items={terms:['利用規約','Terms'],privacy:['プライバシー','Privacy'],contact:['お問い合わせ','Contact']};
       for(const link of help.querySelectorAll('[data-global-support]')){
@@ -220,7 +220,7 @@
     bar=document.createElement('div');
     bar.className='globalLocaleBar';
     bar.setAttribute('role','group');
-    bar.innerHTML='<nav class="globalNavLinks" aria-label="Site navigation"><a class="globalHomeBtn" href="index.html?fresh=1" aria-label="ホームを開く">HOME</a><a class="globalDiscoverBtn" href="discover.html" aria-label="Discoverを開く">Discover</a><a class="globalIntroBtn" href="/ja/" aria-label="STATS MAKERの紹介ページ">紹介</a><details class="globalSupportMenu"><summary>ヘルプ</summary><div class="globalSupportPanel"><a data-global-guide="chart" href="/ja/chart-guide.html">グラフの作り方・能力比較</a><a data-global-guide="png" href="/ja/png-guide.html">PNG保存・共有</a><a data-global-guide="examples" href="/ja/examples.html">完成グラフの作例</a><a data-global-guide="scoring" href="/ja/scoring-guide.html">公平な採点と重み付け</a><div class="globalSupportDivider" aria-hidden="true"></div><a data-global-support="terms" href="/ja/legal.html#terms">利用規約</a><a data-global-support="privacy" href="/ja/legal.html#privacy">プライバシー</a><a data-global-support="contact" href="/ja/legal.html#contact">お問い合わせ</a><button type="button" class="r81-help-theme" data-sm-theme-toggle="menu" aria-pressed="false">☾ ダークモード</button></div></details></nav><div class="globalLocaleControls"><span class="globalLocaleLabel">表示言語</span><div class="globalLocaleSwitch"><button type="button" data-global-lang="ja" aria-label="日本語">JA</button><button type="button" data-global-lang="en" aria-label="English">EN</button></div></div>';
+    bar.innerHTML='<nav class="globalNavLinks" aria-label="Site navigation"><a class="globalHomeBtn" href="index.html?fresh=1" aria-label="ホームを開く">HOME</a><a class="globalDiscoverBtn" href="discover.html" aria-label="Discoverを開く">Discover</a><a class="globalIntroBtn" href="/ja/" aria-label="STATS MAKERの紹介ページ">紹介</a><details class="globalSupportMenu"><summary>ヘルプ</summary><div class="globalSupportPanel"><a data-global-guide="chart" href="/ja/chart-guide.html">グラフの作り方・能力比較</a><a data-global-guide="png" href="/ja/png-guide.html">PNG保存・共有</a><a data-global-guide="examples" href="/ja/examples.html">完成グラフの作例</a><a data-global-guide="scoring" href="/ja/scoring-guide.html">公平な採点と重み付け</a><a data-global-guide="usecases" href="/ja/use-cases.html">5つの実践作例</a><div class="globalSupportDivider" aria-hidden="true"></div><a data-global-support="terms" href="/ja/legal.html#terms">利用規約</a><a data-global-support="privacy" href="/ja/legal.html#privacy">プライバシー</a><a data-global-support="contact" href="/ja/legal.html#contact">お問い合わせ</a><button type="button" class="r81-help-theme" data-sm-theme-toggle="menu" aria-pressed="false">☾ ダークモード</button></div></details></nav><div class="globalLocaleControls"><span class="globalLocaleLabel">表示言語</span><div class="globalLocaleSwitch"><button type="button" data-global-lang="ja" aria-label="日本語">JA</button><button type="button" data-global-lang="en" aria-label="English">EN</button></div></div>';
     document.body.prepend(bar);
     bar.querySelector('.globalHomeBtn').href=previewUrl(new URL(landingLang()?'/index.html?lang='+current():homePath(),location.href).href);
     bar.querySelector('.globalDiscoverBtn').href=previewUrl(new URL((landingLang()||legalLang()||readingLang())?'/discover.html?lang='+current():(legalLang()?'/discover.html':(location.pathname.startsWith('/app/')?'../discover.html':'discover.html')),location.href).href);
