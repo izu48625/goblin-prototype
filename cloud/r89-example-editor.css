@@ -5,3 +5,11 @@
 .r89EditCopy:focus-visible{outline:3px solid #aee8da;outline-offset:2px}
 .r89EditCopy:disabled{opacity:.65;cursor:wait}
 .r89ExampleAction small{font-size:11px;line-height:1.55;color:#607074;max-width:320px}
+
+.r89ExampleStatus{display:flex;align-items:center;gap:12px;flex-wrap:wrap;margin:12px 0;color:#973d2b;font-size:13px;line-height:1.5}
+.r89ExampleStatus button{border:1px solid currentColor;border-radius:5px;padding:8px 11px;background:transparent;color:inherit;font-weight:800;cursor:pointer}
+.r89OriginalExamples .r89ExampleAction small{color:#b9cbe1}
+.r89OriginalExamples .r89ExampleStatus{color:#f2b9ab}
+.r89OriginalExamples .r89EditCopy{background:#416ee0;border-color:#416ee0}
+.r89OriginalExamples .r89EditCopy:hover{background:#3259bb}
+@media(max-width:390px){.r89ExampleAction{align-items:flex-start;flex-direction:column;gap:6px}}
