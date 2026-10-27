@@ -4,7 +4,7 @@ const checks=[
  ['/cloud/my.js',['data-save-category','categoriesAllowed.has(next)',".eq('owner_id',state.user.id)",".eq('updated_at',fresh.updated_at)",'duplicatesAmongOwnedWorks()']],
  ['/cloud/my.css',['.r90CategoryControls','.r90CategorySelect','.r90Duplicate']],
  ['/discover.html',['discover.js?v=r89i18n1']],
- ['/work/b879b7c4-7470-416e-89b4-c682a09a49fa',['manga','index,follow']],
+ ['/work/b879b7c4-7470-416e-89b4-c682a09a49fa',['漫画・アニメ','index,follow']],
  ['/sitemap-works-1.xml',['b879b7c4-7470-416e-89b4-c682a09a49fa']]
 ];
 const wait=ms=>new Promise(resolve=>setTimeout(resolve,ms));
