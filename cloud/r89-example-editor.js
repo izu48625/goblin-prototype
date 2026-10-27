@@ -30,7 +30,8 @@ function projectFor(x){
  p.meta.title=x[lang]?.title||x.title;
  p.meta.subtitle=x.subtitle;
  p.meta.language=lang;
- p.canvas={preset:x.width>x.height?'landscape':'square',width:x.width,height:x.height,transparent:false};
+ p.canvas=original?{preset:'square',width:1080,height:1080,transparent:false}
+   :{preset:x.width>x.height?'landscape':'square',width:x.width,height:x.height,transparent:false};
  if(x.type==='bar'){
    p.data.items=x.rows.map((r,i)=>({id:'sample_drink_'+i,name:r[0],value:r[1],category:'',enabled:true}));
    Object.assign(p.settings,{unit:'pt',orientation:'horizontal',showValues:true,showCategory:false,
