@@ -24,7 +24,7 @@ const stamp='2026-10-27T02:00:00.000Z';
 const same={version:1,title:'Original author score',rows:[{name:'Player A',scores:[97,85]}],criteria:[{name:'Speed',weight:1},{name:'Accuracy',weight:2}],lineage:{relation:'remix'}};
 const works=[
 {id:'11111111-1111-4111-8111-111111111111',owner_id:'aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa',title:'My public A',description:'Own description A',visibility:'public',score_scale:100, snapshot:copy(same),snapshot_updated_at:stamp,updated_at:stamp,published_at:stamp},
-{id:'22222222-2222-4222-8222-222222222222',owner_id:'aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa',title:'My public B identical',description:'Own description B',visibility:'public',score_scale:100, snapshot:copy(same),snapshot_updated_at:stamp,updated_at:stamp,published_at:stamp},
+{id:'22222222-2222-4222-8222-222222222222',owner_id:'aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa',title:'ONE PIECE各編比較・Remix',description:'Own description B',visibility:'public',score_scale:100, snapshot:copy(same),snapshot_updated_at:stamp,updated_at:stamp,published_at:stamp},
 {id:'33333333-3333-4333-8333-333333333333',owner_id:'aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa',title:'My private C',description:'Do not leak',visibility:'private',score_scale:100, snapshot:{version:1,metadata:{category:'manga_anime'},rows:[{name:'Private Player',scores:[50]}],criteria:[{name:'Power'}]},snapshot_updated_at:stamp,updated_at:stamp,published_at:stamp},
 {id:'44444444-4444-4444-8444-444444444444',owner_id:'bbbbbbbb-bbbb-4bbb-8bbb-bbbbbbbbbbbb',title:'FOREIGN SECRET WORK',visibility:'private',snapshot:{rows:[{name:'Secret'}]},updated_at:stamp}
 ];
@@ -104,6 +104,24 @@ for(const [name,engine,width] of specs){
  await page.locator('[data-save-category="'+B+'"]').click();
  await page.waitForFunction(()=>document.querySelector('#myStatus')?.textContent?.includes('他の端末で作品が更新'));
  assert.equal((await page.evaluate(()=>window.__R90_MOCK__.updates)).length,1,'Stale change must not overwrite');
+ // R91: explicitly stage a safe suggestion, verify that staging does NOT write,
+ // and require the owner's positive confirmation for every bulk mutation.
+ assert.equal(await page.locator('#r91BatchSaveBtn').isDisabled(),true);
+ await page.locator('#r91SuggestBtn').click();
+ assert.equal(await page.locator('[data-category-for="'+B+'"]').inputValue(),'manga_anime');
+ assert.equal((await page.evaluate(()=>window.__R90_MOCK__.updates)).length,1,'Staging cannot mutate Supabase');
+ page.once('dialog',dialog=>dialog.dismiss());
+ await page.locator('#r91BatchSaveBtn').click();
+ assert.equal((await page.evaluate(()=>window.__R90_MOCK__.updates)).length,1,'Canceling confirmation cannot write');
+ page.once('dialog',dialog=>dialog.accept());
+ await page.locator('#r91BatchSaveBtn').click();
+ await page.waitForFunction(()=>window.__R90_MOCK__?.updates?.length===2);
+ const allWorks=await page.evaluate(()=>window.__R90_MOCK__.works);
+ assert.equal(allWorks.find(w=>w.id===B).snapshot.metadata.category,'manga_anime');
+ assert.equal(allWorks.find(w=>w.id===B).visibility,'public');
+ assert.equal(allWorks.find(w=>w.id===B).description,'Edited elsewhere');
+ assert.equal(await page.locator('.r90Duplicate').count(),2,'Duplicate scoring signal survives both category changes');
+ assert(!allWorks.some(w=>w.title==='FOREIGN SECRET WORK'&&w.snapshot.metadata),'Foreign creator must remain untouched');
  await page.locator('.globalLocaleBar [data-global-lang="en"]').click();
  await page.waitForFunction(()=>document.querySelector('#r90CategoryHelp')?.textContent?.includes('Only the owner'));
  assert.equal(await page.locator('[data-save-category="'+A+'"]').textContent(),'Save category');
