@@ -99,6 +99,45 @@
     document.querySelector('.hero p').textContent=copy.subtitle;
     document.querySelector('.privacyNote').textContent=copy.privacy;
     searchInput.placeholder=copy.search;
+    // R89: first-party sample gallery follows Discover language and links.
+    const editorial=document.querySelector('.r87Editorial');
+    if(editorial){
+      const en=locale==='en';
+      editorial.querySelector('.r87EditorialOverline').textContent=en?'STATS MAKER EXAMPLES':'STATS MAKER 公式作例';
+      editorial.querySelector('#r87EditorialTitle').textContent=en
+        ?'Discover what you can create with charts':'グラフの使い道を完成例から探す';
+      editorial.querySelector('.r87EditorialHeader p').textContent=en
+        ?'These official examples are illustrative. They are separate from the user-published works below.'
+        :'以下はStats Maker公式が作成した説明用サンプルです。下のユーザー公開作品とは別のコンテンツです。';
+      const all=editorial.querySelector('.r87EditorialAll');
+      all.textContent=en?'View five examples':'5つの作例を見る';
+      all.href='/'+locale+'/use-cases.html';
+      const captions=en?[
+        ['Compare café preferences','Bar chart','A bar chart of five sample drinks'],
+        ['Compare two priorities','Quadrant','A quadrant chart of example walking routes'],
+        ['Track change over time','Line chart','An eight-week sample study trend line']
+      ]:[
+        ['カフェの好みを比較','棒グラフ','ドリンクの好みを点数順に並べた棒グラフ'],
+        ['2つの条件を比べる','象限グラフ','散歩ルートを2軸で比較する象限グラフ'],
+        ['変化を線で追う','折れ線','8週間の学習習慣のサンプル推移を示す折れ線グラフ']
+      ];
+      editorial.querySelectorAll('.r87EditorialRail a').forEach((a,i)=>{
+        a.href='/'+locale+'/use-cases.html#'+['cafe','routes','study'][i];
+        const span=a.querySelector('span');
+        if(span){
+          span.replaceChildren(document.createTextNode(captions[i][0]+' '));
+          const small=document.createElement('small');small.textContent=captions[i][1];span.appendChild(small);
+        }
+        const img=a.querySelector('img');if(img)img.alt=captions[i][2];
+      });
+    }
+    document.querySelectorAll('.footer [data-sm-legal-link]').forEach(a=>{
+      const kind=a.dataset.smLegalLink;
+      const labels={ja:{terms:'利用規約',privacy:'プライバシー',contact:'お問い合わせ'},
+        en:{terms:'Terms',privacy:'Privacy',contact:'Contact'}};
+      a.textContent=labels[locale][kind]||a.textContent;
+      a.href='/'+locale+'/legal.html#'+kind;
+    });
 
     document.querySelector('[data-view="all"]').textContent=copy.allTab;
     document.querySelector('[data-view="community"]').textContent=copy.communityTab;
