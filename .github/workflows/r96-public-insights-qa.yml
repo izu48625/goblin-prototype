@@ -1,0 +1,25 @@
+name: R96 Public SSR meaningful scoring insights QA
+on:
+  pull_request:
+    paths:
+      - 'worker/seo.js'
+      - 'scripts/r96-public-insights-qa.mjs'
+      - '.github/workflows/r96-public-insights-qa.yml'
+permissions:
+  contents: read
+jobs:
+  insights:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Protect Public-only data, grounded calculations and on-page content
+        run: |
+          node --check worker/seo.js
+          node --check scripts/r96-public-insights-qa.mjs
+          node scripts/r96-public-insights-qa.mjs
+          node scripts/r34-seo-edge-test.mjs
+          npm run build:cloudflare
