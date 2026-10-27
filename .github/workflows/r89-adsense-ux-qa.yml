@@ -20,16 +20,17 @@ permissions:
 jobs:
   ux-and-private-copy:
     runs-on: ubuntu-latest
+    container:
+      image: mcr.microsoft.com/playwright:v1.56.1-noble
     timeout-minutes: 20
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
         with: {node-version: '22'}
-      - name: Build static Cloudflare bundle, install browser engines
+      - name: Build static Cloudflare bundle with preinstalled browser engines
         run: |
           npm run build:cloudflare
           npm install --no-save playwright@1.56.1
-          npx playwright install --with-deps chromium webkit
       - name: Serve isolated localhost site
         run: |
           python3 -m http.server 4173 --bind 127.0.0.1 --directory dist >/tmp/r89.log 2>&1 &
