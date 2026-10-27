@@ -31,3 +31,6 @@ body.communityShell .r89HomeIntro{display:none!important}
  .r89HomeIntro a{font-size:11px}
  body.hasGlobalLocaleBar.homeHost:not(.communityShell) #basicRoot{top:88px}
 }
+
+/* Dismissal must beat the narrower mobile rules at every breakpoint. */
+body.hasGlobalLocaleBar.homeHost:not(.communityShell).r89IntroDismissed #basicRoot{top:44px}
