@@ -293,8 +293,8 @@ try{
 
   const nav=page.locator('.globalLocaleBar');
   assert.equal(await nav.locator('.globalIntroBtn').count(),1);
-  assert.equal(await nav.locator('.globalIntroBtn').innerText(),'紹介');
-  assert(new URL(await nav.locator('.globalIntroBtn').getAttribute('href')).pathname==='/ja/');
+  assert.equal(await nav.locator('.globalIntroBtn').innerText(),'作例');
+  assert(new URL(await nav.locator('.globalIntroBtn').getAttribute('href')).pathname==='/ja/use-cases.html');
   for(const width of [390,320]){
     await page.setViewportSize({width,height:844});
     const widths=await nav.evaluate(el=>{
@@ -339,11 +339,12 @@ try{
   console.log('R38 P3 title guard blocks unnamed publication then saves valid title in mock DB PASS');
 
   await page.locator('.globalIntroBtn').click();
-  await page.waitForURL(/\/ja\/$/,{timeout:12000});
+  await page.waitForURL(/\/ja\/use-cases\.html$/,{timeout:12000});
   assert((await page.locator('h1').innerText()).length>4);
   await page.locator('[data-global-lang="en"]').click();
-  await page.waitForURL(/\/en\/$/,{timeout:12000});
-  assert.equal(await page.locator('.globalIntroBtn').innerText(),'About');
-  assert.equal(new URL(await page.locator('.globalIntroBtn').getAttribute('href')).pathname,'/en/');
-  console.log('R38 P3 JA/EN intro header navigation PASS');
+  await page.waitForURL(/\/en\/use-cases\.html$/,{timeout:12000});
+  assert.equal(await page.locator('.globalIntroBtn').innerText(),'Demos');
+  assert.equal(new URL(await page.locator('.globalIntroBtn').getAttribute('href')).pathname,'/en/use-cases.html');
+  assert.equal(await page.locator('.case').count(),5,'English worked cases must load');
+  console.log('R38 P3 JA/EN visible examples navigation PASS');
 }finally{await browser.close()}
