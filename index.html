@@ -127,8 +127,14 @@ body.communityShell #extLauncher{bottom:calc(8px + env(safe-area-inset-bottom))}
 <link rel="stylesheet" href="cloud/r76-launcher.css?v=r76p1">
 <link rel="stylesheet" href="cloud/r77-launcher.css?v=r77p1">
 <link rel="stylesheet" href="cloud/r80-no-sticky-launcher.css?v=r80p1">
+<link rel="stylesheet" href="cloud/r89-home-intro.css?v=r89p1">
 </head>
 <body data-build="R25-P4" class="homeHost">
+<section class="r89HomeIntro" id="r89HomeIntro" aria-label="Stats Makerの使い方">
+  <div class="r89HomeIntroCopy"><h1>好きなものを採点・比較しよう</h1><p>レーダー・ランキング・Tier表などのグラフを作成。すぐ下の表から始められます。</p></div>
+  <a href="/ja/use-cases.html">作例を見る</a>
+  <button type="button" aria-label="案内を閉じて採点表を広く表示" title="案内を閉じる">×</button>
+</section>
 <div id="basicRoot"><iframe id="basicFrame" title="Stats Maker"></iframe></div>
 <script>
 (() => {
@@ -190,6 +196,7 @@ if(document.body.classList.contains('communityShell'))document.getElementById('c
   </section>
 </div>
 
+<script src="cloud/r89-home-intro.js?v=r89p1"></script>
 <script type="module" src="app/src/launcher.js?v=r70imageline1"></script>
 <script type="module" src="cloud/community-home.js?v=r33analytics1"></script>
 <script src="cloud/analytics-config.js?v=r45ga4off1"></script>
