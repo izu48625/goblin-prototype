@@ -26,6 +26,14 @@ async function fetchGet(path){
  }
  return {path,status:-1,body:'',error:String(lastError)};
 }
+// R95 release gate: the deployed root is allowed to lag the GitHub main merge.
+for(let i=1;i<=24;i++){
+ const response=await fetchGet('/');
+ const h1Count=(response.body?.match(/<h1\\b/gi)||[]).length;
+ if(response.status===200&&h1Count===1){console.log('R95 deployment detected after attempt',i);break;}
+ if(i===24)throw new Error('R95 has not reached production: home H1='+h1Count+' status='+response.status);
+ await new Promise(resolve=>setTimeout(resolve,15000));
+}
 const paths=[...editorial,...publicIds.map(id=>'/work/'+id),'/work/00000000-0000-4000-8000-000000000000','/robots.txt','/sitemap.xml','/sitemap-static.xml','/sitemap-works-1.xml'];
 const records=[];
 for(let i=0;i<paths.length;i+=4){
@@ -50,7 +58,7 @@ const workSitemap=records.find(r=>r.path==='/sitemap-works-1.xml')?.body||'';
 const missingIds=publicIds.filter(id=>!workSitemap.includes(id));
 const privacy=results.find(r=>r.path==='/work/00000000-0000-4000-8000-000000000000');
 const warnings=[];
-if(rootH1>1)warnings.push('Root home has '+rootH1+' h1 elements');
+if(rootH1!==1)warnings.push('Root home expected one H1, got '+rootH1);
 if(thin.length)warnings.push('Low visible copy on '+thin.map(x=>x.path).join(','));
 if(missingIds.length)warnings.push('Not in work sitemap '+missingIds.join(','));
 if(!staticSitemap.includes('/ja/use-cases.html'))warnings.push('JA examples absent in static sitemap');
@@ -59,4 +67,4 @@ if(!sitemapIndex.includes('sitemap-static.xml'))warnings.push('Sitemap index lac
 if(!(privacy?.status===404 && /noindex/i.test(privacy?.robots||records.find(x=>x.path===privacy?.path)?.body||'')))warnings.push('Unknown work is not explicit 404 noindex');
 const metrics={editorialTotal:editorial.length,editorialOk:results.filter(r=>editorial.includes(r.path)&&r.status===200).length,publicTotal:publicIds.length,publicOk:publicRecords.length,publicWithTable:results.filter(r=>r.path.startsWith('/work/')&&r.status===200&&r.hasDataTable).length,missingIds,broken,warnings,workSitemapEntries:(workSitemap.match(/<loc>/g)||[]).length,sitemapIndexLength:sitemapIndex.length};
 console.log('R94 LIVE SUMMARY',JSON.stringify(metrics,null,2));
-if(broken.length || publicRecords.length!==publicIds.length || missingIds.length || !(privacy?.status===404))process.exitCode=1;
+if(broken.length || publicRecords.length!==publicIds.length || missingIds.length || warnings.length || !(privacy?.status===404))process.exitCode=1;
