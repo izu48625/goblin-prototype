@@ -35,6 +35,7 @@ jobs:
         run: |
           node scripts/r87-content-static-qa.mjs
           node scripts/r34-seo-edge-test.mjs
+          node scripts/r87-real-public-read-qa.mjs
           node scripts/r84-native-usecases-qa.mjs
           node scripts/r70-adsense-content-qa.mjs
           node scripts/r83-scoring-guide-qa.mjs
