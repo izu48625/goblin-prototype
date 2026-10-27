@@ -1,0 +1,38 @@
+name: R92 Home My Works navigation QA
+on:
+  pull_request:
+    paths:
+      - 'cloud/global-locale.js'
+      - 'index.html'
+      - 'scripts/r92-home-myworks-nav-qa.mjs'
+      - '.github/workflows/r92-home-myworks-nav-qa.yml'
+permissions:
+  contents: read
+concurrency:
+  group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+jobs:
+  home-myworks:
+    runs-on: ubuntu-latest
+    container:
+      image: mcr.microsoft.com/playwright:v1.56.1-noble
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Verify and build
+        run: |
+          node --check cloud/global-locale.js
+          node --check scripts/r92-home-myworks-nav-qa.mjs
+          npm run build:cloudflare
+      - name: Check Home to My Works iPhone and desktop navigation
+        run: |
+          npm install --no-save playwright@1.56.1
+          python3 -m http.server 4173 --bind 127.0.0.1 --directory dist >/tmp/r92.log 2>&1 &
+          for i in $(seq 1 30); do
+            if curl -fsS http://127.0.0.1:4173/index.html >/dev/null; then break; fi
+            sleep 1
+          done
+          BASE_URL=http://127.0.0.1:4173 node scripts/r92-home-myworks-nav-qa.mjs

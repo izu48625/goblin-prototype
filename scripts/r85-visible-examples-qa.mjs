@@ -14,7 +14,7 @@ for(const lang of ['ja','en']){
  assert(landing.includes('href="/'+lang+'/examples.html"'), 'Preserve older three graphic examples');
  assert(landing.includes('r85examples1'), 'Fresh first-load assets');
 }
-assert((await read('index.html')).includes('r85examples1'), 'Home cache should load latest shared navigation');
+assert((await read('index.html')).includes('cloud/global-locale.js?v=r92myworks1'), 'Home cache should load newest shared nav with My Works');
 for(const browserType of [chromium,webkit]){
  const browser=await browserType.launch({headless:true});
  try{
