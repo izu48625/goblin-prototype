@@ -15,11 +15,16 @@ const editorial=['/','/ja/','/en/','/discover','/ja/use-cases.html','/en/use-cas
 const textOf=html=>html.replace(/<script\b[^>]*>[\s\S]*?<\/script>/gi,' ').replace(/<style\b[^>]*>[\s\S]*?<\/style>/gi,' ').replace(/<[^>]*>/g,' ').replace(/&(?:#\d+|#x[\da-f]+|\w+);/gi,' ').replace(/\s+/g,' ').trim();
 const match=(s,re)=>re.exec(s)?.[1]||'';
 async function fetchGet(path){
- try{
- const response=await fetch(site+path,{redirect:'follow',signal:AbortSignal.timeout(18000),headers:{'Cache-Control':'no-cache'}});
- const body=await response.text();
- return {path,status:response.status,finalUrl:response.url,body,headers:response.headers};
- }catch(error){return {path,status:-1,body:'',error:String(error)}}
+ let lastError;
+ for(let attempt=1;attempt<=3;attempt++){
+  try{
+   const response=await fetch(site+path,{redirect:'follow',signal:AbortSignal.timeout(18000),headers:{'Cache-Control':'no-cache'}});
+   const body=await response.text();
+   if(response.status>=500&&attempt<3){await new Promise(r=>setTimeout(r,600*attempt));continue;}
+   return {path,status:response.status,finalUrl:response.url,body,headers:response.headers};
+  }catch(error){lastError=error; if(attempt<3)await new Promise(r=>setTimeout(r,600*attempt));}
+ }
+ return {path,status:-1,body:'',error:String(lastError)};
 }
 const paths=[...editorial,...publicIds.map(id=>'/work/'+id),'/work/00000000-0000-4000-8000-000000000000','/robots.txt','/sitemap.xml','/sitemap-static.xml','/sitemap-works-1.xml'];
 const records=[];
