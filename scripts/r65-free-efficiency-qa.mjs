@@ -23,6 +23,15 @@ function project(select,r,isOgRead=false){
     const [alias,source]=col.includes(':')?col.split(':'):[col,col];
     if(/^seo_row_\d+$/.test(alias))return [alias,snapshot.rows[Number(alias.slice(8))]?.name??null];
     if(/^seo_metric_\d+$/.test(alias))return [alias,snapshot.criteria[Number(alias.slice(11))]??null];
+    if(/^seo_scores_\d+$/.test(alias)){
+      assert.equal(source,'snapshot->rows->'+Number(alias.slice(11))+'->scores',
+        'Bounded score projection must never fetch full row or snapshot');
+      return [alias,snapshot.rows[Number(alias.slice(11))]?.scores??null];
+    }
+    if(alias==='seo_scale'){
+      assert.equal(source,'snapshot->>scale');
+      return [alias,100];
+    }
     if(source==='snapshot'&&isOgRead)return [alias,snapshot];
     assert(Object.hasOwn(r,source),'Unknown projection '+source);
     return [alias,r[source]];
@@ -62,6 +71,10 @@ try{
   assert.equal(calls.seo.length,1);
   assert(calls.seo[0].select.includes('seo_row_17:snapshot->rows->17->>name'));
   assert(calls.seo[0].select.includes('seo_metric_9:snapshot->criteria->9'));
+  assert(calls.seo[0].select.includes('seo_scores_5:snapshot->rows->5->scores'));
+  assert(!calls.seo[0].select.includes('seo_scores_6:'),'Public excerpt exceeds six rows');
+  assert(html.includes('Published rating excerpt'),'SSR should show actual authored scores');
+  assert(html.includes('>90</td>')&&html.includes('>66</td>'),'Keep original scores and distinguish missing cells');
   assert(!calls.seo[0].select.split(',').includes('snapshot'));
   res=await call('/work/'+ids.public,'HEAD');
   assert.equal(res.status,200);assert.equal(await res.text(),'');
