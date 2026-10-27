@@ -1,0 +1,43 @@
+concurrency:
+  group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
+
+name: R90 Owner Category and Duplicate Safety QA
+on:
+  pull_request:
+    paths:
+      - 'cloud/my.js'
+      - 'cloud/my.css'
+      - 'my.html'
+      - 'scripts/r90-owner-category-qa.mjs'
+      - '.github/workflows/r90-owner-category-qa.yml'
+permissions:
+  contents: read
+jobs:
+  category-owner-safety:
+    runs-on: ubuntu-latest
+    container:
+      image: mcr.microsoft.com/playwright:v1.56.1-noble
+    timeout-minutes: 18
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Compile, verify old owner controls and local build
+        run: |
+          node --check cloud/my.js
+          node --check scripts/r90-owner-category-qa.mjs
+          npm run build:cloudflare
+          test -s dist/cloud/my.js
+          test -s dist/my.html
+      - name: Run local-only browser regressions
+        run: |
+          npm install --no-save playwright@1.56.1
+          python3 -m http.server 4173 --bind 127.0.0.1 --directory dist >/tmp/r90.log 2>&1 &
+          for i in $(seq 1 30); do
+            if curl -fsS http://127.0.0.1:4173/my.html >/dev/null; then break; fi
+            sleep 1
+          done
+          BASE_URL=http://127.0.0.1:4173 node scripts/r31-myworks-simple-ui-qa.mjs
+          BASE_URL=http://127.0.0.1:4173 node scripts/r90-owner-category-qa.mjs

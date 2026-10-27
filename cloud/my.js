@@ -19,7 +19,14 @@
       loadError:'作品の読み込みに失敗しました：',
       public:'Public',unlisted:'Unlisted',private:'Private',targets:'対象',metrics:'項目',scale:'点',updated:'更新',
       visibility:'公開範囲',open:'開く',copy:'共有URL',copied:'共有URLをコピーしました。',copyFailed:'URLをコピーできませんでした。',
-      privateNoShare:'Private作品は共有URLを発行しません。',saving:'公開範囲を更新中…',saved:'公開範囲を更新しました。',saveError:'公開範囲を更新できませんでした：'
+      privateNoShare:'Private作品は共有URLを発行しません。',saving:'公開範囲を更新中…',saved:'公開範囲を更新しました。',saveError:'公開範囲を更新できませんでした：',
+      category:'カテゴリ',categorySave:'分類を保存',categorySaving:'カテゴリを保存中…',
+      categorySaved:'カテゴリを更新しました。採点・公開設定は変更していません。',
+      categoryUnchanged:'カテゴリは変更されていません。',categoryStale:'他の端末で作品が更新されています。再読込してから操作してください。',
+      categoryError:'カテゴリを更新できませんでした：',categoryUnset:'未設定',
+      categoryHelp:'カテゴリは作品の持ち主だけが変更できます。同じ採点内容の作品は確認用に表示します（自動削除しません）。',
+      duplicate:'同じ採点データあり',
+      categoryNames:{sports:'スポーツ',manga_anime:'漫画・アニメ',movie_tv:'映画・ドラマ',food:'フード',game:'ゲーム',music:'音楽',books:'本・文学',travel:'旅行・場所',tech:'テクノロジー',lifestyle:'ライフ・趣味',other:'その他'}
     },
     en:{
       brandSub:'My Works',back:'Back to editor',title:'My Published Works',
@@ -33,9 +40,44 @@
       loadError:'Could not load works: ',
       public:'Public',unlisted:'Unlisted',private:'Private',targets:'targets',metrics:'metrics',scale:'pt',updated:'Updated',
       visibility:'Visibility',open:'Open',copy:'Share URL',copied:'Share URL copied.',copyFailed:'Could not copy the URL.',
-      privateNoShare:'Private works do not expose a share URL.',saving:'Updating visibility…',saved:'Visibility updated.',saveError:'Could not update visibility: '
+      privateNoShare:'Private works do not expose a share URL.',saving:'Updating visibility…',saved:'Visibility updated.',saveError:'Could not update visibility: ',
+      category:'Category',categorySave:'Save category',categorySaving:'Saving category…',
+      categorySaved:'Category updated. Ratings and visibility are unchanged.',
+      categoryUnchanged:'Category is already up to date.',categoryStale:'This work changed on another device. Refresh and try again.',
+      categoryError:'Could not update category: ',categoryUnset:'Uncategorized',
+      categoryHelp:'Only the owner can update categories. Duplicate scoring data is highlighted for review; nothing is removed automatically.',
+      duplicate:'Same scoring data',
+      categoryNames:{sports:'Sports',manga_anime:'Manga / Anime',movie_tv:'Movies / TV',food:'Food',game:'Games',music:'Music',books:'Books',travel:'Travel / Places',tech:'Technology',lifestyle:'Lifestyle / Hobbies',other:'Other'}
     }
   };
+
+  // R90: owner-mediated classification; never infer a category or modify another creator's work.
+  const CATEGORY_KEYS=['sports','manga_anime','movie_tv','food','game','music','books','travel','tech','lifestyle','other'];
+  const categoriesAllowed=new Set(CATEGORY_KEYS);
+  function categoryKey(topic){
+    const key=String(topic?.snapshot?.metadata?.category||'');
+    return categoriesAllowed.has(key)?key:'';
+  }
+  function categoryOptions(selected){
+    const choices=[['',c().categoryUnset],...CATEGORY_KEYS.map(key=>[key,c().categoryNames[key]])];
+    return choices.map(([key,label])=>`<option value="${key}" ${selected===key?'selected':''}>${esc(label)}</option>`).join('');
+  }
+  function stableSnapshot(topic){
+    if(!topic?.snapshot||typeof topic.snapshot!=='object'||Array.isArray(topic.snapshot))return null;
+    // jsonb keys have deterministic order in PostgREST; no hashes or scores leave the browser.
+    return JSON.stringify(topic.snapshot);
+  }
+  function duplicatesAmongOwnedWorks(){
+    const seen=new Map(),matches=new Set();
+    for(const topic of state.works){
+      const fingerprint=stableSnapshot(topic);
+      if(!fingerprint)continue;
+      const first=seen.get(fingerprint);
+      if(first){matches.add(first);matches.add(topic.id)}
+      else seen.set(fingerprint,topic.id);
+    }
+    return matches;
+  }
 
   function $(id){return document.getElementById(id)}
   function c(){return copy[state.locale]||copy.ja}
@@ -73,6 +115,7 @@
     $('emptyTitle').textContent=c().empty;
     $('emptyHelp').textContent=c().emptyHelp;
     $('emptyBackBtn').textContent=c().openStats;
+    $('r90CategoryHelp').textContent=c().categoryHelp;
     renderWorks();
   }
   function setLocale(next){
@@ -103,7 +146,7 @@
     return {
       targets:Array.isArray(snap.rows)?snap.rows.length:0,
       metrics:Array.isArray(snap.criteria)?snap.criteria.length:0,
-      category:String(snap?.metadata?.category||'other').replace(/_/g,' ')
+      category:categoryKey(topic)?c().categoryNames[categoryKey(topic)]:c().categoryUnset
     };
   }
 
@@ -125,6 +168,7 @@
     }
 
     empty.classList.add('hidden'); status.classList.add('hidden'); grid.classList.remove('hidden');
+    const duplicated=duplicatesAmongOwnedWorks();
     grid.innerHTML=list.map(topic=>{
       const stats=workStats(topic);
       const vis=String(topic.visibility||'private');
@@ -135,6 +179,7 @@
         <div class="workTop">
           <span class="visibilityBadge ${esc(vis)}">${esc(vis)}</span>
           <span class="metaChip">${esc(stats.category)}</span>
+          ${duplicated.has(topic.id)?`<span class="metaChip r90Duplicate">${esc(c().duplicate)}</span>`:''}
         </div>
         <div class="workTitle">${esc(topic.title||'Untitled')}</div>
         <div class="workDesc">${esc(description||'—')}</div>
@@ -144,6 +189,13 @@
           <span class="metaChip">${Number(topic.score_scale||100)} ${esc(c().scale)}</span>
         </div>
         <div class="workDate">${esc(c().updated)} ${esc(dateText(updated))}</div>
+        <div class="r90CategoryControls">
+          <label for="r90-cat-${esc(topic.id)}">${esc(c().category)}</label>
+          <select id="r90-cat-${esc(topic.id)}" class="r90CategorySelect" data-category-for="${esc(topic.id)}">
+            ${categoryOptions(categoryKey(topic))}
+          </select>
+          <button class="btn" type="button" data-save-category="${esc(topic.id)}">${esc(c().categorySave)}</button>
+        </div>
         <div class="workControls">
           <select class="visibilitySelect" data-visibility-for="${esc(topic.id)}" aria-label="${esc(c().visibility)}">
             <option value="public" ${vis==='public'?'selected':''}>Public</option>
@@ -173,7 +225,7 @@
     if(!sb||!state.user){state.works=[];state.loading=false;renderWorks();return;}
     state.loading=true; renderWorks();
     const {data,error}=await sb.from('topics')
-      .select('id,title,description,visibility,language_code,score_scale,published_at,snapshot_updated_at,snapshot,show_community,allow_ratings')
+      .select('id,title,description,visibility,language_code,score_scale,published_at,snapshot_updated_at,updated_at,snapshot,show_community,allow_ratings')
       .eq('owner_id',state.user.id)
       .order('snapshot_updated_at',{ascending:false,nullsFirst:false})
       .limit(200);
@@ -225,6 +277,45 @@
     }
   }
 
+  async function updateCategory(topicId){
+    if(!sb||!state.user)return;
+    const work=state.works.find(item=>item.id===topicId);
+    const select=document.querySelector(`[data-category-for="${CSS.escape(topicId)}"]`);
+    const button=document.querySelector(`[data-save-category="${CSS.escape(topicId)}"]`);
+    if(!work||!select||!button)return;
+    const next=select.value;
+    if(!categoriesAllowed.has(next)){setStatus(c().categoryError+c().categoryUnset,'error');return}
+    if(categoryKey(work)===next){setStatus(c().categoryUnchanged);return}
+    button.disabled=true;setStatus(c().categorySaving);
+    try{
+      // Fetch fresh owner-scoped snapshot before the edit; never use a stale local copy.
+      const {data:fresh,error:readError}=await sb.from('topics')
+        .select('id,snapshot,updated_at').eq('id',topicId).eq('owner_id',state.user.id).single();
+      if(readError)throw readError;
+      if(!fresh||!fresh.snapshot||Array.isArray(fresh.snapshot)||typeof fresh.snapshot!=='object')
+        throw Error('Invalid topic snapshot');
+      if(fresh.updated_at!==work.updated_at||JSON.stringify(fresh.snapshot)!==stableSnapshot(work)){
+        await loadWorks();setStatus(c().categoryStale,'error');return;
+      }
+      // Restrict the mutation to snapshot metadata plus its update timestamp.
+      // The original title, scores, criteria, lineage, publication state and shares persist.
+      const snapshot={...fresh.snapshot,metadata:{...(fresh.snapshot.metadata||{}),category:next}};
+      const {data:saved,error:writeError}=await sb.from('topics')
+        .update({snapshot,snapshot_updated_at:new Date().toISOString()})
+        .eq('id',topicId).eq('owner_id',state.user.id)
+        .eq('updated_at',fresh.updated_at)
+        .select('id,snapshot,snapshot_updated_at,updated_at')
+        .maybeSingle();
+      if(writeError)throw writeError;
+      if(!saved){await loadWorks();setStatus(c().categoryStale,'error');return}
+      work.snapshot=saved.snapshot;
+      work.snapshot_updated_at=saved.snapshot_updated_at;
+      work.updated_at=saved.updated_at;
+      renderWorks();setStatus(c().categorySaved,'ok');
+    }catch(error){setStatus(c().categoryError+(error?.message||String(error)),'error')}
+    finally{button.disabled=false}
+  }
+
   async function copyShare(topicId){
     const work=state.works.find(item=>item.id===topicId);
     if(!work||work.visibility==='private'){setStatus(c().privateNoShare,'error');return;}
@@ -244,6 +335,8 @@
   $('worksGrid').addEventListener('click',event=>{
     const save=event.target.closest('[data-save-visibility]');
     if(save){updateVisibility(save.dataset.saveVisibility);return;}
+    const saveCategory=event.target.closest('[data-save-category]');
+    if(saveCategory){updateCategory(saveCategory.dataset.saveCategory);return;}
     const copyBtn=event.target.closest('[data-copy-share]');
     if(copyBtn)copyShare(copyBtn.dataset.copyShare);
   });
