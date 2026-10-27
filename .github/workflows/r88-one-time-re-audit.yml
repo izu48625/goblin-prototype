@@ -1,0 +1,31 @@
+name: R88 Temporary Read-Only Reaudit
+on:
+  pull_request:
+    paths:
+      - 'scripts/r88-one-time-re-audit.mjs'
+      - '.github/workflows/r88-one-time-re-audit.yml'
+permissions:
+  contents: read
+jobs:
+  adsense-readonly:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with: {node-version: '22'}
+      - name: Generate static site, install browser engines
+        run: |
+          npm run build:cloudflare
+          npm install --no-save playwright@1.56.1
+          npx playwright install --with-deps chromium webkit
+      - name: Serve the actual source assets locally without data writes
+        run: |
+          python3 -m http.server 4173 --bind 127.0.0.1 --directory dist >/tmp/r88.log 2>&1 &
+          for i in $(seq 1 30); do
+            if curl -fsS http://127.0.0.1:4173/ja/ >/dev/null; then exit 0; fi
+            sleep 1
+          done
+          exit 1
+      - name: Read-only external HTTP + isolated mobile/desktop UX audit
+        run: node scripts/r88-one-time-re-audit.mjs
