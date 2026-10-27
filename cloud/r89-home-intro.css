@@ -34,3 +34,14 @@ body.communityShell .r89HomeIntro{display:none!important}
 
 /* Dismissal must beat the narrower mobile rules at every breakpoint. */
 body.hasGlobalLocaleBar.homeHost:not(.communityShell).r89IntroDismissed #basicRoot{top:44px}
+
+/* R89b: avoid English-label clipping on 320px devices and follow theme. */
+@media(max-width:680px){
+ .r89HomeIntroCopy h1{min-width:0;flex:1;overflow:hidden;text-overflow:ellipsis}
+}
+html[data-sm-theme="dark"] body.homeHost .r89HomeIntro{
+ background:#172232;color:#eef4fc;border-bottom-color:#3b4d64
+}
+html[data-sm-theme="dark"] body.homeHost .r89HomeIntro p{color:#b6c4d6}
+html[data-sm-theme="dark"] body.homeHost .r89HomeIntro a{color:#9bd5ef}
+html[data-sm-theme="dark"] body.homeHost .r89HomeIntro button{color:#d1deed}
