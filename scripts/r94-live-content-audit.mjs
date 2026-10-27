@@ -29,7 +29,7 @@ async function fetchGet(path){
 // R95 release gate: the deployed root is allowed to lag the GitHub main merge.
 for(let i=1;i<=24;i++){
  const response=await fetchGet('/');
- const h1Count=(response.body?.match(/<h1\\b/gi)||[]).length;
+ const h1Count=(response.body||'').split('<h1').length-1;
  if(response.status===200&&h1Count===1){console.log('R95 deployment detected after attempt',i);break;}
  if(i===24)throw new Error('R95 has not reached production: home H1='+h1Count+' status='+response.status);
  await new Promise(resolve=>setTimeout(resolve,15000));
