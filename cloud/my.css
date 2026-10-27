@@ -80,3 +80,13 @@ a{color:inherit}
   .authHealthGrid{display:grid;grid-template-columns:1fr 1fr}
   .healthChip:last-child{grid-column:1/-1}
 }
+
+/* R90: compact owner-only editorial controls; no change to Public/Unlisted privacy. */
+.r90CategoryHelp{font-size:10px;line-height:1.5;color:var(--muted);margin:10px 0 0}
+.workTop{flex-wrap:wrap;justify-content:flex-start}
+.r90Duplicate{color:#e4c790;border-color:#67502a;background:#251e12}
+.r90CategoryControls{display:grid;grid-template-columns:auto minmax(0,1fr) auto;gap:7px;align-items:center;margin-top:10px}
+.r90CategoryControls label{font-size:10px;color:var(--muted);font-weight:750}
+.r90CategoryControls .btn{min-height:37px;white-space:nowrap;font-size:10px}
+.r90CategoryControls select{max-width:100%}
+@media(max-width:390px){.r90CategoryControls{grid-template-columns:1fr auto}.r90CategoryControls label{grid-column:1/-1}}
