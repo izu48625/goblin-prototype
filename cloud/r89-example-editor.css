@@ -1,0 +1,7 @@
+.r89ExampleAction{display:flex;flex-wrap:wrap;align-items:center;gap:8px 14px;margin:11px 0 4px}
+.r89EditCopy{border:1px solid #285e68;background:#285e68;color:#fff;border-radius:6px;cursor:pointer;
+ font:800 13px/1.4 system-ui,-apple-system,sans-serif;padding:10px 13px;min-height:42px}
+.r89EditCopy:hover{background:#174c58}
+.r89EditCopy:focus-visible{outline:3px solid #aee8da;outline-offset:2px}
+.r89EditCopy:disabled{opacity:.65;cursor:wait}
+.r89ExampleAction small{font-size:11px;line-height:1.55;color:#607074;max-width:320px}
