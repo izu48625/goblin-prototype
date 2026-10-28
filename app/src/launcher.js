@@ -12,7 +12,7 @@ const frame=$("basicFrame"),backdrop=$("extBackdrop");
 const communityTopicId=new URLSearchParams(location.search).get('community')||'';
 const communityMode=/^[0-9a-f]{8}-[0-9a-f]{4}-[1-8][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(communityTopicId);
 let freshHomeHandled=false;
-let language=localStorage.getItem("statsMakerV2Language")||localStorage.getItem("statsMaker.locale")||((navigator.language||"ja").toLowerCase().startsWith("ja")?"ja":"en");
+let language=localStorage.getItem("statsMaker.locale")||localStorage.getItem("statsMakerV2Language")||((navigator.language||"en").toLowerCase().startsWith("ja")?"ja":"en");
 
 function setLanguage(next){
   language=next==="en"?"en":"ja";
@@ -61,7 +61,7 @@ function openExtension(type){
     if(communityMode){
       if(!sheet?.sourceTopicId||sheet.sourceTopicId!==communityTopicId||
         !sheet.rows.some(r=>r.scores.some(Number.isFinite)))
-        throw new Error('採点してから「データやグラフ」を開いてください。');
+        throw new Error(language==="ja"?'採点してから「データやグラフ」を開いてください。':'Please enter your scores before opening Visual Tools.');
     }
     if(sheet?.id)project.settings.sourceSheetId=sheet.id;
     syncSourceProject(project,{},sheet);
