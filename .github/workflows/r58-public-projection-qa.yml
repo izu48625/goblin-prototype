@@ -39,7 +39,8 @@ jobs:
           node --check scripts/r38-p4-live-palette-qa.mjs
           npm run build:cloudflare
           test -s dist/cloud/public.js
-          grep -q 'r58p1projection1' dist/public.html
+          grep -q 'cloud/public.js?v=' dist/public.html
+          test -s dist/cloud/public-extensions.js
           test -s dist/ads.txt
           grep -Fx 'google.com, pub-2734957009365610, DIRECT, f08c47fec0942fa0' dist/ads.txt
       - name: Install isolated browser QA
