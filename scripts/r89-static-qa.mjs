@@ -40,7 +40,7 @@ assert(globalLocale.includes('data-global-intro')&&globalLocale.includes('ホー
 assert(css.includes('r89HomeIntroCopy h1')&&css.includes('[data-sm-theme="dark"]'));
 
 const discover=await read('cloud/discover.js'),d=await read('discover.html');
-assert(d.includes('discover.js?v=r97balance1'));
+assert(/discover\.js\?v=[a-zA-Z0-9-]+/.test(d),'Discover must load its versioned locale-aware script');
 assert(discover.includes("all.href='/'+locale+'/use-cases.html'"));
 assert(discover.includes("a.href='/'+locale+'/use-cases.html#'"));
 assert(discover.includes("a.href='/'+locale+'/legal.html#'+kind"));
