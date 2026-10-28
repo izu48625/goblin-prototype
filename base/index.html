@@ -19,7 +19,7 @@
 <link rel="stylesheet" href="css/r79-quiet-interface.css?v=r79p1">
 <link rel="stylesheet" href="css/r80-scoring-first.css?v=r80p1">
 <link rel="stylesheet" href="css/r81-clear-settings.css?v=r81p1">
-<link rel="stylesheet" href="css/r82-community-controls-guard.css?v=r110lightactions1">
+<link rel="stylesheet" href="css/r82-community-controls-guard.css?v=r112fit-scale-palette1">
 <style id="r111-safari-light-row-actions">
 /* Safari-safe inline fallback for the rightmost row controls in the light editor. */
 body:not(.dark-mode) #scoreTable td.deleteCell,
@@ -33,13 +33,32 @@ body:not(.dark-mode) #scoreTable td.deleteCell .progressPill{
   background:#fff!important;color:#455258!important;border:1px solid #d9d5ce!important
 }
 </style>
+<style id="r112-fit-scale-fallback">
+/* Keep the Fit View row-number column light on mobile Safari. */
+body:not(.dark-mode) #fitTable thead th:first-child,
+body:not(.dark-mode) #fitTable tbody td:first-child{
+  background:#f5f3ee!important;color:#374047!important;border-color:#dedbd5!important
+}
+body:not(.dark-mode) #fitTable .fitThumb{
+  background:#f0efea!important;color:#60696e!important;border:1px solid #d3d0c8!important
+}
+.sheetPanel .scoreScaleInline{
+  display:flex;align-items:center;justify-content:flex-end;gap:7px;
+  min-height:25px;padding:1px 6px 2px;margin:0;
+  color:#60696e;font-size:11px;line-height:1.3
+}
+.sheetPanel .scoreScaleInline strong{
+  background:#f4f1ea;color:#7d4a3b;border:1px solid #ddd5c8;
+  border-radius:999px;padding:3px 9px;font-size:11px;font-weight:850;white-space:nowrap
+}
+</style>
 <style id="r107-safari-score-palette">
 /* Inline fallback avoids stale external stylesheets in iOS Safari. */
 body:not(.score-colors-off) #scoreTable td.scoreCell.heat-ss,body:not(.score-colors-off) #scoreTable td.avgCell.heat-ss{background:#e8b9b2!important}
 body:not(.score-colors-off) #scoreTable td.scoreCell.heat-s,body:not(.score-colors-off) #scoreTable td.avgCell.heat-s{background:#edc9b9!important}
 body:not(.score-colors-off) #scoreTable td.scoreCell.heat-a,body:not(.score-colors-off) #scoreTable td.avgCell.heat-a{background:#f1d9c4!important}
-body:not(.score-colors-off) #scoreTable td.scoreCell.heat-b,body:not(.score-colors-off) #scoreTable td.avgCell.heat-b{background:#f5e8ca!important}
-body:not(.score-colors-off) #scoreTable td.scoreCell.heat-c,body:not(.score-colors-off) #scoreTable td.avgCell.heat-c{background:#f3e6c7!important}
+body:not(.score-colors-off) #scoreTable td.scoreCell.heat-b,body:not(.score-colors-off) #scoreTable td.avgCell.heat-b{background:#efd2a6!important}
+body:not(.score-colors-off) #scoreTable td.scoreCell.heat-c,body:not(.score-colors-off) #scoreTable td.avgCell.heat-c{background:#f8edcc!important}
 body:not(.score-colors-off) #scoreTable td.scoreCell.heat-d,body:not(.score-colors-off) #scoreTable td.avgCell.heat-d{background:#e3edc9!important}
 body:not(.score-colors-off) #scoreTable td.scoreCell.heat-e,body:not(.score-colors-off) #scoreTable td.avgCell.heat-e{background:#d1dce9!important}
 body:not(.score-colors-off) #scoreTable td.scoreCell:not([class*="heat-"]){background:#fff!important}
@@ -145,6 +164,8 @@ body:not(.score-colors-off) #scoreTable td.scoreCell.heat-zero,body:not(.score-c
             <button id="r80VisualsBtn" class="btn small r80-mobile-tool" type="button" aria-label="データやグラフを開く">データやグラフ</button>
           </div>
         </div>
+      <div class="scoreScaleInline editOnly" role="status" aria-live="polite"><span data-i18n="scoring.scoreMode">点数モード</span><strong id="visibleScaleBadge">100点満点</strong></div>
+
         <div id="r80OptionsPanel" class="r80-options-panel hidden" role="group" aria-label="採点の設定">
           <div class="r81-options-head"><strong id="r81OptionsTitle">表示・採点の設定</strong><button id="r81OptionsClose" type="button" aria-label="設定を閉じる">閉じる ×</button></div>
           <button id="r80ScaleAction" type="button"><span class="r81-option-title">点数の設定</span><span id="r80ScaleStatus" class="r81-option-value">100点満点</span></button>
@@ -478,7 +499,7 @@ body:not(.score-colors-off) #scoreTable td.scoreCell.heat-zero,body:not(.score-c
 <script src="../cloud/publish-model.js?v=r25p4"></script>
 <script src="../cloud/community-gateway.js?v=r26p3"></script>
 <script src="js/i18n.js?v=r106palette1"></script>
-<script src="js/app.js?v=r38p15scores1"></script>
+<script src="js/app.js?v=r112fit-scale-palette1"></script>
 <script src="js/r80-scoring-first.js?v=r80p1"></script>
 <script src="js/publish-guard.js?v=r25p4"></script>
 <script>
