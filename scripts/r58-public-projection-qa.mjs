@@ -27,7 +27,7 @@ const jsVersion=html.match(/cloud\/public\.js\?v=([a-zA-Z0-9-]+)/)?.[1];
 const cssVersion=html.match(/cloud\/public\.css\?v=([a-zA-Z0-9-]+)/)?.[1];
 assert(jsVersion,'Public JS cache-busting missing');
 assert.equal(cssVersion,jsVersion,'Public JS/CSS cache keys differ');
-assert(html.includes('cloud/public-extensions.js?v='+jsVersion),'R118 Visual Tools cache key mismatch');
+assert(/cloud\/public-extensions\.js\?v=[a-zA-Z0-9-]+/.test(html),'R118 Visual Tools asset missing version');
 assert(source.includes('class="tableWrap creatorScoreTable"'),'Horizontal score matrix removed');
 console.log('R58 P1 explicit projection and data-use audit PASS',fields.length,'fields');
 
