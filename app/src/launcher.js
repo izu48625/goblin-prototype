@@ -16,7 +16,7 @@ const EXTENSIONS=[
   ["creative","image-line","Image Line","各項目に画像を並べた折れ線グラフ","Line chart over one background image per item"]
 ];
 const UI={
-  ja:{launcherTitle:"拡張機能",launcherSub:"グラフ・カードを作る",pickerTitle:"拡張機能",pickerDesc:"基本表の対象・画像・評価項目・点数をそのまま使います。",groups:{popular:"人気",compare:"比較",ranking:"ランキング",number:"数値表示",creative:"画像グラフ"}},
+  ja:{launcherTitle:"データやグラフ",launcherSub:"グラフ・カードを作る",pickerTitle:"データやグラフ",pickerDesc:"基本表の対象・画像・評価項目・点数をそのまま使います。",groups:{popular:"人気",compare:"比較",ranking:"ランキング",number:"数値表示",creative:"画像グラフ"}},
   en:{launcherTitle:"Visual Tools",launcherSub:"Create charts & cards",pickerTitle:"Visual Tools",pickerDesc:"Uses names, images, metrics and scores from your current sheet.",groups:{popular:"POPULAR",compare:"COMPARE",ranking:"RANKING",number:"SHOW A NUMBER",creative:"IMAGE CHART"}}
 };
 const $=id=>document.getElementById(id);
@@ -73,7 +73,7 @@ function openExtension(type){
     if(communityMode){
       if(!sheet?.sourceTopicId||sheet.sourceTopicId!==communityTopicId||
         !sheet.rows.some(r=>r.scores.some(Number.isFinite)))
-        throw new Error('採点してから拡張機能を開いてください。');
+        throw new Error('採点してから「データやグラフ」を開いてください。');
     }
     if(sheet?.id)project.settings.sourceSheetId=sheet.id;
     syncSourceProject(project,{},sheet);
@@ -90,7 +90,7 @@ function openExtension(type){
     location.href=window.SM_AD_PREVIEW_NAV?.url(editorUrl)||editorUrl;
   }catch(error){
     console.error(error);
-    alert((language==="ja"?"拡張機能を開けませんでした：":"Could not open visual tool: ")+(error?.message||error));
+    alert((language==="ja"?"データやグラフを開けませんでした：":"Could not open visual tool: ")+(error?.message||error));
   }
 }
 $("extLauncher").addEventListener("click",()=>backdrop.classList.remove("hidden"));
