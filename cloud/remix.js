@@ -29,7 +29,7 @@
       id:makeId(),
       // The copied scoring sheet keeps the creator's exact public title.
       // Its description belongs to the original, not to the new scorer.
-      title:String(topic.title||'').trim(),
+      title:String(topic.title||'').replace(/(?:\s*[（(]\s*(?:Remix|Copy|コピー)\s*[)）])+\s*$/gi,'').trim(),
       desc:'',
       cols,
       rows,
