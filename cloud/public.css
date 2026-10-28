@@ -330,3 +330,18 @@ th:first-child,td:first-child{background:#f8f7f4;color:#292f35}
 .publicFooter,.publicFooter a{color:#626e76}
 .tableWrap{scrollbar-color:#c8c5bd #f7f6f2}
 .toast{background:#fff;color:#30383e;border-color:#d5d1c9;box-shadow:0 12px 30px #0002}
+
+/* R104: light public navigation and readable helper notes */
+html[data-sm-theme] .globalLocaleBar,html[data-sm-theme] body .globalLocaleBar{background:#f7f6f2!important;color:#30383e!important;border-color:#dedbd3!important}
+html[data-sm-theme] .globalLocaleBar :is(.globalHomeBtn,.globalDiscoverBtn,.globalIntroBtn,.globalSupportMenu>summary){background:#fff!important;color:#30383e!important;border-color:#d6d3cc!important}
+html[data-sm-theme] .globalLocaleBar .globalLocaleSwitch{background:#fff!important;border-color:#d6d3cc!important}
+html[data-sm-theme] .globalLocaleBar .globalLocaleSwitch button{color:#55616a!important}
+html[data-sm-theme] .globalLocaleBar .globalLocaleSwitch button.active{background:#b85c43!important;color:#fff!important}
+.remixNotice,.remixNotice b,.remixNotice span,.notice b,.notice span{color:#5b646b!important}
+.remixNotice{background:#f8f7f4!important;border-color:#dedbd3!important}
+.scoreColorSwitch{display:inline-flex;align-items:center;gap:5px;margin-left:auto;font-size:11px;font-weight:700;color:#4c5860;white-space:nowrap}
+.scoreColorSwitch input{accent-color:#b85c43;width:15px;height:15px}
+.creatorScoreTable td[data-score-value]{color:#293139}
+.creatorScoreTable td[data-score-value="10"],.creatorScoreTable td[data-score-value="100"]{color:#167b55}
+body:not(.publicScoreColorsOff) .creatorScoreTable td[data-score-value]{color:var(--score-ink,#293139)}
+body.publicScoreColorsOff .creatorScoreTable td[data-score-value]{color:#293139!important;background:#fff!important}
