@@ -27,9 +27,10 @@
 
     return {
       id:makeId(),
-      // Prevent repeated "(Remix)" suffixes when copying a copy.
-      title:(String(topic.title||'').replace(/(?:\s*[（(]\s*(?:Remix|Copy|コピー)\s*[)）])+\s*$/gi,'').trim()||String(topic.title||'').trim())+(locale==='ja'?'（コピー）':' (Copy)'),
-      desc:topic.description||'',
+      // The copied scoring sheet keeps the creator's exact public title.
+      // Its description belongs to the original, not to the new scorer.
+      title:String(topic.title||'').trim(),
+      desc:'',
       cols,
       rows,
       sortKey:null,sortDesc:true,rankMetric:'avg',compare:[],compareView:'radar',
