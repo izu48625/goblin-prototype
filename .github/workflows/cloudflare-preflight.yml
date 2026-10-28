@@ -6,6 +6,7 @@ on:
       - "index.html"
       - "base/**"
       - "app/**"
+      - "scripts/r118-public-visuals-qa.mjs"
       - "cloud/**"
       - "css/**"
       - "js/**"
@@ -103,6 +104,9 @@ jobs:
           node --check scripts/r30-storage-and-max-data-qa.mjs
           node --check scripts/r30-home-corrupt-recovery-qa.mjs
           node --check app/src/launcher.js
+          node --check cloud/public-extensions.js
+          node --check app/src/extension-catalog.js
+          node --check scripts/r118-public-visuals-qa.mjs
       - name: Cloudflare-only OG PNG tests
         run: node --test tests/og-image.test.mjs
       - name: R26 edge guard test
@@ -124,6 +128,8 @@ jobs:
         run: node scripts/r29-source-link-safety-test.mjs
       - name: R30 fail-closed chart persistence and max 40x10 data
         run: node scripts/r30-storage-and-max-data-qa.mjs
+      - name: R118 Public Visual Tools creator snapshot regression
+        run: node scripts/r118-public-visuals-qa.mjs
       - name: Build static bundle
         run: npm run build:cloudflare
       - name: Verify required assets
