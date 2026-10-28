@@ -7,7 +7,7 @@ import {exportPreview,exportProjectJSON,readProjectJSON,isIOS} from "../core/exp
 import {createImageManager} from "./image-editor.js";
 import {createDataImport} from "./data-import.js";
 import {createSpreadsheetEditor} from "./spreadsheet-editor.js";
-import {getSourceModel,getMetricOptions,getCriterionOptions,getSubjectOptions,syncSourceProject} from "../core/source-sync.js?v=r29source1";
+import {getSourceModel,getMetricOptions,getCriterionOptions,getSubjectOptions,syncSourceProject} from "../core/source-sync.js?v=r118public1";
 
 const $=id=>document.getElementById(id);
 const params=new URLSearchParams(location.search);
@@ -477,7 +477,9 @@ function sourceInfoBlock(model){
 function buildLinkedDataPanel(p,model){
   const frag=document.createDocumentFragment();
 
-  const source=section("基本表と連動");
+  const source=section(p.settings?.publicSourceSheet
+    ?(getLanguage()==="ja"?"公開作品の採点データ":"Published creator scores")
+    :"基本表と連動");
   source.appendChild(sourceInfoBlock(model));
   frag.appendChild(source);
 
