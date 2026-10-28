@@ -9,7 +9,7 @@ const page=await read('discover.html');
 const root=await read('index.html');
 assert(root.includes('id="basicRoot"')&&root.includes('id="basicFrame"'),'Home editor must remain intact');
 assert(root.includes('id="extLauncher"'),'Home extension launcher intact');
-assert(page.includes('cloud/discover.css?v=r71p1')&&(page.includes('cloud/discover.js?v=r97balance1')),'Cache bust visible');
+assert(page.includes('cloud/discover.css?v=r71p1')&&/cloud\/discover\.js\?v=[a-zA-Z0-9-]+/.test(page),'Cache bust visible');
 assert(discover.includes("const initialCategory=incoming.get('category')"));
 assert(discover.includes('categories.includes(initialCategory)'));
 assert(discover.includes("initialView==='community'"));

@@ -28,6 +28,14 @@ export function readBaseLibrary(){
 
 export function getSourceSheet(project,explicitSheet=null){
   if(explicitSheet)return explicitSheet;
+  // Public visualizations are independent copies of creator scores. Never
+  // fall back to this viewer's Home sheet, even if the embedded source is bad.
+  if(project?.settings && Object.prototype.hasOwnProperty.call(project.settings,'publicSourceSheet')){
+    const sheet=project.settings.publicSourceSheet;
+    return sheet && typeof sheet==='object' &&
+      Array.isArray(sheet.rows) && sheet.rows.length<=40 &&
+      Array.isArray(sheet.cols) && sheet.cols.length<=10 ? sheet : null;
+  }
   // Community graph snapshots must never rebind to the Home active sheet.
   if(project?.settings?.communitySnapshot)return null;
 
@@ -285,6 +293,8 @@ function syncMetricItems(project,model,key,rawIndices){
       sourceRawIndex:item.sourceRawIndex,
       name:item.name,
       value:item.value,
+      imageData:item.imageData||"",
+      imageRef:item.imageRef||null,
       tier:""
     }));
     project.settings.mode="auto";

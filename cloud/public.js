@@ -438,6 +438,7 @@
             ?`<a id="communityRateLink" class="actionBtn communityRate" href="index.html?community=${encodeURIComponent(id)}&v=r27std1">${ja?'Communityで採点する':'Rate in Community'}</a>`
             :''}
           <button id="remixBtn" class="actionBtn remix">${ja?'コピーして採点する':'Copy & rate'}<span class="actionCount">${remixCount}</span></button>
+          <button id="visualToolsBtn" class="actionBtn visualTools" type="button">${ja?'データやグラフ':'Visual Tools'}</button>
           <button id="shareBtn" class="actionBtn ghost">${ja?'URL共有':'Share URL'}</button>
           <button id="shareImageBtn" class="actionBtn shareImage">${ja?'画像で共有':'Share Image'}</button>
           ${isOwner?`<button id="ownerManageBtn" class="actionBtn owner">${ja?'編集・公開設定':'Edit / Publish settings'}</button>`:''}
@@ -518,6 +519,16 @@
         work_code:String(id).slice(0,8).toLowerCase()
       });
     }
+
+    // R118: graph creation uses published creator scores and a local-only
+    // snapshot. Neither original topic nor Community scores are mutated.
+    window.SM_PUBLIC_VISUAL_SOURCE={
+      id:data.id,title:data.title,description:data.description||'',
+      rows,criteria,imageUrls:targetImageUrls,scale,weighted,locale:ja?'ja':'en'
+    };
+    window.dispatchEvent(new Event('statsmaker:public-visual-ready'));
+    document.getElementById('visualToolsBtn').onclick=()=>
+      window.dispatchEvent(new Event('statsmaker:open-public-visuals'));
 
     document.getElementById('remixBtn').onclick=()=>{
       try{
