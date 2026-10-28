@@ -130,10 +130,10 @@
   function c(){return copy[state.locale]||copy.ja}
   function detectLocale(){
     const urlLang=new URLSearchParams(location.search).get('lang');
-    if(urlLang)return String(urlLang).toLowerCase().startsWith('en')?'en':'ja';
+    if(urlLang)return String(urlLang).toLowerCase().startsWith('ja')?'ja':'en';
     const stored=localStorage.getItem(LOCALE_KEY);
-    if(stored)return String(stored).toLowerCase().startsWith('en')?'en':'ja';
-    return String(navigator.language||'ja').toLowerCase().startsWith('en')?'en':'ja';
+    if(stored)return String(stored).toLowerCase().startsWith('ja')?'ja':'en';
+    return String(navigator.language||'en').toLowerCase().startsWith('ja')?'ja':'en';
   }
   function esc(value){return String(value??'').replace(/[&<>"']/g,ch=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[ch]))}
   function setStatus(message='',kind=''){
