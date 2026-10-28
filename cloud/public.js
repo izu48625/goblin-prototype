@@ -534,6 +534,8 @@
       try{
         const sheet=window.SM_REMIX.buildSheet(data,snap,dbCriteria,items,ja?'ja':'en');
         window.SM_REMIX.saveSheet(sheet);
+        // One-time navigation intent: a copied Home URL must not reopen this sheet.
+        try{sessionStorage.setItem('statsMaker:openRemix',sheet.id)}catch{}
         toast(ja?'採点用のコピーを作りました。':'Scoring copy created.');
         setTimeout(()=>{const target='index.html?remixed=1&v=r25p3';location.href=window.SM_AD_PREVIEW_NAV?.url(target)||target},500);
       }catch(e){toast((ja?'Remixに失敗しました：':'Remix failed: ')+(e?.message||e))}
