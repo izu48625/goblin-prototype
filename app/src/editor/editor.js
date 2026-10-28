@@ -108,10 +108,32 @@ function fitZoomToStage(){
   const stage=$("canvasStage");
   const p=current();
   if(!stage||!stage.clientWidth||!stage.clientHeight)return;
-  const pad=36;
-  const fitW=(stage.clientWidth-pad)/p.canvas.width;
-  const fitH=(stage.clientHeight-pad)/p.canvas.height;
-  zoom=Math.max(.18,Math.min(.82,fitW,fitH));
+  if(!mobileQuery.matches){
+    const pad=36;
+    const fitW=(stage.clientWidth-pad)/p.canvas.width;
+    const fitH=(stage.clientHeight-pad)/p.canvas.height;
+    zoom=Math.max(.18,Math.min(.82,fitW,fitH));
+    return;
+  }
+  // Mobile: measure the unobscured canvas space, excluding the fixed bottom
+  // tabs AND stage padding. Using only clientHeight made a fitted canvas
+  // overflow below the Safari controls even though it said "Fit".
+  const css=getComputedStyle(stage);
+  const left=parseFloat(css.paddingLeft)||0;
+  const right=parseFloat(css.paddingRight)||0;
+  const top=parseFloat(css.paddingTop)||0;
+  const bottom=parseFloat(css.paddingBottom)||0;
+  const rect=stage.getBoundingClientRect();
+  const tabTop=document.querySelector(".mobile-bottom-tabs")?.getBoundingClientRect().top;
+  const visibleBottom=Number.isFinite(tabTop)?Math.min(rect.bottom,tabTop):rect.bottom;
+  const usableW=Math.max(1,stage.clientWidth-left-right-12);
+  const usableH=Math.max(1,Math.min(
+    stage.clientHeight-top-bottom-10,
+    visibleBottom-rect.top-top-12
+  ));
+  const fitW=usableW/p.canvas.width;
+  const fitH=usableH/p.canvas.height;
+  zoom=Math.max(.08,Math.min(1,fitW,fitH));
 }
 
 async function renderPreview(){
@@ -125,7 +147,19 @@ async function renderPreview(){
   shell.style.width=`${p.canvas.width}px`;
   shell.style.height=`${p.canvas.height}px`;
   shell.style.transform=`scale(${zoom})`;
-  shell.style.margin=`${-(p.canvas.height*(1-zoom))/2}px ${-(p.canvas.width*(1-zoom))/2}px`;
+  const fitBox=$("canvasFitBox");
+  if(mobileQuery.matches && fitBox){
+    // The wrapper occupies the actual transformed width/height. No negative
+    // margins, vertical centering, or hidden half-canvas on small screens.
+    fitBox.style.width=`${p.canvas.width*zoom}px`;
+    fitBox.style.height=`${p.canvas.height*zoom}px`;
+    shell.style.margin="0";
+    shell.style.transformOrigin="top left";
+  }else{
+    if(fitBox){fitBox.style.width="";fitBox.style.height="";}
+    shell.style.transformOrigin="center center";
+    shell.style.margin=`${-(p.canvas.height*(1-zoom))/2}px ${-(p.canvas.width*(1-zoom))/2}px`;
+  }
 
   const target=$("previewRoot");
   target.setAttribute("style",cssVars());
@@ -2023,6 +2057,10 @@ async function doExport(){
 function fitPreview(){
   zoomTouched=false;
   fitZoomToStage();
+  const stage=$("canvasStage");
+  // Explicitly reset any prior pan/scroll and return the entire canvas to
+  // the top. iPhone Safari's restore state must not leave it half hidden.
+  if(stage){stage.scrollTop=0;stage.scrollLeft=0;}
   renderPreview();
 }
 
@@ -2079,7 +2117,7 @@ $("mobileLangBtn").addEventListener("click",()=>{
 
 $("zoomOutBtn").addEventListener("click",()=>{
   zoomTouched=true;
-  zoom=Math.max(.18,zoom-.05);
+  zoom=Math.max(mobileQuery.matches?.08:.18,zoom-.05);
   renderPreview();
 });
 $("zoomInBtn").addEventListener("click",()=>{
@@ -2162,6 +2200,12 @@ function handleViewportResize(){
 window.addEventListener("resize",handleViewportResize);
 if(window.visualViewport){
   window.visualViewport.addEventListener("resize",handleViewportResize);
+}
+// Navigation, source selectors and Safari address-bar transitions can alter
+// the stage height without dispatching a window resize.
+if(window.ResizeObserver){
+  const previewResizeObserver=new ResizeObserver(handleViewportResize);
+  previewResizeObserver.observe($("canvasStage"));
 }
 window.addEventListener("beforeunload",()=>{
   try{saveProject(current())}catch{}

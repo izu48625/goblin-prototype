@@ -370,9 +370,22 @@ body.publicScoreColorsOff .creatorScoreTable td[data-score-value]{background:#ff
 
 /* R118: Visual Tools available from Discover public work detail pages. */
 .actionBtn.visualTools{
-  border-color:#5576ba;background:#e8eefb;color:#264b8a;
+  min-height:48px;border:1px solid #d6b4a9;border-radius:8px;
+  background:#fff;color:#954330;
+  font-size:13px;font-weight:850;
+  box-shadow:0 2px 7px rgba(35,40,38,.075);
+  gap:8px;
 }
-.actionBtn.visualTools:hover{background:#dae6fb;border-color:#4269b1}
+.actionBtn.visualTools::before{
+  content:"＋";display:grid;place-items:center;
+  width:29px;height:29px;flex:none;border-radius:6px;
+  background:#f5e6df;color:#a34c38;font-size:20px;
+}
+.actionBtn.visualTools:hover{
+  background:#faf1ec;color:#8f3a2a;border-color:#c68c7a;
+  box-shadow:0 3px 9px rgba(35,40,38,.11)
+}
+.actionBtn.visualTools:focus-visible{outline:3px solid #b86b54;outline-offset:2px}
 .publicVisualBackdrop{
   position:fixed;inset:0;z-index:140;display:flex;align-items:flex-end;
   justify-content:center;background:rgba(22,31,40,.56);padding:0;

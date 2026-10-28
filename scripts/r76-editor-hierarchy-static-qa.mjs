@@ -29,8 +29,17 @@ assert(launcher.includes('height:48px')&&launcher.includes('min-height:48px'),
  'Compact launcher must preserve at least 44px tap surface');
 assert(!/(?:^|\n)\s*#basicRoot\s*\{/m.test(launcher.replace(/\/\*[\s\S]*?\*\//g,'')),'Do not change iframe viewport reservation');
 const original=await read('base/js/app.js');
+const originalStyles=await read('base/css/style.css');
+// The modern light scoring UI uses opaque sRGB colors from app.js;
+// the historical RGBA palette is still retained in stylesheet fallbacks.
 for(const color of ['rgba(116,60,74,.42)','rgba(122,84,62,.35)','rgba(110,99,57,.32)']){
- assert(original.includes(color),'Scoring grade palette changed: '+color);
+ assert(originalStyles.includes(color),'Scoring grade fallback changed: '+color);
+}
+for(const [grade,color] of Object.entries({
+ 'heat-ss':'#e8b9b2','heat-s':'#edc9b9','heat-a':'#f1d9c4',
+ 'heat-b':'#efd2a6','heat-c':'#f8edcc','heat-d':'#e3edc9','heat-e':'#d1dce9'
+})){
+ assert(original.includes("'"+grade+"':'"+color+"'"),'Live scoring grade palette changed: '+grade);
 }
 for(const path of ['base/css/r76-editor-hierarchy.css','cloud/r76-launcher.css']){
  const styles=(await read(path)).replace(/\/\*[\s\S]*?\*\//g,'');

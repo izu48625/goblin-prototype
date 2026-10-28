@@ -1,0 +1,59 @@
+/* R119 — Mobile chart preview: align art to the top and fit the entire canvas.
+   This changes only the editor viewport, never #previewRoot/.visual artwork,
+   chart layout, saved project data, or PNG/JPG export dimensions. */
+
+.canvas-fit-box{display:contents}
+
+@media (max-width:760px){
+  /* The shared site navigation consumes 44px above the 54px editor header.
+     Old CSS allocated a complete viewport *after* that navigation, which
+     pushed the preview beneath the fixed DATA/STYLE/TEXT/CANVAS tabs. */
+  body.editor-body .editor-layout{
+    height:calc(100vh - 54px);
+    height:calc(100dvh - 54px);
+    min-height:0;
+  }
+  body.editor-body.hasGlobalLocaleBar .editor-layout{
+    height:calc(100vh - 98px);
+    height:calc(100dvh - 98px);
+  }
+  body.editor-body .preview-area,
+  body.editor-body.hasGlobalLocaleBar .preview-area{
+    height:100%;
+    min-height:0;
+  }
+  body.editor-body .canvas-stage,
+  body.editor-body.hasGlobalLocaleBar .canvas-stage{
+    display:flex;
+    flex:1 1 0;
+    flex-direction:column;
+    align-items:center;
+    justify-content:flex-start;
+    min-height:0;
+    min-width:0;
+    overflow-x:hidden;
+    overflow-y:auto;
+    -webkit-overflow-scrolling:touch;
+    overscroll-behavior:contain;
+    padding:10px 8px calc(72px + env(safe-area-inset-bottom));
+  }
+  /* Measured rendered dimensions prevent transform margins from displacing
+     the artwork below the viewport center (the user's screenshot symptom). */
+  body.editor-body .canvas-fit-box{
+    position:relative;
+    display:block;
+    flex:none;
+    margin:0 auto;
+    width:0;
+    height:0;
+  }
+  body.editor-body .canvas-fit-box > .canvas-shell{
+    position:absolute;
+    inset:0 auto auto 0;
+    flex:none;
+    margin:0!important;
+    transform-origin:top left;
+  }
+  /* Fixed bottom tabs remain reachable even with very tall visuals. */
+  body.editor-body .mobile-bottom-tabs{z-index:60}
+}

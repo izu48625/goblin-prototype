@@ -104,6 +104,7 @@ jobs:
           node --check scripts/r30-storage-and-max-data-qa.mjs
           node --check scripts/r30-home-corrupt-recovery-qa.mjs
           node --check app/src/launcher.js
+          node --check scripts/r119-mobile-preview-browser-qa.mjs
           node --check cloud/public-extensions.js
           node --check app/src/extension-catalog.js
           node --check scripts/r118-public-visuals-qa.mjs
@@ -137,6 +138,7 @@ jobs:
           test -f dist/index.html
           test -f dist/base/index.html
           test -f dist/app/editor.html
+          test -f dist/app/css/r119-mobile-fit.css
           test -f dist/discover.html
           test -f dist/public.html
           test -f dist/rate.html

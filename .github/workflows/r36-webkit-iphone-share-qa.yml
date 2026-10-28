@@ -26,7 +26,7 @@ jobs:
         run: |
           node --check scripts/r36-webkit-iphone-share-qa.mjs
           npm run build:cloudflare
-          grep -q 'src/editor-entry.js?v=r70imageline1' dist/app/editor.html
+          grep -q 'src/editor-entry.js?v=r119-mobile-fit1' dist/app/editor.html
           grep -q 'exportPreview' dist/app/src/core/export.js
       - name: Run iPhone WebKit PNG editor and share UX
         run: |

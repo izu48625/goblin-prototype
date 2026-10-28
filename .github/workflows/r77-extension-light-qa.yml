@@ -9,6 +9,11 @@ on:
       - 'index.html'
       - 'app/editor.html'
       - 'app/css/r77-light-editor.css'
+      - 'app/css/r119-mobile-fit.css'
+      - 'app/src/editor/editor.js'
+      - 'cloud/public.css'
+      - 'public.html'
+      - 'scripts/r119-mobile-preview-browser-qa.mjs'
       - 'cloud/r77-launcher.css'
       - 'scripts/r77-*.mjs'
       - '.github/workflows/r77-extension-light-qa.yml'
@@ -45,4 +50,6 @@ jobs:
           done
           exit 1
       - name: Verify real extension selection, contrast, mobile drawers, original dark artwork
-        run: node scripts/r77-editor-light-browser-qa.mjs
+        run: |
+          node scripts/r77-editor-light-browser-qa.mjs
+          node scripts/r119-mobile-preview-browser-qa.mjs
