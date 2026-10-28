@@ -248,8 +248,8 @@
     'heat-ss':'#e8b9b2',
     'heat-s':'#edc9b9',
     'heat-a':'#f1d9c4',
-    'heat-b':'#f5e8ca',
-    'heat-c':'#f3e6c7',
+    'heat-b':'#efd2a6',
+    'heat-c':'#f8edcc',
     'heat-d':'#e3edc9',
     'heat-e':'#d1dce9',
     'heat-zero':'#c0cfdf'
@@ -1487,6 +1487,8 @@
     const scale=activeSheet().scale||100;
     const badge=$('currentScaleBadge');
     if(badge)badge.textContent=t('scoring.currentScale',{scale});
+    const visibleBadge=$('visibleScaleBadge');
+    if(visibleBadge)visibleBadge.textContent=t('scoring.currentScale',{scale});
     const hint=$('scaleMismatchHint');
     if(hint)hint.classList.toggle('hidden',!canUseScoresAsTen());
   }
