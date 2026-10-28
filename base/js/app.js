@@ -1250,16 +1250,16 @@
     const n=cols.length;
 
     if(!s.compare.length){
-      ctx.fillStyle='#73859e';
-      ctx.font='10px sans-serif';
+      ctx.fillStyle='#354049';
+      ctx.font='600 12px -apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif';
       ctx.textAlign='center';
       ctx.fillText(t('compare.choose'),w/2,h/2);
       return;
     }
 
     if(n<3){
-      ctx.fillStyle='#73859e';
-      ctx.font='10px sans-serif';
+      ctx.fillStyle='#354049';
+      ctx.font='600 12px -apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif';
       ctx.textAlign='center';
       ctx.fillText(n===0?t('compare.noCommon'):t('compare.needThree'),w/2,h/2);
       return;
@@ -1283,8 +1283,9 @@
       ctx.stroke();
     }
 
-    ctx.font='9px -apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif';
-    ctx.fillStyle='#9aaac0';
+    // On the light chart panel, dark, slightly larger axis labels stay readable on iPhone Safari.
+    ctx.font='700 12px -apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif';
+    ctx.fillStyle='#354049';
     ctx.textAlign='center';
     ctx.textBaseline='middle';
 
