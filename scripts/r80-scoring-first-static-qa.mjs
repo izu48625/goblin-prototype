@@ -5,7 +5,7 @@ const read=p=>readFile(path(p),'utf8');
 const html=await read('base/index.html'),host=await read('index.html'),js=await read('base/js/r80-scoring-first.js');
 const css=await read('base/css/r80-scoring-first.css'),hostCss=await read('cloud/r80-no-sticky-launcher.css');
 assert(html.includes('r80-scoring-first.css?v=r80p1'));
-assert(html.includes('r80-scoring-first.js?v=r80p1'));
+assert(html.includes('r80-scoring-first.js?v=r100labels1'));
 assert(host.includes('r80-no-sticky-launcher.css?v=r80p1'));
 for(const id of ['mobileHeaderMoreBtn','r81ThemeBtn','r81OptionsClose',
  'newSheetBtn','publishBtn','r81SearchAction','r80OptionsBtn','r80VisualsBtn',
