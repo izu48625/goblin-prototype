@@ -3,6 +3,17 @@ import {readFile} from 'node:fs/promises';
 import {chromium,webkit} from 'playwright';
 
 const read=path=>readFile(new URL('../'+path,import.meta.url),'utf8');
+// R98: the real editorial lab must be discoverable from both localized landing pages,
+// without confusing it with user-published Public content.
+for(const locale of ['ja','en']){
+ const landing=await read(locale+'/index.html');
+ const url='/'+locale+'/game-balance.html';
+ assert((landing.split('href="'+url+'"').length-1)>=2,
+  'Original lab should be linked from examples and practical-usecases: '+locale);
+ assert(landing.includes('id="practical-usecases"'));
+ assert(landing.includes(locale==='ja'?'ユーザーの公開作品とは別':'not a user-published work'));
+ assert(!landing.includes('adsbygoogle.js')&&!landing.includes('googletagmanager.com'));
+}
 for(const locale of ['ja','en']){
  const html=await read(locale+'/game-balance.html');
  assert(html.includes('<html lang="'+locale+'">'));
