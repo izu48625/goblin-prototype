@@ -84,7 +84,12 @@ for(const engine of [chromium,webkit]){
       const errors=[];
       page.on('pageerror',e=>errors.push(e.message));
       await page.goto(root+'/index.html?qa=r120',{waitUntil:'domcontentloaded'});
-      await page.locator('#launcherTitle').waitFor({state:'visible',timeout:30000});
+      await page.locator('#launcherTitle').waitFor({state:'attached',timeout:30000});
+      // On mobile the main launcher is intentionally hidden in favor of the
+      // visible scoring-toolbar shortcut inside the Home iframe.
+      const mobileTool=page.frameLocator('#basicFrame').locator('#r80VisualsBtn');
+      await mobileTool.waitFor({state:'visible',timeout:30000});
+      assert.equal((await mobileTool.textContent()).trim(),en?'Visuals':'データやグラフ');
       await page.waitForFunction(value=>document.querySelector('#launcherTitle')?.textContent===value,
         en?'Visual Tools':'データやグラフ',{timeout:20000});
       assert.equal(await page.locator('#launcherTitle').textContent(),
