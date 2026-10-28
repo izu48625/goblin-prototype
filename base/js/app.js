@@ -2217,17 +2217,18 @@
           });
           if(uploadError)throw new Error('Target image upload failed: '+uploadError.message);
           const {error:writeError}=await sb.from('topic_items').update({image_url:path})
-            .eq('id',item.id).eq('topic_id',topicId);
+            .eq('id',item.id).eq('topic_id',topicId).select('id').single();
           if(writeError)throw new Error('Target image link could not be saved: '+writeError.message);
-          if(oldPath)storage.remove([oldPath]).then(({error})=>{
-            if(error)console.warn('[Stats Maker] Old target image cleanup failed:',error);
-          }).catch(error=>console.warn('[Stats Maker] Old target image cleanup failed:',error));
+          if(oldPath){
+            const {error:removeError}=await storage.remove([oldPath]);
+            if(removeError)console.warn('[Stats Maker] Old target image cleanup failed:',removeError);
+          }
         }
         usedPaths.add(path);
       }else if(source.imageRemoved===true){
         if(oldPath){
           const {error:writeError}=await sb.from('topic_items').update({image_url:null})
-            .eq('id',item.id).eq('topic_id',topicId);
+            .eq('id',item.id).eq('topic_id',topicId).select('id').single();
           if(writeError)throw new Error('Target image removal could not be saved: '+writeError.message);
           const {error:removeError}=await storage.remove([oldPath]);
           if(removeError)console.warn('[Stats Maker] Removed target image cleanup failed:',removeError);
@@ -2239,6 +2240,20 @@
       }
     }
     return usedPaths;
+  }
+
+  async function erasePublishedTargetImages(sb,topicId){
+    const {data:items,error:listError}=await sb.from('topic_items')
+      .select('image_url').eq('topic_id',topicId);
+    if(listError)throw listError;
+    const paths=(items||[]).map(item=>item.image_url)
+      .filter(path=>isTopicImagePath(path,topicId));
+    if(!paths.length)return;
+    // Revoke previously signed links on unpublish by deleting objects themselves.
+    const {error:removeError}=await sb.storage.from(TARGET_IMAGE_BUCKET).remove(paths);
+    if(removeError)throw removeError;
+    const {error:unlinkError}=await sb.from('topic_items').update({image_url:null}).eq('topic_id',topicId);
+    if(unlinkError)throw unlinkError;
   }
 
   async function insertPublishedStructure(sb,topicId,model){
@@ -2324,11 +2339,14 @@
         .update({visibility:'private'}).eq('id',s.cloudTopicId).eq('owner_id',user.id);
       if(updateError)throw updateError;
 
+      let imageDeleteError=null;
+      try{await erasePublishedTargetImages(sb,s.cloudTopicId)}
+      catch(error){imageDeleteError=error;console.warn('[Stats Maker] Unpublish image cleanup failed:',error)}
       s.cloudVisibility='private';scheduleSave('');
       $('publishResult').classList.add('hidden');
       $('publishUnpublishBtn').classList.add('hidden');
       $('publishExecuteBtn').textContent=t('publish.execute');
-      setPublishStatus(t('publish.unpublishSuccess'),'ok');
+      setPublishStatus(imageDeleteError?(window.SM_I18N?.getLanguage?.()==='en'?'Work is private, but image deletion could not be verified. Please retry.':'作品は非公開になりましたが、画像の削除を確認できませんでした。再試行してください。'):t('publish.unpublishSuccess'),imageDeleteError?'error':'ok');
       renderHeader();
       refreshEditorCommunitySummary(true);
     }catch(e){setPublishStatus(t('publish.errorPrefix')+(e?.message||String(e)),'error')}
