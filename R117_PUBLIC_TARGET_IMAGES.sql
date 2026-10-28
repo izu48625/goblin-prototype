@@ -1,6 +1,6 @@
 -- R117: small creator-owned target thumbnails for public work pages.
 -- Private bucket: public/unlisted topic images are signed per view; private works remain owner-only.
--- 50 KiB JPEG cap and one named object per target image version protect Free quotas.
+-- 50 KiB JPEG cap and a later fixed-name policy (40 per topic) protect Free quotas.
 insert into storage.buckets (id,name,public,file_size_limit,allowed_mime_types)
 values ('topic-target-images','topic-target-images',false,51200,array['image/jpeg']::text[])
 on conflict (id) do update
