@@ -311,3 +311,22 @@ th:first-child,td:first-child{background:#f8f7f4;color:#292f35}
 .workReportActions button{background:#f6f5f1;color:#30373c;border-color:#d5d1c9}
 .workReportActions .workReportSubmit{background:#b85c43;color:#fff}
 .creatorScoreTable th:first-child,.creatorScoreTable td:first-child{box-shadow:2px 0 0 #e3e0da}
+
+/* R102: finish light theme for nested public detail widgets. */
+.heroScope{background:#f5f3ee;border-left-color:#b85c43;color:#53616b}
+.summaryStat,.metricSummaryCard,.participantBox,.privacyLock{background:#f8f7f4;border-color:#dedbd3}
+.summaryLabel,.summarySub,.metricSummaryName,.metricSummaryScale{color:#626e76}
+.summaryValue,.summaryValue.accent,.metricSummaryValue{color:#30383e}
+.rankRow:first-child{background:#f8f4e9;border-color:#d9cba5}
+.rankRow:nth-child(2){background:#f8f7f4;border-color:#d8d8d5}
+.rankRow:nth-child(3){background:#f8f7f4;border-color:#d7c9bd}
+.rankName,.rankName small{color:#3b454c}
+.rankValue{color:#a6503a}
+.communityBlock,.compareCommunityCard{background:#fff}
+.ownerHint,.updatedAt,.smallBadge,.criteria small,.privacyNote span,.privacyNote b,.privacyLock b,.privacyLock span{color:#66727a}
+.smallBadge,.privacyLock{border-color:#dedbd3}
+.actionBtn.ghost,.actionBtn.owner{background:#f8f7f4;border-color:#d5d1c9;color:#3d4b53}
+.lineageBar{background:#f5f1f8;border-color:#e0d5e8}
+.publicFooter,.publicFooter a{color:#626e76}
+.tableWrap{scrollbar-color:#c8c5bd #f7f6f2}
+.toast{background:#fff;color:#30383e;border-color:#d5d1c9;box-shadow:0 12px 30px #0002}
