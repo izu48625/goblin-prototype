@@ -25,7 +25,7 @@ for(const [html,lang] of [[en,'en'],[ja,'ja']]){
 }
 assert(en.includes('Chart Maker for Radar'), 'English chart-maker search title missing');
 assert(en.includes('anime')||en.includes('Anime'), 'English topic coverage missing');
-assert(ja.includes('グラフ作成・能力比較'));
+assert(ja.includes('キャラ比較・能力値グラフ作成'));
 assert(root.includes("localStorage.setItem('statsMaker.locale',language)"));
 assert(discover.includes('rating charts'));
 assert(robot.includes('Sitemap: https://statsmaker.app/sitemap.xml'));
