@@ -38,3 +38,11 @@ body:not(.score-colors-off) .fitTable td:is(.fitScoreCell,.fitAverageCell).heat-
 body:not(.score-colors-off) #scoreTable td.scoreCell:not([class*="heat-"]),body:not(.score-colors-off) .fitTable td.fitScoreCell:not([class*="heat-"]){background:#fff!important}
 
 body:not(.score-colors-off) #scoreTable td.scoreCell.heat-zero,body:not(.score-colors-off) #scoreTable td.avgCell.heat-zero{background:#c0cfdf!important}
+
+/* Keep the editor's right-hand row tools light in light mode. */
+body #scoreTable td.deleteCell,body #scoreTable th.deleteHead{background:#f7f6f2!important;color:#30363a!important;border-color:#dedbd4!important}
+body #scoreTable td.deleteCell .rowActionWrap{background:transparent!important;color:#30363a!important}
+body #scoreTable td.deleteCell .rowMove{color:#6b7885!important}
+body #scoreTable td.deleteCell .rowDelete{color:#a06468!important}
+body #scoreTable td.deleteCell .rowMove:hover{background:#eae8e2!important;color:#30363a!important}
+body #scoreTable td.deleteCell .rowDelete:hover{background:#f9eeee!important;color:#a34249!important}
