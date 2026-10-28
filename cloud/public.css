@@ -281,3 +281,33 @@ a{color:inherit}
     max-width:68px;
   }
 }
+
+
+/* R101: public work detail matches the light Discover experience. */
+:root{color-scheme:light;--bg:#f6f5f1;--panel:#fff;--panel2:#f5f4f0;--line:#dedbd3;--text:#292f35;--muted:#68727a;--accent:#b95b42;--good:#34866e;--warn:#9b752b}
+html,body{background:var(--bg);color:var(--text)}
+.top{background:linear-gradient(180deg,rgba(246,245,241,.99),rgba(246,245,241,.93) 78%,rgba(246,245,241,0))}
+.brand{color:#30373c}.mark{background:#30373c}.readonly{border-color:#d5d1c9;color:#626d75}
+.hero{background:linear-gradient(145deg,#fff,#f8f7f3 72%);border-color:var(--line)}
+.hero:before{display:none}
+.hero,.card{color:var(--text);background-color:#fff;border-color:var(--line)}
+.visibilityBadge,.pill,.rankRow,.criteria span,.participantBox,.notice{background:#f7f6f2;border-color:#dedbd3;color:#4d5b63}
+.desc,.sectionSub,.privacyNote,.participantLabel,.status,.emptyCommunity{color:#65727a}
+.tableWrap{border-color:#dedbd3}
+table{background:#fff;color:#292f35}
+th,td{border-color:#e3e0da}
+th{background:#f1f0eb;color:#48535b}
+th:first-child,td:first-child{background:#f8f7f4;color:#292f35}
+.avg,.rankValue{color:#a75039}
+.rankNo{background:#edeae3;color:#48535b}
+.criteria span{color:#48535b}
+.actionBtn{background:#f8f7f3;border-color:#d5d0c7;color:#3d4b53}
+.actionBtn.primary{background:#b85c43;border-color:#b85c43;color:#fff}
+.actionBtn.remix{background:#eee6f5;border-color:#d9c7e9;color:#694d80}
+.notice{color:#796128}
+.workReportDialog{background:#fff;color:#292f35;border-color:#d5d1c9}
+.workReportClose,.workReportHint{color:#55636c}
+.workReportDialog select,.workReportDialog textarea{background:#fff;color:#292f35;border-color:#d5d1c9}
+.workReportActions button{background:#f6f5f1;color:#30373c;border-color:#d5d1c9}
+.workReportActions .workReportSubmit{background:#b85c43;color:#fff}
+.creatorScoreTable th:first-child,.creatorScoreTable td:first-child{box-shadow:2px 0 0 #e3e0da}
