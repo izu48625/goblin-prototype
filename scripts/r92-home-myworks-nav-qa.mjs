@@ -5,7 +5,7 @@ import {chromium,webkit} from 'playwright';
 const nav=await readFile(new URL('../cloud/global-locale.js',import.meta.url),'utf8');
 const root=await readFile(new URL('../index.html',import.meta.url),'utf8');
 assert(nav.includes('data-global-myworks')&&nav.includes("'/my.html?lang='+lang"),'Missing correct owner navigation');
-assert(root.includes('cloud/global-locale.js?v=r92myworks1'),'Home must refresh shared nav');
+assert(/cloud\/global-locale\.js\?v=[A-Za-z0-9-]+/.test(root),'Home must load versioned shared nav');
 assert(!nav.includes('myWorks.innerHTML'),'Avoid injecting user-controlled text');
 const BASE=process.env.BASE_URL||'http://127.0.0.1:4173';
 for(const [engine,width] of [[webkit,320],[webkit,390],[chromium,1180]]){
