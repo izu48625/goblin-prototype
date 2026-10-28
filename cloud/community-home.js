@@ -139,7 +139,7 @@ if(uuid.test(topicId)){
       loading.classList.add('hidden');
     }catch(error){
       console.error('[Stats Maker] Community home failed',error);
-      loading.textContent='Communityを開けませんでした：'+(error?.message||String(error));
+      loading.textContent=(siteLanguage()==='ja'?'Communityを開けませんでした：':'Could not load Community: ')+(error?.message||String(error));
       loading.classList.add('error');
     }
   })();
