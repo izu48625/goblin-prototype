@@ -349,3 +349,20 @@ body.publicScoreColorsOff .creatorScoreTable td[data-score-value]{color:#293139!
 /* R105: match the editor's heatmap direction: warmer cells for higher scores. */
 body:not(.publicScoreColorsOff) .creatorScoreTable td[data-score-value]{background:var(--score-bg,#fff)!important;color:#30383e!important}
 body.publicScoreColorsOff .creatorScoreTable td[data-score-value]{background:#fff!important;color:#30383e!important}
+
+/* R117: published target thumbnails (signed, private Storage objects).
+   Inline name/image layout stays legible across iPhone Safari and desktop. */
+.publicTargetIdentity{display:flex;align-items:center;gap:9px;min-width:0;max-width:100%}
+.publicTargetThumb{display:block;flex:0 0 38px;width:38px;height:38px;border-radius:9px;object-fit:cover;background:#efeee9;border:1px solid #d9d6cf}
+.publicTargetMissing{background:#f4f3ef;border:1px dashed #d9d6cf}
+.publicTargetText{min-width:0;display:block;overflow-wrap:anywhere;line-height:1.4}
+.creatorScoreTable td:first-child{min-width:175px;max-width:225px;vertical-align:middle}
+.rankName .publicTargetIdentity{gap:8px}
+.rankName .publicTargetThumb{flex-basis:34px;width:34px;height:34px;border-radius:8px}
+.rankName .publicTargetText{overflow:hidden;white-space:nowrap;text-overflow:ellipsis}
+@media(max-width:520px){
+ .creatorScoreTable td:first-child{min-width:146px;max-width:170px}
+ .creatorScoreTable .publicTargetIdentity{gap:6px}
+ .creatorScoreTable .publicTargetThumb{flex-basis:32px;width:32px;height:32px;border-radius:7px}
+ .rankName .publicTargetThumb{flex-basis:32px;width:32px;height:32px}
+}
