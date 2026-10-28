@@ -3,7 +3,7 @@ import {buildCommunitySheet,collectCommunityScores} from './community-rating-mod
 // A separate in-memory sheet is mounted; Home localStorage is never changed.
 const query=new URLSearchParams(location.search);
 const topicId=query.get('community')||'';
-const siteLanguage=()=>String(localStorage.getItem('statsMaker.locale')||'ja').toLowerCase().startsWith('en')?'en':'ja';
+const siteLanguage=()=>String(localStorage.getItem('statsMaker.locale')||localStorage.getItem('statsMakerV2Language')||navigator.language||'en').toLowerCase().startsWith('ja')?'ja':'en';
 const uuid=/^[0-9a-f]{8}-[0-9a-f]{4}-[1-8][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
 if(uuid.test(topicId)){
   const $=id=>document.getElementById(id);
