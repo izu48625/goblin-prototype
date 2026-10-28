@@ -61,7 +61,7 @@
   const initial=new URLSearchParams(location.search).get('lang');
   const stored=initial==='ja'||initial==='en'?initial:
     localStorage.getItem('statsMaker.locale')||localStorage.getItem('statsMakerV2Language')||navigator.language;
-  setLanguage(String(stored||'ja').toLowerCase().startsWith('en')?'en':'ja');
+  setLanguage(String(stored||'en').toLowerCase().startsWith('ja')?'ja':'en');
   const HIDDEN_KEY='statsMaker.r89HomeIntroHidden';
   const preferenceRead=()=>{try{return localStorage.getItem(HIDDEN_KEY)==='1'}catch{return false}};
   const preferenceWrite=hidden=>{try{
