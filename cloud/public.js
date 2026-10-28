@@ -382,7 +382,7 @@
 
         <div class="summaryStrip">
           <div class="summaryStat">
-            <div class="summaryLabel">${ja?'あなたの総合1位':'Your Overall #1'}</div>
+            <div class="summaryLabel">${ja?'作成者の総合1位':'Creator Overall #1'}</div>
             <div class="summaryValue accent">${creatorTop?fmt(creatorTop.value):'—'}</div>
             <div class="summarySub">${creatorTop?esc(creatorTop.name):(ja?'採点なし':'No scores')}</div>
           </div>
@@ -429,7 +429,7 @@
         </section>
         <aside>
           <section class="card">
-            <div class="cardTitleRow"><h2>${ja?'あなたの総合ランキング':'Your Overall Ranking'}</h2><span class="smallBadge">TOP ${Math.min(10,creatorRanking.length)}</span></div>
+            <div class="cardTitleRow"><h2>${ja?'作成者の総合ランキング':'Creator Overall Ranking'}</h2><span class="smallBadge">TOP ${Math.min(10,creatorRanking.length)}</span></div>
             <div class="ranking">${creatorRanking.length?creatorRanking.slice(0,10).map((item,i)=>`<div class="rankRow"><div class="rankNo">${i+1}</div><div class="rankName">${esc(item.name)}</div><div class="rankValue">${fmt(item.value)}</div></div>`).join(''):`<div class="emptyCommunity">${ja?'採点データがありません。':'No scored data yet.'}</div>`}</div>
           </section>
           <section class="card" style="margin-top:14px">
@@ -468,7 +468,7 @@
           <div class="shareOptionGroup">
             <div class="shareOptionLabel">${ja?'内容':'Template'}</div>
             <div class="shareOptionGrid">
-              <button class="shareChoice active" data-share-template="creator" type="button"><b>${ja?'作成者 TOP3':'Creator TOP3'}</b><span>${ja?'自分の総合ランキング':'Creator overall ranking'}</span></button>
+              <button class="shareChoice active" data-share-template="creator" type="button"><b>${ja?'作成者 TOP3':'Creator TOP3'}</b><span>${ja?'作成者の総合ランキング':'Creator overall ranking'}</span></button>
               <button id="shareCommunityChoice" class="shareChoice" data-share-template="community" type="button"><b>Community TOP3</b><span id="shareCommunityChoiceSub">${ja?'5人以上で利用可能':'Available at 5+ participants'}</span></button>
               <button class="shareChoice" data-share-template="overview" type="button"><b>${ja?'概要カード':'Overview'}</b><span>${ja?'対象数・項目数・尺度・参加者':'Targets, metrics, scale, participants'}</span></button>
             </div>
