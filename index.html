@@ -93,18 +93,18 @@ button{font:inherit}
 @media(max-width:390px){.extGrid{grid-template-columns:1fr}}
 
 /* The Community screen is exactly the Home shell and table, with a submit bar. */
-.communityControls{position:fixed;z-index:110;left:10px;right:10px;bottom:calc(74px + env(safe-area-inset-bottom));display:flex;flex-direction:column;gap:6px;padding:9px 12px;border:1px solid #345775;border-radius:14px;background:#0c1b30;box-shadow:0 10px 28px rgba(0,0,0,.35);color:#dce9fb}
+.communityControls{position:fixed;z-index:110;left:10px;right:10px;bottom:calc(74px + env(safe-area-inset-bottom));display:flex;flex-direction:column;gap:6px;padding:9px 12px;border:1px solid #d5d1c9;border-radius:14px;background:#fff;box-shadow:0 8px 24px rgba(38,44,46,.12);color:#303a3e}
 .communityHead{display:flex;align-items:center;justify-content:space-between;gap:8px;font-size:11px;font-weight:850}
-.communityHead a{color:#a5c5ff;text-decoration:none}
+.communityHead a{color:#3a6474;text-decoration:underline;text-underline-offset:3px}
 .communityButtons{display:grid;grid-template-columns:1fr 1.35fr;gap:7px}
-.communityButtons button{min-height:40px;border-radius:9px;border:1px solid #4b6996;background:#1a3458;color:white;font-weight:850;font-size:12px}
-.communityButtons button.primary{background:#3465bd}
+.communityButtons button{min-height:40px;border-radius:9px;border:1px solid #c9c6bf;background:#f7f6f2;color:#374247;font-weight:850;font-size:12px}
+.communityButtons button.primary{background:#416aa9;border-color:#416aa9;color:#fff}
 .communityButtons button:disabled{opacity:.6}
-.communityMessage{font-size:11px;color:#b9c9df;min-height:12px}
-.communityMessage.ok{color:#72e2ab}
-.communityMessage.error{color:#ff9595}
-.communityLoading{position:fixed;inset:0;z-index:111;display:grid;place-items:center;background:#07101f;color:#b6cbeb;font-size:15px;text-align:center;padding:20px}
-.communityLoading.error{color:#ff9b9b}
+.communityMessage{font-size:11px;color:#58656b;min-height:12px}
+.communityMessage.ok{color:#276b4e}
+.communityMessage.error{color:#a93842}
+.communityLoading{position:fixed;inset:0;z-index:111;display:grid;place-items:center;background:#f6f5f1;color:#354249;font-size:15px;text-align:center;padding:20px}
+.communityLoading.error{color:#a93842}
 body.communityShell #basicRoot{bottom:calc(178px + env(safe-area-inset-bottom))}
 body.communityShell #extLauncher{bottom:calc(8px + env(safe-area-inset-bottom))}
 @media(min-width:601px){
