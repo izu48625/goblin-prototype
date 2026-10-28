@@ -15,7 +15,11 @@ const verify=html=>{
   assert.equal((html.match(/name="google-adsense-account"/g)||[]).length,1,
     'Duplicate owner verification meta');
   assert(!forbidden.test(html),'Real AdSense script must not activate at verification step');
-  assert(html.includes('<title>Stats Maker'),'Root app HTML unexpectedly replaced');
+  const title=head.match(/<title>([^<]+)<\\/title>/)?.[1]||'';
+  assert(title.includes('Stats Maker')&&title.length>=16,
+    'Root app must retain a descriptive search title and Stats Maker brand');
+  assert(html.includes('id="basicFrame"')&&html.includes('id="extLauncher"'),
+    'Actual scoring app and chart launcher must remain present');
 };
 if(mode==='local'){
   const src=await readFile(new URL('../index.html',import.meta.url),'utf8');
