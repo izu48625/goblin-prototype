@@ -4,7 +4,7 @@ import {chromium,webkit} from 'playwright';
 
 const my=await readFile(new URL('../cloud/my.js',import.meta.url),'utf8');
 const markup=await readFile(new URL('../my.html',import.meta.url),'utf8');
-assert(markup.includes('id="r90CategoryHelp"')&&markup.includes('cloud/my.js?v=r91review1'));
+assert(markup.includes('id="r90CategoryHelp"')&&markup.includes('cloud/my.js?v=r97dup1'));
 for(const marker of ['data-save-category','categoriesAllowed.has(next)',".eq('owner_id',state.user.id)",".eq('updated_at',fresh.updated_at)",'duplicatesAmongOwnedWorks()', 'r90CategorySelect']){
  assert(my.includes(marker),'R90 missing safety/UI invariant '+marker);
 }
@@ -79,6 +79,21 @@ for(const [name,engine,width] of specs){
  await page.locator('.workCard').first().waitFor({state:'visible',timeout:15000});
  assert.equal(await page.locator('.workCard').count(),3);
  assert.equal(await page.locator('.r90Duplicate').count(),2);
+ // R97: only owner-matched Public scoring duplicates are reviewable; no implicit write.
+ assert.equal(await page.locator('#r97DupOnlyBtn').isEnabled(),true);
+ await page.locator('#r97DupOnlyBtn').click();
+ assert.equal(await page.locator('.workCard').count(),2);
+ assert.equal(await page.locator('.r97DuplicateReview').count(),2);
+ await page.locator('[data-stage-unlisted="'+A+'"]').click();
+ assert.equal(await page.locator('[data-visibility-for="'+A+'"]').inputValue(),'unlisted');
+ assert((await page.locator('#myStatus').textContent()).includes('まだ変更は保存していません'));
+ assert.equal((await page.evaluate(()=>window.__R90_MOCK__.updates)).length,0,
+  'Staging Unlisted must never write before explicit owner save');
+ await page.locator('#r97DupOnlyBtn').click();
+ assert.equal(await page.locator('.workCard').count(),3);
+ assert.equal(await page.locator('[data-visibility-for="'+A+'"]').inputValue(),'public',
+  'Unsaved staged visibility must be discarded on rerender');
+ 
  assert(!(await page.locator('body').innerText()).includes('FOREIGN SECRET WORK'));
  assert.equal(await page.locator('[data-category-for="'+A+'"]').inputValue(),'');
  const oldSnapshot=await page.evaluate(()=>window.__R90_MOCK__.works.find(w=>w.id==='11111111-1111-4111-8111-111111111111').snapshot);
