@@ -1,0 +1,39 @@
+name: R100 Clear Chart Labels and Japanese Character Search QA
+on:
+  pull_request:
+    paths:
+      - 'index.html'
+      - 'base/index.html'
+      - 'base/js/r80-scoring-first.js'
+      - 'app/src/launcher.js'
+      - 'cloud/r89-home-intro.js'
+      - 'ja/index.html'
+      - 'ja/chart-guide.html'
+      - 'scripts/r100-search-copy-qa.mjs'
+      - '.github/workflows/r100-search-copy-qa.yml'
+  push:
+    branches: [main]
+    paths:
+      - 'index.html'
+      - 'base/index.html'
+      - 'base/js/r80-scoring-first.js'
+      - 'app/src/launcher.js'
+      - 'cloud/r89-home-intro.js'
+      - 'ja/index.html'
+      - 'ja/chart-guide.html'
+      - 'scripts/r100-search-copy-qa.mjs'
+      - '.github/workflows/r100-search-copy-qa.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  search-copy-static:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Verify SEO copy and UI labels
+        run: node scripts/r100-search-copy-qa.mjs
