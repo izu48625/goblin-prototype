@@ -2,7 +2,7 @@ const site='https://statsmaker.app';
 const pages=[
   ['/ja/game-balance.html',['id="r97Lab"','重みを動かして順位を比較','/cloud/r97-game-balance.js?v=r97lab1','rel="canonical"']],
   ['/en/game-balance.html',['id="r97Lab"','Balance five game weapons','/cloud/r97-game-balance.js?v=r97lab1','rel="canonical"']],
-  ['/cloud/r97-game-balance.js',['data-r97-result','Wind Dagger','疾風の短剣','r97Scenario']],
+  ['/cloud/r97-game-balance.js',['data-r97-result','Wind Dagger','疾風の短剣','data-r97-scenario']],
   ['/discover.html',['id="r97BalanceLink"','cloud/discover.js?v=r97balance1']],
   ['/cloud/discover.js',['game-balance.html','r97BalanceLink']],
   ['/my.html',['id="r97DupOnlyBtn"','cloud/my.js?v=r97dup1','noindex,follow']],
