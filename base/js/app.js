@@ -229,13 +229,14 @@
   function heatClass(v){
     const p=scorePct(v);
     if(p==null)return '';
-    if(p>=95)return 'heat-ss';
+    if(p>=100)return 'heat-ss';
     if(p>=90)return 'heat-s';
     if(p>=80)return 'heat-a';
     if(p>=70)return 'heat-b';
     if(p>=60)return 'heat-c';
     if(p>=50)return 'heat-d';
-    return 'heat-e';
+    if(p>0)return 'heat-e';
+    return 'heat-zero';
   }
   // R38 P13: photo-locked rendered sRGB palette via authentic translucent
   // RGBA composition on a shared #101b30 backing. Compare final painted
@@ -244,13 +245,14 @@
   // thresholds, stored values, public works, or 10/100 score behavior.
   // Use opaque light-theme palette consistently across Safari and embedded browsers.
   const scoreTileColors=Object.freeze({
-    'heat-ss':'#edc6b9',
-    'heat-s':'#edc6b9',
+    'heat-ss':'#e8b9b2',
+    'heat-s':'#edc9b9',
     'heat-a':'#f1d9c4',
     'heat-b':'#f5e8ca',
     'heat-c':'#e5edef',
     'heat-d':'#dce8f5',
-    'heat-e':'#eaf0f5'
+    'heat-e':'#d1dce9',
+    'heat-zero':'#c0cfdf'
   });
   function scoreTileColor(v){return scoreTileColors[heatClass(v)]||'#ffffff';}
   function esc(s){
