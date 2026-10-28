@@ -16,7 +16,7 @@
       instructions:[
         'ホームの採点表に、比較する対象と共通の採点項目を入力する。',
         '各項目を同じ尺度で採点する。主観評価なら基準を揃える。',
-        '拡張機能から目的に合うグラフを選び、PNGで保存する。'
+        '「データやグラフ」から目的に合うグラフを選び、PNGで保存する。'
       ],
       links:['5つの実践作例','3つの形式比較','採点基準と重み付け','お問い合わせ']
     },
@@ -32,7 +32,7 @@
       instructions:[
         'Enter your subjects and the same scoring criteria for each in the Home table.',
         'Use a consistent scale and define what each score means.',
-        'Open Visual Tools to select a chart format and export a PNG.'
+        'Open Data & Charts to select a chart format and export a PNG.'
       ],
       links:['Five practical examples','Three format comparisons','Scoring and weighting guide','Contact']
     }
