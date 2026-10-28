@@ -347,5 +347,5 @@ body:not(.publicScoreColorsOff) .creatorScoreTable td[data-score-value]{color:va
 body.publicScoreColorsOff .creatorScoreTable td[data-score-value]{color:#293139!important;background:#fff!important}
 
 /* R105: match the editor's heatmap direction: warmer cells for higher scores. */
-body:not(.publicScoreColorsOff) .creatorScoreTable td[data-score-value]{background:var(--score-bg,#fff)!important;color:#fff!important}
+body:not(.publicScoreColorsOff) .creatorScoreTable td[data-score-value]{background:var(--score-bg,#fff)!important;color:#30383e!important}
 body.publicScoreColorsOff .creatorScoreTable td[data-score-value]{background:#fff!important;color:#30383e!important}
