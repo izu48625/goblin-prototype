@@ -23,8 +23,11 @@ const dataAccess=[...new Set([...source.matchAll(/\bdata\.([A-Za-z_][A-Za-z0-9_]
 for(const key of dataAccess) {
   assert(required.includes(key)||['criteria','topic_items'].includes(key),'Rendered page reads unselected field '+key);
 }
-assert(html.includes('cloud/public.js?v=r58p1projection1'),'Public JS cache-busting missing');
-assert(html.includes('cloud/public.css?v=r58p1projection1'),'Companion CSS key mismatch');
+const jsVersion=html.match(/cloud\/public\.js\?v=([a-zA-Z0-9-]+)/)?.[1];
+const cssVersion=html.match(/cloud\/public\.css\?v=([a-zA-Z0-9-]+)/)?.[1];
+assert(jsVersion,'Public JS cache-busting missing');
+assert.equal(cssVersion,jsVersion,'Public JS/CSS cache keys differ');
+assert(html.includes('cloud/public-extensions.js?v='+jsVersion),'R118 Visual Tools cache key mismatch');
 assert(source.includes('class="tableWrap creatorScoreTable"'),'Horizontal score matrix removed');
 console.log('R58 P1 explicit projection and data-use audit PASS',fields.length,'fields');
 
