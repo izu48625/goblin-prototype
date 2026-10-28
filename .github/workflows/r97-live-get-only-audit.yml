@@ -1,0 +1,20 @@
+name: R97 one-time GET-only production verification
+on:
+  push:
+    branches: [r97-live-get-only-audit-20261028]
+    paths:
+      - 'scripts/r97-live-get-only-audit.mjs'
+      - '.github/workflows/r97-live-get-only-audit.yml'
+permissions:
+  contents: read
+jobs:
+  get-only:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Verify bilingual tutorial, public privacy, owner controls, sitemap
+        run: node scripts/r97-live-get-only-audit.mjs
