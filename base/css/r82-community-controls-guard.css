@@ -20,7 +20,7 @@ body.community-mode #mobileHeaderMoreMenu{
 }
 
 /* R106: one light, score-dependent palette for all editor table views. */
-:root{--sm-heat-ss:#e8b9b2;--sm-heat-s:#edc9b9;--sm-heat-a:#f1d9c4;--sm-heat-b:#f5e8ca;--sm-heat-c:#e5edef;--sm-heat-d:#dce8f5;--sm-heat-e:#d1dce9;--sm-heat-zero:#c0cfdf}
+:root{--sm-heat-ss:#e8b9b2;--sm-heat-s:#edc9b9;--sm-heat-a:#f1d9c4;--sm-heat-b:#f5e8ca;--sm-heat-c:#f3e6c7;--sm-heat-d:#e3edc9;--sm-heat-e:#d1dce9;--sm-heat-zero:#c0cfdf}
 body:not(.score-colors-off) #scoreTable td.scoreCell.heat-ss,body:not(.score-colors-off) #scoreTable td.avgCell.heat-ss{background:var(--sm-heat-ss)!important}
 body:not(.score-colors-off) #scoreTable td.scoreCell.heat-s,body:not(.score-colors-off) #scoreTable td.avgCell.heat-s{background:var(--sm-heat-s)!important}
 body:not(.score-colors-off) #scoreTable td.scoreCell.heat-a,body:not(.score-colors-off) #scoreTable td.avgCell.heat-a{background:var(--sm-heat-a)!important}
