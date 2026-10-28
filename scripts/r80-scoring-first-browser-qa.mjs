@@ -16,6 +16,7 @@ for(const engine of [chromium,webkit]){
    if(width<500){
      assert(!await page.locator('#extLauncher').isVisible(),'Floating CTA still covers score table');
      assert(await frame.locator('#r80VisualsBtn').isVisible());
+     assert.equal((await frame.locator('#r80VisualsBtn').textContent()).trim(),'データやグラフ','Mobile button should use clear wording');
      assert(await frame.locator('#publishBtn').isVisible());
      assert(await frame.locator('#newSheetBtn').isVisible());
      assert(!await frame.locator('#searchInput').isVisible(),'Search should be progressive');
@@ -50,11 +51,13 @@ for(const engine of [chromium,webkit]){
      await frame.locator('#r80VisualsBtn').click();
    }else{
      assert(await page.locator('#extLauncher').isVisible());
+     assert.equal((await page.locator('#launcherTitle').textContent()).trim(),'データやグラフ','Desktop launcher should use clear wording');
      assert(await frame.locator('#publishBtn').isVisible());
      assert(!await frame.locator('#r80OptionsBtn').isVisible());
      await page.locator('#extLauncher').click();
    }
    await page.locator('#extSheet').waitFor({state:'visible'});
+   assert.equal((await page.locator('#pickerTitle').textContent()).trim(),'データやグラフ');
    await page.locator('#extGroups .extCard').filter({hasText:'Ranking Card'}).click();
    await page.waitForURL(/\/app\/editor\.html/,{timeout:25000});
    await page.locator('#previewRoot .ranking-visual').waitFor({state:'visible',timeout:25000});
