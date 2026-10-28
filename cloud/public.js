@@ -332,6 +332,36 @@
     }catch{}
     const criteria=(Array.isArray(snap.criteria)&&snap.criteria.length)?snap.criteria:dbCriteria.map(c=>({name:c.name,weight:Number(c.weight??1)}));
     const rows=(Array.isArray(snap.rows)&&snap.rows.length)?snap.rows:items.map(i=>({name:i.name,note:'',scores:Array(criteria.length).fill(null)}));
+    // R117: issue short-lived image URLs only for viewable topics.
+    // The Storage bucket is private and enforces topic visibility/ownership through RLS.
+    const imagePathPattern=/^[0-9a-f-]{36}\/([0-9]|[1-3][0-9])[.]jpg$/;
+    const imagePaths=items.map(item=>item.image_url)
+      .filter(path=>typeof path==='string'&&imagePathPattern.test(path)&&path.startsWith(id+'/'));
+    const imageByPath=new Map();
+    if(imagePaths.length){
+      try{
+        const {data:signed,error:signError}=await sb.storage
+          .from('topic-target-images').createSignedUrls(imagePaths,600);
+        if(signError)throw signError;
+        (signed||[]).forEach((entry,index)=>{
+          const url=entry?.signedUrl||'';
+          if(!entry?.error && typeof url==='string'
+            && url.startsWith('https://ibpdxbeltdwkquowjeay.supabase.co/')){
+            imageByPath.set(imagePaths[index],url);
+          }
+        });
+      }catch(error){console.warn('[Stats Maker] Target images could not be loaded:',error)}
+    }
+    const targetImageUrls=items.map(item=>imageByPath.get(item.image_url)||'');
+    const hasTargetImages=targetImageUrls.some(Boolean);
+    function publicTargetHtml(name,index){
+      const url=targetImageUrls[index]||'';
+      const image=url
+        ?'<img class="publicTargetThumb" loading="lazy" decoding="async" alt="" src="'+esc(url)+'">'
+        :(hasTargetImages?'<span class="publicTargetThumb publicTargetMissing" aria-hidden="true"></span>':'');
+      return '<span class="publicTargetIdentity">'+image+'<span class="publicTargetText">'+esc(name)+'</span></span>';
+    }
+
     const scale=Number(snap.scale||data.score_scale||100)===10?10:100;
     const weighted=typeof snap.weighted==='boolean'?snap.weighted:!!data.weighted;
     const publicCategory=socialCategoryLabel(snap?.metadata?.category||'other',ja);
@@ -352,7 +382,7 @@
         :(ja?'公開作品として扱われ、URLから誰でも閲覧できます。':'A public Stats Maker page that anyone with the URL can view.'));
     const metricChips=criteria.map(c=>`<span class="${weighted?'weightedMetric':''}">${esc(c.name)}${weighted?`<small>×${fmt(c.weight??1)}</small>`:''}</span>`).join('');
     const tableHead=criteria.map(c=>`<th>${esc(c.name)}</th>`).join('');
-    const tableRows=rows.map(row=>{const scores=Array.isArray(row.scores)?row.scores:[];const av=average(scores,criteria,weighted);return `<tr><td>${esc(row.name)}</td>${criteria.map((_,i)=>{const n=num(scores[i]);return `<td class="${n===null?'na':'score'}" ${n===null?'':`data-score-value="${n}" data-score-max="${scale}" style="--score-bg:${n/scale>=1?'#e8b9b2':n/scale>=.9?'#edc9b9':n/scale>=.8?'#f1d9c4':n/scale>=.7?'#efd2a6':n/scale>=.6?'#f8edcc':n/scale>=.5?'#e3edc9':n/scale>0?'#d1dce9':'#c0cfdf'}"`}>${n===null?'—':fmt(n)}</td>`}).join('')}<td class="avg">${av===null?'—':fmt(av)}</td></tr>`}).join('');
+    const tableRows=rows.map((row,rowIndex)=>{const scores=Array.isArray(row.scores)?row.scores:[];const av=average(scores,criteria,weighted);return `<tr><td>${publicTargetHtml(row.name,rowIndex)}</td>${criteria.map((_,i)=>{const n=num(scores[i]);return `<td class="${n===null?'na':'score'}" ${n===null?'':`data-score-value="${n}" data-score-max="${scale}" style="--score-bg:${n/scale>=1?'#e8b9b2':n/scale>=.9?'#edc9b9':n/scale>=.8?'#f1d9c4':n/scale>=.7?'#efd2a6':n/scale>=.6?'#f8edcc':n/scale>=.5?'#e3edc9':n/scale>0?'#d1dce9':'#c0cfdf'}"`}>${n===null?'—':fmt(n)}</td>`}).join('')}<td class="avg">${av===null?'—':fmt(av)}</td></tr>`}).join('');
 
     // Public score colors are optional and never change the underlying scores.
     // R38 P16: preserve the single original horizontal scroll matrix on every
@@ -419,7 +449,7 @@
           <b>${ja?'対象と評価項目をコピーして、自分で採点できます。':'Copy the targets and metrics to score them yourself.'}</b>
           <span>${ja?'元の点数はコピーされません。':'Original scores are not copied.'}</span>
         </div>
-        ${rows.some(row=>row.hasLocalImage)?`<div class="notice">${ja?'現在、作成者のローカル画像は公開ページへアップロードされません。':'Creator-local images are not uploaded to the public page yet.'}</div>`:''}
+        ${rows.some((row,i)=>row.hasLocalImage&&!targetImageUrls[i])?`<div class="notice">${ja?'一部の画像はまだ公開されていません。作成者は画像を保存したブラウザから「公開を更新」すると反映できます。':'Some images are not public yet. The creator can update the publication from the browser where the images are saved.'}</div>`:''}
       </section>
 
       <div class="grid">
@@ -430,7 +460,7 @@
         <aside>
           <section class="card">
             <div class="cardTitleRow"><h2>${ja?'作成者の総合ランキング':'Creator Overall Ranking'}</h2><span class="smallBadge">TOP ${Math.min(10,creatorRanking.length)}</span></div>
-            <div class="ranking">${creatorRanking.length?creatorRanking.slice(0,10).map((item,i)=>`<div class="rankRow"><div class="rankNo">${i+1}</div><div class="rankName">${esc(item.name)}</div><div class="rankValue">${fmt(item.value)}</div></div>`).join(''):`<div class="emptyCommunity">${ja?'採点データがありません。':'No scored data yet.'}</div>`}</div>
+            <div class="ranking">${creatorRanking.length?creatorRanking.slice(0,10).map((item,i)=>`<div class="rankRow"><div class="rankNo">${i+1}</div><div class="rankName">${publicTargetHtml(item.name,item.index)}</div><div class="rankValue">${fmt(item.value)}</div></div>`).join(''):`<div class="emptyCommunity">${ja?'採点データがありません。':'No scored data yet.'}</div>`}</div>
           </section>
           <section class="card" style="margin-top:14px">
             <div class="cardTitleRow"><h2>${ja?'評価項目':'Metrics'}</h2><span class="smallBadge">${criteria.length}</span></div>

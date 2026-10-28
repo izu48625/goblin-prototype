@@ -96,6 +96,7 @@
     s.rows.forEach(r=>{
       if(typeof r.name!=='string')r.name='';
       if(typeof r.image!=='string')r.image='';
+      if(typeof r.imageRemoved!=='boolean')r.imageRemoved=false;
       if(typeof r.note!=='string')r.note='';
       if(!Array.isArray(r.scores))r.scores=[];
       while(r.scores.length<s.cols.length)r.scores.push(null);
@@ -1028,6 +1029,7 @@
       try{
         const data=await resizeImage(file);
         s.rows[idx].image=data;
+        s.rows[idx].imageRemoved=false;
         renderAll();
         scheduleSave(t('image.added'));
       }catch(err){
@@ -1038,6 +1040,7 @@
     document.querySelectorAll('[data-remove-image]').forEach(el=>el.addEventListener('click',e=>{
       const idx=+e.currentTarget.dataset.removeImage;
       s.rows[idx].image='';
+      s.rows[idx].imageRemoved=true;
       renderAll();scheduleSave(t('image.removed'));
     }));
   }
@@ -2173,6 +2176,90 @@
     return true;
   }
 
+  // R117: target images are stored outside the JSON snapshot, keeping Free DB small.
+  // The private Storage bucket enforces topic ownership for writes and topic visibility for reads.
+  const TARGET_IMAGE_BUCKET='topic-target-images';
+  const TARGET_IMAGE_LIMIT=51200; // bucket and client agree on 50 KiB JPEGs
+  const publishedImagePathPattern=/^[0-9a-f-]{36}\/([0-9]|[1-3][0-9])[.]jpg$/;
+  function isTopicImagePath(path,topicId){
+    return typeof path==='string' && publishedImagePathPattern.test(path) && path.startsWith(topicId+'/');
+  }
+  async function syncPublishedTargetImages(sb,topicId,sheet,model){
+    const sourceRows=(sheet.rows||[]).filter(row=>String(row?.name||'').trim());
+    if(sourceRows.length!==model.rows.length)throw new Error('Target image list differs from the published structure.');
+    const {data:items,error:listError}=await sb.from('topic_items')
+      .select('id,position,image_url').eq('topic_id',topicId).order('position');
+    if(listError)throw listError;
+    if(!items||items.length!==model.rows.length)throw new Error('Published target rows could not be verified.');
+    const storage=sb.storage.from(TARGET_IMAGE_BUCKET);
+    const usedPaths=new Set();
+    for(let index=0;index<sourceRows.length;index++){
+      const source=sourceRows[index],item=items[index];
+      if(Number(item.position)!==index)throw new Error('Published target order differs from local row order.');
+      const oldPath=isTopicImagePath(item.image_url,topicId)?item.image_url:null;
+      const localImage=typeof source.image==='string'?source.image:'';
+      if(localImage){
+        if(!localImage.startsWith('data:image/jpeg;base64,')){
+          throw new Error('Please select the image again before publishing (JPEG thumbnail required).');
+        }
+        const base64=localImage.slice('data:image/jpeg;base64,'.length);
+        if(base64.length>Math.ceil(TARGET_IMAGE_LIMIT*4/3)+8)throw new Error('Target image exceeds the 50 KiB upload limit.');
+        const binary=atob(base64);
+        if(binary.length>TARGET_IMAGE_LIMIT)throw new Error('Target image exceeds the 50 KiB upload limit.');
+        const bytes=new Uint8Array(binary.length);
+        for(let i=0;i<binary.length;i++)bytes[i]=binary.charCodeAt(i);
+        const digest=await crypto.subtle.digest('SHA-256',bytes);
+        const hash=Array.from(new Uint8Array(digest).slice(0,6),byte=>byte.toString(16).padStart(2,'0')).join('');
+        // Fixed object key gives each topic at most 40 target files (Free-quota guard).
+        const path=topicId+'/'+index+'.jpg';
+        const imageKey=path+':'+hash;
+        if(oldPath!==path || source.publishedImageKey!==imageKey){
+          const {error:uploadError}=await storage.upload(path,new Blob([bytes],{type:'image/jpeg'}),{
+            contentType:'image/jpeg',cacheControl:'60',upsert:true
+          });
+          if(uploadError)throw new Error('Target image upload failed: '+uploadError.message);
+          const {error:writeError}=await sb.from('topic_items').update({image_url:path})
+            .eq('id',item.id).eq('topic_id',topicId).select('id').single();
+          if(writeError)throw new Error('Target image link could not be saved: '+writeError.message);
+          if(oldPath && oldPath!==path){
+            const {error:removeError}=await storage.remove([oldPath]);
+            if(removeError)console.warn('[Stats Maker] Old target image cleanup failed:',removeError);
+          }
+        }
+        source.publishedImageKey=imageKey;
+        usedPaths.add(path);
+      }else if(source.imageRemoved===true){
+        if(oldPath){
+          const {error:writeError}=await sb.from('topic_items').update({image_url:null})
+            .eq('id',item.id).eq('topic_id',topicId).select('id').single();
+          if(writeError)throw new Error('Target image removal could not be saved: '+writeError.message);
+          const {error:removeError}=await storage.remove([oldPath]);
+          if(removeError)console.warn('[Stats Maker] Removed target image cleanup failed:',removeError);
+        }
+        source.imageRemoved=false;
+        source.publishedImageKey='';
+      }else if(oldPath){
+        // Another device may lack local images: never erase a published image implicitly.
+        usedPaths.add(oldPath);
+      }
+    }
+    return usedPaths;
+  }
+
+  async function erasePublishedTargetImages(sb,topicId){
+    const {data:items,error:listError}=await sb.from('topic_items')
+      .select('image_url').eq('topic_id',topicId);
+    if(listError)throw listError;
+    const paths=(items||[]).map(item=>item.image_url)
+      .filter(path=>isTopicImagePath(path,topicId));
+    if(!paths.length)return;
+    // Revoke previously signed links on unpublish by deleting objects themselves.
+    const {error:removeError}=await sb.storage.from(TARGET_IMAGE_BUCKET).remove(paths);
+    if(removeError)throw removeError;
+    const {error:unlinkError}=await sb.from('topic_items').update({image_url:null}).eq('topic_id',topicId);
+    if(unlinkError)throw unlinkError;
+  }
+
   async function insertPublishedStructure(sb,topicId,model){
     const items=model.rows.map(row=>({topic_id:topicId,name:row.name,image_url:null,position:row.position}));
     const criteria=model.criteria.map(item=>({topic_id:topicId,name:item.name,weight:item.weight,position:item.position}));
@@ -2191,13 +2278,14 @@
       const now=new Date().toISOString();
       const basePayload={owner_id:user.id,title:model.title,description:model.description,language_code:model.language,score_scale:model.scale,weighted:model.weighted,visibility,allow_ratings:true,show_community:true,snapshot_version:model.version,snapshot:model,snapshot_updated_at:now,published_at:now};
       let topicId=s.cloudTopicId||'',updating=false,versioned=false;
+      let priorPathsToClean=[];
 
       if(topicId){
         updating=true;
         const [{data:hasSubs,error:subErr},{data:current,error:currentErr},{data:items,error:itemErr},{data:criteria,error:critErr}]=await Promise.all([
           sb.rpc('topic_has_submissions',{p_topic_id:topicId}),
           sb.from('topics').select('id,title,score_scale,weighted').eq('id',topicId).eq('owner_id',user.id).single(),
-          sb.from('topic_items').select('id,name,position').eq('topic_id',topicId).order('position'),
+          sb.from('topic_items').select('id,name,position,image_url').eq('topic_id',topicId).order('position'),
           sb.from('criteria').select('id,name,weight,position').eq('topic_id',topicId).order('position')
         ]);
         if(subErr)throw subErr;if(currentErr)throw currentErr;if(itemErr)throw itemErr;if(critErr)throw critErr;
@@ -2211,15 +2299,32 @@
         }else{
           const {data:updateData,error:updateError}=await sb.from('topics').update(basePayload).eq('id',topicId).eq('owner_id',user.id).select('id').single();
           if(updateError)throw updateError;topicId=updateData.id;
-          if(!hasSubs){await clearPublishedStructure(sb,topicId);await insertPublishedStructure(sb,topicId,model)}
+          if(!hasSubs&&!same){
+            priorPathsToClean=(items||[]).map(item=>item.image_url).filter(path=>isTopicImagePath(path,topicId));
+            await clearPublishedStructure(sb,topicId);
+            await insertPublishedStructure(sb,topicId,model);
+          }
         }
       }else{
         const insertPayload=s.sourceTopicId?{...basePayload,source_topic_id:s.sourceTopicId}:basePayload;
         const {data:insertData,error:insertError}=await sb.from('topics').insert(insertPayload).select('id').single();if(insertError)throw insertError;topicId=insertData.id;await insertPublishedStructure(sb,topicId,model);
       }
 
+      // The published topic and scores must remain usable even if one image upload fails.
+      let imageIssue=null;
+      try{
+        const usedPaths=await syncPublishedTargetImages(sb,topicId,s,model);
+        const stalePaths=priorPathsToClean.filter(path=>!usedPaths.has(path));
+        if(stalePaths.length){
+          const {error:cleanupError}=await sb.storage.from(TARGET_IMAGE_BUCKET).remove(stalePaths);
+          if(cleanupError)console.warn('[Stats Maker] Orphaned thumbnail cleanup failed:',cleanupError);
+        }
+      }catch(error){
+        imageIssue=error;
+        console.warn('[Stats Maker] Public target image upload incomplete:',error);
+      }
       window.SM_ANALYTICS?.event('publish_success',{visibility,outcome:'success'});
-      s.cloudTopicId=topicId;s.cloudVisibility=visibility;s.cloudPublishedAt=now;scheduleSave('');publishState.url=publicPageUrl(topicId);$('publishUrlInput').value=publishState.url;$('publishResult').classList.remove('hidden');$('publishUnpublishBtn').classList.remove('hidden');$('publishExecuteBtn').textContent=t('publish.updateExecute');setPublishStatus(versioned?t('publish.versionedSuccess'):(updating?t('publish.updateSuccess'):t('publish.success')),'ok');renderHeader();refreshEditorCommunitySummary(true);
+      s.cloudTopicId=topicId;s.cloudVisibility=visibility;s.cloudPublishedAt=now;scheduleSave('');publishState.url=publicPageUrl(topicId);$('publishUrlInput').value=publishState.url;$('publishResult').classList.remove('hidden');$('publishUnpublishBtn').classList.remove('hidden');$('publishExecuteBtn').textContent=t('publish.updateExecute');setPublishStatus(imageIssue?(window.SM_I18N?.getLanguage?.()==='en'?'Work published, but some images could not be uploaded. Please try Update publication again.':'作品は公開されましたが、一部の画像を保存できませんでした。「公開を更新」で再試行してください。'):(versioned?t('publish.versionedSuccess'):(updating?t('publish.updateSuccess'):t('publish.success'))),imageIssue?'error':'ok');renderHeader();refreshEditorCommunitySummary(true);
     }catch(e){
       window.SM_ANALYTICS?.event('publish_failure',{outcome:'failure'});
       setPublishStatus(t('publish.errorPrefix')+(e?.message||String(e))+migrationHint(e),'error')
@@ -2238,11 +2343,14 @@
         .update({visibility:'private'}).eq('id',s.cloudTopicId).eq('owner_id',user.id);
       if(updateError)throw updateError;
 
+      let imageDeleteError=null;
+      try{await erasePublishedTargetImages(sb,s.cloudTopicId)}
+      catch(error){imageDeleteError=error;console.warn('[Stats Maker] Unpublish image cleanup failed:',error)}
       s.cloudVisibility='private';scheduleSave('');
       $('publishResult').classList.add('hidden');
       $('publishUnpublishBtn').classList.add('hidden');
       $('publishExecuteBtn').textContent=t('publish.execute');
-      setPublishStatus(t('publish.unpublishSuccess'),'ok');
+      setPublishStatus(imageDeleteError?(window.SM_I18N?.getLanguage?.()==='en'?'Work is private, but image deletion could not be verified. Please retry.':'作品は非公開になりましたが、画像の削除を確認できませんでした。再試行してください。'):t('publish.unpublishSuccess'),imageDeleteError?'error':'ok');
       renderHeader();
       refreshEditorCommunitySummary(true);
     }catch(e){setPublishStatus(t('publish.errorPrefix')+(e?.message||String(e)),'error')}
