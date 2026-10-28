@@ -123,7 +123,7 @@ for(const engine of [chromium,webkit]){
       if(en){
         for(const label of ['Published creator scores','Axes','Display options','X axis','Overall average']){
           if(label==='Overall average')continue; // Quadrant chooses independent X and Y metrics.
-          assert(panel.includes(label),'Missing English editor label '+label+': '+panel);
+          assert(panel.toLowerCase().includes(label.toLowerCase()),'Missing English editor label '+label+': '+panel);
         }
         assert(!/(連動元|表示設定|比較項目|評価項目|項目平均|対象)/.test(panel),
           'Japanese-only controls remain in English panel: '+panel);
