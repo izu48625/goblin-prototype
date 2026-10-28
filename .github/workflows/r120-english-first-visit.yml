@@ -1,0 +1,51 @@
+name: R120 English First Visit Journey
+on:
+  pull_request:
+    paths:
+      - 'index.html'
+      - 'discover.html'
+      - 'public.html'
+      - 'app/**'
+      - 'base/js/app.js'
+      - 'base/js/i18n.js'
+      - 'cloud/global-locale.js'
+      - 'cloud/discover.js'
+      - 'cloud/public.js'
+      - 'cloud/r89-home-intro.js'
+      - 'scripts/r120-english-first-visit-browser-qa.mjs'
+      - '.github/workflows/r120-english-first-visit.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  browser-locale-journey:
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Build production-style static files
+        run: |
+          node --check cloud/discover.js
+          node --check cloud/public.js
+          node --check cloud/global-locale.js
+          node --check app/src/core/source-sync.js
+          node --check app/src/editor/editor.js
+          node --check scripts/r120-english-first-visit-browser-qa.mjs
+          npm run build:cloudflare
+      - name: Install browser engines
+        run: |
+          npm install --no-save playwright@1.56.1
+          npx playwright install --with-deps chromium webkit
+      - name: Run isolated initial-language tests on local site
+        env:
+          BASE_URL: http://127.0.0.1:4173
+        run: |
+          python3 -m http.server 4173 --bind 127.0.0.1 --directory dist >/tmp/r120-browser.log 2>&1 &
+          for i in $(seq 1 30); do
+            if curl -fsS http://127.0.0.1:4173/index.html >/dev/null; then break; fi
+            sleep 1
+          done
+          node scripts/r120-english-first-visit-browser-qa.mjs
