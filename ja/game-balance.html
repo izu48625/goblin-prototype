@@ -1,0 +1,63 @@
+<!doctype html>
+<html lang="ja"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#f6f5f1"><meta name="robots" content="index,follow">
+<title>ゲーム装備5種類の能力バランスを比較｜重み付けランキング実践例 | Stats Maker</title><meta name="description" content="オリジナルのゲーム装備5種類を攻撃・速度・防御・操作性の4項目で評価。重みを動かして順位の変化を試せる、元データと計算式つきの実践作例。">
+<link rel="canonical" href="https://statsmaker.app/ja/game-balance.html">
+<link rel="alternate" hreflang="ja" href="https://statsmaker.app/ja/game-balance.html">
+<link rel="alternate" hreflang="en" href="https://statsmaker.app/en/game-balance.html">
+<link rel="alternate" hreflang="x-default" href="https://statsmaker.app/en/game-balance.html">
+<meta property="og:type" content="article"><meta property="og:site_name" content="Stats Maker">
+<meta property="og:title" content="ゲーム装備5種類の能力バランスを比較｜重み付けランキング実践例 | Stats Maker"><meta property="og:description" content="オリジナルのゲーム装備5種類を攻撃・速度・防御・操作性の4項目で評価。重みを動かして順位の変化を試せる、元データと計算式つきの実践作例。">
+<meta property="og:url" content="https://statsmaker.app/ja/game-balance.html">
+<style>
+:root{color-scheme:light;font-family:system-ui,-apple-system,"Noto Sans",sans-serif;color:#273039;background:#f6f5f1}
+*{box-sizing:border-box}body{margin:0}a{color:#24576b;text-underline-offset:3px}a:focus-visible,button:focus-visible,input:focus-visible{outline:3px solid #388d91;outline-offset:3px}
+header,main,footer{width:min(990px,calc(100% - 32px));margin:auto}header{padding:16px 0;border-bottom:1px solid #d9d5cd;display:flex;justify-content:space-between;gap:12px;flex-wrap:wrap;align-items:center}
+header strong{letter-spacing:.08em}nav{display:flex;gap:14px;flex-wrap:wrap;font-size:13px;font-weight:750}
+main{padding:22px 0 44px}.eyebrow{font-size:12px;letter-spacing:.1em;font-weight:850;color:#a45437}h1{font-size:clamp(28px,5.3vw,43px);line-height:1.22;margin:10px 0 15px}h2{font-size:clamp(21px,3.4vw,27px);line-height:1.32;margin:0 0 10px}p,li{line-height:1.78}.lead{font-size:clamp(15px,2.4vw,18px);line-height:1.8;color:#515a61}
+section{margin-top:20px;padding:24px 0;border-top:1px solid #dedbd3}section:first-of-type{border-top:0}
+.notice{background:#fffaf1;border:1px solid #e7cfad;border-radius:7px;padding:12px 15px;font-size:13px;color:#76552e;line-height:1.65}
+.actions{display:flex;flex-wrap:wrap;gap:10px;margin:18px 0}.actions a,button{min-height:42px;font:inherit;font-weight:750;padding:10px 14px;border-radius:7px}
+.actions a{display:inline-flex;align-items:center;text-decoration:none;background:#315fae;color:#fff}.actions a.secondary{background:#fff;color:#2d5363;border:1px solid #c8cbc8}
+.tablewrap{overflow-x:auto;border:1px solid #ddd9d0;border-radius:8px;background:#fff;max-width:100%}table{width:100%;border-collapse:collapse;min-width:520px;font-size:14px}th,td{border-bottom:1px solid #e9e6df;padding:10px 12px;text-align:left}thead{background:#efeee8}tr:last-child th,tr:last-child td{border-bottom:0}
+.r97Lab{background:#fff;border:1px solid #dedbd3;border-radius:11px;padding:clamp(13px,3vw,24px);margin-top:16px}
+.r97WeightGrid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:10px}
+.r97Weight{display:flex;min-width:0;flex-direction:column;background:#f6f6f3;border:1px solid #e5e1d9;border-radius:7px;padding:12px;font-weight:700;font-size:13px;gap:5px}
+.r97Weight strong{font-size:23px;font-variant-numeric:tabular-nums}.r97Weight input{width:100%;accent-color:#2d668c;min-height:25px}
+.r97Buttons{display:flex;flex-wrap:wrap;gap:7px;margin:15px 0}.r97Buttons button{background:#f4f3ef;color:#2c3c47;border:1px solid #cbd1d0;font-size:13px;cursor:pointer}
+.r97Buttons button:hover{background:#e7f2f2}
+.r97Summary{font-weight:800;margin:8px 0 14px;color:#284a6b}.r97Bar{height:12px;background:#e8e7e0;border-radius:8px;min-width:100px;overflow:hidden}.r97Bar span{display:block;height:100%;background:#417f9c;border-radius:8px}
+.r97Score{font-variant-numeric:tabular-nums;font-weight:800}.r97Formula{font-size:13px;color:#647078;margin-bottom:0}
+.r97Scenarios li{margin:5px 0}.r97End{font-size:13px;color:#647078;border-top:1px solid #e0ddd5;margin-top:22px;padding-top:14px}
+@media(max-width:640px){.r97WeightGrid{grid-template-columns:repeat(2,minmax(0,1fr))}section{padding:18px 0}header{align-items:flex-start}}
+</style>
+<link rel="stylesheet" href="/cloud/global-locale.css?v=r73p1">
+</head><body class="r73-light-page" data-sm-ad-page="guide">
+<header><strong>STATS MAKER / LAB</strong><nav aria-label="サイト内移動"><a href="/index.html?lang=ja">グラフを作る</a><a href="/discover.html?lang=ja">公開作品を見る</a><a href="/ja/use-cases.html">他の作例を見る</a><a href="/en/game-balance.html" hreflang="en">English</a></nav></header>
+<main>
+<div class="eyebrow">STATS MAKER｜オリジナル実践作例</div><h1>装備の強さは一つの順位で決められる？</h1><p class="lead">短剣・盾・槍・弓・槌という5つの創作装備を、攻撃・速度・防御・操作性の4項目で比較する。重視する条件を変えたとき、どの装備が選ばれるのか。すべての数値と計算方法を公開した、操作できる比較実験です。実在ゲームの公式性能ではありません。</p>
+<div class="notice">運営制作の実践作例｜数値はすべて説明用</div>
+<section id="question"><h2>そもそも何を比べたい？</h2><p>単純な合計点には「すべての能力が同じくらい大切」という前提がある。速い短剣と堅い盾を一列に並べるだけでは、どの場面で強いかまでは伝わらない。今回は同じ尺度を5装備に適用し、優先する能力を先に決めてから結論を比較する。個人制作ゲームの仮設計や、創作キャラクターの評価を考える際にも応用できる。</p></section>
+<section id="rubric"><h2>共通の採点基準（0〜100点）</h2><p>5装備すべて同じ4項目を、数値が大きいほど有利という尺度で評価。以下の基準と数値は、この作例のために作った説明用データで、実際に測定した値ではありません。</p><ul><li>攻撃：仮想的な対戦で相手に与える圧力の強さ。</li><li>速度：行動の機会が回ってくる頻度。移動速度とは別の概念。</li><li>防御：相手の攻撃に耐える余裕の大きさ。</li><li>操作性：狙った動きや位置取りの再現しやすさ。</li></ul></section>
+<section id="data"><h2>入力データをすべて公開</h2><p>重みを変えても元の採点値は変更しません。この表の数値を使えば、Stats Makerで自分でも同じ比較を再現できます。</p>
+<div class="tablewrap" role="region" tabindex="0" aria-label="全採点値の表。必要に応じて横スクロール"><table><thead><tr><th scope="col">装備</th><th scope="col">攻撃</th><th scope="col">速度</th><th scope="col">防御</th><th scope="col">操作性</th></tr></thead><tbody><tr><th scope="row">疾風の短剣</th><td>52</td><td>98</td><td>25</td><td>70</td></tr>
+<tr><th scope="row">鋼の盾</th><td>35</td><td>38</td><td>98</td><td>92</td></tr>
+<tr><th scope="row">蒼の槍</th><td>84</td><td>68</td><td>66</td><td>67</td></tr>
+<tr><th scope="row">月影の弓</th><td>72</td><td>83</td><td>30</td><td>58</td></tr>
+<tr><th scope="row">岩砕きの槌</th><td>97</td><td>24</td><td>78</td><td>42</td></tr></tbody></table></div></section>
+<section id="try"><h2>重みを動かして順位を比較</h2><p>各項目の重要度を0〜5で変更できます。0はその項目を合計に含めないという意味。採点の元データを動かさず、価値基準だけを動かして順位がどう変わるか試してみよう。</p>
+<div class="r97Lab" id="r97Lab"><div class="r97WeightGrid"><label class="r97Weight">攻撃<strong><output data-weight-output="0">1</output></strong><input type="range" min="0" max="5" value="1" step="1" data-weight="0" aria-label="攻撃 の重要度"></label><label class="r97Weight">速度<strong><output data-weight-output="1">1</output></strong><input type="range" min="0" max="5" value="1" step="1" data-weight="1" aria-label="速度 の重要度"></label><label class="r97Weight">防御<strong><output data-weight-output="2">1</output></strong><input type="range" min="0" max="5" value="1" step="1" data-weight="2" aria-label="防御 の重要度"></label><label class="r97Weight">操作性<strong><output data-weight-output="3">1</output></strong><input type="range" min="0" max="5" value="1" step="1" data-weight="3" aria-label="操作性 の重要度"></label></div>
+<div class="r97Buttons"><button type="button" data-r97-scenario="speed">速度重視</button><button type="button" data-r97-scenario="defense">防御重視</button><button type="button" data-r97-scenario="power">攻撃重視</button><button type="button" data-r97-reset>すべての重みを1に戻す</button></div>
+<p class="r97Summary" role="status" aria-live="polite" data-r97-summary></p>
+<div class="tablewrap" role="region" tabindex="0" aria-label="重み付けによる順位"><table><thead><tr><th scope="col">順位</th><th scope="col">装備</th><th scope="col">加重得点 / 100</th><th scope="col">得点の割合</th></tr></thead><tbody data-r97-result></tbody></table></div>
+<p class="r97Formula" data-r97-formula></p></div></section>
+<section><h2>重みを変えると、何が起こる？</h2><ol class="r97Scenarios"><li>均等（1:1:1:1）：蒼の槍が71.25点で1位。どの能力も極端に低くなく、実は個別項目では最高点を取っていない。</li><li>速度重視（1:3:0:1）：疾風の短剣が83.20点で1位。月影の弓75.80点を上回る。元の性能値ではなく、重視する条件が変わった結果だ。</li><li>防御重視（1:0:3:1）：鋼の盾が84.20点で1位。攻撃と速度が低くても、防御の重要度によって評価が逆転する。</li><li>攻撃重視（4:1:0:0）：岩砕きの槌が82.40点で1位、蒼の槍が80.80点。わずかな差を絶対的な性能差と解釈しないことが大切。</li></ol><p>実際の戦闘では、攻撃の間隔、スタミナ、コスト、レベル帯、プレイヤーの熟練度なども影響する。この作例の得点を根拠に装備の強弱を断定することはできない。本格的なゲームバランス検証には、同条件でのプレイテスト、複数プレイヤーの観察、ばらつきや制約の記録が必要だ。</p></section>
+<section><h2>この比較だけでは分からないこと</h2><p>実際の戦闘では、攻撃の間隔、スタミナ、コスト、レベル帯、プレイヤーの熟練度なども影響する。この作例の得点を根拠に装備の強弱を断定することはできない。本格的なゲームバランス検証には、同条件でのプレイテスト、複数プレイヤーの観察、ばらつきや制約の記録が必要だ。</p></section>
+<section><h2>Stats Makerで同じ表を再現する</h2><p>5つの装備名を評価対象、4能力を評価項目として入力し、100点満点で採点。レーダーで得意・不得意の形を見て、ランキングで重み付き順位を表示し、Tier表で近い評価をまとめる。画像保存とサイトへの公開は別の操作なので、元データを試すだけなら公開する必要はありません。</p>
+<div class="actions"><a href="/index.html?lang=ja">採点エディターを開く</a><a class="secondary" href="/ja/scoring-guide.html">採点基準の詳しい説明</a></div></section>
+<section><h2>読み違えないためのQ&A</h2><h3>合計点だけではダメ？</h3><p>合計点は暗黙に各項目を同じ重みで扱うため、特徴がまったく違う装備同士でも同じ点数になることがあります。目的に合わせて内訳も確認しましょう。</p><h3>実際のゲームの性能値なの？</h3><p>いいえ。装備名・採点値は、このページの説明のために制作したオリジナルのサンプルです。ゲームの公式データや実測結果ではありません。</p><h3>これで公開作品が増えるの？</h3><p>いいえ。これは運営が作成した実践ガイドです。一般ユーザーが公開するPublic作品はDiscoverに別途表示され、他の人の作品を転載・改変していません。</p></section>
+</main>
+<footer class="r97End">運営制作の実践作例｜数値はすべて説明用 · <a href="/ja/legal.html#contact">お問い合わせ</a></footer>
+<script src="/cloud/r97-game-balance.js?v=r97lab1" defer></script>
+<script src="/cloud/global-locale.js?v=r47guideNav1" defer></script>
+</body></html>
