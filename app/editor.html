@@ -13,6 +13,7 @@
 <link rel="stylesheet" href="css/r73-editor-chrome.css?v=r73p1">
 <link rel="stylesheet" href="css/r77-light-editor.css?v=r77p1">
 <link rel="stylesheet" href="css/r79-quiet-chrome.css?v=r79p1">
+<link rel="stylesheet" href="css/r119-mobile-fit.css?v=r119-mobile-fit1">
 </head>
 <body data-build="R23-P3B" class="editor-body" data-sm-ad-page="editor">
 <header class="editor-header">
@@ -68,8 +69,10 @@
     </div>
 
     <div id="canvasStage" class="canvas-stage">
-      <div id="canvasShell" class="canvas-shell">
-        <div id="previewRoot" class="preview-root"></div>
+      <div id="canvasFitBox" class="canvas-fit-box">
+        <div id="canvasShell" class="canvas-shell">
+          <div id="previewRoot" class="preview-root"></div>
+        </div>
       </div>
     </div>
   </main>
@@ -124,7 +127,7 @@
     }
   })();
 </script>
-<script type="module" src="src/editor-entry.js?v=r118public1"></script>
+<script type="module" src="src/editor-entry.js?v=r119-mobile-fit1"></script>
 
 <div id="exportPreviewModal" class="export-preview-modal hidden" role="dialog" aria-modal="true">
   <div class="export-preview-card">
