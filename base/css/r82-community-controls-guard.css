@@ -20,7 +20,7 @@ body.community-mode #mobileHeaderMoreMenu{
 }
 
 /* R106: one light, score-dependent palette for all editor table views. */
-:root{--sm-heat-ss:#edc6b9;--sm-heat-s:#edc6b9;--sm-heat-a:#f1d9c4;--sm-heat-b:#f5e8ca;--sm-heat-c:#e5edef;--sm-heat-d:#dce8f5;--sm-heat-e:#eaf0f5}
+:root{--sm-heat-ss:#e8b9b2;--sm-heat-s:#edc9b9;--sm-heat-a:#f1d9c4;--sm-heat-b:#f5e8ca;--sm-heat-c:#e5edef;--sm-heat-d:#dce8f5;--sm-heat-e:#d1dce9;--sm-heat-zero:#c0cfdf}
 body:not(.score-colors-off) #scoreTable td.scoreCell.heat-ss,body:not(.score-colors-off) #scoreTable td.avgCell.heat-ss{background:var(--sm-heat-ss)!important}
 body:not(.score-colors-off) #scoreTable td.scoreCell.heat-s,body:not(.score-colors-off) #scoreTable td.avgCell.heat-s{background:var(--sm-heat-s)!important}
 body:not(.score-colors-off) #scoreTable td.scoreCell.heat-a,body:not(.score-colors-off) #scoreTable td.avgCell.heat-a{background:var(--sm-heat-a)!important}
@@ -36,3 +36,5 @@ body:not(.score-colors-off) .fitTable td:is(.fitScoreCell,.fitAverageCell).heat-
 body:not(.score-colors-off) .fitTable td:is(.fitScoreCell,.fitAverageCell).heat-d,body:not(.score-colors-off) .overviewMetric.heat-d{background:var(--sm-heat-d)!important}
 body:not(.score-colors-off) .fitTable td:is(.fitScoreCell,.fitAverageCell).heat-e,body:not(.score-colors-off) .overviewMetric.heat-e{background:var(--sm-heat-e)!important}
 body:not(.score-colors-off) #scoreTable td.scoreCell:not([class*="heat-"]),body:not(.score-colors-off) .fitTable td.fitScoreCell:not([class*="heat-"]){background:#fff!important}
+
+body:not(.score-colors-off) #scoreTable td.scoreCell.heat-zero,body:not(.score-colors-off) #scoreTable td.avgCell.heat-zero{background:#c0cfdf!important}
