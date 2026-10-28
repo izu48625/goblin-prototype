@@ -1,0 +1,8 @@
+/* R83: restore the original R38 P13 dark score palette, without changing the light UI. */
+#scoreTable,.fitTable{background-color:#101b30}
+#scoreTable tbody tr,.fitTable tbody tr{background-color:#101b30}
+#scoreTable tbody tr:nth-child(even),.fitTable tbody tr:nth-child(even){background-color:#131e31}
+#scoreTable td.scoreCell,#scoreTable td.avgCell,.fitTable td.fitScoreCell,.fitTable td.fitAverageCell,.overviewMetric{background-color:#101b30;color:#f4f2ed}
+#scoreTable td.scoreCell:is(.heat-e,.heat-d,.heat-c,.heat-b,.heat-a,.heat-s,.heat-ss),#scoreTable td.avgCell:is(.heat-e,.heat-d,.heat-c,.heat-b,.heat-a,.heat-s,.heat-ss),.fitTable td.fitScoreCell:is(.heat-e,.heat-d,.heat-c,.heat-b,.heat-a,.heat-s,.heat-ss),.fitTable td.fitAverageCell:is(.heat-e,.heat-d,.heat-c,.heat-b,.heat-a,.heat-s,.heat-ss),.overviewMetric:is(.heat-e,.heat-d,.heat-c,.heat-b,.heat-a,.heat-s,.heat-ss){background-color:#101b30;background-image:linear-gradient(var(--score-tile-overlay,transparent),var(--score-tile-overlay,transparent));color:#f4f2ed}
+#scoreTable td.scoreCell .scoreInput,.fitTable td.fitScoreCell .fitScoreInput{color:#f4f2ed}
+body.score-colors-off #scoreTable td.scoreCell,body.score-colors-off #scoreTable td.avgCell,body.score-colors-off .fitTable td.fitScoreCell,body.score-colors-off .fitTable td.fitAverageCell,body.score-colors-off .overviewMetric{background-color:#101b30!important;background-image:none!important;color:#f4f2ed}
