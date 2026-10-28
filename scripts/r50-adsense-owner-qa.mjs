@@ -15,7 +15,7 @@ const verify=html=>{
   assert.equal((html.match(/name="google-adsense-account"/g)||[]).length,1,
     'Duplicate owner verification meta');
   assert(!forbidden.test(html),'Real AdSense script must not activate at verification step');
-  const title=head.match(/<title>([^<]+)<\\/title>/)?.[1]||'';
+  const title=head.split('<title>')[1]?.split('</title>')[0]||'';
   assert(title.includes('Stats Maker')&&title.length>=16,
     'Root app must retain a descriptive search title and Stats Maker brand');
   assert(html.includes('id="basicFrame"')&&html.includes('id="extLauncher"'),
