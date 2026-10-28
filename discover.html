@@ -28,7 +28,7 @@ try{
     .r87EditorialAll{color:#7c3b2b;font-weight:800;font-size:12px;text-underline-offset:3px;white-space:nowrap}
     .r87EditorialRail{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px}
     .r87EditorialRail a{min-width:0;display:flex;gap:9px;align-items:center;padding:7px;border:1px solid #e0ded7;border-radius:6px;color:#2f363b;background:#f9f8f5;text-decoration:none;font-weight:750;font-size:12px}
-    .r87EditorialRail a:hover,.r87EditorialRail a:focus-visible{border-color:#b75f45;outline-offset:2px}
+.r97ExploreLink{margin:11px 0 0!important;font-size:12px}.r97ExploreLink a{font-weight:800;color:#285d70}.r97ExploreLink small{display:inline;color:#737c80;font-size:11px}\n         .r87EditorialRail a:hover,.r87EditorialRail a:focus-visible{border-color:#b75f45;outline-offset:2px}
     .r87EditorialRail img{width:63px;height:54px;object-fit:cover;flex:none;border-radius:3px}
     .r87EditorialRail small{display:block;color:#7e8589;font-size:10px;font-weight:700}
     @media(max-width:680px){
@@ -70,6 +70,7 @@ try{
         <a href="/ja/use-cases.html#routes"><img src="/ja/example-images/usecase-routes.png" width="1080" height="1080" decoding="async" loading="lazy" alt="散歩ルートを2軸で比較する象限グラフ"><span>2つの条件を比べる <small>Quadrant</small></span></a>
         <a href="/ja/use-cases.html#study"><img src="/ja/example-images/usecase-study.png" width="1600" height="900" decoding="async" loading="lazy" alt="8週間の学習習慣の推移を示す折れ線グラフ"><span>変化を線で追う <small>Line</small></span></a>
       </div>
+      <p class="r97ExploreLink"><a id="r97BalanceLink" href="/ja/game-balance.html">新作例：ゲーム装備5種類を重み付けで比較する</a> <small>公式の操作できる採点例・Public投稿とは別です</small></p>
     </section>
 
     <nav class="browseTabs" aria-label="Browse mode">
@@ -128,7 +129,7 @@ try{
 
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <script src="cloud/supabase.js?v=r25p3"></script>
-  <script src="cloud/discover.js?v=r89i18n1"></script>
+  <script src="cloud/discover.js?v=r97balance1"></script>
 <script src="cloud/analytics-config.js?v=r45ga4off1"></script>
 <script src="cloud/analytics.js?v=r45ga4off1"></script>
 <script src="cloud/global-locale.js?v=r47guideNav1"></script>
