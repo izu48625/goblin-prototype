@@ -19,15 +19,16 @@ const snapshot={criteria:[{name:'Speed',weight:1}],rows:[{name:'Alpha',scores:[9
 const topic={id:'57b432ed-fbf2-4261-b57d-9e0f27356d2e',title:'GOAT (Remix) （Remix） (Remix)',score_scale:10,description:'QA'};
 const items=[{id:'i1',name:'Alpha',position:0}],criteria=[{id:'c1',name:'Speed',weight:1,position:0}];
 const result=buildSheet(topic,snapshot,criteria,items,'ja');
-assert.equal(result.title,'GOAT（コピー）','Stacked Remix suffixes survived');
+assert.equal(result.title,'GOAT','Old Remix suffixes were not removed');
 assert.equal(result.sourceTopicId,topic.id,'Remix lineage was lost');
+assert.equal(result.desc,'','A copied sheet must not inherit the original description');
 assert.equal(result.sourceCommunity.itemIds[0],'i1');
 assert.equal(result.rows[0].scores[0],null,'Original score was wrongly copied');
 const en=buildSheet({...topic,title:result.title},snapshot,criteria,items,'en');
-assert.equal(en.title,'GOAT (Copy)');
+assert.equal(en.title,'GOAT');
 assert.equal(topic.title,'GOAT (Remix) （Remix） (Remix)','Source topic was modified');
 saveSheet(result);
-assert.equal(JSON.parse(stored.get('statsMakerV014Library')).sheets[0].title,'GOAT（コピー）');
+assert.equal(JSON.parse(stored.get('statsMakerV014Library')).sheets[0].title,'GOAT');
 const originalRaw=stored.get('statsMakerV014Library');
 for(const raw of ['{invalid-remix-backup',JSON.stringify({notSheets:true}),JSON.stringify({sheets:[null]})]){
   stored.set('statsMakerV014Library',raw);
