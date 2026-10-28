@@ -112,6 +112,13 @@
       const all=editorial.querySelector('.r87EditorialAll');
       all.textContent=en?'View five examples':'5つの作例を見る';
       all.href='/'+locale+'/use-cases.html';
+      const extra=editorial.querySelector('#r97BalanceLink');
+      if(extra){
+        extra.textContent=en?'Interactive example: compare five original game weapons':'新作例：ゲーム装備5種類を重み付けで比較する';
+        extra.href='/'+locale+'/game-balance.html';
+        const note=extra.parentElement.querySelector('small');
+        if(note)note.textContent=en?'An original first-party tutorial, separate from public uploads':'公式の操作できる採点例・Public投稿とは別です';
+      }
       const captions=en?[
         ['Compare café preferences','Bar chart','A bar chart of five sample drinks'],
         ['Compare two priorities','Quadrant','A quadrant chart of example walking routes'],
