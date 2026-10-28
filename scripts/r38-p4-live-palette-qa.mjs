@@ -1,9 +1,12 @@
 import assert from 'node:assert/strict';
 import {readFile} from 'node:fs/promises';
-const KEY='r38p15scores1';
-const PUB_KEY='r58p1projection1';
+const KEY='r119-fresh-home1';
+const STYLE_KEY='r38p15scores1';
+const I18N_KEY='r119-community-copy1';
+const PUB_CSS_KEY='r118-public-visual1';
+const PUB_KEY='r119-copy-route1';
 const HOME='base/index.html?v='+KEY;
-const STYLE='css/style.css?v='+KEY;
+const STYLE='css/style.css?v='+STYLE_KEY;
 const expectedColors=[
   'rgba(31,47,53,.20)','rgba(37,64,85,.24)','rgba(39,72,103,.31)','rgba(40,89,89,.29)','rgba(110,99,57,.32)','rgba(122,84,62,.35)','rgba(116,60,74,.42)'
 ];
@@ -19,7 +22,7 @@ assert(!homeDoc.includes('id="filterCount"'), 'retired row-count still in DOM');
 const publicDoc=await readFile(new URL('../public.html',import.meta.url),'utf8');
 const publicCss=await readFile(new URL('../cloud/public.css',import.meta.url),'utf8');
 const publicJS=await readFile(new URL('../cloud/public.js',import.meta.url),'utf8');
-assert(publicDoc.includes('cloud/public.css?v='+PUB_KEY), 'published CSS not cache busted');
+assert(publicDoc.includes('cloud/public.css?v='+PUB_CSS_KEY), 'published CSS not cache busted');
 assert(publicDoc.includes('cloud/public.js?v='+PUB_KEY), 'published JS not cache busted');
 assert(publicCss.includes('.creatorScoreTable table'), 'compact horizontal score table CSS missing');
 assert(!publicCss.includes('.publicScoreCards{display:grid'), 'card-mode CSS must be removed');
@@ -29,7 +32,7 @@ const liveQa=await readFile(new URL('../scripts/r38-p4-live-palette-qa.mjs',impo
 const liveRuntime=liveQa.slice(liveQa.lastIndexOf('for(const host of hosts){'));
 assert(!liveRuntime.includes("' +base"),'live QA references undefined base variable');
 assert(!liveRuntime.includes("'+base"),'live QA references undefined base variable');
-assert(homeDoc.includes('js/i18n.js?v='+KEY), 'toggle label translation cache stale');
+assert(homeDoc.includes('js/i18n.js?v='+I18N_KEY), 'toggle label translation cache stale');
 const appJS=await readFile(new URL('../base/js/app.js',import.meta.url),'utf8');
 assert(appJS.includes("COLOR_PREF_KEY='statsMaker.scoreColorsVisible.v1'"), 'display preference not implemented');
 const localCss=await readFile(new URL('../base/css/style.css',import.meta.url),'utf8');
@@ -69,17 +72,17 @@ for(const host of hosts){
       const home=await fetchText(host.base+'/base/index.html?v='+KEY);
       assert(home.includes(STYLE),'stale Home HTML -> CSS');
       assert(home.includes('js/app.js?v='+KEY),'stale Home HTML -> color JS');
-      assert(home.includes('js/i18n.js?v='+KEY),'stale Home HTML -> translations');
+      assert(home.includes('js/i18n.js?v='+I18N_KEY),'stale Home HTML -> translations');
       assert(home.includes('id="scoreColorToggleBtn"'),'no score color toggle on production');
       assert(!home.includes('id="gradeFilter"'),'retired grade filter visible in production');
       const publicHome=await fetchText(host.base+'/public.html?paletteQA=r38p15-'+attempt);
-      assert(publicHome.includes('cloud/public.css?v='+PUB_KEY),'published score CSS stale at '+host.base);
+      assert(publicHome.includes('cloud/public.css?v='+PUB_CSS_KEY),'published score CSS stale at '+host.base);
       assert(publicHome.includes('cloud/public.js?v='+PUB_KEY),'published score JS stale at '+host.base);
-      const publicStyle=await fetchText(host.base+'/cloud/public.css?v='+PUB_KEY);
+      const publicStyle=await fetchText(host.base+'/cloud/public.css?v='+PUB_CSS_KEY);
       const publicLogic=await fetchText(host.base+'/cloud/public.js?v='+PUB_KEY);
       assert(publicStyle.includes('.creatorScoreTable table'),'compact scroll CSS missing at '+host.base);
       assert(publicLogic.includes('class="tableWrap creatorScoreTable"'),'horizontal table markup missing at '+host.base);
-      const css=await fetchText(host.base+'/base/css/style.css?v='+KEY);
+      const css=await fetchText(host.base+'/base/css/style.css?v='+STYLE_KEY);
       const app=await fetchText(host.base+'/base/js/app.js?v='+KEY);
       assert(app.includes('scoreTileColors'),'missing real per-cell JS colors');
       assert(app.includes('statsMaker.scoreColorsVisible.v1'),'missing ON/OFF toggle behavior');
