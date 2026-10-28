@@ -1,0 +1,62 @@
+name: R120 International First Visit Language QA
+on:
+  pull_request:
+    paths:
+      - 'index.html'
+      - 'discover.html'
+      - 'public.html'
+      - 'my.html'
+      - 'base/index.html'
+      - 'base/js/app.js'
+      - 'base/js/i18n.js'
+      - 'cloud/discover.js'
+      - 'cloud/public.js'
+      - 'cloud/global-locale.js'
+      - 'cloud/community-home.js'
+      - 'cloud/my.js'
+      - 'cloud/r89-home-intro.js'
+      - 'app/**'
+      - 'scripts/r120-english-first-visit-browser-qa.mjs'
+      - '.github/workflows/r120-i18n-qa.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  browser-language:
+    runs-on: ubuntu-latest
+    timeout-minutes: 24
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Check changed JS syntax and build static assets
+        run: |
+          node --check scripts/r120-english-first-visit-browser-qa.mjs
+          node --check cloud/global-locale.js
+          node --check cloud/discover.js
+          node --check cloud/public.js
+          node --check cloud/r89-home-intro.js
+          node --check cloud/community-home.js
+          node --check cloud/my.js
+          node --check app/src/editor/editor.js
+          node --check app/src/core/source-sync.js
+          node --check base/js/app.js
+          node --check base/js/i18n.js
+          npm run build:cloudflare
+      - name: Install Chromium and WebKit
+        run: |
+          npm install --no-save playwright@1.56.1
+          npx playwright install --with-deps chromium webkit
+      - name: Serve local static build
+        run: |
+          python3 -m http.server 4173 --bind 127.0.0.1 --directory dist >/tmp/r120-static.log 2>&1 &
+          for i in $(seq 1 30); do
+            if curl -fsS http://127.0.0.1:4173/index.html >/dev/null; then exit 0; fi
+            sleep 1
+          done
+          exit 1
+      - name: Verify fresh English and Japanese mobile browsers
+        env:
+          BASE_URL: http://127.0.0.1:4173
+        run: node scripts/r120-english-first-visit-browser-qa.mjs
