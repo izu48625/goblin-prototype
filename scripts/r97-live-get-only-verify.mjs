@@ -7,7 +7,7 @@ const pages=[
   ['/cloud/discover.js',['game-balance.html','r97BalanceLink']],
   ['/my.html',['id="r97DupOnlyBtn"','cloud/my.js?v=r97dup1','noindex,follow']],
   ['/cloud/my.js',['publicDuplicatesAmongOwnedWorks()','data-stage-unlisted',"select.value='unlisted'"]],
-  ['/sitemap.xml',['game-balance.html']]
+  ['/sitemap-static.xml',['/ja/game-balance.html','/en/game-balance.html']]
 ];
 const wait=ms=>new Promise(done=>setTimeout(done,ms));
 async function check(path,markers){
