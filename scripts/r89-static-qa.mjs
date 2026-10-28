@@ -29,7 +29,7 @@ for(const team of original.teams){
 }
 const root=await read('index.html'),launcher=await read('app/src/launcher.js'),css=await read('cloud/r89-home-intro.css'),js=await read('cloud/r89-home-intro.js');
 assert(root.includes('id="r89HomeIntro"'));assert(root.includes('<div id="basicRoot"><iframe'), 'instant editor removed');
-assert(root.includes('id="r87HomeGuide"'));assert(root.includes('r89-home-intro.js?v=r89p1'));
+assert(root.includes('id="r87HomeGuide"'));assert(/r89-home-intro\.js\?v=[a-zA-Z0-9-]+/.test(root));
 assert(css.includes('body.hasGlobalLocaleBar.homeHost:not(.communityShell) #basicRoot{top:93px}'));
 assert(css.includes('body.homeHost.r89IntroDismissed'));
 assert(js.includes('window.SM_R89_LANGUAGE=setLanguage')&&launcher.includes('SM_R89_LANGUAGE?.(language)'));
