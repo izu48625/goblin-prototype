@@ -1,7 +1,7 @@
 import fs from 'node:fs/promises';
 
 const BASE_URL=process.env.BASE_URL||'https://statsmaker.app';
-const PUBLIC_TOPIC_ID=process.env.PUBLIC_TOPIC_ID||'57b432ed-fbf2-4261-b57d-9e0f27356d2e';
+const PUBLIC_TOPIC_ID=process.env.PUBLIC_TOPIC_ID||'1eed295e-9a79-449d-9fd7-e4405e0ae426';
 const mode=process.argv[2]||'http';
 
 function assert(condition,message){
