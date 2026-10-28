@@ -352,7 +352,7 @@
         :(ja?'公開作品として扱われ、URLから誰でも閲覧できます。':'A public Stats Maker page that anyone with the URL can view.'));
     const metricChips=criteria.map(c=>`<span class="${weighted?'weightedMetric':''}">${esc(c.name)}${weighted?`<small>×${fmt(c.weight??1)}</small>`:''}</span>`).join('');
     const tableHead=criteria.map(c=>`<th>${esc(c.name)}</th>`).join('');
-    const tableRows=rows.map(row=>{const scores=Array.isArray(row.scores)?row.scores:[];const av=average(scores,criteria,weighted);return `<tr><td>${esc(row.name)}</td>${criteria.map((_,i)=>{const n=num(scores[i]);return `<td class="${n===null?'na':'score'}" ${n===null?'':`data-score-value="${n}" data-score-max="${scale}" style="--score-bg:${n/scale>=.85?'#f5c4b5':n/scale>=.7?'#f8dac0':n/scale>=.5?'#f9e8c9':n/scale>=.3?'#e4eef0':'#dce8f7'}"`}>${n===null?'—':fmt(n)}</td>`}).join('')}<td class="avg">${av===null?'—':fmt(av)}</td></tr>`}).join('');
+    const tableRows=rows.map(row=>{const scores=Array.isArray(row.scores)?row.scores:[];const av=average(scores,criteria,weighted);return `<tr><td>${esc(row.name)}</td>${criteria.map((_,i)=>{const n=num(scores[i]);return `<td class="${n===null?'na':'score'}" ${n===null?'':`data-score-value="${n}" data-score-max="${scale}" style="--score-bg:${n/scale>=.85?'#8b3e36':n/scale>=.7?'#94563b':n/scale>=.5?'#8a6a3f':n/scale>=.3?'#426777':'#344b70'}"`}>${n===null?'—':fmt(n)}</td>`}).join('')}<td class="avg">${av===null?'—':fmt(av)}</td></tr>`}).join('');
 
     // Public score colors are optional and never change the underlying scores.
     // R38 P16: preserve the single original horizontal scroll matrix on every
