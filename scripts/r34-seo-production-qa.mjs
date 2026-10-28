@@ -53,6 +53,12 @@ assert(index.text.includes('/sitemap-static.xml'));
 assert(index.text.includes('/sitemap-works-1.xml'));
 const staticMap=await fetchText('/sitemap-static.xml');
 assert.equal(staticMap.response.status,200);
+assert(staticMap.text.includes('<loc>https://statsmaker.app/</loc>'),
+  'Canonical root scoring editor missing from submitted sitemap');
+const mainEditor=await fetchText('/');
+assert.equal(mainEditor.response.status,200,'Root scoring editor is not accessible');
+assert(mainEditor.text.includes('<link rel="canonical" href="https://statsmaker.app/">'),
+  'Root scoring editor is missing its own canonical URL');
 assert(staticMap.text.includes('/en/'));
 assert(staticMap.text.includes('/ja/'));
 assert(!staticMap.text.includes('/my/'));
