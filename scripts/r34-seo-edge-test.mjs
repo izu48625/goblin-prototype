@@ -25,7 +25,16 @@ for(const [html,lang] of [[en,'en'],[ja,'ja']]){
 }
 assert(en.includes('Chart Maker for Radar'), 'English chart-maker search title missing');
 assert(en.includes('anime')||en.includes('Anime'), 'English topic coverage missing');
-assert(ja.includes('グラフ作成・能力比較'));
+assert(ja.includes('キャラ比較・能力値グラフ作成'));
+assert(root.includes('キャラ比較・グラフ作成'));
+const guide=await read('ja/chart-guide.html');
+assert(guide.includes('<h1>キャラやチームの能力比較に合うグラフを選ぶ</h1>'));
+assert(guide.includes('<h2>キャラの能力値を比較する実例</h2>'));
+assert(guide.includes('キャラA</th><td>9</td><td>4</td><td>8</td><td>7.0</td>'));
+assert(guide.includes('キャラB</th><td>6</td><td>8</td><td>7</td><td>7.0</td>'));
+assert(guide.includes('「データやグラフ」からRadar Chart'));
+assert(guide.includes('name="robots" content="index,follow"'));
+assert(guide.includes('href="https://statsmaker.app/ja/chart-guide.html"'));
 assert(root.includes("localStorage.setItem('statsMaker.locale',language)"));
 assert(discover.includes('rating charts'));
 assert(robot.includes('Sitemap: https://statsmaker.app/sitemap.xml'));
