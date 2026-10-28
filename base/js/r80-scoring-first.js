@@ -44,7 +44,8 @@
     menuBtn.setAttribute('aria-label',en?'Other sheet actions':'シートのその他の操作');
     menuBtn.textContent='⋯';
     optionsBtn.textContent=en?'Settings':'設定';
-    $('r80VisualsBtn').textContent=en?'＋ Visuals':'＋ 拡張';
+    $('r80VisualsBtn').textContent=en?'Data & Charts':'データやグラフ';
+    $('r80VisualsBtn').setAttribute('aria-label',en?'Open Data & Charts':'データやグラフを開く');
     $('r81OptionsTitle').textContent=en?'View & score settings':'表示・採点の設定';
     $('r81OptionsClose').textContent=en?'Close ×':'閉じる ×';
     $('r81OptionsClose').setAttribute('aria-label',en?'Close settings':'設定を閉じる');
