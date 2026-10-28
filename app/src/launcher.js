@@ -1,7 +1,7 @@
 import {EXTENSIONS} from "./extension-catalog.js?v=r118public1";
 import {createProject} from "./core/project.js";
 import {saveProject} from "./core/store.js";
-import {syncSourceProject} from "./core/source-sync.js?v=r29source1";
+import {syncSourceProject} from "./core/source-sync.js?v=r118public1";
 
 const UI={
   ja:{launcherTitle:"データやグラフ",launcherSub:"グラフ・カードを作る",pickerTitle:"データやグラフ",pickerDesc:"基本表の対象・画像・評価項目・点数をそのまま使います。",groups:{popular:"人気",compare:"比較",ranking:"ランキング",number:"数値表示",creative:"画像グラフ"}},
