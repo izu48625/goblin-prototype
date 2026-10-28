@@ -7,7 +7,7 @@ import {exportPreview,exportProjectJSON,readProjectJSON,isIOS} from "../core/exp
 import {createImageManager} from "./image-editor.js";
 import {createDataImport} from "./data-import.js";
 import {createSpreadsheetEditor} from "./spreadsheet-editor.js";
-import {getSourceModel,getMetricOptions,getCriterionOptions,getSubjectOptions,syncSourceProject} from "../core/source-sync.js?v=r118public1";
+import {getSourceModel,getMetricOptions,getCriterionOptions,getSubjectOptions,syncSourceProject} from "../core/source-sync.js?v=r120-locale1";
 
 const $=id=>document.getElementById(id);
 const uiText=(ja,en)=>getLanguage()==="ja"?ja:en;
