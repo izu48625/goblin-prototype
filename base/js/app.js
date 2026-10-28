@@ -249,8 +249,8 @@
     'heat-s':'#edc9b9',
     'heat-a':'#f1d9c4',
     'heat-b':'#f5e8ca',
-    'heat-c':'#e5edef',
-    'heat-d':'#dce8f5',
+    'heat-c':'#f3e6c7',
+    'heat-d':'#e3edc9',
     'heat-e':'#d1dce9',
     'heat-zero':'#c0cfdf'
   });
