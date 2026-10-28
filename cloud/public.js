@@ -334,7 +334,7 @@
     const rows=(Array.isArray(snap.rows)&&snap.rows.length)?snap.rows:items.map(i=>({name:i.name,note:'',scores:Array(criteria.length).fill(null)}));
     // R117: issue short-lived image URLs only for viewable topics.
     // The Storage bucket is private and enforces topic visibility/ownership through RLS.
-    const imagePathPattern=/^[0-9a-f-]{36}\/([0-9]|[1-3][0-9])-[0-9a-f]{12}[.]jpg$/;
+    const imagePathPattern=/^[0-9a-f-]{36}\/([0-9]|[1-3][0-9])[.]jpg$/;
     const imagePaths=items.map(item=>item.image_url)
       .filter(path=>typeof path==='string'&&imagePathPattern.test(path)&&path.startsWith(id+'/'));
     const imageByPath=new Map();
