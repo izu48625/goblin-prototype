@@ -1,0 +1,46 @@
+name: R97 Original Content and Owner Duplicate Review QA
+on:
+  pull_request:
+    paths:
+      - 'ja/game-balance.html'
+      - 'en/game-balance.html'
+      - 'cloud/r97-game-balance.js'
+      - 'worker/seo.js'
+      - 'discover.html'
+      - 'cloud/discover.js'
+      - 'cloud/my.js'
+      - 'my.html'
+      - 'cloud/my.css'
+      - 'scripts/r90-owner-category-qa.mjs'
+      - 'scripts/r97-original-content-qa.mjs'
+      - '.github/workflows/r97-original-content-qa.yml'
+permissions:
+  contents: read
+jobs:
+  new-samples-and-duplicate-review:
+    runs-on: ubuntu-latest
+    container:
+      image: mcr.microsoft.com/playwright:v1.56.1-noble
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Build with no paid services
+        run: |
+          node --check cloud/my.js
+          node --check cloud/discover.js
+          node --check cloud/r97-game-balance.js
+          node --check scripts/r97-original-content-qa.mjs
+          npm run build:cloudflare
+      - name: Validate iPhone Safari, desktop, sample math, anonymous owner-only actions
+        run: |
+          npm install --no-save playwright@1.56.1
+          python3 -m http.server 4173 --bind 127.0.0.1 --directory dist >/tmp/r97-site.log 2>&1 &
+          for i in $(seq 1 30); do
+            if curl -fsS http://127.0.0.1:4173/my.html >/dev/null; then break; fi
+            sleep 1
+          done
+          BASE_URL=http://127.0.0.1:4173 node scripts/r97-original-content-qa.mjs
+          BASE_URL=http://127.0.0.1:4173 node scripts/r90-owner-category-qa.mjs

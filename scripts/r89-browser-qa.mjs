@@ -49,7 +49,8 @@ for(const engine of [chromium,webkit]){
    assert((await gallery.locator('h2').textContent()).startsWith('Discover'));
    assert((await gallery.locator('p').textContent()).includes('separate from'));
    const links=await gallery.locator('a[href]').evaluateAll(els=>els.map(x=>x.getAttribute('href')));
-   assert(links.every(x=>x.startsWith('/en/use-cases.html')),'EN examples must link EN only: '+links.join(','));
+   assert(links.every(x=>x.startsWith('/en/use-cases.html')||x==='/en/game-balance.html'),'EN examples must link EN only: '+links.join(','));
+   assert(links.includes('/en/game-balance.html'),'Interactive editorial case study must follow EN locale');
    const overflow=await page.evaluate(()=>document.documentElement.scrollWidth-innerWidth);
    assert(overflow<=3,'Discover overflow '+width);
    let failManifestOnce=width===390;

@@ -40,7 +40,7 @@ assert(globalLocale.includes('data-global-intro')&&globalLocale.includes('ホー
 assert(css.includes('r89HomeIntroCopy h1')&&css.includes('[data-sm-theme="dark"]'));
 
 const discover=await read('cloud/discover.js'),d=await read('discover.html');
-assert(d.includes('discover.js?v=r89i18n1'));
+assert(d.includes('discover.js?v=r97balance1'));
 assert(discover.includes("all.href='/'+locale+'/use-cases.html'"));
 assert(discover.includes("a.href='/'+locale+'/use-cases.html#'"));
 assert(discover.includes("a.href='/'+locale+'/legal.html#'+kind"));

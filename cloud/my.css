@@ -181,3 +181,12 @@ html:not([data-sm-theme="dark"]) .emptyState b{color:#292e33}
 html:not([data-sm-theme="dark"]) :is(.btn,.filterBtn,.r90CategorySelect,.visibilitySelect):focus-visible{
   outline:2px solid #307f87;outline-offset:2px;
 }
+
+/* R97 owner-only duplicate review. No automatic visibility changes. */
+.r97DuplicateReview{border:1px solid #bdad8c;border-radius:7px;padding:10px 12px;margin-top:11px;background:var(--panel2)}
+.r97DuplicateReview p{font-size:12px;line-height:1.6;color:var(--muted);margin:0 0 9px}
+.r97DuplicateReview .btn{min-height:37px;font-size:12px}
+.r91ReviewTools .r97Active{border-color:#3e797a;background:#dcefee;color:#255457}
+html[data-sm-theme="dark"] .r91ReviewTools .r97Active{background:#193c49;color:#e0f2f3}
+html:not([data-sm-theme="dark"]) .r97DuplicateReview{background:#fffaf0;border-color:#dfc7a3}
+@media(max-width:390px){.r91ReviewTools #r97DupOnlyBtn{grid-column:1/-1}}

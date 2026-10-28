@@ -1,0 +1,63 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#f6f5f1"><meta name="robots" content="index,follow">
+<title>Balance Five Original Game Weapons with a Weighted Ranking | Stats Maker</title><meta name="description" content="Interactive original game-balance case study with five imaginary weapons, four rating criteria, adjustable weights, score breakdowns, trade-offs and explicit limitations.">
+<link rel="canonical" href="https://statsmaker.app/en/game-balance.html">
+<link rel="alternate" hreflang="ja" href="https://statsmaker.app/ja/game-balance.html">
+<link rel="alternate" hreflang="en" href="https://statsmaker.app/en/game-balance.html">
+<link rel="alternate" hreflang="x-default" href="https://statsmaker.app/en/game-balance.html">
+<meta property="og:type" content="article"><meta property="og:site_name" content="Stats Maker">
+<meta property="og:title" content="Balance Five Original Game Weapons with a Weighted Ranking | Stats Maker"><meta property="og:description" content="Interactive original game-balance case study with five imaginary weapons, four rating criteria, adjustable weights, score breakdowns, trade-offs and explicit limitations.">
+<meta property="og:url" content="https://statsmaker.app/en/game-balance.html">
+<style>
+:root{color-scheme:light;font-family:system-ui,-apple-system,"Noto Sans",sans-serif;color:#273039;background:#f6f5f1}
+*{box-sizing:border-box}body{margin:0}a{color:#24576b;text-underline-offset:3px}a:focus-visible,button:focus-visible,input:focus-visible{outline:3px solid #388d91;outline-offset:3px}
+header,main,footer{width:min(990px,calc(100% - 32px));margin:auto}header{padding:16px 0;border-bottom:1px solid #d9d5cd;display:flex;justify-content:space-between;gap:12px;flex-wrap:wrap;align-items:center}
+header strong{letter-spacing:.08em}nav{display:flex;gap:14px;flex-wrap:wrap;font-size:13px;font-weight:750}
+main{padding:22px 0 44px}.eyebrow{font-size:12px;letter-spacing:.1em;font-weight:850;color:#a45437}h1{font-size:clamp(28px,5.3vw,43px);line-height:1.22;margin:10px 0 15px}h2{font-size:clamp(21px,3.4vw,27px);line-height:1.32;margin:0 0 10px}p,li{line-height:1.78}.lead{font-size:clamp(15px,2.4vw,18px);line-height:1.8;color:#515a61}
+section{margin-top:20px;padding:24px 0;border-top:1px solid #dedbd3}section:first-of-type{border-top:0}
+.notice{background:#fffaf1;border:1px solid #e7cfad;border-radius:7px;padding:12px 15px;font-size:13px;color:#76552e;line-height:1.65}
+.actions{display:flex;flex-wrap:wrap;gap:10px;margin:18px 0}.actions a,button{min-height:42px;font:inherit;font-weight:750;padding:10px 14px;border-radius:7px}
+.actions a{display:inline-flex;align-items:center;text-decoration:none;background:#315fae;color:#fff}.actions a.secondary{background:#fff;color:#2d5363;border:1px solid #c8cbc8}
+.tablewrap{overflow-x:auto;border:1px solid #ddd9d0;border-radius:8px;background:#fff;max-width:100%}table{width:100%;border-collapse:collapse;min-width:520px;font-size:14px}th,td{border-bottom:1px solid #e9e6df;padding:10px 12px;text-align:left}thead{background:#efeee8}tr:last-child th,tr:last-child td{border-bottom:0}
+.r97Lab{background:#fff;border:1px solid #dedbd3;border-radius:11px;padding:clamp(13px,3vw,24px);margin-top:16px}
+.r97WeightGrid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:10px}
+.r97Weight{display:flex;min-width:0;flex-direction:column;background:#f6f6f3;border:1px solid #e5e1d9;border-radius:7px;padding:12px;font-weight:700;font-size:13px;gap:5px}
+.r97Weight strong{font-size:23px;font-variant-numeric:tabular-nums}.r97Weight input{width:100%;accent-color:#2d668c;min-height:25px}
+.r97Buttons{display:flex;flex-wrap:wrap;gap:7px;margin:15px 0}.r97Buttons button{background:#f4f3ef;color:#2c3c47;border:1px solid #cbd1d0;font-size:13px;cursor:pointer}
+.r97Buttons button:hover{background:#e7f2f2}
+.r97Summary{font-weight:800;margin:8px 0 14px;color:#284a6b}.r97Bar{height:12px;background:#e8e7e0;border-radius:8px;min-width:100px;overflow:hidden}.r97Bar span{display:block;height:100%;background:#417f9c;border-radius:8px}
+.r97Score{font-variant-numeric:tabular-nums;font-weight:800}.r97Formula{font-size:13px;color:#647078;margin-bottom:0}
+.r97Scenarios li{margin:5px 0}.r97End{font-size:13px;color:#647078;border-top:1px solid #e0ddd5;margin-top:22px;padding-top:14px}
+@media(max-width:640px){.r97WeightGrid{grid-template-columns:repeat(2,minmax(0,1fr))}section{padding:18px 0}header{align-items:flex-start}}
+</style>
+<link rel="stylesheet" href="/cloud/global-locale.css?v=r73p1">
+</head><body class="r73-light-page" data-sm-ad-page="guide">
+<header><strong>STATS MAKER / LAB</strong><nav aria-label="Site navigation"><a href="/index.html?lang=en">Create a chart</a><a href="/discover.html?lang=en">Explore published works</a><a href="/en/use-cases.html">More original examples</a><a href="/ja/game-balance.html" hreflang="ja">日本語</a></nav></header>
+<main>
+<div class="eyebrow">ORIGINAL INTERACTIVE CASE STUDY</div><h1>Balance five game weapons without inventing a single best answer</h1><p class="lead">How do you compare a fast dagger with a heavy hammer or defensive shield? Use a fully disclosed, imaginary data set to test whether the best choice changes when speed, defense or attack matters more. These values are original illustrations, not facts from any game.</p>
+<div class="notice">Original teaching example · all values illustrative</div>
+<section id="question"><h2>The question behind the ranking</h2><p>A single total hides trade-offs. The dagger is fast but fragile; the shield is defensive but slow. Instead of pretending that every player wants the same gear, start with a shared scoring rubric and change the priority weights openly. The method works for original game prototypes, board games or classroom exercises.</p></section>
+<section id="rubric"><h2>Scoring rubric (0–100)</h2><p>All five items use the same four criteria and the same higher-is-better scale. These fictional scores reflect one transparent design exercise; there are no hidden accuracy claims.</p><ul><li>Damage: how much pressure it creates on the target in our imagined encounter.</li><li>Speed: frequency of opportunities to act, not movement speed.</li><li>Defense: protection or safety margin during the encounter.</li><li>Control: ability to steer position and choices with predictable outcomes.</li></ul></section>
+<section id="data"><h2>Original input scores</h2><p>These are the complete source values. Changing a weight does not rewrite a score. You can copy this table into Stats Maker and compare the same five items yourself.</p>
+<div class="tablewrap" role="region" tabindex="0" aria-label="Full original scores; scroll horizontally if necessary"><table><thead><tr><th scope="col">Equipment</th><th scope="col">Damage</th><th scope="col">Speed</th><th scope="col">Defense</th><th scope="col">Control</th></tr></thead><tbody><tr><th scope="row">Wind Dagger</th><td>52</td><td>98</td><td>25</td><td>70</td></tr>
+<tr><th scope="row">Iron Shield</th><td>35</td><td>38</td><td>98</td><td>92</td></tr>
+<tr><th scope="row">Azure Spear</th><td>84</td><td>68</td><td>66</td><td>67</td></tr>
+<tr><th scope="row">Moon Bow</th><td>72</td><td>83</td><td>30</td><td>58</td></tr>
+<tr><th scope="row">Stone Hammer</th><td>97</td><td>24</td><td>78</td><td>42</td></tr></tbody></table></div></section>
+<section id="try"><h2>Try a weighted ranking</h2><p>Adjust the importance of each criterion from 0 to 5. A weight of zero removes that criterion from the average. Each choice remains transparent. This is a teaching model, not an official game balance test.</p>
+<div class="r97Lab" id="r97Lab"><div class="r97WeightGrid"><label class="r97Weight">Damage<strong><output data-weight-output="0">1</output></strong><input type="range" min="0" max="5" value="1" step="1" data-weight="0" aria-label="Damage weight"></label><label class="r97Weight">Speed<strong><output data-weight-output="1">1</output></strong><input type="range" min="0" max="5" value="1" step="1" data-weight="1" aria-label="Speed weight"></label><label class="r97Weight">Defense<strong><output data-weight-output="2">1</output></strong><input type="range" min="0" max="5" value="1" step="1" data-weight="2" aria-label="Defense weight"></label><label class="r97Weight">Control<strong><output data-weight-output="3">1</output></strong><input type="range" min="0" max="5" value="1" step="1" data-weight="3" aria-label="Control weight"></label></div>
+<div class="r97Buttons"><button type="button" data-r97-scenario="speed">Speed-focused</button><button type="button" data-r97-scenario="defense">Defense-focused</button><button type="button" data-r97-scenario="power">Damage-focused</button><button type="button" data-r97-reset>Reset to equal weights</button></div>
+<p class="r97Summary" role="status" aria-live="polite" data-r97-summary></p>
+<div class="tablewrap" role="region" tabindex="0" aria-label="Live weighted ranking"><table><thead><tr><th scope="col">Rank</th><th scope="col">Equipment</th><th scope="col">Weighted / 100</th><th scope="col">Relative score</th></tr></thead><tbody data-r97-result></tbody></table></div>
+<p class="r97Formula" data-r97-formula></p></div></section>
+<section><h2>What the scenarios reveal</h2><ol class="r97Scenarios"><li>Equal weights (1:1:1:1): Azure Spear leads at 71.25. Its scores are reasonably balanced; it is not the best in any single criterion.</li><li>Speed focus (1:3:0:1): Wind Dagger leads at 83.20, ahead of Moon Bow at 75.80. The ranking changes because the priority changes, not because the source scores were altered.</li><li>Defense focus (1:0:3:1): Iron Shield leads at 84.20. A high protection rating can outweigh its weaker damage and speed.</li><li>Damage focus (4:1:0:0): Stone Hammer leads at 82.40, narrowly ahead of Azure Spear at 80.80. A small lead should not be mistaken for a robust design verdict.</li></ol></section>
+<section><h2>What this comparison does not prove</h2><p>The model ignores attack timing, stamina, costs, matchmaking, level progression and actual play-test results. It should not be used to declare a weapon objectively overpowered. For real balancing, capture comparable play-test observations, segment players, repeat measurements and explain uncertainty.</p></section>
+<section><h2>Recreate the comparison in Stats Maker</h2><p>Enter the five items as rows and four criteria as columns. Use the same 0–100 scale, and keep the raw scores visible alongside any graph. A radar chart shows a weapon's strengths; a ranking answers a chosen weighting question; a tier list groups close values. Saving a chart locally or exporting a PNG does not publish it to Discover.</p>
+<div class="actions"><a href="/index.html?lang=en">Open the chart editor</a><a class="secondary" href="/en/scoring-guide.html">Read the scoring methodology</a></div></section>
+<section><h2>Common interpretation mistakes</h2><h3>Why not just use total points?</h3><p>Total points silently assigns equal weights and can hide that two very different weapons receive the same overall number.</p><h3>Are the scores objective game facts?</h3><p>No. Every item and score in this page was invented as an instructional example. They are not measured weapon statistics or player research.</p><h3>Does this add new public works?</h3><p>No. This is a first-party educational page. User-created Public works still appear separately in Discover, and nobody else's content is republished or edited.</p></section>
+</main>
+<footer class="r97End">Original teaching example · all values illustrative · <a href="/en/legal.html#contact">Contact</a></footer>
+<script src="/cloud/r97-game-balance.js?v=r97lab1" defer></script>
+<script src="/cloud/global-locale.js?v=r47guideNav1" defer></script>
+</body></html>

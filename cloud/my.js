@@ -5,7 +5,7 @@
   const sb=window.SM_SUPABASE?.client||null;
   const LOCALE_KEY='statsMaker.locale';
   const OGP_ORIGIN=String(window.SM_RUNTIME?.ogShareOrigin||'').replace(/\/+$/,'');
-  const state={user:null,works:[],filter:'all',loading:false,locale:detectLocale()};
+  const state={user:null,works:[],filter:'all',reviewDuplicates:false,loading:false,locale:detectLocale()};
   const copy={
     ja:{
       brandSub:'公開作品',back:'編集へ戻る',title:'自分の公開作品',
@@ -26,6 +26,10 @@
       categoryError:'カテゴリを更新できませんでした：',categoryUnset:'未設定',
       categoryHelp:'カテゴリは作品の持ち主だけが変更できます。同じ採点内容の作品は確認用に表示します（自動削除しません）。',
       duplicate:'同じ採点内容あり',
+      dupFilter:n=>`公開中の重複候補 ${n}件を見る`,dupFilterOff:'全作品を表示',
+      dupNone:'公開中の重複候補はありません。',
+      dupHint:'公開中の採点内容が別の作品と一致しています。元データを残したい場合は限定公開に変更できます。',
+      dupStage:'限定公開を選択',dupStaged:'「限定公開」を選択しただけで、まだ変更は保存していません。保存するには同じカードの「公開範囲」を押してください。',
       suggest:'カテゴリ候補を表示',batchSave:'提案をまとめて保存',
       suggestions:n=>`${n}件の候補を選択しました。まだ保存されていません。内容を確認してから保存してください。`,
       noneSuggested:'安全に判定できるカテゴリ候補はありません。各作品で個別に設定できます。',
@@ -52,6 +56,10 @@
       categoryError:'Could not update category: ',categoryUnset:'Uncategorized',
       categoryHelp:'Only the owner can update categories. Duplicate scoring data is highlighted for review; nothing is removed automatically.',
       duplicate:'Same rating data',
+      dupFilter:n=>`Review ${n} public duplicate candidates`,dupFilterOff:'Show all my works',
+      dupNone:'No matching Public scoring data among your own works.',
+      dupHint:'The public scoring data matches another of your works. You can choose Unlisted while keeping your original scores and share URL.',
+      dupStage:'Select Unlisted',dupStaged:'Unlisted is selected locally only. Click the Visibility button on this card to save the change.',
       suggest:'Suggest categories',batchSave:'Save suggested categories',
       suggestions:n=>`${n} categories selected, not saved. Review each work before saving.`,
       noneSuggested:'No confident category suggestions. You can classify each work manually.',
@@ -92,6 +100,17 @@
       const first=seen.get(fingerprint);
       if(first){matches.add(first);matches.add(topic.id)}
       else seen.set(fingerprint,topic.id);
+    }
+    return matches;
+  }
+  function publicDuplicatesAmongOwnedWorks(){
+    const seen=new Map(),matches=new Set();
+    for(const topic of state.works){
+      if(topic.visibility!=='public')continue;
+      const key=scoringFingerprint(topic);
+      if(!key)continue;
+      if(seen.has(key)){matches.add(seen.get(key));matches.add(topic.id)}
+      else seen.set(key,topic.id);
     }
     return matches;
   }
@@ -146,6 +165,7 @@
     $('r90CategoryHelp').textContent=c().categoryHelp;
     $('r91SuggestBtn').textContent=c().suggest;
     $('r91BatchSaveBtn').textContent=c().batchSave;
+    $('r97DupOnlyBtn').textContent=state.reviewDuplicates?c().dupFilterOff:c().dupFilter(publicDuplicatesAmongOwnedWorks().size);
     renderWorks();
   }
   function setLocale(next){
@@ -192,9 +212,18 @@
       grid.classList.add('hidden'); empty.classList.add('hidden'); return;
     }
 
-    const list=state.filter==='all'?state.works:state.works.filter(w=>w.visibility===state.filter);
+    const publicDups=publicDuplicatesAmongOwnedWorks();
+    const filterBtn=$('r97DupOnlyBtn');
+    filterBtn.textContent=state.reviewDuplicates?c().dupFilterOff:c().dupFilter(publicDups.size);
+    filterBtn.disabled=!state.user||(!state.reviewDuplicates&&!publicDups.size);
+    filterBtn.setAttribute('aria-pressed',String(state.reviewDuplicates));
+    filterBtn.classList.toggle('r97Active',state.reviewDuplicates);
+    let list=state.filter==='all'?state.works:state.works.filter(w=>w.visibility===state.filter);
+    if(state.reviewDuplicates)list=list.filter(w=>publicDups.has(w.id));
     if(!list.length){
-      status.classList.add('hidden'); grid.classList.add('hidden'); empty.classList.remove('hidden'); return;
+      if(state.reviewDuplicates){status.textContent=c().dupNone;status.classList.remove('hidden');empty.classList.add('hidden');}
+      else{status.classList.add('hidden');empty.classList.remove('hidden');}
+      grid.classList.add('hidden'); return;
     }
 
     empty.classList.add('hidden'); status.classList.add('hidden'); grid.classList.remove('hidden');
@@ -219,6 +248,7 @@
           <span class="metaChip">${Number(topic.score_scale||100)} ${esc(c().scale)}</span>
         </div>
         <div class="workDate">${esc(c().updated)} ${esc(dateText(updated))}</div>
+        ${publicDups.has(topic.id)?`<div class="r97DuplicateReview"><p>${esc(c().dupHint)}</p><button type="button" class="btn" data-stage-unlisted="${esc(topic.id)}">${esc(c().dupStage)}</button></div>`:''}
         <div class="r90CategoryControls">
           <label for="r90-cat-${esc(topic.id)}">${esc(c().category)}</label>
           <select id="r90-cat-${esc(topic.id)}" class="r90CategorySelect" data-category-for="${esc(topic.id)}">
@@ -401,7 +431,17 @@
   $('refreshBtn').addEventListener('click',refresh);
   $('r91SuggestBtn').addEventListener('click',previewSuggestions);
   $('r91BatchSaveBtn').addEventListener('click',saveSuggestedCategories);
+  $('r97DupOnlyBtn').addEventListener('click',()=>{state.reviewDuplicates=!state.reviewDuplicates;renderWorks()});
   $('worksGrid').addEventListener('click',event=>{
+    const stage=event.target.closest('[data-stage-unlisted]');
+    if(stage){
+      const id=stage.dataset.stageUnlisted;
+      if(state.user&&publicDuplicatesAmongOwnedWorks().has(id)){
+        const select=document.querySelector(`[data-visibility-for="${CSS.escape(id)}"]`);
+        if(select){select.value='unlisted';setStatus(c().dupStaged);}
+      }
+      return;
+    }
     const save=event.target.closest('[data-save-visibility]');
     if(save){updateVisibility(save.dataset.saveVisibility);return;}
     const saveCategory=event.target.closest('[data-save-category]');
