@@ -6,7 +6,7 @@ function sourceLocale(){
     const saved=typeof localStorage!=="undefined"
       ?localStorage.getItem("statsMaker.locale")||localStorage.getItem("statsMakerV2Language")
       :null;
-    const browser=typeof navigator!=="undefined"?navigator.language:null;
+    const browser=typeof window!=="undefined" && typeof navigator!=="undefined"?navigator.language:null;
     return String(saved||browser||"ja").toLowerCase().startsWith("ja")?"ja":"en";
   }catch{return "ja"}
 }
