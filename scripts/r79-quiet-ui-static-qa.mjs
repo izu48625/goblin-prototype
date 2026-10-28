@@ -27,10 +27,17 @@ for(const p of ['base/css/r79-quiet-interface.css','app/css/r79-quiet-chrome.css
  assert.equal((t.match(/{/g)||[]).length,(t.match(/}/g)||[]).length,'Unbalanced styles '+p);
 }
 const dataJS=await read('base/js/app.js');
+const scoreCss=await read('base/css/style.css');
 for(const col of ['rgba(116,60,74,.42)','rgba(122,84,62,.35)',
  'rgba(110,99,57,.32)','rgba(40,89,89,.29)','rgba(39,72,103,.31)',
  'rgba(37,64,85,.24)','rgba(31,47,53,.20)']){
- assert(dataJS.includes(col),'7-grade RGB invariant '+col);
+ assert(scoreCss.includes(col),'7-grade CSS fallback invariant '+col);
+}
+for(const [grade,color] of Object.entries({
+ 'heat-ss':'#e8b9b2','heat-s':'#edc9b9','heat-a':'#f1d9c4',
+ 'heat-b':'#efd2a6','heat-c':'#f8edcc','heat-d':'#e3edc9','heat-e':'#d1dce9'
+})){
+ assert(dataJS.includes("'"+grade+"':'"+color+"'"),'7-grade live RGB invariant '+grade);
 }
 assert((await read('cloud/analytics-config.js')).includes('enabled:false'));
 assert((await read('cloud/ad-layout.js')).includes('if(!requestedPreview())return'));
