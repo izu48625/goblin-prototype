@@ -20,11 +20,17 @@ for(const key of ['#scoreTable tbody tr:nth-child(even)','color-scheme:light','#
 assert(shell.includes('body.homeHost .globalLocaleBar')&&shell.includes('#extSheet'));
 assert(shell.includes('background:#fff;color:#292e33'));
 const colorJS=await read('base/js/app.js');
+const baseCss=await read('base/css/style.css');
+// The legacy translucent palette remains as a CSS fallback, while modern
+// Safari scoring uses the explicit opaque colors from app.js.
 for(const rgba of [
  'rgba(116,60,74,.42)','rgba(122,84,62,.35)','rgba(110,99,57,.32)',
  'rgba(40,89,89,.29)','rgba(39,72,103,.31)','rgba(37,64,85,.24)','rgba(31,47,53,.20)'
-])assert(colorJS.includes(rgba),'Grade RGBA regression: '+rgba);
-const baseCss=await read('base/css/style.css');
+])assert(baseCss.includes(rgba),'Grade CSS fallback regression: '+rgba);
+for(const [grade,color] of Object.entries({
+ 'heat-ss':'#e8b9b2','heat-s':'#edc9b9','heat-a':'#f1d9c4',
+ 'heat-b':'#efd2a6','heat-c':'#f8edcc','heat-d':'#e3edc9','heat-e':'#d1dce9'
+}))assert(colorJS.includes("'"+grade+"':'"+color+"'"),'Grade live RGB regression: '+grade);
 assert(baseCss.includes('background-color:var(--score-tile-overlay, transparent)'));
 assert(!(await read('cloud/analytics-config.js')).includes('enabled:true'));
 assert((await read('cloud/ad-layout.js')).includes('if(!requestedPreview())return'));
