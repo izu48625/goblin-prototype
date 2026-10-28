@@ -20,6 +20,19 @@
 <link rel="stylesheet" href="css/r80-scoring-first.css?v=r80p1">
 <link rel="stylesheet" href="css/r81-clear-settings.css?v=r81p1">
 <link rel="stylesheet" href="css/r82-community-controls-guard.css?v=r110lightactions1">
+<style id="r111-safari-light-row-actions">
+/* Safari-safe inline fallback for the rightmost row controls in the light editor. */
+body:not(.dark-mode) #scoreTable td.deleteCell,
+body:not(.dark-mode) #scoreTable td.deleteCell .rowActionWrap {
+  background:#f7f6f2!important;
+  color:#30363a!important;
+}
+body:not(.dark-mode) #scoreTable td.deleteCell .rowMove{color:#64748b!important}
+body:not(.dark-mode) #scoreTable td.deleteCell .rowDelete{color:#a06468!important}
+body:not(.dark-mode) #scoreTable td.deleteCell .progressPill{
+  background:#fff!important;color:#455258!important;border:1px solid #d9d5ce!important
+}
+</style>
 <style id="r107-safari-score-palette">
 /* Inline fallback avoids stale external stylesheets in iOS Safari. */
 body:not(.score-colors-off) #scoreTable td.scoreCell.heat-ss,body:not(.score-colors-off) #scoreTable td.avgCell.heat-ss{background:#e8b9b2!important}
