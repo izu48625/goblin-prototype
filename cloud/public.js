@@ -352,7 +352,7 @@
         :(ja?'公開作品として扱われ、URLから誰でも閲覧できます。':'A public Stats Maker page that anyone with the URL can view.'));
     const metricChips=criteria.map(c=>`<span class="${weighted?'weightedMetric':''}">${esc(c.name)}${weighted?`<small>×${fmt(c.weight??1)}</small>`:''}</span>`).join('');
     const tableHead=criteria.map(c=>`<th>${esc(c.name)}</th>`).join('');
-    const tableRows=rows.map(row=>{const scores=Array.isArray(row.scores)?row.scores:[];const av=average(scores,criteria,weighted);return `<tr><td>${esc(row.name)}</td>${criteria.map((_,i)=>{const n=num(scores[i]);return `<td class="${n===null?'na':'score'}" ${n===null?'':`data-score-value="${n}" data-score-max="${scale}"`}>${n===null?'—':fmt(n)}</td>`}).join('')}<td class="avg">${av===null?'—':fmt(av)}</td></tr>`}).join('');
+    const tableRows=rows.map(row=>{const scores=Array.isArray(row.scores)?row.scores:[];const av=average(scores,criteria,weighted);return `<tr><td>${esc(row.name)}</td>${criteria.map((_,i)=>{const n=num(scores[i]);return `<td class="${n===null?'na':'score'}" ${n===null?'':`data-score-value="${n}" data-score-max="${scale}" style="--score-ink:${n/scale>=.8?'#147a54':n/scale>=.6?'#a47722':n/scale>=.4?'#b76528':'#b13f48'}"`}>${n===null?'—':fmt(n)}</td>`}).join('')}<td class="avg">${av===null?'—':fmt(av)}</td></tr>`}).join('');
 
     // Public score colors are optional and never change the underlying scores.
     // R38 P16: preserve the single original horizontal scroll matrix on every
@@ -775,6 +775,8 @@
       document.getElementById('communityContent').textContent=ja?'この公開ページではCommunity集計が非表示です。':'Community results are hidden for this page.';
     }
 
+    const colorSwitch=document.getElementById('publicScoreColors');
+    if(colorSwitch){let enabled=true;try{enabled=localStorage.getItem('statsmaker.publicScoreColors')!=='off'}catch{}colorSwitch.checked=enabled;document.body.classList.toggle('publicScoreColorsOff',!enabled)}
     status.classList.add('hidden');content.classList.remove('hidden');
   }catch(e){console.error(e);status.textContent='Could not load this Stats Maker page.\n'+(e?.message||String(e));}
 
