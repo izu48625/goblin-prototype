@@ -4,6 +4,7 @@
 
   const communityTopicId=new URLSearchParams(location.search).get('community')||'';
   const communityMode=/^[0-9a-f]{8}-[0-9a-f]{4}-[1-8][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(communityTopicId);
+  const freshHomeRequested=!communityMode && new URLSearchParams(location.search).get('fresh')==='1';
   const STORAGE_KEY = communityMode?'statsMakerCommunityDraft:'+communityTopicId:'statsMakerV014Library';
   const LEGACY_STORAGE_KEYS = ['statsMakerV0134Library','statsMakerV0133Library','statsMakerV013Library','statsMakerV012Library','statsMakerV011Library','statsMakerV010Library','statsMakerV09Library','statsMakerV08Library','statsMakerV07Library','statsMakerV05Library','statsMakerV04Library','statsMakerV03Library'];
   const MAX_ROWS = 40;
@@ -26,6 +27,38 @@
     ],
     sortKey:null,sortDesc:true,rankMetric:'avg',compare:[],compareView:'radar',viewMode:'sheet',fitMode:'auto',fitZoom:1,weighted:false,weights:[1,1,1,1],scale:100,updatedAt:Date.now()
   });
+
+  // Old public examples included verbose titles and descriptions added during
+  // publication. Only repair exact, unedited metadata in personal scoring copies.
+  const LEGACY_COPY_METADATA={
+    'a2ca13fa-48b8-42b6-bbd2-b4945acf3aba':{
+      longTitle:'ONE PIECE各編比較｜ストーリー・世界観・戦闘など5項目',
+      shortTitle:'ONE PIECE各編比較',
+      oldDescription:'『ONE PIECE』の東の海、アラバスタ、空島、W7・エニエスロビー、頂上戦争を、敵キャラ・ストーリー・世界観・戦闘シーン・感動の5項目で比較する非公式の評価表です。100点満点を使い、敵キャラの項目には他項目より大きな重みが設定されています。結果は主観的な採点であり公式評価ではありません。'
+    },
+    '1eed295e-9a79-449d-9fd7-e4405e0ae426':{
+      longTitle:'サッカー選手6人の能力比較｜7項目・10点満点',
+      shortTitle:'サッカー選手6人の能力比較',
+      oldDescription:'メッシ、C・ロナウド、ネイマール、アザール、R9、ケインの6人を、シュート・パス・ドリブル・フィジカル・スピード・IQ・視野の7項目、10点満点で比較する非公式の評価表です。点数は採点者の主観的な評価であり、選手の公式能力値や確定した優劣を示すものではありません。'
+    }
+  };
+  function normalizeLegacyCopyMetadata(s){
+    const meta=LEGACY_COPY_METADATA[s?.sourceTopicId];
+    if(!meta)return;
+    const title=String(s.title||'').trim()
+      .replace(/(?:\s*[（(]\s*(?:Remix|Copy|コピー)\s*[)）])+\s*$/gi,'').trim();
+    if(title===meta.longTitle)s.title=meta.shortTitle;
+    if(s.sourceTopicTitle===meta.longTitle)s.sourceTopicTitle=meta.shortTitle;
+    if(s.desc===meta.oldDescription)s.desc='';
+  }
+  function isPristineLocalSheet(s){
+    return !String(s?.title||'').trim() && !String(s?.desc||'').trim()
+      && !s?.sourceTopicId && !s?.cloudTopicId
+      && Array.isArray(s?.rows) && s.rows.every(row=>
+        !String(row?.name||'').trim() && !String(row?.note||'').trim()
+        && !String(row?.image||'').trim()
+        && (row?.scores||[]).every(v=>v===null||v===undefined||v===''));
+  }
 
   // If an existing saved library is unreadable, preserve its raw bytes.
   // A blank in-memory sheet must never silently replace it on autosave.
@@ -73,9 +106,22 @@
       if(raw){
         const parsed = JSON.parse(raw);
         if(parsed && Array.isArray(parsed.sheets) && parsed.sheets.length){
-          parsed.sheets.forEach(normalizeSheet);
+          parsed.sheets.forEach(s=>{
+            normalizeSheet(s);
+            normalizeLegacyCopyMetadata(s);
+          });
           if(!parsed.activeId || !parsed.sheets.some(s=>s.id===parsed.activeId)){
             parsed.activeId = parsed.sheets[0].id;
+          }
+          if(freshHomeRequested){
+            // Keep saved work untouched. Reuse a blank, or add an unsaved draft.
+            const empty=[...parsed.sheets].reverse().find(isPristineLocalSheet);
+            if(empty)parsed.activeId=empty.id;
+            else{
+              const first=blankSheet('');
+              parsed.sheets.push(first);
+              parsed.activeId=first.id;
+            }
           }
           return parsed;
         }
