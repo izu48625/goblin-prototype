@@ -1,7 +1,7 @@
 import {EXTENSIONS} from "./extension-catalog.js?v=r118public1";
 import {createProject} from "./core/project.js";
 import {saveProject} from "./core/store.js";
-import {syncSourceProject} from "./core/source-sync.js?v=r118public1";
+import {syncSourceProject} from "./core/source-sync.js?v=r120-locale1";
 
 const UI={
   ja:{launcherTitle:"データやグラフ",launcherSub:"グラフ・カードを作る",pickerTitle:"データやグラフ",pickerDesc:"基本表の対象・画像・評価項目・点数をそのまま使います。",groups:{popular:"人気",compare:"比較",ranking:"ランキング",number:"数値表示",creative:"画像グラフ"}},
@@ -12,7 +12,7 @@ const frame=$("basicFrame"),backdrop=$("extBackdrop");
 const communityTopicId=new URLSearchParams(location.search).get('community')||'';
 const communityMode=/^[0-9a-f]{8}-[0-9a-f]{4}-[1-8][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(communityTopicId);
 let freshHomeHandled=false;
-let language=localStorage.getItem("statsMakerV2Language")||localStorage.getItem("statsMaker.locale")||((navigator.language||"ja").toLowerCase().startsWith("ja")?"ja":"en");
+let language=localStorage.getItem("statsMaker.locale")||localStorage.getItem("statsMakerV2Language")||((navigator.language||"en").toLowerCase().startsWith("ja")?"ja":"en");
 
 function setLanguage(next){
   language=next==="en"?"en":"ja";
@@ -61,7 +61,7 @@ function openExtension(type){
     if(communityMode){
       if(!sheet?.sourceTopicId||sheet.sourceTopicId!==communityTopicId||
         !sheet.rows.some(r=>r.scores.some(Number.isFinite)))
-        throw new Error('採点してから「データやグラフ」を開いてください。');
+        throw new Error(language==="ja"?'採点してから「データやグラフ」を開いてください。':'Please enter your scores before opening Visual Tools.');
     }
     if(sheet?.id)project.settings.sourceSheetId=sheet.id;
     syncSourceProject(project,{},sheet);

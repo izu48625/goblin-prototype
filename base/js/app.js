@@ -1002,7 +1002,7 @@
         syncCommunityScoreSummary(field,ri);
         refreshScaleWarning();
         if(communityMode){
-          $('statusText').textContent='点数を変更しました。Communityへの反映には「評価を更新」を押してください。';
+          $('statusText').textContent=t('community.scoreDirty');
           if(window.parent!==window)window.parent.postMessage(
             {type:'statsmaker:community-score-dirty'},location.origin);
         }else{

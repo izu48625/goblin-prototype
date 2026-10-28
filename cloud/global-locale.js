@@ -1,7 +1,7 @@
 (() => {
   'use strict';
   const KEY='statsMaker.locale', LEGACY='statsMakerV2Language';
-  const normalize=value=>String(value||'').toLowerCase().startsWith('en')?'en':'ja';
+  const normalize=value=>String(value||'').toLowerCase().startsWith('ja')?'ja':'en';
   // Explicit preview mode belongs to the current navigation chain only:
   // no storage flag, cookie, tracking, ad request or default visitor changes.
   const adPreviewActive=()=>new URLSearchParams(location.search).get('adPreview')==='1';

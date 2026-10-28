@@ -39,6 +39,13 @@
   };
   function setLanguage(lang){
     const current=lang==='en'?'en':'ja', c=langCopy[current];
+    document.title=current==='en'
+      ?'Stats Maker | Ratings, Rankings & Chart Creator'
+      :'Stats Maker | キャラ比較・グラフ作成・ランキングメーカー';
+    const meta=document.querySelector('meta[name="description"]');
+    if(meta)meta.content=current==='en'
+      ?'Rate and compare characters, players, games and more. Make radar charts, rankings, tier lists and other visuals, then share or export images. Free in English and Japanese.'
+      :'キャラやスポーツ選手の能力を採点・比較し、ランキング・レーダーチャート・Tier表などのグラフを作成できるStats Maker。日本語・英語対応。';
     intro.querySelector('h1').textContent=c.title;
     intro.setAttribute('aria-label',current==='en'?'Stats Maker introduction':'Stats Makerの使い方');
     intro.querySelector('p').textContent=c.desc;
@@ -61,7 +68,7 @@
   const initial=new URLSearchParams(location.search).get('lang');
   const stored=initial==='ja'||initial==='en'?initial:
     localStorage.getItem('statsMaker.locale')||localStorage.getItem('statsMakerV2Language')||navigator.language;
-  setLanguage(String(stored||'ja').toLowerCase().startsWith('en')?'en':'ja');
+  setLanguage(String(stored||'en').toLowerCase().startsWith('ja')?'ja':'en');
   const HIDDEN_KEY='statsMaker.r89HomeIntroHidden';
   const preferenceRead=()=>{try{return localStorage.getItem(HIDDEN_KEY)==='1'}catch{return false}};
   const preferenceWrite=hidden=>{try{

@@ -29,7 +29,7 @@ for(const team of original.teams){
 }
 const root=await read('index.html'),launcher=await read('app/src/launcher.js'),css=await read('cloud/r89-home-intro.css'),js=await read('cloud/r89-home-intro.js');
 assert(root.includes('id="r89HomeIntro"'));assert(root.includes('<div id="basicRoot"><iframe'), 'instant editor removed');
-assert(root.includes('id="r87HomeGuide"'));assert(root.includes('r89-home-intro.js?v=r89p1'));
+assert(root.includes('id="r87HomeGuide"'));assert(/r89-home-intro\.js\?v=[a-zA-Z0-9-]+/.test(root));
 assert(css.includes('body.hasGlobalLocaleBar.homeHost:not(.communityShell) #basicRoot{top:93px}'));
 assert(css.includes('body.homeHost.r89IntroDismissed'));
 assert(js.includes('window.SM_R89_LANGUAGE=setLanguage')&&launcher.includes('SM_R89_LANGUAGE?.(language)'));
@@ -40,7 +40,7 @@ assert(globalLocale.includes('data-global-intro')&&globalLocale.includes('ホー
 assert(css.includes('r89HomeIntroCopy h1')&&css.includes('[data-sm-theme="dark"]'));
 
 const discover=await read('cloud/discover.js'),d=await read('discover.html');
-assert(d.includes('discover.js?v=r97balance1'));
+assert(/discover\.js\?v=[a-zA-Z0-9-]+/.test(d),'Discover must load its versioned locale-aware script');
 assert(discover.includes("all.href='/'+locale+'/use-cases.html'"));
 assert(discover.includes("a.href='/'+locale+'/use-cases.html#'"));
 assert(discover.includes("a.href='/'+locale+'/legal.html#'+kind"));

@@ -1,4 +1,16 @@
 const BASE_STORAGE_KEY="statsMakerV014Library";
+function sourceLocale(){
+  // Match the active site language without importing the DOM-bound editor
+  // i18n module, since the source model is also tested by plain Node QA.
+  try{
+    const saved=typeof localStorage!=="undefined"
+      ?localStorage.getItem("statsMaker.locale")||localStorage.getItem("statsMakerV2Language")
+      :null;
+    const browser=typeof window!=="undefined" && typeof navigator!=="undefined"?navigator.language:null;
+    return String(saved||browser||"ja").toLowerCase().startsWith("ja")?"ja":"en";
+  }catch{return "ja"}
+}
+const sourceText=(ja,en)=>sourceLocale()==="ja"?ja:en;
 
 function num(v){
   if(v===null || v===undefined || String(v).trim()==="")return null;
@@ -112,9 +124,9 @@ export function getSourceModel(project,explicitSheet=null){
   }
 
   const metricLabel=key=>{
-    if(key==="avg")return "総合平均";
+    if(key==="avg")return sourceText("総合平均","Overall average");
     const ci=Number(String(key).replace("c:",""));
-    return criteria[ci]||`評価${ci+1}`;
+    return criteria[ci]||sourceText(`評価${ci+1}`,`Metric ${ci+1}`);
   };
 
   const metricValue=(row,key)=>{
@@ -158,7 +170,7 @@ export function getSourceModel(project,explicitSheet=null){
 export function getMetricOptions(model){
   if(!model)return [];
   return [
-    {value:"avg",label:"総合平均"},
+    {value:"avg",label:sourceText("総合平均","Overall average")},
     ...model.criteria.map((label,i)=>({value:`c:${i}`,label}))
   ];
 }
@@ -422,7 +434,7 @@ function syncRing(project,model,rawIndex){
     .slice(0,10)
     .map(({id,label,value,max,unit})=>({id,label,value,max,unit}));
   project.meta.title=row?.name||String(model.sheet.title||"Stats Maker");
-  project.meta.subtitle=row?String(model.sheet.title||""):"項目平均";
+  project.meta.subtitle=row?String(model.sheet.title||""):sourceText("項目平均","Metric average");
 }
 
 function syncRadar(project,model,rawIndices){
@@ -467,7 +479,7 @@ function syncRadar(project,model,rawIndices){
     )
   }));
 
-  project.meta.subtitle=`${project.data.axes.length}項目比較`;
+  project.meta.subtitle=sourceText(`${project.data.axes.length}項目比較`,`${project.data.axes.length}-metric comparison`);
 }
 
 export function syncSourceProject(project,changes={},explicitSheet=null){

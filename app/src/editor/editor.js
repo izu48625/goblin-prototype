@@ -7,9 +7,10 @@ import {exportPreview,exportProjectJSON,readProjectJSON,isIOS} from "../core/exp
 import {createImageManager} from "./image-editor.js";
 import {createDataImport} from "./data-import.js";
 import {createSpreadsheetEditor} from "./spreadsheet-editor.js";
-import {getSourceModel,getMetricOptions,getCriterionOptions,getSubjectOptions,syncSourceProject} from "../core/source-sync.js?v=r118public1";
+import {getSourceModel,getMetricOptions,getCriterionOptions,getSubjectOptions,syncSourceProject} from "../core/source-sync.js?v=r120-locale1";
 
 const $=id=>document.getElementById(id);
+const uiText=(ja,en)=>getLanguage()==="ja"?ja:en;
 const params=new URLSearchParams(location.search);
 const id=params.get("id");
 let project=getProject(id);
@@ -504,7 +505,7 @@ function sourceInfoBlock(model){
   box.className="source-info-card";
   box.innerHTML=`<b></b><span></span>`;
   box.querySelector("b").textContent=model.sheet.title||"Stats Maker";
-  box.querySelector("span").textContent=`${model.rows.length}対象 / ${model.criteria.length}評価項目`;
+  box.querySelector("span").textContent=uiText(`${model.rows.length}対象 / ${model.criteria.length}評価項目`,`${model.rows.length} targets / ${model.criteria.length} metrics`);
   return box;
 }
 
@@ -513,14 +514,14 @@ function buildLinkedDataPanel(p,model){
 
   const source=section(p.settings?.publicSourceSheet
     ?(getLanguage()==="ja"?"公開作品の採点データ":"Published creator scores")
-    :"基本表と連動");
+    :uiText("基本表と連動","Linked to Home scores"));
   source.appendChild(sourceInfoBlock(model));
   frag.appendChild(source);
 
   if(p.type==="stat-card" || p.type==="ring"){
-    const sec=section("対象");
+    const sec=section(uiText("対象","Subject"));
     sec.appendChild(sourceSelectField(
-      "表示対象",
+      uiText("表示対象","Select subject"),
       getSubjectOptions(model),
       p.settings.sourceSubjectIndex??model.rows[0]?.rawIndex??"",
       value=>mutate(x=>syncSourceProject(x,{subjectIndex:Number(value)}))
@@ -529,9 +530,9 @@ function buildLinkedDataPanel(p,model){
   }
 
   if(["ranking-card","bar","dot","tier-list","image-line"].includes(p.type)){
-    const sec=section("評価項目");
+    const sec=section(uiText("評価項目","Metric"));
     sec.appendChild(sourceSelectField(
-      "表示する評価",
+      uiText("表示する評価","Choose metric"),
       getMetricOptions(model),
       p.settings.sourceMetricKey||model.metricKey,
       value=>mutate(x=>syncSourceProject(x,{metricKey:value}))
@@ -561,17 +562,17 @@ function buildLinkedDataPanel(p,model){
   }
 
   if(p.type==="quadrant" || p.type==="scatter"){
-    const sec=section("軸");
+    const sec=section(uiText("軸","Axes"));
     const grid=document.createElement("div");
     grid.className="inline-grid";
     grid.appendChild(sourceSelectField(
-      "X軸",
+      uiText("X軸","X axis"),
       getCriterionOptions(model),
       p.settings.sourceXIndex??0,
       value=>mutate(x=>syncSourceProject(x,{xIndex:Number(value)}))
     ));
     grid.appendChild(sourceSelectField(
-      "Y軸",
+      uiText("Y軸","Y axis"),
       getCriterionOptions(model),
       p.settings.sourceYIndex??Math.min(1,model.criteria.length-1),
       value=>mutate(x=>syncSourceProject(x,{yIndex:Number(value)}))
@@ -603,17 +604,17 @@ function buildLinkedDataPanel(p,model){
   }
 
   if(p.type==="range"){
-    const sec=section("比較項目");
+    const sec=section(uiText("比較項目","Compare metrics"));
     const grid=document.createElement("div");
     grid.className="inline-grid";
     grid.appendChild(sourceSelectField(
-      "項目A",
+      uiText("項目A","Metric A"),
       getCriterionOptions(model),
       p.settings.sourceRangeA??0,
       value=>mutate(x=>syncSourceProject(x,{aIndex:Number(value)}))
     ));
     grid.appendChild(sourceSelectField(
-      "項目B",
+      uiText("項目B","Metric B"),
       getCriterionOptions(model),
       p.settings.sourceRangeB??Math.min(1,model.criteria.length-1),
       value=>mutate(x=>syncSourceProject(x,{bIndex:Number(value)}))
@@ -651,7 +652,7 @@ function buildLinkedDataPanel(p,model){
   }
 
   if(p.type==="radar"){
-    const sec=section("比較対象");
+    const sec=section(uiText("比較対象","Compare targets"));
     sec.appendChild(sourceSubjectChecks(
       model,
       p.settings.sourceSeriesIndices||[],
@@ -661,7 +662,7 @@ function buildLinkedDataPanel(p,model){
     frag.appendChild(sec);
   }
 
-  const options=section("表示設定");
+  const options=section(uiText("表示設定","Display options"));
 
   if(p.type==="ranking-card"){
     const top=document.createElement("div");
@@ -899,7 +900,7 @@ function buildDataPanel(){
     const opts=section("Ranking");
     if(sourceModel){
       opts.appendChild(sourceSelectField(
-        "表示項目",
+        uiText("表示項目","Displayed metric"),
         getMetricOptions(sourceModel),
         p.settings.sourceMetricKey||sourceModel.metricKey,
         value=>mutate(x=>syncSourceProject(x,{metricKey:value}))
@@ -1018,7 +1019,7 @@ function buildDataPanel(){
     const info=section("Card");
     if(sourceModel){
       info.appendChild(sourceSelectField(
-        "対象",
+        uiText("対象","Subject"),
         getSubjectOptions(sourceModel),
         p.settings.sourceSubjectIndex??sourceModel.rows[0]?.rawIndex??"",
         value=>mutate(x=>syncSourceProject(x,{subjectIndex:Number(value)}))
@@ -1083,13 +1084,13 @@ function buildDataPanel(){
     if(sourceModel){
       const sourceGrid=document.createElement("div");sourceGrid.className="inline-grid";
       sourceGrid.appendChild(sourceSelectField(
-        "X軸",
+        uiText("X軸","X axis"),
         getCriterionOptions(sourceModel),
         p.settings.sourceXIndex??0,
         value=>mutate(x=>syncSourceProject(x,{xIndex:Number(value)}))
       ));
       sourceGrid.appendChild(sourceSelectField(
-        "Y軸",
+        uiText("Y軸","Y axis"),
         getCriterionOptions(sourceModel),
         p.settings.sourceYIndex??Math.min(1,sourceModel.criteria.length-1),
         value=>mutate(x=>syncSourceProject(x,{yIndex:Number(value)}))
@@ -1175,7 +1176,7 @@ function buildDataPanel(){
     const opts=section(t("bar.options"));
     if(sourceModel){
       opts.appendChild(sourceSelectField(
-        "表示項目",
+        uiText("表示項目","Displayed metric"),
         getMetricOptions(sourceModel),
         p.settings.sourceMetricKey||sourceModel.metricKey,
         value=>mutate(x=>syncSourceProject(x,{metricKey:value}))
@@ -1268,7 +1269,7 @@ function buildDataPanel(){
 
   if(p.type==="radar"){
     if(sourceModel){
-      const subjects=section("対象");
+      const subjects=section(uiText("対象","Subject"));
       subjects.appendChild(sourceSubjectChecks(
         sourceModel,
         p.settings.sourceSeriesIndices||[],
@@ -1415,7 +1416,7 @@ function buildDataPanel(){
     const opts=section("Dot");
     if(sourceModel){
       opts.appendChild(sourceSelectField(
-        "表示項目",
+        uiText("表示項目","Displayed metric"),
         getMetricOptions(sourceModel),
         p.settings.sourceMetricKey||sourceModel.metricKey,
         value=>mutate(x=>syncSourceProject(x,{metricKey:value}))
@@ -1438,7 +1439,7 @@ function buildDataPanel(){
     const opts=section("Ring");
     if(sourceModel){
       opts.appendChild(sourceSelectField(
-        "対象",
+        uiText("対象","Subject"),
         getSubjectOptions(sourceModel),
         p.settings.sourceSubjectIndex??sourceModel.rows[0]?.rawIndex??"",
         value=>mutate(x=>syncSourceProject(x,{subjectIndex:Number(value)}))
@@ -1453,7 +1454,7 @@ function buildDataPanel(){
     const opts=section("Tier");
     if(sourceModel){
       opts.appendChild(sourceSelectField(
-        "評価項目",
+        uiText("評価項目","Metric"),
         getMetricOptions(sourceModel),
         p.settings.sourceMetricKey||sourceModel.metricKey,
         value=>mutate(x=>syncSourceProject(x,{metricKey:value}))
@@ -1503,13 +1504,13 @@ function buildDataPanel(){
     if(sourceModel){
       const sg=document.createElement("div");sg.className="inline-grid";
       sg.appendChild(sourceSelectField(
-        "X軸",
+        uiText("X軸","X axis"),
         getCriterionOptions(sourceModel),
         p.settings.sourceXIndex??0,
         value=>mutate(x=>syncSourceProject(x,{xIndex:Number(value)}))
       ));
       sg.appendChild(sourceSelectField(
-        "Y軸",
+        uiText("Y軸","Y axis"),
         getCriterionOptions(sourceModel),
         p.settings.sourceYIndex??Math.min(1,sourceModel.criteria.length-1),
         value=>mutate(x=>syncSourceProject(x,{yIndex:Number(value)}))
@@ -1537,13 +1538,13 @@ function buildDataPanel(){
     if(sourceModel){
       const g=document.createElement("div");g.className="inline-grid";
       g.appendChild(sourceSelectField(
-        "項目A",
+        uiText("項目A","Metric A"),
         getCriterionOptions(sourceModel),
         p.settings.sourceRangeA??0,
         value=>mutate(x=>syncSourceProject(x,{aIndex:Number(value)}))
       ));
       g.appendChild(sourceSelectField(
-        "項目B",
+        uiText("項目B","Metric B"),
         getCriterionOptions(sourceModel),
         p.settings.sourceRangeB??Math.min(1,sourceModel.criteria.length-1),
         value=>mutate(x=>syncSourceProject(x,{bIndex:Number(value)}))
@@ -1850,7 +1851,8 @@ function renderSourceQuickBar(){
 
   const lead=document.createElement("div");
   lead.className="source-quick-lead";
-  lead.innerHTML=`<b>連動元</b><span></span>`;
+  lead.innerHTML="<b></b><span></span>";
+  lead.querySelector("b").textContent=uiText("連動元","SOURCE");
   lead.querySelector("span").textContent=model.sheet.title||"Stats Maker";
   bar.appendChild(lead);
 
@@ -1874,14 +1876,14 @@ function renderSourceQuickBar(){
 
   if(p.type==="stat-card" || p.type==="ring"){
     addSelect(
-      "対象",
+      uiText("対象","Subject"),
       getSubjectOptions(model),
       p.settings.sourceSubjectIndex??model.rows[0]?.rawIndex??"",
       value=>mutate(x=>syncSourceProject(x,{subjectIndex:Number(value)}))
     );
   }else if(["ranking-card","bar","dot","tier-list","image-line"].includes(p.type)){
     addSelect(
-      "評価",
+      uiText("評価","Metric"),
       getMetricOptions(model),
       p.settings.sourceMetricKey||model.metricKey,
       value=>mutate(x=>syncSourceProject(x,{metricKey:value}))
@@ -2012,7 +2014,15 @@ function showExportPreview(result){
   exportPreviewUrl=URL.createObjectURL(result.blob);
   exportPreviewFile=result.file;
   $("exportPreviewImage").src=exportPreviewUrl;
-  $("exportPreviewTitle").textContent=result.mime==="image/jpeg"?"JPGプレビュー":"PNGプレビュー";
+  $("exportPreviewTitle").textContent=(result.mime==="image/jpeg"?"JPG":"PNG")+uiText("プレビュー"," preview");
+  const modal=$("exportPreviewModal");
+  modal.querySelector(".export-preview-head span").textContent=uiText("画像が完成しました","Your image is ready");
+  modal.querySelector(".export-preview-help").textContent=uiText(
+    "「共有 / 保存」を押して、共有シートから「画像を保存」または「ファイルに保存」を選んでください。",
+    "Tap Share / Save, then save the image or file from your browser's sharing menu."
+  );
+  $("exportPreviewShare").textContent=uiText("共有 / 保存","Share / Save");
+  $("exportPreviewDismiss").textContent=uiText("閉じる","Close");
   $("exportPreviewModal").classList.remove("hidden");
 }
 
@@ -2175,7 +2185,7 @@ $("restoreBtn").addEventListener("click",async()=>{
     requestAnimationFrame(fitPreview);
   }catch(e){
     console.error(e);
-    alert(getLanguage()==="ja"?"Projectを読み込めませんでした":"Could not load project");
+    alert(uiText("Projectを読み込めませんでした","Could not load project"));
   }
 });
 

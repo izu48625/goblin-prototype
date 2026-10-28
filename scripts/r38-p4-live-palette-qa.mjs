@@ -3,8 +3,8 @@ import {readFile} from 'node:fs/promises';
 const KEY='r119-fresh-home1';
 const STYLE_KEY='r38p15scores1';
 const I18N_KEY='r119-community-copy1';
-const PUB_CSS_KEY='r119-copy-route1';
-const PUB_KEY='r119-copy-route1';
+const PUB_CSS_KEY='r120-locale1';
+const PUB_KEY='r120-locale1';
 const HOME='base/index.html?v='+KEY;
 const STYLE='css/style.css?v='+STYLE_KEY;
 const expectedColors=[
