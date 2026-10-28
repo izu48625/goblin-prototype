@@ -242,16 +242,17 @@
   // pixels to IMG_7846(1).png, not these tint RGB values in isolation.
   // Keep CSS selectors and inline updates in sync. No change to grading
   // thresholds, stored values, public works, or 10/100 score behavior.
+  // Use opaque light-theme palette consistently across Safari and embedded browsers.
   const scoreTileColors=Object.freeze({
-    'heat-ss':'rgba(116,60,74,.42)', // 95–100%
-    'heat-s':'rgba(122,84,62,.35)',  // 90–94%
-    'heat-a':'rgba(110,99,57,.32)',  // 80–89%
-    'heat-b':'rgba(40,89,89,.29)',  // 70–79%
-    'heat-c':'rgba(39,72,103,.31)',  // 60–69%
-    'heat-d':'rgba(37,64,85,.24)',  // 50–59%
-    'heat-e':'rgba(31,47,53,.20)'   // 0–49%
+    'heat-ss':'#edc6b9',
+    'heat-s':'#edc6b9',
+    'heat-a':'#f1d9c4',
+    'heat-b':'#f5e8ca',
+    'heat-c':'#e5edef',
+    'heat-d':'#dce8f5',
+    'heat-e':'#eaf0f5'
   });
-  function scoreTileColor(v){return scoreTileColors[heatClass(v)]||'';}
+  function scoreTileColor(v){return scoreTileColors[heatClass(v)]||'#ffffff';}
   function esc(s){
     return String(s).replace(/[&<>"']/g,ch=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[ch]));
   }
@@ -823,10 +824,10 @@
 
       s.cols.forEach((_,ci)=>{
         const v=row.scores[ci];
-        h+=`<td class="scoreCell ${heatClass(v)}" style="--score-tile-overlay:${scoreTileColor(v)}"><input class="scoreInput" data-score-row="${index}" data-score-col="${ci}" type="number" inputmode="decimal" min="0" max="${s.scale||100}" step="${(s.scale||100)===10?'0.1':'1'}" value="${v==null?'':v}" placeholder="–"></td>`;
+        h+=`<td class="scoreCell ${heatClass(v)}" style="--score-tile-overlay:${scoreTileColor(v)};background-color:${scoreTileColor(v)}"><input class="scoreInput" data-score-row="${index}" data-score-col="${ci}" type="number" inputmode="decimal" min="0" max="${s.scale||100}" step="${(s.scale||100)===10?'0.1':'1'}" value="${v==null?'':v}" placeholder="–"></td>`;
       });
 
-      h+=`<td class="avgCell ${heatClass(a)}" style="--score-tile-overlay:${scoreTileColor(a)}"><span class="avgValue">${fmt(a)}</span><span class="grade">${grade(a)}</span></td>`;
+      h+=`<td class="avgCell ${heatClass(a)}" style="--score-tile-overlay:${scoreTileColor(a)};background-color:${scoreTileColor(a)}"><span class="avgValue">${fmt(a)}</span><span class="grade">${grade(a)}</span></td>`;
       const rp=rowProgress(row);
       h+=`<td class="deleteCell"><div class="rowActionWrap">
         <span class="progressPill ${rp.pct===100?'complete':''}" title="${esc(t('aria.progress'))}">${rp.done}/${rp.total}</span>
