@@ -138,10 +138,26 @@ body.communityShell #extLauncher{bottom:calc(8px + env(safe-area-inset-bottom))}
 <div id="basicRoot"><iframe id="basicFrame" title="Stats Maker"></iframe></div>
 <script>
 (() => {
-  const topic = new URLSearchParams(location.search).get('community')||'';
+  const params = new URLSearchParams(location.search);
+  const topic = params.get('community')||'';
   const valid = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-8][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(topic);
+  // Returning from Copy & rate or Edit publication is a one-time exception.
+  // Ordinary Home links (including a copied URL) start with an empty sheet.
+  let resumeRemix=false, resumePublish=false;
+  try{
+    const pending=sessionStorage.getItem('statsMaker:openRemix');
+    resumeRemix=params.get('remixed')==='1' && !!pending;
+    if(resumeRemix)sessionStorage.removeItem('statsMaker:openRemix');
+    resumePublish=params.get('from')==='public' && sessionStorage.getItem('statsMaker:openPublish')==='1';
+  }catch{}
+  if(params.get('remixed')==='1'){
+    params.delete('remixed');
+    params.delete('v');
+    try{history.replaceState(history.state,'',location.pathname+(params.size?'?'+params.toString():'')+location.hash)}catch{}
+  }
+  const fresh=!valid && !resumeRemix && !resumePublish && params.get('resume')!=='1';
   if(valid)document.body.classList.add('communityShell');
-  document.getElementById('basicFrame').src='base/index.html?v=r117-target-image-upload1'+(valid?'&community='+encodeURIComponent(topic):'');
+  document.getElementById('basicFrame').src='base/index.html?v=r119-fresh-home1'+(valid?'&community='+encodeURIComponent(topic):fresh?'&fresh=1':'');
 })();
 </script>
 <div id="communityLoading" class="communityLoading hidden">Communityを読み込み中…</div>
