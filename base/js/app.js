@@ -2180,7 +2180,7 @@
   // The private Storage bucket enforces topic ownership for writes and topic visibility for reads.
   const TARGET_IMAGE_BUCKET='topic-target-images';
   const TARGET_IMAGE_LIMIT=51200; // bucket and client agree on 50 KiB JPEGs
-  const publishedImagePathPattern=/^[0-9a-f-]{36}\/([0-9]|[1-3][0-9])-[0-9a-f]{12}[.]jpg$/;
+  const publishedImagePathPattern=/^[0-9a-f-]{36}\/([0-9]|[1-3][0-9])[.]jpg$/;
   function isTopicImagePath(path,topicId){
     return typeof path==='string' && publishedImagePathPattern.test(path) && path.startsWith(topicId+'/');
   }
@@ -2210,20 +2210,23 @@
         for(let i=0;i<binary.length;i++)bytes[i]=binary.charCodeAt(i);
         const digest=await crypto.subtle.digest('SHA-256',bytes);
         const hash=Array.from(new Uint8Array(digest).slice(0,6),byte=>byte.toString(16).padStart(2,'0')).join('');
-        const path=topicId+'/'+index+'-'+hash+'.jpg';
-        if(oldPath!==path){
+        // Fixed object key gives each topic at most 40 target files (Free-quota guard).
+        const path=topicId+'/'+index+'.jpg';
+        const imageKey=path+':'+hash;
+        if(oldPath!==path || source.publishedImageKey!==imageKey){
           const {error:uploadError}=await storage.upload(path,new Blob([bytes],{type:'image/jpeg'}),{
-            contentType:'image/jpeg',cacheControl:'300',upsert:true
+            contentType:'image/jpeg',cacheControl:'60',upsert:true
           });
           if(uploadError)throw new Error('Target image upload failed: '+uploadError.message);
           const {error:writeError}=await sb.from('topic_items').update({image_url:path})
             .eq('id',item.id).eq('topic_id',topicId).select('id').single();
           if(writeError)throw new Error('Target image link could not be saved: '+writeError.message);
-          if(oldPath){
+          if(oldPath && oldPath!==path){
             const {error:removeError}=await storage.remove([oldPath]);
             if(removeError)console.warn('[Stats Maker] Old target image cleanup failed:',removeError);
           }
         }
+        source.publishedImageKey=imageKey;
         usedPaths.add(path);
       }else if(source.imageRemoved===true){
         if(oldPath){
@@ -2234,6 +2237,7 @@
           if(removeError)console.warn('[Stats Maker] Removed target image cleanup failed:',removeError);
         }
         source.imageRemoved=false;
+        source.publishedImageKey='';
       }else if(oldPath){
         // Another device may lack local images: never erase a published image implicitly.
         usedPaths.add(oldPath);
