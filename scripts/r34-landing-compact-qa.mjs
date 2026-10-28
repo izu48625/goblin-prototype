@@ -10,7 +10,7 @@ assert(roadmap.includes('Search Console所有権確認・サイトマップ送�
 assert(roadmap.includes('https://statsmaker.app/sitemap.xml'));
 const en=await read('en/index.html'),ja=await read('ja/index.html');
 const originalIntro={
-  ja:'Stats Makerは、好きなキャラクター・スポーツ選手・映画・ゲームなどを採点し、ランキングやグラフとして共有できるWebツールです。',
+  ja:'キャラ比較や選手の能力値比較も、攻撃・防御・素早さなど好きな項目で採点。Stats Makerなら、同じ点数からレーダーチャート・ランキング・Tier表を作成して共有できます。',
   en:'Stats Maker is a chart maker for ranking characters, athletes, movies, games, products and anything else you want to compare.'
 };
 assert(ja.includes(originalIntro.ja),'Japanese introduction changed unexpectedly');
