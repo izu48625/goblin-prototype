@@ -89,7 +89,8 @@ try{
   assert((await page.locator('h1').innerText()).includes('Turn ratings'));
   await page.locator('[data-global-lang="ja"]').click();
   await page.waitForURL(url=>url.pathname==='/ja/'||url.pathname==='/ja');
-  assert((await page.locator('h1').innerText()).includes('評価や比較'));
+  assert((await page.locator('h1').innerText()).includes('キャラや選手の能力を比較'));
+  assert((await page.locator('h1').count())===1,'Japanese landing should have one helpful H1');
   await page.locator('.globalDiscoverBtn').click();
   await page.waitForURL(url=>url.pathname.startsWith('/discover')&&url.searchParams.get('lang')==='ja');
   assert.equal(await page.locator('.globalLocaleBar').count(),1);

@@ -15,7 +15,16 @@ for(const id of ['mobileHeaderMoreBtn','r81ThemeBtn','r81OptionsClose',
 }
 assert(js.includes("$('scoreSettingsBtn')?.click()")&&js.includes("$('moreToolsBtn')?.click()"));
 assert(js.includes("window.parent.postMessage({type:'statsmaker:open-extensions'},location.origin)"));
+assert(html.includes('aria-label="データやグラフを開く"'));
+assert(js.includes("'データやグラフ'"));
+assert(js.includes("'データやグラフを開く'"));
+assert(host.includes('id="launcherTitle" class="launchTitle">データやグラフ</span>'));
+assert(host.includes('<h2 id="pickerTitle">データやグラフ</h2>'));
+const intro=await read('cloud/r89-home-intro.js');
+assert(intro.includes('「データやグラフ」から目的に合うグラフを選び'));
 const launcher=await read('app/src/launcher.js');
+assert(launcher.includes('launcherTitle:"データやグラフ"'));
+assert(launcher.includes('pickerTitle:"データやグラフ"'));
 assert(launcher.includes('event.origin!==location.origin||event.source!==frame.contentWindow'),
  'Visuals bridge cannot accept other-origin messages');
 const p=await read('app/src/core/project.js');
