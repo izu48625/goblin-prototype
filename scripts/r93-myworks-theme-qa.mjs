@@ -6,7 +6,7 @@ const read=async p=>readFile(new URL('../'+p,import.meta.url),'utf8');
 const html=await read('my.html');
 const css=await read('cloud/my.css');
 assert(html.includes('class="r73-light-page"'));
-assert(html.includes('cloud/my.css?v=r93light1'));
+assert(html.includes('cloud/my.css?v=r97dup1'));
 assert(html.includes('content="#f6f5f1"'));
 assert(html.includes('noindex,follow'));
 assert(!html.includes('noindex,nofollow'),'No duplicate conflicting robots meta');
