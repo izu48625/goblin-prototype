@@ -1,0 +1,50 @@
+name: R122 Tier Single-Word Search QA
+on:
+  pull_request:
+    paths:
+      - 'ja/tier.html'
+      - 'en/tier.html'
+      - 'ja/index.html'
+      - 'en/index.html'
+      - 'ja/tier-maker.html'
+      - 'en/tier-maker.html'
+      - 'ja/chart-guide.html'
+      - 'en/chart-guide.html'
+      - 'cloud/global-locale.js'
+      - 'worker/seo.js'
+      - 'scripts/r122-tier-meaning-*.mjs'
+      - '.github/workflows/r122-tier-search-qa.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  tier-meaning:
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Validate indexable content and safe site build
+        run: |
+          node --check scripts/r122-tier-meaning-seo-qa.mjs
+          node --check scripts/r122-tier-meaning-browser-qa.mjs
+          node scripts/r122-tier-meaning-seo-qa.mjs
+          npm run build:cloudflare
+          test -s dist/ja/tier.html
+          test -s dist/en/tier.html
+      - name: Install mobile browser engines
+        run: |
+          npm install --no-save playwright@1.56.1
+          npx playwright install --with-deps chromium webkit
+      - name: Check bilingual pages in mobile Chrome and Safari
+        env:
+          BASE_URL: http://127.0.0.1:4173
+        run: |
+          python3 -m http.server 4173 --bind 127.0.0.1 --directory dist >/tmp/r122-static.log 2>&1 &
+          for i in $(seq 1 30); do
+            if curl -fsS http://127.0.0.1:4173/ja/tier.html >/dev/null; then break; fi
+            sleep 1
+          done
+          node scripts/r122-tier-meaning-browser-qa.mjs
