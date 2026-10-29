@@ -36,7 +36,7 @@
     ?document.body.dataset.smReadingPage:'';
   const articleName=()=>{
     const name=location.pathname.split('/').pop();
-    return ['chart-guide.html','png-guide.html','examples.html','scoring-guide.html','use-cases.html','tier-maker.html'].includes(name)?name:null;
+    return ['chart-guide.html','png-guide.html','examples.html','scoring-guide.html','use-cases.html','tier-maker.html','tier.html'].includes(name)?name:null;
   };
   const current=()=>landingLang()||legalLang()||readingLang()||normalize(localStorage.getItem(KEY)||localStorage.getItem(LEGACY)||navigator.language||'ja');
 
