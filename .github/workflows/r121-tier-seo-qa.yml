@@ -1,0 +1,52 @@
+name: R121 Tier Maker Search Landing QA
+on:
+  pull_request:
+    paths:
+      - 'ja/tier-maker.html'
+      - 'en/tier-maker.html'
+      - 'ja/index.html'
+      - 'en/index.html'
+      - 'ja/examples.html'
+      - 'en/examples.html'
+      - 'worker/seo.js'
+      - 'cloud/global-locale.js'
+      - 'cloud/tier-seo-*.js'
+      - 'cloud/tier-seo.css'
+      - 'scripts/r121-tier-landing-*.mjs'
+      - '.github/workflows/r121-tier-seo-qa.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  tier-landing:
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Validate crawlable pages and local editor integration
+        run: |
+          node --check cloud/tier-seo-start.js
+          node --check scripts/r121-tier-landing-static-qa.mjs
+          node --check scripts/r121-tier-landing-browser-qa.mjs
+          node scripts/r121-tier-landing-static-qa.mjs
+          npm run build:cloudflare
+          test -s dist/ja/tier-maker.html
+          test -s dist/en/tier-maker.html
+          test -s dist/cloud/tier-seo-start.js
+      - name: Install real Chromium and WebKit
+        run: |
+          npm install --no-save playwright@1.56.1
+          npx playwright install --with-deps chromium webkit
+      - name: Mobile Tier creation and navigation regression
+        env:
+          BASE_URL: http://127.0.0.1:4173
+        run: |
+          python3 -m http.server 4173 --bind 127.0.0.1 --directory dist >/tmp/r121-static.log 2>&1 &
+          for i in $(seq 1 30); do
+            if curl -fsS http://127.0.0.1:4173/ja/tier-maker.html >/dev/null; then break; fi
+            sleep 1
+          done
+          node scripts/r121-tier-landing-browser-qa.mjs
