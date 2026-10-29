@@ -14,7 +14,9 @@ for(const browserType of [chromium,webkit]){
       assert((await page.locator('h1').textContent()).includes(lang==='ja'?'ティア':'Tier'));
       assert.equal(await page.locator('.tierSeoTable tbody tr').count(),11);
       const img=page.locator('#worked-example img');
-      assert(await img.evaluate(x=>x.complete&&x.naturalWidth>0),'Original chart must load');
+      await img.scrollIntoViewIfNeeded();
+      await page.waitForFunction(()=>{const x=document.querySelector('#worked-example img');return !!x&&x.complete&&x.naturalWidth>0;},{timeout:15000});
+      assert(await img.evaluate(x=>x.naturalWidth>0),'Original chart must load');
       const overflow=await page.evaluate(()=>document.documentElement.scrollWidth-innerWidth);
       assert(overflow<=4,'Mobile overflow '+browserType.name()+' '+lang+' '+overflow);
       await page.locator('#how-to a[href="'+('/'+lang+'/tier-maker.html')+'"]').first().click();
