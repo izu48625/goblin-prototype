@@ -760,7 +760,7 @@
         ? (communityRanking.length
           ? communityRanking.slice(0,10).map((item,i)=>`<div class="rankRow"><div class="rankNo">${i+1}</div><div class="rankName">${esc(item.name)}<small>${item.count}${ja?'人':' ratings'}</small></div><div class="rankValue">${fmt(item.value)}</div></div>`).join('')
           : `<div class="emptyCommunity">${ja?`${communityMinimum}件以上の評価が集まった対象はまだありません。`:`No target has ${communityMinimum} eligible ratings yet.`}</div>`)
-        : `<div class="privacyLock"><b>${ja?'平均はまだ非表示':'Averages are still private'}</b><span>${ja?`あと${communityMinimum}人でCommunity総合ランキングを公開します。`:`Community ranking unlocks after ${communityMinimum} participants.`}</span></div>`;
+        : `<div class="privacyLock"><b>${ja?'平均はまだ非表示':'Averages are still private'}</b><span>${ja?`あと${Math.max(0,communityMinimum-participant)}人でCommunity総合ランキングを公開します。`:`Community ranking unlocks after ${communityMinimum} participants.`}</span></div>`;
 
       let ownHtml='';
       if(own&&canShowAverages){
