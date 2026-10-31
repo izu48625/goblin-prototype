@@ -31,14 +31,14 @@
       subtitle:'公開された評価シートを検索して、結果を見たりRemixしたりできます。',
       privacy:'Public作品のみ掲載。URL限定（Unlisted）はここには表示されません。',
       search:'タイトル・説明・対象・評価項目を部分一致で検索',
-      allTab:'すべての作品',communityTab:'みんなで評価',
+      allTab:'すべての作品',communityTab:'みんなで採点',
       newest:'新着',popular:'人気',community:'Community',remix:'Remix',
-      works:'すべての作品',communityWorks:'みんなで評価できる作品',
+      works:'すべての作品',communityWorks:'みんなで採点できる作品',
       loading:'公開作品を読み込んでいます…',refresh:'更新',
       participants:'参加者',remixes:'Remix',targets:'対象',metrics:'項目',
-      public:'PUBLIC',communityBadge:'参加型',open:'見る →',communityOpen:'作品を見て評価する →',statsOpen:'データを見る',statsClose:'データを閉じる',more:'さらに表示',
+      public:'PUBLIC',communityBadge:'参加型',open:'見る →',communityOpen:'採点に参加する →',statsOpen:'データを見る',statsClose:'データを閉じる',more:'さらに表示',
       empty:'条件に合う公開作品がありません。',
-      communityEmpty:'みんなで評価できる作品がありません。',
+      communityEmpty:'現在、採点に参加できる作品はありません。',
       error:'公開作品を読み込めませんでした。',
       result:n=>`${n}件のPublic作品`,
       communityResult:n=>`${n}件の参加型作品`,
@@ -94,7 +94,7 @@
 
   function setCopy(){
     document.documentElement.lang=locale;
-    document.title='Discover - Stats Maker';
+    document.title=locale==='ja'?'みんなで採点・作品一覧 | Stats Maker':'Rate Together - Stats Maker';
     document.querySelector('.hero h1').textContent=copy.title;
     document.querySelector('.hero p').textContent=copy.subtitle;
     document.querySelector('.privacyNote').textContent=copy.privacy;
@@ -505,6 +505,14 @@
 
   function reload(delay=0){
     clearTimeout(searchTimer);
+    const together=state.view==='community';
+    const hero=document.querySelector('.hero');
+    const editorial=document.querySelector('.r87Editorial');
+    if(editorial)editorial.style.display=together?'none':'';
+    if(hero){
+      hero.querySelector('h1').textContent=together?(locale==='ja'?'みんなで採点しよう':'Rate Together'):copy.title;
+      hero.querySelector('p').textContent=together?(locale==='ja'?'お題を選んで自分の点数を投稿。みんなのランキングを一緒に作ろう。':'Choose a topic, submit your scores and create a community ranking together.'):copy.subtitle;
+    }
     // Switch tab headings immediately even before the network response.
     sectionTitle.textContent=state.view==='community'?copy.communityWorks:copy.works;
     const generation=++state.generation;
