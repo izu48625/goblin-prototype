@@ -26,7 +26,7 @@ if(uuid.test(topicId)){
   }
   async function loadData(sb){
     const {data:topic,error}=await sb.from('topics')
-      .select('id,title,description,language_code,score_scale,weighted,allow_ratings,visibility,topic_items(id,name,position),criteria(id,name,weight,position)')
+      .select('id,title,description,language_code,score_scale,weighted,allow_ratings,visibility,community_minimum,topic_items(id,name,position),criteria(id,name,weight,position)')
       .eq('id',topicId).single();
     if(error)throw error;
     if(!topic.allow_ratings)throw new Error('This work is not accepting Community ratings.');
@@ -133,6 +133,10 @@ if(uuid.test(topicId)){
       context=await loadData(sb);
       await mountSheet(context.sheet);
       syncButtons();
+      const minimum=Number(context.topic.community_minimum)===1?1:5;
+      msg(siteLanguage()==='ja'
+        ?`投稿した採点は、参加者${minimum}人から平均点・順位として公開されます。${minimum===1?'1人目から公開されます。':''}`
+        :`Submitted scores will appear in averages and rankings starting at ${minimum} participant(s).`);
       $('communityBackLink').textContent=siteLanguage()==='en'?'← Back to public work':'← 公開ページへ戻る';
       $('communityDraft').textContent=siteLanguage()==='en'?'Save draft':'下書き保存';
       panel.classList.remove('hidden');
