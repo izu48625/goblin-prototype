@@ -359,7 +359,7 @@
       'community.openPublic':'View details on public page',
       'community.noRatings':'No Community ratings yet.',
       'community.noEligibleAverage':'No target has 5 eligible ratings yet.',
-      'action.discover':'みんなで採点',
+      'action.discover':'Rate Together',
       'action.new':'＋ New',
       'action.duplicate':'Duplicate',
       'action.delete':'Delete',
