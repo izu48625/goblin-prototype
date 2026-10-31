@@ -10,7 +10,7 @@ assert(match,'Main topic lookup with explicit select is required');
 const projection=match[1];
 const required=[
   'id','owner_id','title','description','score_scale','weighted','visibility',
-  'allow_ratings','show_community','source_topic_id','published_at',
+  'allow_ratings','show_community','community_minimum','source_topic_id','published_at',
   'snapshot','snapshot_updated_at'
 ];
 const fields=projection.split(',topic_items(')[0].split(',');
