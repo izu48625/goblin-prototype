@@ -506,13 +506,10 @@
   function reload(delay=0){
     clearTimeout(searchTimer);
     const together=state.view==='community';
-    const hero=document.querySelector('.hero');
-    const editorial=document.querySelector('.r87Editorial');
-    if(editorial)editorial.style.display=together?'none':'';
-    if(hero){
-      hero.querySelector('h1').textContent=together?(locale==='ja'?'みんなで採点しよう':'Rate Together'):copy.title;
-      hero.querySelector('p').textContent=together?(locale==='ja'?'お題を選んで自分の点数を投稿。みんなのランキングを一緒に作ろう。':'Choose a topic, submit your scores and create a community ranking together.'):copy.subtitle;
-    }
+    const editorial=document.querySelectorAll('.r87Editorial')[0];
+    if(editorial?.style)editorial.style.display=together?'none':'';
+    document.querySelector('.hero h1').textContent=together?(locale==='ja'?'みんなで採点しよう':'Rate Together'):copy.title;
+    document.querySelector('.hero p').textContent=together?(locale==='ja'?'お題を選んで自分の点数を投稿。みんなのランキングを一緒に作ろう。':'Choose a topic, submit your scores and create a community ranking together.'):copy.subtitle;
     // Switch tab headings immediately even before the network response.
     sectionTitle.textContent=state.view==='community'?copy.communityWorks:copy.works;
     const generation=++state.generation;
