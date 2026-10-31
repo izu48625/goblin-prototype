@@ -90,7 +90,9 @@ try{
     await page.locator('.globalDiscoverBtn').waitFor({state:'visible',timeout:15000});
     assert.equal(await page.locator('.globalHomeBtn').count(),1,path);
     assert.equal(await page.locator('.globalDiscoverBtn').count(),1,path);
-    assert((await page.locator('.globalDiscoverBtn').getAttribute('href')).endsWith('/discover.html'),path);
+    const communityHref=new URL(await page.locator('.globalDiscoverBtn').getAttribute('href'));
+    assert.equal(communityHref.pathname,'/discover.html',path);
+    assert.equal(communityHref.searchParams.get('view'),'community',path);
     if(path==='/public.html')assert.equal(await page.locator('.discoverLink').count(),0);
   }
   assert.deepEqual(errors,[],'Unexpected browser errors during R31 Home UI checks');

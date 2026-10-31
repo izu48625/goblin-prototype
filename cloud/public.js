@@ -295,7 +295,7 @@
     const sb=window.SM_SUPABASE?.client;if(!sb)throw new Error('Supabase is not ready.');
 
     const {data,error}=await sb.from('topics')
-      .select('id,owner_id,title,description,score_scale,weighted,visibility,allow_ratings,show_community,source_topic_id,published_at,snapshot,snapshot_updated_at,topic_items(id,name,position,image_url),criteria(id,name,weight,position)')
+      .select('id,owner_id,title,description,score_scale,weighted,visibility,allow_ratings,show_community,community_minimum,source_topic_id,published_at,snapshot,snapshot_updated_at,topic_items(id,name,position,image_url),criteria(id,name,weight,position)')
       .eq('id',id).single();
     if(error)throw error;
 
@@ -319,6 +319,7 @@
     let currentUser=null;
     try{currentUser=(await sb.auth.getUser()).data?.user||null}catch{}
     const isOwner=!!currentUser&&currentUser.id===data.owner_id;
+    const communityMinimum=Number(data.community_minimum)===1?1:5;
     const items=(data.topic_items||[]).sort((a,b)=>a.position-b.position);
     const dbCriteria=(data.criteria||[]).sort((a,b)=>a.position-b.position);
     const snap=(data.snapshot&&typeof data.snapshot==='object'&&!Array.isArray(data.snapshot))?data.snapshot:{};
@@ -500,7 +501,7 @@
             <div class="shareOptionLabel">${ja?'内容':'Template'}</div>
             <div class="shareOptionGrid">
               <button class="shareChoice active" data-share-template="creator" type="button"><b>${ja?'作成者 TOP3':'Creator TOP3'}</b><span>${ja?'作成者の総合ランキング':'Creator overall ranking'}</span></button>
-              <button id="shareCommunityChoice" class="shareChoice" data-share-template="community" type="button"><b>Community TOP3</b><span id="shareCommunityChoiceSub">${ja?'5人以上で利用可能':'Available at 5+ participants'}</span></button>
+              <button id="shareCommunityChoice" class="shareChoice" data-share-template="community" type="button"><b>Community TOP3</b><span id="shareCommunityChoiceSub">${ja?`${communityMinimum}人以上で利用可能`:`Available at ${communityMinimum}+ participants`}</span></button>
               <button class="shareChoice" data-share-template="overview" type="button"><b>${ja?'概要カード':'Overview'}</b><span>${ja?'対象数・項目数・尺度・参加者':'Targets, metrics, scale, participants'}</span></button>
             </div>
           </div>
@@ -570,7 +571,7 @@
         communityChoice.disabled=!shareCommunityUnlocked;
         if(communitySub)communitySub.textContent=shareCommunityUnlocked
           ?(ja?`${shareParticipant}人のCommunity平均を使用`:`Uses ${shareParticipant} Community participants`)
-          :(ja?'5人以上で利用可能':'Available at 5+ participants');
+          :(ja?`${communityMinimum}人以上で利用可能`:`Available at ${communityMinimum}+ participants`);
       }
       if(!shareCommunityUnlocked&&shareState.template==='community')shareState.template='creator';
       const size=shareCanvasSize(shareState.aspect);
@@ -697,7 +698,7 @@
       if(countRes.error||itemRes.error||criterionRes.error)throw(countRes.error||itemRes.error||criterionRes.error);
 
       const participant=Number(countRes.data||0);
-      const canShowAverages=participant>=5;
+      const canShowAverages=participant>=communityMinimum;
       const itemSummary=itemRes.data||[];
       const criterionSummary=criterionRes.data||[];
       const itemById=new Map(items.map(i=>[i.id,i]));
@@ -706,7 +707,7 @@
           itemId:s.item_id,
           name:itemById.get(s.item_id)?.name||'',
           count:Number(s.response_count||0),
-          value:canShowAverages&&Number(s.response_count||0)>=5?num(s.avg_overall):null
+          value:canShowAverages&&Number(s.response_count||0)>=communityMinimum?num(s.avg_overall):null
         }))
         .filter(x=>x.value!==null)
         .sort((a,b)=>b.value-a.value||a.name.localeCompare(b.name,ja?'ja':'en'));
@@ -718,13 +719,13 @@
       const cMap=new Map(
         criterionSummary.map(s=>[
           `${s.item_id}|${s.criterion_id}`,
-          {...s,avg_score:canShowAverages&&Number(s.response_count||0)>=5?num(s.avg_score):null}
+          {...s,avg_score:canShowAverages&&Number(s.response_count||0)>=communityMinimum?num(s.avg_score):null}
         ])
       );
 
       const metricSummary=dbCriteria.map(criterion=>{
         const rowsForMetric=criterionSummary
-          .filter(row=>row.criterion_id===criterion.id&&canShowAverages&&Number(row.response_count||0)>=5&&num(row.avg_score)!==null)
+          .filter(row=>row.criterion_id===criterion.id&&canShowAverages&&Number(row.response_count||0)>=communityMinimum&&num(row.avg_score)!==null)
           .map(row=>({avg:num(row.avg_score),count:Number(row.response_count||0)}))
           .filter(row=>row.avg!==null&&row.count>0);
         const den=rowsForMetric.reduce((sum,row)=>sum+row.count,0);
@@ -747,7 +748,7 @@
       if(canShowAverages&&items.length&&dbCriteria.length){
         communityTable=`<div class="tableWrap"><table><thead><tr><th>${ja?'対象':'Target'}</th>${dbCriteria.map(c=>`<th>${esc(c.name)}</th>`).join('')}<th>${ja?'総合':'Overall'}</th></tr></thead><tbody>${items.map(item=>{
           const overall=itemSummary.find(x=>x.item_id===item.id);
-          const overallValue=Number(overall?.response_count||0)>=5?num(overall?.avg_overall):null;
+          const overallValue=Number(overall?.response_count||0)>=communityMinimum?num(overall?.avg_overall):null;
           return `<tr><td>${esc(item.name)}</td>${dbCriteria.map(c=>{
             const s=cMap.get(`${item.id}|${c.id}`);
             return `<td class="${s?.avg_score==null?'na':'score'}">${s?.avg_score==null?'—':fmt(s.avg_score)}</td>`;
@@ -758,8 +759,8 @@
       const rankingHtml=canShowAverages
         ? (communityRanking.length
           ? communityRanking.slice(0,10).map((item,i)=>`<div class="rankRow"><div class="rankNo">${i+1}</div><div class="rankName">${esc(item.name)}<small>${item.count}${ja?'人':' ratings'}</small></div><div class="rankValue">${fmt(item.value)}</div></div>`).join('')
-          : `<div class="emptyCommunity">${ja?'5件以上の評価が集まった対象はまだありません。':'No target has 5 eligible ratings yet.'}</div>`)
-        : `<div class="privacyLock"><b>${ja?'平均はまだ非表示':'Averages are still private'}</b><span>${ja?'参加者が5人に達するとCommunity総合ランキングを表示します。':'Community Overall Ranking unlocks when 5 participants have submitted.'}</span></div>`;
+          : `<div class="emptyCommunity">${ja?`${communityMinimum}件以上の評価が集まった対象はまだありません。`:`No target has ${communityMinimum} eligible ratings yet.`}</div>`)
+        : `<div class="privacyLock"><b>${ja?'平均はまだ非表示':'Averages are still private'}</b><span>${ja?`あと${Math.max(0,communityMinimum-participant)}人でCommunity総合ランキングを公開します。`:`Community ranking unlocks after ${communityMinimum} participants.`}</span></div>`;
 
       let ownHtml='';
       if(own&&canShowAverages){
@@ -788,21 +789,21 @@
           <div class="privacyNote">
             <b>${canShowAverages?(ja?'Community平均を公開中':'Community averages unlocked'):(ja?'プライバシー保護中':'Privacy threshold active')}</b>
             <span>${canShowAverages
-              ?(ja?'5人以上の投稿が集まったため、Community平均を表示しています。対象ごとの平均は、その対象を全項目採点した参加者が5人以上いる場合のみ表示します。':'Community averages are available. Each target is shown only when at least 5 participants fully rated that target.')
-              :(ja?`現在${participant}人。5人未満では平均点・順位・差分を表示しません。`:`${participant} participant(s). Averages, rankings, and differences stay hidden until 5 participants submit.`)}</span>
+              ?(ja?`Community平均を公開中。${participant===1?'参加者1人のため暫定結果です。':''}対象ごとの平均は、全項目を採点した人が${communityMinimum}人以上いる場合に表示します。`:`Community averages are available. ${participant===1?'This is a provisional result from one voter. ':''}Each target needs ${communityMinimum} completed ratings.`)
+              :(ja?`現在${participant}人。あと${Math.max(0,communityMinimum-participant)}人で集計結果を表示します。`:`${participant} participant(s). ${Math.max(0,communityMinimum-participant)} more needed to unlock results.`)}</span>
           </div>
         </div>
 
         <div class="communityGrid">
           <section>
-            <div class="cardTitleRow"><h2>${ja?'Community総合ランキング':'Community Overall Ranking'}</h2><span class="smallBadge">${canShowAverages?'TOP 10':'5+'}</span></div>
+            <div class="cardTitleRow"><h2>${ja?'Community総合ランキング':'Community Overall Ranking'}</h2><span class="smallBadge">${canShowAverages?'TOP 10':`${communityMinimum}+`}</span></div>
             <div class="ranking">${rankingHtml}</div>
           </section>
           <section>
-            <div class="cardTitleRow"><h2>${ja?'項目別Community平均':'Community Metric Averages'}</h2><span class="smallBadge">${canShowAverages?dbCriteria.length:'5+'}</span></div>
+            <div class="cardTitleRow"><h2>${ja?'項目別Community平均':'Community Metric Averages'}</h2><span class="smallBadge">${canShowAverages?dbCriteria.length:`${communityMinimum}+`}</span></div>
             ${canShowAverages
               ?metricSummaryHtml
-              :`<div class="privacyLock compact"><b>${ja?'5人で解放':'Unlocks at 5'}</b><span>${ja?'項目別平均も5人未満では表示しません。':'Metric averages remain hidden below 5 participants.'}</span></div>`}
+              :`<div class="privacyLock compact"><b>${ja?`${communityMinimum}人で公開`:`Unlocks at ${communityMinimum}`}</b><span>${ja?`項目別平均も${communityMinimum}人未満では非表示です。`:`Metric averages are hidden below ${communityMinimum} participants.`}</span></div>`}
           </section>
         </div>
 

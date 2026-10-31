@@ -1961,11 +1961,12 @@
     if(!panel||!status||!body)return;
 
     const participant=Number(payload?.participant||0);
-    const unlocked=participant>=5;
+    const minimum=Number(payload?.minimum)===1?1:5;
+    const unlocked=participant>=minimum;
     $('editorCommunityParticipantCount').textContent=String(participant);
     $('editorCommunityGate').innerHTML=unlocked
       ? `<b>${esc(t('community.unlockedHelp'))}</b><span>${esc(t('community.participants'))}: ${participant}</span>`
-      : `<b>${esc(t('community.lockedTitle'))}</b><span>${esc(t('community.lockedHelp',{count:Math.max(0,5-participant)}))}</span>`;
+      : `<b>${esc(t('community.lockedTitle'))}</b><span>${esc(t('community.lockedHelp',{count:Math.max(0,minimum-participant)}))}</span>`;
 
     $('editorCommunityUnlocked').classList.toggle('hidden',!unlocked);
     if(unlocked){
@@ -2021,13 +2022,17 @@
       const sb=window.SM_SUPABASE?.client;
       if(!sb)throw new Error('Supabase client is not ready');
 
-      const countRes=await sb.rpc('get_topic_participant_count',{p_topic_id:topicId});
-      if(countRes.error)throw countRes.error;
+      const [countRes,topicRes]=await Promise.all([
+        sb.rpc('get_topic_participant_count',{p_topic_id:topicId}),
+        sb.from('topics').select('community_minimum').eq('id',topicId).single()
+      ]);
+      if(countRes.error||topicRes.error)throw(countRes.error||topicRes.error);
+      const minimum=Number(topicRes.data?.community_minimum)===1?1:5;
       const participant=Number(countRes.data||0);
       let ranking=[];
       let metrics=[];
 
-      if(participant>=5){
+      if(participant>=minimum){
         const [itemRes,criterionRes,itemsRes,criteriaRes]=await Promise.all([
           sb.rpc('get_community_item_summary',{p_topic_id:topicId}),
           sb.rpc('get_community_criterion_summary',{p_topic_id:topicId}),
@@ -2045,7 +2050,7 @@
           .map(row=>({
             name:itemName.get(row.item_id)||'',
             count:Number(row.response_count||0),
-            value:Number(row.response_count||0)>=5&&row.avg_overall!==null?Number(row.avg_overall):null
+            value:Number(row.response_count||0)>=minimum&&row.avg_overall!==null?Number(row.avg_overall):null
           }))
           .filter(row=>row.value!==null&&Number.isFinite(row.value))
           .sort((a,b)=>b.value-a.value||a.name.localeCompare(b.name))
@@ -2054,7 +2059,7 @@
         const criterionRows=criterionRes.data||[];
         metrics=criteria.map(criterion=>{
           const eligible=criterionRows
-            .filter(row=>row.criterion_id===criterion.id&&Number(row.response_count||0)>=5&&row.avg_score!==null)
+            .filter(row=>row.criterion_id===criterion.id&&Number(row.response_count||0)>=minimum&&row.avg_score!==null)
             .map(row=>({avg:Number(row.avg_score),count:Number(row.response_count||0)}))
             .filter(row=>Number.isFinite(row.avg)&&row.count>0);
           const denominator=eligible.reduce((sum,row)=>sum+row.count,0);
@@ -2065,7 +2070,7 @@
         });
       }
 
-      const payload={participant,ranking,metrics,loadedAt:Date.now()};
+      const payload={participant,minimum,ranking,metrics,loadedAt:Date.now()};
       editorCommunityCache.set(topicId,payload);
       if(requestId!==editorCommunityRequestId||liveCommunityTopicId()!==topicId)return;
       renderEditorCommunityPayload(payload);
@@ -2340,7 +2345,7 @@
         if(hasSubs&&!same){
           const oldTopicId=topicId;
           const versionSnapshot={...model,lineage:{relation:'version',sourceTopicId:oldTopicId,sourceTopicTitle:String(current?.title||'')}};
-          const {data:newTopic,error:newErr}=await sb.from('topics').insert({...basePayload,source_topic_id:oldTopicId,snapshot:versionSnapshot}).select('id').single();
+          const {data:newTopic,error:newErr}=await sb.from('topics').insert({...basePayload,community_minimum:1,source_topic_id:oldTopicId,snapshot:versionSnapshot}).select('id').single();
           if(newErr)throw newErr;topicId=newTopic.id;await insertPublishedStructure(sb,topicId,model);versioned=true;updating=false;
         }else{
           const {data:updateData,error:updateError}=await sb.from('topics').update(basePayload).eq('id',topicId).eq('owner_id',user.id).select('id').single();
@@ -2352,7 +2357,7 @@
           }
         }
       }else{
-        const insertPayload=s.sourceTopicId?{...basePayload,source_topic_id:s.sourceTopicId}:basePayload;
+        const insertPayload=s.sourceTopicId?{...basePayload,community_minimum:1,source_topic_id:s.sourceTopicId}:{...basePayload,community_minimum:1};
         const {data:insertData,error:insertError}=await sb.from('topics').insert(insertPayload).select('id').single();if(insertError)throw insertError;topicId=insertData.id;await insertPublishedStructure(sb,topicId,model);
       }
 

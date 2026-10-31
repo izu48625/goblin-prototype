@@ -112,8 +112,9 @@
     label.textContent=lang==='ja'?'表示言語':'Language';
     const discover=bar.querySelector('.globalDiscoverBtn');
     if(discover){
-      discover.title=lang==='ja'?'公開作品を探す':'Explore published works';
-      discover.setAttribute('aria-label',lang==='ja'?'Discoverを開く':'Open Discover');
+      discover.textContent=lang==='ja'?'みんなで採点':'Rate Together';
+      discover.title=lang==='ja'?'みんなで採点できる作品を探す':'Browse works open to ratings';
+      discover.setAttribute('aria-label',lang==='ja'?'みんなで採点を開く':'Open Rate Together');
     }
     // The first-party worked examples are reachable in one tap from every screen.
     // Reuse the former About slot to keep iPhone header width unchanged.
@@ -248,10 +249,10 @@
     bar=document.createElement('div');
     bar.className='globalLocaleBar';
     bar.setAttribute('role','group');
-    bar.innerHTML='<nav class="globalNavLinks" aria-label="Site navigation"><a class="globalHomeBtn" href="index.html?fresh=1" aria-label="ホームを開く">HOME</a><a class="globalDiscoverBtn" href="discover.html" aria-label="Discoverを開く">Discover</a><a class="globalIntroBtn globalExamplesBtn" href="/ja/use-cases.html" aria-label="作例集（グラフ8種類）を見る">作例</a><details class="globalSupportMenu"><summary>ヘルプ</summary><div class="globalSupportPanel"><a data-global-myworks href="/my.html?lang=ja">自分の作品を管理</a><a data-global-about href="/ja/">サービス紹介</a><a data-global-guide="chart" href="/ja/chart-guide.html">グラフの作り方・能力比較</a><a data-global-guide="png" href="/ja/png-guide.html">PNG保存・共有</a><a data-global-guide="scoring" href="/ja/scoring-guide.html">公平な採点と重み付け</a><div class="globalSupportDivider" aria-hidden="true"></div><a data-global-support="terms" href="/ja/legal.html#terms">利用規約</a><a data-global-support="privacy" href="/ja/legal.html#privacy">プライバシー</a><a data-global-support="contact" href="/ja/legal.html#contact">お問い合わせ</a><button type="button" class="r81-help-theme" data-sm-theme-toggle="menu" aria-pressed="false">☾ ダークモード</button></div></details></nav><div class="globalLocaleControls"><span class="globalLocaleLabel">表示言語</span><div class="globalLocaleSwitch"><button type="button" data-global-lang="ja" aria-label="日本語">JA</button><button type="button" data-global-lang="en" aria-label="English">EN</button></div></div>';
+    bar.innerHTML='<nav class="globalNavLinks" aria-label="Site navigation"><a class="globalHomeBtn" href="index.html?fresh=1" aria-label="ホームを開く">HOME</a><a class="globalDiscoverBtn" href="discover.html?view=community" aria-label="みんなで採点を開く">みんなで採点</a><a class="globalIntroBtn globalExamplesBtn" href="/ja/use-cases.html" aria-label="作例集（グラフ8種類）を見る">作例</a><details class="globalSupportMenu"><summary>ヘルプ</summary><div class="globalSupportPanel"><a data-global-myworks href="/my.html?lang=ja">自分の作品を管理</a><a data-global-about href="/ja/">サービス紹介</a><a data-global-guide="chart" href="/ja/chart-guide.html">グラフの作り方・能力比較</a><a data-global-guide="png" href="/ja/png-guide.html">PNG保存・共有</a><a data-global-guide="scoring" href="/ja/scoring-guide.html">公平な採点と重み付け</a><div class="globalSupportDivider" aria-hidden="true"></div><a data-global-support="terms" href="/ja/legal.html#terms">利用規約</a><a data-global-support="privacy" href="/ja/legal.html#privacy">プライバシー</a><a data-global-support="contact" href="/ja/legal.html#contact">お問い合わせ</a><button type="button" class="r81-help-theme" data-sm-theme-toggle="menu" aria-pressed="false">☾ ダークモード</button></div></details></nav><div class="globalLocaleControls"><span class="globalLocaleLabel">表示言語</span><div class="globalLocaleSwitch"><button type="button" data-global-lang="ja" aria-label="日本語">JA</button><button type="button" data-global-lang="en" aria-label="English">EN</button></div></div>';
     document.body.prepend(bar);
     bar.querySelector('.globalHomeBtn').href=previewUrl(new URL(landingLang()?'/index.html?lang='+current():homePath(),location.href).href);
-    bar.querySelector('.globalDiscoverBtn').href=previewUrl(new URL((landingLang()||legalLang()||readingLang())?'/discover.html?lang='+current():(legalLang()?'/discover.html':(location.pathname.startsWith('/app/')?'../discover.html':'discover.html')),location.href).href);
+    bar.querySelector('.globalDiscoverBtn').href=previewUrl(new URL('/discover.html?view=community&lang='+current(),location.origin).href);
     // Preserve a compact navigation bar on iPhone; close the dropdown on
     // outside click or Escape, rather than adding another wide fixed tab.
     document.addEventListener('click',event=>{
