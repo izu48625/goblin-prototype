@@ -283,7 +283,7 @@
       const map=new Map((scores||[]).map(s=>[`${s.item_id}|${s.criterion_id}`,num(s.score)]));
       const values=items.map(item=>{
         const row=criteria.map(c=>map.get(`${item.id}|${c.id}`)??null);
-        return {itemId:item.id,name:item.name,value:average(row,criteria,weighted)};
+        return {itemId:item.id,name:item.name,value:row.every(score=>score!==null)?average(row,criteria,weighted):null};
       });
       return {status:rs.status,values};
     }catch{return null}
@@ -811,6 +811,174 @@
           ?`<section class="communityMatrix"><div class="cardTitleRow"><h2>${ja?'Community採点表':'Community Score Matrix'}</h2><span class="smallBadge">${ja?'対象 × 項目':'Target × Metric'}</span></div>${communityTable}</section>`
           :''}
         ${ownHtml}`;
+      function enhanceCommunity(root,ja,items,criteria,criterionSummary,communityRanking,own,minimum,unlocked){
+  const grid=root.querySelector(".communityGrid");
+  if(!grid)return;
+  grid.classList.add("communityResultsGrid");
+  const rankingSection=grid.children[0];
+  const metricSection=grid.children[1];
+  if(rankingSection){
+    rankingSection.classList.add("communityRankingSection");
+    const title=rankingSection.querySelector("h2");
+    if(title)title.textContent=ja?"みんなの総合ランキング":"Community Overall Ranking";
+  }
+  const make=(tag,className,value)=>{
+    const el=document.createElement(tag);
+    if(className)el.className=className;
+    if(value!==undefined)el.textContent=String(value);
+    return el;
+  };
+  const short=(value)=>Number(Number(value).toFixed(1)).toString();
+  // Rebuild the comparison. Existing overall results include the current
+  // participant, so subtract their completed submitted score first.
+  const compare=root.querySelector(".compareCommunityCard")||make("section","compareCommunityCard");
+  compare.classList.add("communityCompareSection");
+  compare.replaceChildren();
+  const compareHead=make("div","cardTitleRow");
+  compareHead.appendChild(make("h2","",ja?"あなた vs みんな":"You vs other participants"));
+  compareHead.appendChild(make("span","smallBadge",ja?"自分を除いた平均":"Excludes your rating"));
+  compare.appendChild(compareHead);
+  compare.appendChild(make("p","communityHelp",ja?
+    "差＝あなたの点数 − ほかの参加者の平均。プラスはあなたの方が高く評価。":
+    "Difference = your score minus the average rating of everyone else."));
+  if(!unlocked||!own||own.status!=="submitted"){
+    compare.appendChild(make("p","communityWaiting",ja?
+      "採点を投稿すると、ほかの参加者との評価差を比較できます。":
+      "Submit a rating to compare your scores with other participants."));
+  }else{
+    const overallById=new Map(communityRanking.map(v=>[v.itemId,v]));
+    const entries=own.values.filter(v=>v.value!==null);
+    const comparable=entries.some(v=>{
+      const all=overallById.get(v.itemId);
+      return all && all.count-1>=Math.max(1,minimum);
+    });
+    if(!comparable){
+      compare.appendChild(make("p","communityWaiting",ja?
+        "ほかの参加者の採点待ちです。自分1人のときは差を0と表示しません。":
+        "Waiting for other participants. A solo rating is not shown as a zero difference."));
+    }
+    if(entries.length){
+      const wrap=make("div","tableWrap communityCompareTable");
+      const table=make("table");
+      const thead=make("thead"),theadRow=make("tr");
+      [ja?"対象":"Target",ja?"あなた":"You",ja?"みんな":"Others",ja?"差":"Diff"].forEach(n=>theadRow.appendChild(make("th","",n)));
+      thead.appendChild(theadRow);table.appendChild(thead);
+      const tbody=make("tbody");
+      entries.forEach(entry=>{
+        const pooled=overallById.get(entry.itemId);
+        const otherCount=pooled?pooled.count-1:0;
+        // RPC reports a pooled 2-decimal mean. Show one decimal for the
+        // reconstructed other-participant mean to avoid false precision.
+        const other=pooled&&otherCount>=Math.max(1,minimum)
+          ?(pooled.value*pooled.count-entry.value)/otherCount:null;
+        const diff=other===null?null:Number((entry.value-other).toFixed(1));
+        const tr=make("tr");
+        tr.appendChild(make("td","",entry.name));
+        tr.appendChild(make("td","score",short(entry.value)));
+        tr.appendChild(make("td",other===null?"na":"avg",other===null?"—":short(other)));
+        tr.appendChild(make("td",diff===null?"na":diff>0?"diffPlus":diff<0?"diffMinus":"na",
+          diff===null?"—":(diff>0?"+":"")+short(diff)));
+        tbody.appendChild(tr);
+      });
+      table.appendChild(tbody);wrap.appendChild(table);compare.appendChild(wrap);
+    }
+  }
+  if(metricSection)grid.insertBefore(compare,metricSection);
+  else grid.appendChild(compare);
+  // Replace cross-team metric averages with a switchable ranking for each
+  // criterion; only public, threshold-qualified aggregate values are used.
+  if(metricSection){
+    metricSection.classList.add("communityMetricSection");
+    metricSection.replaceChildren();
+    const header=make("div","cardTitleRow");
+    header.appendChild(make("h2","",ja?"項目別ランキング":"Rankings by metric"));
+    header.appendChild(make("span","smallBadge",String(criteria.length)+(ja?"項目":" metrics")));
+    metricSection.appendChild(header);
+    if(unlocked){
+      const label=make("label","communityMetricControl",ja?"比較項目 ":"Metric ");
+      const select=make("select");
+      select.id="communityMetricSelect";
+      select.setAttribute("aria-label",ja?"比較する評価項目":"Metric to compare");
+      criteria.forEach((criterion,i)=>{
+        const opt=make("option","",criterion.name);opt.value=String(i);select.appendChild(opt);
+      });
+      label.appendChild(select);metricSection.appendChild(label);
+      const list=make("div","ranking communityMetricRanking");
+      list.setAttribute("aria-live","polite");
+      metricSection.appendChild(list);
+      const render=()=>{
+        list.replaceChildren();
+        const criterion=criteria[Number(select.value)];
+        if(!criterion)return;
+        const rows=items.map(item=>{
+          const data=criterionSummary.find(s=>s.item_id===item.id&&s.criterion_id===criterion.id);
+          return {name:item.name,count:Number(data?.response_count||0),value:Number(data?.avg_score)};
+        }).filter(row=>row.count>=minimum&&Number.isFinite(row.value))
+          .sort((a,b)=>b.value-a.value||a.name.localeCompare(b.name,ja?"ja":"en"));
+        if(!rows.length){
+          list.appendChild(make("p","communityWaiting",ja?"この項目はまだ集計待ちです。":"Waiting for ratings on this metric."));
+          return;
+        }
+        rows.forEach((row,i)=>{
+          const wrapper=make("div","rankRow");
+          wrapper.appendChild(make("div","rankNo",i+1));
+          const name=make("div","rankName",row.name);
+          name.appendChild(make("small","",row.count+(ja?"人の回答":" ratings")));
+          wrapper.appendChild(name);
+          wrapper.appendChild(make("div","rankValue",short(row.value)));
+          list.appendChild(wrapper);
+        });
+      };
+      select.addEventListener("change",render);
+      render();
+    }else{
+      metricSection.appendChild(make("p","communityWaiting",ja?
+        "必要な参加者数に達すると項目別ランキングが表示されます。":
+        "Rankings appear once enough participants submit."));
+    }
+  }
+  // The first column previously consumed the screen on mobile.
+  // Default to one criterion + Overall, with an option for the full matrix.
+  const matrix=root.querySelector(".communityMatrix");
+  if(matrix){
+    matrix.classList.add("communityCompactMatrix");
+    const header=matrix.querySelector(".cardTitleRow h2");
+    if(header)header.textContent=ja?"詳細採点表":"Detailed score matrix";
+    const wrap=matrix.querySelector(".tableWrap");
+    if(wrap){
+      wrap.classList.add("communityScoreTable");
+      const table=wrap.querySelector("table");
+      const heading=make("div","communityMatrixControls");
+      const label=make("label","communityMetricControl",ja?"表示項目 ":"Show metric ");
+      const select=make("select");
+      select.id="communityTableMetricSelect";
+      select.setAttribute("aria-label",ja?"採点表の表示項目":"Visible score matrix column");
+      criteria.forEach((criterion,i)=>{
+        const opt=make("option","",criterion.name);opt.value=String(i);select.appendChild(opt);
+      });
+      const allOpt=make("option","",ja?"すべての項目":"All metrics");
+      allOpt.value="all";select.appendChild(allOpt);label.appendChild(select);
+      heading.appendChild(label);
+      heading.appendChild(make("span","communityHelp",ja?
+        "すべて表示すると横スクロールできます。":"Scroll sideways to view all metrics."));
+      matrix.insertBefore(heading,wrap);
+      const apply=()=>{
+        const val=select.value;matrix.dataset.view=val;
+        const rows=table?Array.from(table.rows):[];
+        rows.forEach(row=>{
+          Array.from(row.cells).forEach((cell,index)=>{
+            const criterionIndex=index-1;
+            cell.hidden=val!=="all"&&criterionIndex>=0&&criterionIndex<criteria.length&&criterionIndex!==Number(val);
+          });
+        });
+      };
+      select.value=window.innerWidth<=700?"0":"all";
+      select.addEventListener("change",apply);
+      apply();
+    }
+  }
+}
+      enhanceCommunity(document.getElementById('communityContent'),ja,items,dbCriteria,criterionSummary,communityRanking,own,communityMinimum,canShowAverages);
     }else{
       shareParticipant=0;
       shareCommunityRanking=[];
