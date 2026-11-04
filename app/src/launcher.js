@@ -63,6 +63,19 @@ function openExtension(type){
         !sheet.rows.some(r=>r.scores.some(Number.isFinite)))
         throw new Error(language==="ja"?'採点してから「データやグラフ」を開いてください。':'Please enter your scores before opening Visual Tools.');
     }
+    // A linked visualization needs at least one named, scored subject.
+    // Otherwise the editor opens with an empty chart and an iOS "No options" picker.
+    const hasScoredSubject=!!sheet?.rows?.some(row=>
+      String(row?.name??"").trim() &&
+      Array.isArray(row.scores) &&
+      row.scores.some(value=>value!==null && value!==undefined &&
+        String(value).trim()!=="" && Number.isFinite(Number(value)))
+    );
+    if(!hasScoredSubject){
+      throw new Error(language==="ja"
+        ?"基本表に対象名と点数を1つ以上入力してから、グラフを作成してください。"
+        :"Enter at least one named subject with a score in the Home table before creating a chart.");
+    }
     if(sheet?.id)project.settings.sourceSheetId=sheet.id;
     syncSourceProject(project,{},sheet);
     if(communityMode){
