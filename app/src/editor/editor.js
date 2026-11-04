@@ -1856,6 +1856,24 @@ function renderSourceQuickBar(){
   lead.querySelector("span").textContent=model.sheet.title||"Stats Maker";
   bar.appendChild(lead);
 
+  // Existing projects created from an empty Home sheet should explain the
+  // missing data rather than opening an empty iOS native select picker.
+  const hasScore=model.rows.some(row=>row.scores.some(Number.isFinite));
+  if(!hasScore){
+    const notice=document.createElement("div");
+    notice.className="source-empty-notice";
+    notice.textContent=uiText(
+      "表示できる採点データがありません。HOMEで対象名と点数を入力し、グラフを作り直してください。",
+      "No scored subjects found. Add names and scores on Home, then recreate this chart."
+    );
+    const home=document.createElement("a");
+    home.href="../index.html";
+    home.textContent=uiText("HOMEで入力","Edit Home scores");
+    home.className="source-empty-home";
+    bar.append(notice,home);
+    return;
+  }
+
   const addSelect=(label,options,value,onChange)=>{
     const wrap=document.createElement("label");
     wrap.className="source-quick-select";
