@@ -108,6 +108,8 @@ jobs:
           node --check cloud/public-extensions.js
           node --check app/src/extension-catalog.js
           node --check scripts/r118-public-visuals-qa.mjs
+      - name: Home / Visual Tools score-preservation regression
+        run: node --test tests/extension-return-preserve-scores.test.mjs
       - name: Cloudflare-only OG PNG tests
         run: node --test tests/og-image.test.mjs
       - name: R26 edge guard test

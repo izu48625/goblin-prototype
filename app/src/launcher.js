@@ -88,6 +88,15 @@ function openExtension(type){
     window.SM_ANALYTICS?.event('template_selected',{template_type:type});
     const editorUrl=`app/editor.html?v=r27h1&id=${encodeURIComponent(project.id)}`+
       (communityMode?`&from=community&topic=${encodeURIComponent(communityTopicId)}`:'');
+    // Keep the current Home sheet when the user returns with the browser Back
+    // gesture as well as the editor's Back button. A regular Home URL still
+    // opens a fresh sheet, but the history entry for this editor session
+    // explicitly resumes the scores already saved above.
+    if(!communityMode){
+      const returnUrl=new URL(window.location.href);
+      returnUrl.searchParams.set("resume","1");
+      history.replaceState(history.state,"",returnUrl.pathname+returnUrl.search+returnUrl.hash);
+    }
     location.href=window.SM_AD_PREVIEW_NAV?.url(editorUrl)||editorUrl;
   }catch(error){
     console.error(error);
