@@ -45,14 +45,14 @@ function renderLanguage(){
   });
 }
 function getLiveSheet(){
-  try{
-    const lib=frame.contentWindow?.__statsMakerGetLibrary?.();
-    // The Home iframe reports when its persisted library is corrupt. Never
-    // bypass its fail-closed autosave safeguard during extension navigation.
-    if(lib&&!communityMode&&frame.contentWindow?.__statsMakerCanPersist?.()!==false)
-      localStorage.setItem("statsMakerV014Library",JSON.stringify(lib));
-    return frame.contentWindow?.__statsMakerGetActiveSheet?.()||null;
-  }catch(error){console.error("Base bridge failed",error);return null}
+  // Only the embedded Home owns the local-storage write/lease. A parent write
+  // fires a storage event in the iframe and can falsely signal a tab conflict.
+  const flush=frame.contentWindow?.__statsMakerFlushBeforeExtension;
+  if(typeof flush!=="function")
+    throw new Error(language==="ja"
+      ?"基本表の準備ができていません。ページを再読み込みしてください。"
+      :"Home is not ready. Please reload the page.");
+  return flush();
 }
 function openExtension(type){
   try{
@@ -100,7 +100,12 @@ function openExtension(type){
     location.href=window.SM_AD_PREVIEW_NAV?.url(editorUrl)||editorUrl;
   }catch(error){
     console.error(error);
-    alert((language==="ja"?"データやグラフを開けませんでした：":"Could not open visual tool: ")+(error?.message||error));
+    const quota=error?.name==="QuotaExceededError"||/quota.*exceed/i.test(String(error?.message||""));
+    alert(quota
+      ?(language==="ja"
+        ?"ブラウザの保存容量がいっぱいです。基本表をJSONでバックアップし、不要な保存済みグラフを整理してください。採点データは削除していません。"
+        :"Browser storage is full. Back up your Home data as JSON and remove unused saved charts. Your scores have not been deleted.")
+      :(language==="ja"?"データやグラフを開けませんでした：":"Could not open visual tool: ")+(error?.message||error));
   }
 }
 $("extLauncher").addEventListener("click",()=>backdrop.classList.remove("hidden"));

@@ -105,3 +105,47 @@ for(const scale of [100,10]){
 assert.equal(JSON.parse(originalRaw)[0].id,stored.id);
 console.log('R30 storage guard PASS: '+corruptVariants.length+
   ' corrupt fixtures blocked, quota atomic, original charts preserved');
+
+
+// Multiple visual extensions must reuse embedded images without dropping any
+// snapshot when the Home sheet changes or the first project is deleted.
+memory.clear();
+const pictures=Array.from({length:10},(_,i)=>
+  'data:image/jpeg;base64,'+String.fromCharCode(65+i).repeat(40000));
+const snapshots=[];
+for(let n=0;n<10;n++){
+  const p=createProject('ranking-card');
+  p.meta.title='IMAGE SNAPSHOT '+n;
+  p.data.items=pictures.map((imageData,i)=>({
+    id:'row_'+i,name:'Subject '+i,value:90-i,
+    imageData,imageRef:null,enabled:true
+  }));
+  snapshots.push(p);
+  saveProject(p);
+}
+const compact=memory.get(PROJECT_KEY);
+assert(compact.length<650000,
+  'Ten saved charts unexpectedly duplicated the same ten full-size images');
+assert.equal(Object.keys(JSON.parse(compact)[0].__statsMakerSharedImages||{}).length,10,
+  'Shared image bank did not retain all exact original assets');
+for(const p of snapshots){
+  assert.deepEqual(getProject(p.id)?.data,p.data,
+    'Image de-duplication changed a saved chart snapshot');
+}
+deleteProject(snapshots[0].id);
+assert.deepEqual(getProject(snapshots[9].id)?.data,snapshots[9].data,
+  'Deleting the image-bank host also deleted another chart image');
+assert.equal(memory.get(HOME_KEY),undefined,
+  'Restoring image snapshots must not require a Home sheet');
+
+const goodCompact=memory.get(PROJECT_KEY);
+const damaged=JSON.parse(goodCompact);
+damaged[0].data.items[0].imageData='__statsMakerImage:missing';
+const damagedRaw=JSON.stringify(damaged);
+memory.set(PROJECT_KEY,damagedRaw);
+assert.throws(()=>saveProject(createProject('bar')),/blocked to protect previous work/,
+  'Missing shared image must fail closed without erasing old charts');
+assert.equal(memory.get(PROJECT_KEY),damagedRaw);
+memory.set(PROJECT_KEY,goodCompact);
+assert.deepEqual(getProject(snapshots[9].id)?.data,snapshots[9].data);
+console.log('R126 extension image bank PASS: 10 projects, exact images, delete, corrupt guard');

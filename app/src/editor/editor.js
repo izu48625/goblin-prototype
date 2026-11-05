@@ -1,5 +1,5 @@
 import {t,getLanguage,setLanguage,toggleLanguage,applyI18n} from "../core/i18n.js";
-import {getProject,saveProject} from "../core/store.js";
+import {getProject,saveProject} from "../core/store.js?v=r126-storage1";
 import {THEMES,CANVAS_PRESETS,applyTheme,applyCanvasPreset,newItemId,newStatId,newAxisId,newSeriesId} from "../core/project.js";
 import {History} from "../core/history.js";
 import {getVisualization} from "../visualizations/registry.js?v=r70imageline1";
