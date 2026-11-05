@@ -16,7 +16,7 @@ const id=params.get("id");
 let project=getProject(id);
 if(!project){
   alert(getLanguage()==="ja"?"Projectが見つかりません":"Project not found");
-  location.href="../index.html?extensions=1&v=r18c10";
+  location.href="../index.html?extensions=1&resume=1&v=r18c10";
   throw new Error("Project not found");
 }
 
