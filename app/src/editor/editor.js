@@ -7,7 +7,7 @@ import {exportPreview,exportProjectJSON,readProjectJSON,isIOS} from "../core/exp
 import {createImageManager} from "./image-editor.js";
 import {createDataImport} from "./data-import.js";
 import {createSpreadsheetEditor} from "./spreadsheet-editor.js";
-import {getSourceModel,getMetricOptions,getCriterionOptions,getSubjectOptions,syncSourceProject} from "../core/source-sync.js?v=r120-locale1";
+import {getSourceModel,getMetricOptions,getCriterionOptions,getSubjectOptions,syncSourceProject} from "../core/source-sync.js?v=r125-radar-colors1";
 
 const $=id=>document.getElementById(id);
 const uiText=(ja,en)=>getLanguage()==="ja"?ja:en;
@@ -416,6 +416,7 @@ function linkedRadarColorControls(p){
 
   const grid=document.createElement("div");
   grid.className="source-highlight-grid";
+  grid.style.gridTemplateColumns="minmax(0,1fr)";
   (p.data.series||[]).forEach(series=>{
     const rawIndex=Number(series.sourceRawIndex);
     if(!Number.isInteger(rawIndex))return;
@@ -423,6 +424,7 @@ function linkedRadarColorControls(p){
     const initial=/^#[0-9a-f]{6}$/i.test(series.color||"")?series.color:fallback;
     const line=document.createElement("div");
     line.className="source-highlight-row";
+    line.style.gridTemplateColumns="minmax(0,1fr) 40px 112px";
 
     const name=document.createElement("span");
     name.className="source-highlight-name";
