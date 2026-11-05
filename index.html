@@ -155,7 +155,7 @@ body.communityShell #extLauncher{bottom:calc(8px + env(safe-area-inset-bottom))}
     params.delete('v');
     try{history.replaceState(history.state,'',location.pathname+(params.size?'?'+params.toString():'')+location.hash)}catch{}
   }
-  const fresh=!valid && !resumeRemix && !resumePublish && params.get('resume')!=='1';
+  const fresh=!valid && !resumeRemix && !resumePublish && params.get('resume')!=='1' && params.get('extensions')!=='1';
   if(valid)document.body.classList.add('communityShell');
   document.getElementById('basicFrame').src='base/index.html?v=r123-community1'+(valid?'&community='+encodeURIComponent(topic):fresh?'&fresh=1':'');
 })();
