@@ -403,6 +403,85 @@ function sourceHighlightControls(model,highlightColors,onChange){
   return shell;
 }
 
+
+function linkedRadarColorControls(p){
+  const sec=section(uiText("グラフ線の色","Graph line colors"));
+  const note=document.createElement("div");
+  note.className="source-info-note";
+  note.textContent=uiText(
+    "各対象の線・塗り・凡例の色を変更できます。PNG保存にも反映されます。",
+    "Set each target's line, fill and legend color. PNG exports use these colors too."
+  );
+  sec.appendChild(note);
+
+  const grid=document.createElement("div");
+  grid.className="source-highlight-grid";
+  (p.data.series||[]).forEach(series=>{
+    const rawIndex=Number(series.sourceRawIndex);
+    if(!Number.isInteger(rawIndex))return;
+    const fallback="#6F9CFF";
+    const initial=/^#[0-9a-f]{6}$/i.test(series.color||"")?series.color:fallback;
+    const line=document.createElement("div");
+    line.className="source-highlight-row";
+
+    const name=document.createElement("span");
+    name.className="source-highlight-name";
+    name.textContent=series.name||uiText("対象","Target");
+
+    const picker=document.createElement("input");
+    picker.type="color";
+    picker.className="source-highlight-color";
+    picker.value=initial;
+    picker.setAttribute("aria-label",uiText(`${name.textContent}の線色`,`${name.textContent} line color`));
+
+    const hex=document.createElement("input");
+    hex.type="text";
+    hex.className="input";
+    hex.maxLength=7;
+    hex.style.width="104px";
+    hex.value=initial.toUpperCase();
+    hex.setAttribute("aria-label",uiText(`${name.textContent}のカラーコード`,`${name.textContent} hex color`));
+
+    const setColor=value=>{
+      const nextColor=String(value||"").trim().toUpperCase();
+      if(!/^#[0-9A-F]{6}$/.test(nextColor)){
+        const saved=(current().data.series||[]).find(s=>Number(s.sourceRawIndex)===rawIndex);
+        hex.value=saved?.color||initial;
+        return;
+      }
+      picker.value=nextColor;
+      hex.value=nextColor;
+      const currentSeries=(current().data.series||[]).find(s=>Number(s.sourceRawIndex)===rawIndex);
+      if(currentSeries?.color?.toUpperCase()===nextColor)return;
+      mutate(x=>{
+        x.settings.radarSeriesColors={...(x.settings.radarSeriesColors||{}),[String(rawIndex)]:nextColor};
+        const target=(x.data.series||[]).find(s=>Number(s.sourceRawIndex)===rawIndex);
+        if(target)target.color=nextColor;
+      },{panels:false});
+    };
+    // Safari can emit input before change. Preserve the picker node during
+    // live updates, otherwise the native color chooser may close unexpectedly.
+    picker.addEventListener("input",()=>setColor(picker.value));
+    picker.addEventListener("change",()=>setColor(picker.value));
+    hex.addEventListener("change",()=>setColor(hex.value));
+    line.append(name,picker,hex);
+    grid.appendChild(line);
+  });
+  sec.appendChild(grid);
+
+  const reset=document.createElement("button");
+  reset.type="button";
+  reset.className="btn source-picker-btn";
+  reset.textContent=uiText("標準色に戻す","Restore default colors");
+  reset.addEventListener("click",()=>mutate(x=>{
+    x.settings.radarSeriesColors={};
+    const palette=["#6F9CFF","#35D07F","#F5B54C","#B673FF","#FF7284","#48C7D9"];
+    (x.data.series||[]).forEach((s,i)=>s.color=palette[i%palette.length]);
+  }));
+  sec.appendChild(reset);
+  return sec;
+}
+
 function choiceButtons(options,currentValue,onChange,className="segmented"){
   const wrap=document.createElement("div");
   wrap.className=className;
@@ -660,6 +739,7 @@ function buildLinkedDataPanel(p,model){
       {max:6}
     ));
     frag.appendChild(sec);
+    frag.appendChild(linkedRadarColorControls(p));
   }
 
   const options=section(uiText("表示設定","Display options"));
