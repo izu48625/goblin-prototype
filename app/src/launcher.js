@@ -1,6 +1,6 @@
 import {EXTENSIONS} from "./extension-catalog.js?v=r118public1";
 import {createProject} from "./core/project.js";
-import {saveProject} from "./core/store.js";
+import {saveProject} from "./core/store.js?v=r126-storage1";
 import {syncSourceProject} from "./core/source-sync.js?v=r125-radar-colors1";
 
 const UI={
