@@ -2777,6 +2777,22 @@
   }catch{}
 
   // R10 bridge for source-linked visual extensions.
+  // Flush a pending column/score edit before navigating to a visualization.
+  // The Home iframe owns the storage lease; the parent must not write its key.
+  window.__statsMakerFlushBeforeExtension = () => {
+    if(storageRecoveryRequired)
+      throw new Error('Home storage needs recovery before creating a chart');
+    clearTimeout(saveTimer);
+    saveTimer=null;
+    assertStorageCurrent();
+    if(!communityMode){
+      const raw=JSON.stringify(library);
+      localStorage.setItem(STORAGE_KEY,raw);
+      lastStoredHomeRaw=raw;
+    }
+    $('saveBadge').textContent=communityMode?'編集中（投稿前）':t('save.saved');
+    return clone(activeSheet());
+  };
   window.__statsMakerGetActiveSheet = () => clone(activeSheet());
   window.__statsMakerGetLibrary = () => clone(library);
   window.__statsMakerCanPersist = () => !storageRecoveryRequired && !otherTabChangedStorage;
