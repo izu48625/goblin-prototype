@@ -469,15 +469,26 @@ function syncRadar(project,model,rawIndices){
   }));
 
   const palette=["#6F9CFF","#35D07F","#F5B54C","#B673FF","#FF7284","#48C7D9"];
-  project.data.series=selectedRows.map((row,si)=>({
-    id:`series_${row.rawIndex}`,
-    sourceRawIndex:row.rawIndex,
-    name:row.name,
-    color:palette[si%palette.length],
-    values:axisIndices.map(ci=>
-      Number.isFinite(row.scores[ci])?row.scores[ci]:0
-    )
-  }));
+  // Keep the chosen color tied to the Home row (not its current position).
+  // Switching a series off and on must not lose a custom color.
+  const overrides=project.settings.radarSeriesColors||{};
+  const previousColors=new Map((project.data.series||[])
+    .filter(s=>Number.isInteger(s.sourceRawIndex))
+    .map(s=>[String(s.sourceRawIndex),s.color]));
+  const validHex=value=>/^#[0-9a-f]{6}$/i.test(String(value||""));
+  project.data.series=selectedRows.map((row,si)=>{
+    const key=String(row.rawIndex);
+    const preferred=overrides[key]||previousColors.get(key);
+    return {
+      id:`series_${row.rawIndex}`,
+      sourceRawIndex:row.rawIndex,
+      name:row.name,
+      color:validHex(preferred)?preferred:palette[si%palette.length],
+      values:axisIndices.map(ci=>
+        Number.isFinite(row.scores[ci])?row.scores[ci]:0
+      )
+    };
+  });
 
   project.meta.subtitle=sourceText(`${project.data.axes.length}項目比較`,`${project.data.axes.length}-metric comparison`);
 }
