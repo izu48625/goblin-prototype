@@ -1,0 +1,44 @@
+name: R126 Production Release Verification
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - "index.html"
+      - "base/index.html"
+      - "base/js/app.js"
+      - "app/src/launcher.js"
+      - "app/src/core/store.js"
+      - ".github/workflows/r126-production-release-check.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  deployed-assets:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - name: Check Cloudflare live assets match shipped quota fix
+        env:
+          RELEASE_SHA: ${{ github.sha }}
+        run: |
+          set -eu
+          for attempt in $(seq 1 15); do
+            url="https://statsmaker.app/index.html?verify=${RELEASE_SHA}-${attempt}"
+            if curl -fsSL --max-time 10 -H 'Cache-Control: no-cache' "$url" -o /tmp/stats-home.html &&
+               grep -Fq 'app/src/launcher.js?v=r126-storage1' /tmp/stats-home.html &&
+               curl -fsSL --max-time 10 -H 'Cache-Control: no-cache' "https://statsmaker.app/app/src/launcher.js?verify=${RELEASE_SHA}-${attempt}" -o /tmp/stats-launcher.js &&
+               grep -Fq '__statsMakerFlushBeforeExtension' /tmp/stats-launcher.js &&
+               grep -Fq 'store.js?v=r126-storage1' /tmp/stats-launcher.js &&
+               curl -fsSL --max-time 10 -H 'Cache-Control: no-cache' "https://statsmaker.app/app/src/core/store.js?verify=${RELEASE_SHA}-${attempt}" -o /tmp/stats-store.js &&
+               grep -Fq '__statsMakerSharedImages' /tmp/stats-store.js; then
+              echo "R126 live Cloudflare assets verified: ${RELEASE_SHA}"
+              exit 0
+            fi
+            echo "R126 not live on Cloudflare yet (attempt ${attempt})"
+            sleep 6
+          done
+          echo "::error::Cloudflare public assets do not match the merged release"
+          exit 1
