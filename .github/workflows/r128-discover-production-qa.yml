@@ -1,0 +1,27 @@
+name: R128 Live Discover SSR Verification
+on:
+  push:
+    branches: [main]
+    paths:
+      - "worker/discover-ssr.js"
+      - "worker/index.js"
+      - "wrangler.jsonc"
+      - "scripts/r128-discover-production-qa.mjs"
+      - ".github/workflows/r128-discover-production-qa.yml"
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  live-html-first:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+      - run: node --check scripts/r128-discover-production-qa.mjs
+      - name: Read-only check of production Cloudflare SSR
+        env:
+          BASE_URL: https://statsmaker.app
+        run: node scripts/r128-discover-production-qa.mjs
