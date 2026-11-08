@@ -81,7 +81,7 @@ try{
 
   forceHidden=true;
   r=await run('/discover');
-  assert.equal(r.status,200);
+  assert.equal(r.status,503,'Transient SSR failure must be retryable, not a durable 200/noindex');
   assert.equal(r.headers.get('X-Robots-Tag'),'noindex,follow');
   html=await r.text();
   assert(!html.includes(hiddenId));
@@ -90,10 +90,61 @@ try{
 
   fail=true;
   r=await run('/discover');
-  assert.equal(r.status,200);
+  assert.equal(r.status,503,'Transient SSR failure must be retryable, not a durable 200/noindex');
   assert.equal(r.headers.get('X-Robots-Tag'),'noindex,follow');
   assert(!(await r.text()).includes(publicId));
   fail=false;
+
+  // Execute the browser bootstrap with a real server payload. It must paint
+  // the Public work without even one initial API or direct Supabase request.
+  function el(dataset={}){
+    const classes=new Set();
+    return {dataset,textContent:'',innerHTML:'',value:'',disabled:false,
+      classList:{add(v){classes.add(v)},remove(v){classes.delete(v)},
+        toggle(v,force){if(force)classes.add(v);else classes.delete(v)},
+        contains(v){return classes.has(v)}},
+      addEventListener(){},setAttribute(){}};
+  }
+  const ids=Object.fromEntries(['grid','status','searchInput','resultMeta',
+    'sectionTitle','moreBtn','refreshBtn'].map(id=>[id,el()]));
+  const categories=['all','sports','manga_anime','movie_tv','food','game',
+    'music','books','travel','tech','lifestyle','other'].map(category=>el({category}));
+  const views=['all','community'].map(view=>el({view}));
+  const sorts=['newest','popular','community','remix'].map(sort=>el({sort}));
+  const selectors=new Map();
+  for(const selector of ['.hero h1','.hero p','.privacyNote','.createLink','.footer a'])
+    selectors.set(selector,el());
+  for(const item of [...views,...sorts]){
+    const key=item.dataset.view?'view':'sort';
+    selectors.set('[data-'+key+'="'+item.dataset[key]+'"]',item);
+  }
+  const doc={
+    documentElement:{lang:'ja'},
+    getElementById(id){
+      return id==='discover-ssr-data'?{textContent:JSON.stringify({
+        locale:'ja',category:'all',view:'all',data:{
+          rows:[publicRow],total:1,has_more:false,anchor:'2026-11-09T00:00:00Z'
+        }
+      })}:ids[id];
+    },
+    querySelector(s){if(!selectors.has(s))throw Error('Unexpected DOM selector: '+s);return selectors.get(s)},
+    querySelectorAll(s){return s==='.categoryBtn'?categories:s==='.browseTab'?views:
+      s==='.sortBtn'?sorts:[]}
+  };
+  let unexpectedNetwork=0;
+  vm.runInNewContext(source,{
+    document:doc,window:{location:{hostname:'statsmaker.app',search:''},
+      SM_SUPABASE:{client:{async rpc(){unexpectedNetwork++;throw Error('duplicate initial RPC')}}}},
+    localStorage:{getItem(){return null}},navigator:{language:'ja-JP'},
+    fetch(){unexpectedNetwork++;throw Error('duplicate initial API call')},
+    console:{warn(){},error(){}},Intl,Date,URLSearchParams,Number,Set,
+    setTimeout(){throw Error('Unexpected reload scheduling')},
+    clearTimeout(){},
+  },{filename:'cloud/discover.js'});
+  assert.equal(unexpectedNetwork,0,'SSR hydration must not duplicate first-page fetch');
+  assert(ids.grid.innerHTML.includes('Football &lt;all-stars&gt;'));
+  assert(!ids.grid.innerHTML.includes('<img src=x'));
+  assert(!ids.grid.classList.contains('hidden'));
 
   // Browser can consume the validated SSR JSON without an extra first-page RPC.
   // Preserve the existing non-SSR R40 path for previews and old static hosts.
