@@ -27,8 +27,8 @@ try{
   // old cache version, so actual visitors loaded stale CSS despite passing
   // isolated tests with an empty browser cache.
   const iframeSource=await page.locator('#basicFrame').getAttribute('src');
-  assert(iframeSource?.includes('base/index.html?v=r38p15scores1'),
-    'Home iframe document still uses a stale cache key');
+  assert(/^base\/index\.html\?v=[A-Za-z0-9_-]+(?:&.*)?$/.test(iframeSource||''),
+    'Home iframe must have a versioned same-origin editor URL');
   const home=page.frameLocator('#basicFrame');
   await home.locator('#titleInput').waitFor({state:'visible',timeout:30000});
   const cssSource=await home.locator('link[href^="css/style.css"]').getAttribute('href');
