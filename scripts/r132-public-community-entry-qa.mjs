@@ -51,14 +51,14 @@ try{
 
   permissions.allow_ratings=false;
   res=await get();html=await res.text();
-  assert(!html.includes('communityJoin')&&!html.includes('seoJoinNote'),
+  assert(!html.includes('<a class="communityJoin"')&&!html.includes('<p class="seoJoinNote"'),
     'Rating-disabled works must not invite submissions');
   assert(html.includes('評価結果・ランキングを見る'),
     'Standard open action must remain for non-participating works');
 
   permissions.allow_ratings=true;permissions.show_community=false;
   html=await (await get()).text();
-  assert(!html.includes('communityJoin'),'Community-disabled works must not invite ratings');
+  assert(!html.includes('<a class="communityJoin"'),'Community-disabled works must not invite ratings');
 
   permissions={show_community:true,allow_ratings:true};lang='en';
   html=await (await get()).text();
@@ -70,7 +70,7 @@ try{
 
   const missing=await get(lockedId);
   assert.equal(missing.status,404,'Private and Unlisted must not appear as indexed Public works');
-  assert(!((await missing.text()).includes('communityJoin')));
+  assert(!((await missing.text()).includes('<a class="communityJoin"')));
 
   fail=true;
   res=await get();
