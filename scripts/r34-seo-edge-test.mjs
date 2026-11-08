@@ -124,6 +124,12 @@ try{
   assert(body.includes('Messi &amp; Ronaldo'));
   assert(body.includes('Rating criteria'));
   assert(body.includes('Published rating excerpt'),'Search results must expose real Public score values');
+  assert(body.includes('Visual comparison of published scores'),
+    'Crawlers must see authentic score charts without running JavaScript');
+  assert(body.includes('class="seoVisualBars"'),
+    'At least two scored items should generate per-criterion comparison bars');
+  assert(body.includes('width:80.0%')&&body.includes('>8 / 10</strong>'),
+    'Chart values must exactly match the published snapshot and score scale');
   assert(body.includes('>8</td>')&&body.includes('>9</td>'),"Use the author’s real scores, not invented rankings");
   assert(body.includes('>—</td>'),'Missing ratings must not become zeros');
   assert(body.includes('Maximum score: 10 points'),'Use real scale for interpretations');
