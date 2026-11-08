@@ -8,6 +8,8 @@ on:
     paths:
       - "worker/index.js"
       - "worker/seo.js"
+      - "worker/public-score-visual.js"
+      - "scripts/r131-public-score-visual-qa.mjs"
       - "wrangler.jsonc"
       - "robots.txt"
       - "index.html"
@@ -37,10 +39,14 @@ jobs:
       - name: Verify syntax
         run: |
           node --check worker/seo.js
+          node --check worker/public-score-visual.js
+          node --check scripts/r131-public-score-visual-qa.mjs
           node --check worker/index.js
           node --check scripts/r34-seo-edge-test.mjs
       - name: SEO, visibility, XSS, and multilingual tests
         run: node scripts/r34-seo-edge-test.mjs
+      - name: Server-side chart visibility, accuracy, input safety and missing scores
+        run: node scripts/r131-public-score-visual-qa.mjs
       - name: Confirm Workers assets include both languages
         run: |
           npm run build:cloudflare
