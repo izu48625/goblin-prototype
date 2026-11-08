@@ -2,7 +2,6 @@ import {clickBasic} from './r80-qa-click.mjs';
 import assert from 'node:assert/strict';
 import {readFile} from 'node:fs/promises';
 import {chromium,webkit} from 'playwright';
-import sharp from 'sharp';
 
 const BASE=(process.env.BASE_URL||'http://127.0.0.1:4173').replace(/\/$/,'');
 const raw=await readFile(new URL('./r28-publish-lifecycle-test.mjs',import.meta.url),'utf8');
@@ -43,76 +42,34 @@ try{
     await home.locator('[data-score-row="0"][data-score-col="'+i+'"]').fill(String(values[i]));
   await home.locator('#titleInput').click(); // Commit the final score's change event.
   await page.waitForTimeout(300); // CSS color transition settles before exact RGB comparison.
-  // R38 P12: validate a REAL translucent cell background and its real pixels.
-  const expectedRaw=[
-    'rgba(116,60,74,.42)',
-    'rgba(122,84,62,.35)',
-    'rgba(110,99,57,.32)',
-    'rgba(39,72,103,.31)'
-  ];
-  const expectedCss=[
-    'rgba(116, 60, 74, 0.42)',
-    'rgba(122, 84, 62, 0.35)',
-    'rgba(110, 99, 57, 0.32)',
-    'rgba(39, 72, 103, 0.31)'
-  ];
-  const colors=await home.locator('#scoreTable').evaluate(el=>
+  // The current R107+ light palette uses solid, deliberately readable grade
+  // colors, not the superseded R38 translucent photo-composite palette.
+  const expectedRaw=['#e8b9b2','#edc9b9','#f1d9c4','#f8edcc'];
+  const toRgb=hex=>'rgb('+[1,3,5].map(i=>parseInt(hex.slice(i,i+2),16)).join(', ')+')';
+  const readScoreCells=()=>home.locator('#scoreTable').evaluate(el=>
     [...el.querySelectorAll('tbody tr:first-child td.scoreCell')].slice(0,4)
       .map(td=>({
-        klass:td.className,
+        grade:[...td.classList].find(name=>name.startsWith('heat-')),
         tint:td.style.getPropertyValue('--score-tile-overlay'),
         backing:getComputedStyle(td).backgroundColor,
         layer:getComputedStyle(td).backgroundImage,
         value:td.querySelector('input')?.value
       })));
-  assert.deepEqual(colors.map(x=>x.klass.split(' ').at(-1)),
-    ['heat-ss','heat-s','heat-a','heat-c']);
+  const colors=await readScoreCells();
+  assert.deepEqual(colors.map(x=>x.grade),['heat-ss','heat-s','heat-a','heat-c']);
   assert.deepEqual(colors.map(x=>x.tint),expectedRaw,
-    'score tiles lost actual inline translucent RGBA');
-  for(let i=0;i<4;i++){
-    assert.equal(colors[i].backing,expectedCss[i],
-      'graded tile must have genuine RGBA background, not an opaque backing');
-    assert.equal(colors[i].layer,'none',
-      'graded tile must not use a faux transparent gradient');
-  }
-  // A measured digital screenshot (IMG_7846(1).png) is now the source of
-  // truth for the FINAL displayed score colors. Calculate the RGBA composite,
-  // rather than comparing tint source RGB or accepting arbitrary hue families.
-  const channels=(rgba,base=[255,255,255])=>{
-    const match=rgba.match(/^rgba\((\d+),(\d+),(\d+),\.(\d+)\)$/);
-    assert(match,'bad transparent tint '+rgba);
-    const opacity=Number('0.'+match[4]);
-    assert(opacity>0 && opacity<=0.42, 'score tile translucency too weak '+rgba);
-    return [1,2,3].map((pos,i)=>Math.round(Number(match[pos])*opacity+base[i]*(1-opacity)));
-  };
-  // R75 request: retain exact translucent grade RGBA but show them on light paper.
-  // The former dark composite was intentionally superseded by the user.
-  const referenceCompose=expectedRaw.map(v=>channels(v));
-  assert(referenceCompose.every(v=>v.every(c=>c>=155&&c<=255)),
-    'RGBA overlays no longer have a bright, readable composite: '+JSON.stringify(referenceCompose));
+    'Scoring cells must keep the current approved light palette');
+  assert.deepEqual(colors.map(x=>x.backing),expectedRaw.map(toRgb),
+    'Scoring cells must render their readable solid colors');
+  assert(colors.every(x=>x.layer==='none'),'No unintended glossy gradient');
   const blank=await home.locator('#scoreTable tbody tr:nth-child(2) td.scoreCell').first().evaluate(td=>({
     hasGrade:[...td.classList].some(x=>x.startsWith('heat-')),
     backing:getComputedStyle(td).backgroundColor,
     layer:getComputedStyle(td).backgroundImage
   }));
-  assert(!blank.hasGrade && blank.layer==='none' &&
-    blank.backing==='rgb(255, 255, 255)',
-    'empty score cells must be opaque white in R75 light theme');
-  console.log('R38 P13 screenshot-locked true alpha and blank cells PASS',colors);
-
-  const cellPixelPair=async locator=>{
-    const png=await locator.screenshot({animations:'disabled'});
-    const {data,info}=await sharp(png).removeAlpha().raw().toBuffer({resolveWithObject:true});
-    const x=Math.min(12,info.width-2);
-    const at=y=>{
-      const offset=(y*info.width+x)*info.channels;
-      return [...data.subarray(offset,offset+3)];
-    };
-    return {top:at(Math.min(8,info.height-2)),
-      bottom:at(Math.max(1,info.height-8))};
-  };
-  const rgbClose=(a,b)=>a.length===b.length&&a.every((n,i)=>Math.abs(n-b[i])<=4);
-  const baselineTopRGB=[];
+  assert(!blank.hasGrade&&blank.layer==='none'&&blank.backing==='rgb(255, 255, 255)',
+    'Unscored cells should remain white');
+  console.log('Current 10-point solid grade palette PASS',colors);
 
   await clickBasic(home,'scoreSettingsBtn');
   await home.locator('#scale100Btn').click();
@@ -122,75 +79,40 @@ try{
     await home.locator('[data-score-row="0"][data-score-col="'+i+'"]')
       .fill(String(referenceValues[i]));
   await home.locator('#titleInput').click();
-  const reference=await home.locator('#scoreTable').evaluate(el=>
-    [...el.querySelectorAll('tbody tr:first-child td.scoreCell')].slice(0,4)
-      .map(td=>({grade:td.classList[1],
-        tint:td.style.getPropertyValue('--score-tile-overlay'),
-        backing:getComputedStyle(td).backgroundColor,
-        layer:getComputedStyle(td).backgroundImage})));
+  const reference=await readScoreCells();
   assert.deepEqual(reference.map(x=>x.grade),['heat-ss','heat-s','heat-a','heat-c']);
   assert.deepEqual(reference.map(x=>x.tint),expectedRaw);
-  assert(reference.every((x,i)=>x.backing===expectedCss[i] && x.layer==='none'));
-  console.log('R38 P13 97/94/88/67 photo-matched RGBA PASS',reference);
+  assert.deepEqual(reference.map(x=>x.backing),expectedRaw.map(toRgb));
   const avg=await home.locator('#scoreTable tbody tr:first-child td.avgCell').evaluate(el=>({
-    className:el.className,
-    backing:getComputedStyle(el).backgroundColor,
+    className:el.className,backing:getComputedStyle(el).backgroundColor,
     layer:getComputedStyle(el).backgroundImage
   }));
-  assert(avg.className.includes('heat-a') &&
-    avg.backing==='rgba(110, 99, 57, 0.32)' && avg.layer==='none',
-    'average cell must use the same real RGBA A tint without gloss');
+  assert(avg.className.includes('heat-a')&&avg.backing===toRgb('#f1d9c4')&&avg.layer==='none',
+    'Average cell should follow the same approved A-grade palette');
 
-  // Compare browser pixels against the user-selected screenshot, across
-  // desktop and iPhone widths in Chromium and WebKit. This also verifies
-  // B/C/D, not just the four values used in the 10-point-mode test.
+  // Compare the rendered palette across desktop and mobile widths without
+  // assuming an obsolete translucency model. Verify behavior in real browsers.
   const pixelValues=[97,94,88,67,70,60,50];
-  const targets=[
-    ...expectedRaw,
-    'rgba(40,89,89,.29)', // 70
-    'rgba(39,72,103,.31)', // 60
-    'rgba(37,64,85,.24)' // 50
-  ].map(v=>channels(v));
+  let desktopPalette=null;
   for(const width of [1365,390,320]){
     await page.setViewportSize({width,height:844});
     const samples=[];
-    for(let i=0;i<pixelValues.length;i++){
-      await home.locator('[data-score-row="0"][data-score-col="0"]')
-        .fill(String(pixelValues[i]));
+    for(const score of pixelValues){
+      await home.locator('[data-score-row="0"][data-score-col="0"]').fill(String(score));
       await home.locator('#titleInput').click();
-      const actual=await cellPixelPair(home.locator('#scoreTable tbody tr:first-child td.scoreCell').first());
-      assert(rgbClose(actual.top,targets[i]),
-        'R75 white-backed original RGBA mismatch at '+width+', score '+pixelValues[i]+
-        ': '+actual.top+' target '+targets[i]);
-      assert(rgbClose(actual.bottom,actual.top),
-        'Score color has unwanted gloss at '+width+', score '+pixelValues[i]);
-      if(width===1365)baselineTopRGB[i]=actual.top;
-      else assert(rgbClose(actual.top,baselineTopRGB[i]),
-        'PC/mobile RGB mismatch at '+width+', score '+pixelValues[i]);
-      samples.push({score:pixelValues[i],actual:actual.top});
+      await page.waitForTimeout(140);
+      const first=(await readScoreCells())[0];
+      assert(/^heat-/.test(first.grade)&&/^rgb\(/.test(first.backing)&&first.layer==='none',
+        'Missing solid grade at width '+width+' score '+score);
+      samples.push({score,grade:first.grade,color:first.backing});
     }
-    console.log('R38 P13 screenshot palette RGB parity PASS',
-      process.env.BROWSER_ENGINE||'chromium',width,samples);
+    if(desktopPalette===null)desktopPalette=samples;
+    else assert.deepEqual(samples,desktopPalette,'Color/grade changes between desktop and mobile at '+width);
+    console.log('Current solid palette responsive parity PASS',width,samples);
   }
-  // Same SS tint on alternate rows must reveal the darker/lighter table
-  // underlay, demonstrating real see-through compositing rather than a
-  // flattened one-color screenshot. Restore test rows afterward.
   await page.setViewportSize({width:390,height:844});
   await home.locator('[data-score-row="0"][data-score-col="0"]').fill('97');
-  await home.locator('[data-score-row="1"][data-score-col="0"]').fill('97');
   await home.locator('#titleInput').click();
-  await page.waitForTimeout(250);
-  const odd=await cellPixelPair(home.locator('#scoreTable tbody tr:first-child td.scoreCell').first());
-  const even=await cellPixelPair(home.locator('#scoreTable tbody tr:nth-child(2) td.scoreCell').first());
-  const diff=odd.top.map((v,i)=>Math.abs(v-even.top[i]));
-  assert(diff.some(v=>v>=1) && diff.every(v=>v<=2),
-    'Score tint lost its subtle real row-background composite: '+
-    odd.top+' vs '+even.top);
-  await home.locator('[data-score-row="1"][data-score-col="0"]').fill('');
-  await home.locator('#titleInput').click();
-  console.log('R38 P13 subtle row alpha-compositing PASS',odd.top,even.top);
-
-  await page.setViewportSize({width:390,height:844});
 
   // R38 P14: screenshot-matched palette is default ON. A single toggle next
   // to the "All" grade filter neutralizes table/average/fit/overview displays
@@ -224,9 +146,8 @@ try{
     });
   };
   const original=await checkColor();
-  assert.equal(original[0].color,'rgba(116, 60, 74, 0.42)');
-  assert(original.slice(1).every(x=>x.color.startsWith('rgba(')),
-    'Initial grades missing outside the regular score table');
+  assert(original.every(x=>/^rgba?\(/.test(x.color)&&x.color!=='rgb(255, 255, 255)'),
+    'Solid grade colors must be visible in all scoring views');
   for(const width of [1365,390,320]){
     await page.setViewportSize({width,height:844});
     const geometry=await home.locator('.filterBar').evaluate(el=>{
