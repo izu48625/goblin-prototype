@@ -100,11 +100,11 @@ export async function discoverSsrPage(request,env,ctx){
   const statusMarker='<div id="status" class="status">公開作品を読み込んでいます…</div>';
   if(!shell.includes(marker)||!shell.includes(statusMarker)){
     console.error('[Stats Maker] Discover SSR shell markers absent');
-    return new Response(shell,{status:200,headers:{...noStoreHeaders,'X-Robots-Tag':'noindex,follow'}});
+    return new Response(shell,{status:503,headers:{...noStoreHeaders,'X-Robots-Tag':'noindex,follow','Retry-After':'60'}});
   }
   if(!result){
     // Preserve JS fallback for visitors, but do not index a failed, empty shell.
-    return new Response(shell,{status:200,headers:{...noStoreHeaders,'X-Robots-Tag':'noindex,follow'}});
+    return new Response(shell,{status:503,headers:{...noStoreHeaders,'X-Robots-Tag':'noindex,follow','Retry-After':'60'}});
   }
   const cards=result.rows.map(t=>card(t,locale)).join('');
   const initial=JSON.stringify({locale,category,view,data:result})
