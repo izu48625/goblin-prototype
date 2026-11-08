@@ -240,7 +240,14 @@ export async function sitemapIndex(){
     const match=(r.headers.get('Content-Range')||'').match(/\/(\d+)$/);
     if(!match)throw new Error('Missing public topic count');
     count=Number(match[1]);
-  }catch(e){console.error('[R34 SEO] sitemap count error',String(e));return response('Sitemap temporarily unavailable','text/plain; charset=utf-8',503,'no-store')}
+  }catch(e){
+    // Keep editorial and legal pages discoverable if Supabase is briefly unavailable.
+    // Never guess or list Public works while visibility cannot be verified.
+    console.error('[R34 SEO] sitemap count error',String(e));
+    const fallback=xmlHead+'<sitemapindex xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">'+
+      '<sitemap><loc>'+ORIGIN+'/sitemap-static.xml</loc></sitemap></sitemapindex>';
+    return response(fallback,'application/xml; charset=utf-8',200,'no-store');
+  }
   const total=Math.min(MAX_SITEMAP_PAGES,Math.ceil(count/PER_PAGE));
   const entries=['<sitemap><loc>'+ORIGIN+'/sitemap-static.xml</loc></sitemap>'];
   for(let i=1;i<=total;i++)entries.push('<sitemap><loc>'+ORIGIN+'/sitemap-works-'+i+'.xml</loc></sitemap>');
