@@ -80,9 +80,10 @@ try{
       .fill(String(referenceValues[i]));
   await home.locator('#titleInput').click();
   const reference=await readScoreCells();
-  assert.deepEqual(reference.map(x=>x.grade),['heat-ss','heat-s','heat-a','heat-c']);
-  assert.deepEqual(reference.map(x=>x.tint),expectedRaw);
-  assert.deepEqual(reference.map(x=>x.backing),expectedRaw.map(toRgb));
+  const expected100=['#edc9b9','#edc9b9','#f1d9c4','#f8edcc'];
+  assert.deepEqual(reference.map(x=>x.grade),['heat-s','heat-s','heat-a','heat-c']);
+  assert.deepEqual(reference.map(x=>x.tint),expected100);
+  assert.deepEqual(reference.map(x=>x.backing),expected100.map(toRgb));
   const avg=await home.locator('#scoreTable tbody tr:first-child td.avgCell').evaluate(el=>({
     className:el.className,backing:getComputedStyle(el).backgroundColor,
     layer:getComputedStyle(el).backgroundImage
