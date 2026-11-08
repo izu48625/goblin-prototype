@@ -24,11 +24,11 @@ async function inventory(){
   const outer=sources['index.html'],home=sources['base/index.html'];
   const publicPage=sources['public.html'];
   const match=(src,exp,label)=>{const found=src.match(exp)?.[1];check(Boolean(found),'missing '+label);return found;};
-  const homeKey=match(outer,/base\/index\.html\?v=([a-z0-9]+)/,'HOME iframe version');
-  for(const ref of [
-    /css\/style\.css\?v=([a-z0-9]+)/,
-    /js\/app\.js\?v=([a-z0-9]+)/
-  ])check(match(home,ref,'HOME CSS/JS revision')===homeKey,'inconsistent HOME iframe/CSS/JS cache');
+  // Independently versioned HTML/CSS/JS assets are valid. Each must carry its
+  // own nonempty cache key; requiring all keys to match rejects newer releases.
+  const homeKey=match(outer,/base\/index\.html\?v=([a-z0-9_-]+)/i,'HOME iframe version');
+  const homeCssKey=match(home,/css\/style\.css\?v=([a-z0-9_-]+)/i,'HOME CSS revision');
+  const homeJsKey=match(home,/js\/app\.js\?v=([a-z0-9_-]+)/i,'HOME JS revision');
   check(home.includes('id="scoreColorToggleBtn"'),'approved score color visibility switch missing');
   check(!home.includes('id="gradeFilter"')&&!home.includes('id="filterCount"'),
     'removed filter or visible/total counter came back');
@@ -59,7 +59,7 @@ async function inventory(){
   }
   check(sources['robots.txt'].includes('Sitemap: '+ROOT_URL+'/sitemap.xml'),
     'robots sitemap reference not official domain');
-  return {homeKey,publicKey:publicCSSKey};
+  return {homeKey,homeCssKey,homeJsKey,publicKey:publicCSSKey};
 }
 const get=async(url)=>{
   const response=await fetch(url,{
@@ -84,8 +84,8 @@ async function live(){
         ]);
         ready=[outer,home,publicPage].every(x=>x.response.status===200)&&
           outer.body.includes('base/index.html?v='+keys.homeKey)&&
-          home.body.includes('css/style.css?v='+keys.homeKey)&&
-          home.body.includes('js/app.js?v='+keys.homeKey)&&
+          home.body.includes('css/style.css?v='+keys.homeCssKey)&&
+          home.body.includes('js/app.js?v='+keys.homeJsKey)&&
           publicPage.body.includes('cloud/public.css?v='+keys.publicKey)&&
           publicPage.body.includes('cloud/public.js?v='+keys.publicKey);
         if(ready)break;
@@ -94,8 +94,8 @@ async function live(){
     }
     check(ready,'expected release cache keys not deployed on '+host.name);
     const paths=[
-      '/base/js/app.js?v='+keys.homeKey,
-      '/base/css/style.css?v='+keys.homeKey,
+      '/base/js/app.js?v='+keys.homeJsKey,
+      '/base/css/style.css?v='+keys.homeCssKey,
       '/cloud/public.js?v='+keys.publicKey,
       '/cloud/public.css?v='+keys.publicKey
     ];
