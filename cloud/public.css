@@ -505,3 +505,57 @@ body.publicScoreColorsOff .creatorScoreTable td[data-score-value]{background:#ff
   .communityMetricControl{width:100%;justify-content:space-between}
   .communityMetricControl select{min-width:0;max-width:72%;font-size:12px}
 }
+
+
+/* R130: meaningful creator comparisons before the detailed score matrix.
+   Actual submitted averages, original criterion scores and readable text
+   accompany the SVG; compact without sideways scrolling on iPhone. */
+.publicGlance{margin-top:15px;padding:16px;border:1px solid #d9d6ce;border-radius:13px;background:rgba(255,255,255,.94);color:#30383e}
+.glanceHead{display:flex;align-items:center;justify-content:space-between;gap:8px;flex-wrap:wrap;margin-bottom:11px}
+.glanceHead h2{margin:0;font-size:clamp(15px,2vw,19px);line-height:1.35;font-weight:900}
+.glanceHead>span{font-size:10px;font-weight:800;color:#68727a}
+.glanceLayout{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:12px}
+.glanceColumn{min-width:0;padding:13px;border:1px solid #e4e0d7;border-radius:11px;background:#faf9f6}
+.glanceColumn h3{margin:0 0 12px;color:#59656d;font-size:12px;line-height:1.45;font-weight:850}
+.glanceRankList{display:grid;gap:10px}
+.glanceRankRow{display:grid;grid-template-columns:28px minmax(0,1fr);gap:9px;align-items:center;min-width:0}
+.glanceRankNumber{display:grid;place-items:center;width:28px;height:28px;border-radius:8px;background:#eee8e0;color:#775346;font-size:12px;font-weight:950}
+.glanceRankRow:first-child .glanceRankNumber{background:#f1d9ba;color:#754724}
+.glanceRankBody,.glanceRankHeading,.glanceRankName{min-width:0}
+.glanceRankHeading{display:flex;align-items:center;justify-content:space-between;gap:8px;margin-bottom:7px}
+.glanceRankName{font-size:12px;font-weight:850;color:#35414a;overflow:hidden}
+.glanceRankName .publicTargetIdentity{max-width:100%;white-space:normal}
+.glanceRankName .publicTargetText{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.glanceRankName .publicTargetThumb{width:27px;height:27px;flex-basis:27px;border-radius:6px}
+.glanceRankScore{flex:none;color:#a44e3a;font-size:16px;font-weight:950;font-variant-numeric:tabular-nums}
+.glanceRankScore small{color:#7b878e;font-size:10px;font-weight:700}
+.glanceBarTrack{height:8px;border-radius:20px;overflow:hidden;background:#e8e6e0}
+.glanceBarTrack>span{display:block;height:100%;border-radius:inherit;background:linear-gradient(90deg,#d79c7b,#b65c45)}
+.glanceRankRow:nth-child(2) .glanceBarTrack>span{background:linear-gradient(90deg,#87b4c2,#367a91)}
+.glanceRankRow:nth-child(3) .glanceBarTrack>span{background:linear-gradient(90deg,#b3a3ca,#8464ad)}
+.glanceMethod{margin:11px 0 0;color:#69747a;font-size:10px;line-height:1.55}
+.glanceEmpty,.glanceNoRadar{padding:18px 10px;border:1px dashed #d8d5cf;border-radius:9px;text-align:center;color:#69747a;font-size:11px;line-height:1.6}
+.glanceRadarFigure{margin:0}
+.glanceRadarSvg{display:block;width:min(100%,330px);height:auto;max-height:290px;margin:0 auto;overflow:visible}
+.glanceRadarRing{fill:none;stroke:#d9dcd9;stroke-width:1}
+.glanceRadarAxis{stroke:#d9dcd9;stroke-width:1}
+.glanceRadarAxisLabel{fill:#66747d;font-size:11px;font-weight:850}
+.glanceRadarLegend{display:flex;flex-wrap:wrap;justify-content:center;gap:6px 12px;margin-top:2px}
+.glanceLegendItem{display:flex;align-items:center;gap:5px;min-width:0;max-width:100%;color:#43505b;font-size:10px;font-weight:800;overflow-wrap:anywhere}
+.glanceLegendItem i{flex:none;width:10px;height:10px;border-radius:3px}
+.glanceCriteria{display:flex;flex-wrap:wrap;gap:5px 8px;margin-top:10px}
+.glanceCriteria>span{min-width:0;max-width:100%;padding:5px 7px;border:1px solid #deded8;border-radius:7px;background:#fff;font-size:10px;line-height:1.45;color:#56616a;overflow-wrap:anywhere}
+.glanceCriteria b{color:#a6503a}
+@media(max-width:700px){
+  .publicGlance{padding:12px}
+  .glanceLayout{grid-template-columns:1fr}
+  .glanceColumn{padding:12px}
+  .glanceRankList{gap:10px}
+  .glanceRadarSvg{width:min(100%,270px);max-height:265px}
+}
+@media(max-width:360px){
+  .publicGlance{padding:10px}
+  .glanceColumn{padding:10px}
+  .glanceRankName{font-size:11px}
+  .glanceRankScore{font-size:14px}
+}
