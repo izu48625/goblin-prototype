@@ -562,5 +562,33 @@
     button.classList.toggle('active',button.dataset.view===state.view);
     button.setAttribute?.('aria-pressed',String(button.dataset.view===state.view));
   });
-  reload();
+  // Server-rendered Public first page (no second RPC on the initial visit).
+  // The gateway has already checked visibility and rate limits for this page.
+  // Invalid/mismatched payloads fall back to the existing fresh Public fetch.
+  function hydratePublicSsr(){
+    const el=document.getElementById('discover-ssr-data');
+    if(!el||typeof el.textContent!=='string')return false;
+    try{
+      const payload=JSON.parse(el.textContent);
+      const data=payload?.data;
+      if(payload.locale!==locale||payload.category!==state.category||
+          payload.view!==state.view||!data||!Array.isArray(data.rows)||
+          data.rows.length>PAGE_SIZE||!Number.isSafeInteger(Number(data.total))||
+          Number(data.total)<0||typeof data.has_more!=='boolean'||!data.anchor||
+          data.rows.some(topic=>!topic?.id||topic.visibility!=='public')||
+          new Set(data.rows.map(topic=>topic.id)).size!==data.rows.length)return false;
+      state.works=data.rows;
+      state.total=Number(data.total);
+      state.hasMore=data.has_more&&data.rows.length>0;
+      state.offset=data.rows.length;
+      state.anchor=data.anchor;
+      state.visible=data.rows.length;
+      render();
+      return true;
+    }catch(error){
+      console.warn('[Stats Maker] Discover SSR hydration skipped',error);
+      return false;
+    }
+  }
+  if(!hydratePublicSsr())reload();
 })();

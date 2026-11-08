@@ -14,6 +14,9 @@ jobs:
       - run: node --check cloud/discover.js
       - run: node --check scripts/r40-discover-server-pagination-qa.mjs
       - run: node scripts/r40-discover-server-pagination-qa.mjs
+      - run: node --check worker/discover-ssr.js
+      - run: node --check scripts/r128-discover-ssr-qa.mjs
+      - run: node scripts/r128-discover-ssr-qa.mjs
       - name: Static SQL safety assertions
         run: |
           grep -q 'security invoker' R40_DISCOVER_PUBLIC_RPC.sql

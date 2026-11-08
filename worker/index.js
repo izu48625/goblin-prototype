@@ -1,5 +1,6 @@
 import {communityGateway,securityConfig} from './community-gateway.js';
 import {discoverPublicRequest} from './discover-public.js';
+import {discoverSsrPage} from './discover-ssr.js';
 import {workReportGateway} from './work-report.js';
 import {contactGateway} from './legal-contact.js';
 import {publicWorkHead,publicWorkHtml,sitemapIndex,staticSitemap,workSitemap} from './seo.js';
@@ -112,6 +113,8 @@ export default {
         return new Response('Method Not Allowed',{status:405,headers:{Allow:'GET, HEAD'}});
       return request.method==='HEAD'?publicWorkHead(seoWork[1]):publicWorkHtml(seoWork[1]);
     }
+    if(url.pathname==='/discover'||url.pathname==='/discover.html')
+      return discoverSsrPage(request,env,ctx);
     if(url.pathname==='/api/discover')return discoverPublicRequest(request,env,ctx);
     if(url.pathname==='/api/health'){
       return Response.json({ok:true,service:'stats-maker',release:'r26p4-prep',hosting:'cloudflare-workers',ogBackend:'cloudflare-free-png'},{headers:{'Cache-Control':'no-store'}});
