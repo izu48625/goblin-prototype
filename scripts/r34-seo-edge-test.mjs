@@ -39,7 +39,7 @@ assert(root.includes("localStorage.setItem('statsMaker.locale',language)"));
 assert(discover.includes('rating charts'));
 assert(robot.includes('Sitemap: https://statsmaker.app/sitemap.xml'));
 assert(builder.includes("'en','ja'"));
-for(const p of ['public.html','my.html','rate.html','base/index.html','app/editor.html']){
+for(const p of ['public.html','my.html','rate.html','base/index.html','base.html','editor.html','app/editor.html']){
   assert((await read(p)).includes('<meta name="robots" content="noindex,follow">'),
     'User/private/internal page must be noindex: '+p);
 }
@@ -172,7 +172,12 @@ try{
   const unavailable=await req('/work/'+publicId);
   assert.equal(unavailable.status,503,'Unavailable database must not produce indexable pages');
   assert.equal(unavailable.headers.get('Cache-Control'),'no-store');
-  assert.equal((await req('/sitemap.xml')).status,503);
+  const fallbackSitemap=await req('/sitemap.xml');
+  assert.equal(fallbackSitemap.status,200,'Static sitemap should survive a temporary DB outage');
+  assert.equal(fallbackSitemap.headers.get('Cache-Control'),'no-store');
+  const fallbackXml=await fallbackSitemap.text();
+  assert(fallbackXml.includes('/sitemap-static.xml'));
+  assert(!fallbackXml.includes('/sitemap-works-1.xml'),'Do not guess Public works while DB is unavailable');
   assert.equal((await req('/sitemap-works-1.xml')).status,503);
   const other=await req('/');
   assert.equal(await other.text(),'asset-fallback');

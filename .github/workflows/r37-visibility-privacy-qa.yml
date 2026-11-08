@@ -37,7 +37,8 @@ jobs:
           node scripts/r34-seo-edge-test.mjs
           node scripts/r37-visibility-edge-qa.mjs
           npm run build:cloudflare
-          grep -Fq 'cloud/discover.js?v=r97balance1' dist/discover.html
+          # Verify the current versioned asset instead of a retired fixed build token.
+          grep -Eq 'cloud/discover\.js\?v=[A-Za-z0-9_-]+' dist/discover.html
       - name: Isolated browser Public, Unlisted, Private verification
         run: |
           npm install --no-save playwright@1.56.1
