@@ -23,7 +23,7 @@ for(const c of meta.cases){
 const siteMap=await staticSitemap().text();
 const common=await txt('cloud/global-locale.js');
 assert(common.includes("'use-cases.html'"),'Bilingual page switching missing');
-assert(common.includes('data-global-guide="usecases"'),'Shared guide nav missing');
+assert(common.includes('class="globalIntroBtn globalExamplesBtn"')&&common.includes('href="/ja/use-cases.html"'),'Shared examples nav missing');
 for(const lang of ['ja','en']){
  const path=lang+'/use-cases.html',html=await txt(path),bundled=await txt('dist/'+path);
  assert.equal(bundled,html,'Cloudflare page differs from authored '+path);
