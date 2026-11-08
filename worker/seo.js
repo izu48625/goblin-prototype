@@ -1,7 +1,10 @@
+import {renderPublicScoreVisual} from './public-score-visual.js';
 /* R34: public-only indexable work pages + bounded search sitemaps.
  * Every database lookup is anon/public RLS with visibility=eq.public.
  * No privileged key, analytics, Supabase mutation or paid component.
  */
+// Only static presentation CSS; the data/visibility query is unchanged.
+const publicScoreVisualCss="\n.seoVisual{padding:17px 19px}\n.seoVisual>p{font-size:13px;line-height:1.7;color:#b3c6de}\n.seoVisualGrid{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:13px}\n.seoVisualGrid>div,.seoVisualRadar{margin:0;min-width:0;padding:13px;border:1px solid #38526e;border-radius:12px;background:#0b192c}\n.seoVisual h3{margin:0 0 8px;font-size:14px;color:#e8f0ff}\n.seoVisualMetric{margin-bottom:14px}\n.seoVisualMetric:last-child{margin-bottom:0}\n.seoVisualBar{margin-top:8px}\n.seoVisualBarHeading{display:flex;align-items:baseline;justify-content:space-between;gap:8px;font-size:12px}\n.seoVisualBarHeading span{min-width:0;overflow-wrap:anywhere}\n.seoVisualBarHeading strong{flex:none;color:#ffbd97;font-variant-numeric:tabular-nums}\n.seoVisualTrack{height:8px;margin-top:5px;overflow:hidden;border-radius:99px;background:#293c52}\n.seoVisualTrack i{display:block;height:100%;border-radius:inherit;background:linear-gradient(90deg,#d57c61,#efad89)}\n.seoVisualRadar svg{display:block;width:min(100%,250px);height:auto;margin:auto}\n.seoVisualRing{fill:none;stroke:#425970;stroke-width:1}\n.seoVisualAxis{stroke:#425970;stroke-width:1}\n.seoVisualAxisLabel{fill:#d1dfef;font:700 10px system-ui,sans-serif}\n.seoVisualLegend{display:flex;flex-wrap:wrap;justify-content:center;gap:6px 10px;margin-top:8px}\n.seoVisualLegend span{display:inline-flex;align-items:center;gap:5px;max-width:100%;font-size:11px;overflow-wrap:anywhere}\n.seoVisualLegend i{width:9px;height:9px;flex:none;border-radius:3px}\n.seoVisualCriteria{display:flex;flex-wrap:wrap;gap:6px;margin-top:10px}\n.seoVisualCriteria span{padding:4px 6px;border:1px solid #38526e;border-radius:6px;color:#bacbe2;font-size:11px;overflow-wrap:anywhere}\n.seoVisualHint{margin:10px 0 0;font-size:11px;color:#a7bdd7}\n@media(max-width:700px){.seoVisualGrid{grid-template-columns:1fr}.seoVisual{padding:14px}.seoVisualGrid>div,.seoVisualRadar{padding:12px}}\n";
 const ORIGIN='https://statsmaker.app';
 const API='https://ibpdxbeltdwkquowjeay.supabase.co/rest/v1/topics';
 const KEY='sb_publishable_6abnwW_1p-U_Y_DefUXfFQ_Dz_Y2vsD';
@@ -129,6 +132,7 @@ export async function publicWorkHtml(id){
       return '<td>'+(valid?esc(String(raw)):'—')+'</td>';
     }).join('')+'</tr>');
   const alignedScores=displayedRows.map(row=>displayedColumns.map(col=>row.scores[col.index]));
+  const scoreVisual=renderPublicScoreVisual(displaySubjects,displayMetrics,alignedScores,lang,validScale);
   const scoreTable=displayMetrics.length&&displaySubjects.length&&scoreRows.some(row=>row.length>0)
     ?'<section class="seoScores"><h2>'+(en?'Published rating excerpt':'公開作品の採点データ')+'</h2>'+
       '<p>'+(en?'Scores reflect the creator’s assessment, not independently measured facts.':'点数は投稿者による評価で、客観的な実測値ではありません。')+
@@ -166,10 +170,11 @@ export async function publicWorkHtml(id){
     '<meta property="og:url" content="'+canonical+'"><meta property="og:image" content="'+esc(ogImage)+'">'+
     '<meta name="twitter:card" content="summary_large_image">'+
     '<script type="application/ld+json">'+jsonld+'</script>'+
-    '<style>*{box-sizing:border-box}body{margin:0;background:#07101f;color:#edf4ff;font:16px/1.65 system-ui,-apple-system,sans-serif}header,main,footer{width:min(900px,calc(100% - 32px));margin:auto}header{padding:24px 0 14px}a{color:#a9c8ff}h1{font-size:clamp(25px,5vw,36px);line-height:1.3;overflow-wrap:anywhere}h2{font-size:19px;margin-bottom:4px}p{color:#bfcee2}section{background:#101f34;border:1px solid #294463;border-radius:14px;padding:16px 21px;margin:20px 0}ul{display:grid;gap:7px;padding-left:20px}li{overflow-wrap:anywhere}.actions{display:flex;flex-wrap:wrap;gap:10px}.actions a{display:inline-block;padding:12px 16px;border-radius:10px;background:#315cab;color:white;text-decoration:none;font-weight:800}.actions a.secondary{background:#203951}.seoTableScroll{overflow-x:auto;max-width:100%}.seoScores table{border-collapse:collapse;min-width:440px;width:100%;font-size:14px}.seoScores th,.seoScores td{padding:9px 10px;border-bottom:1px solid #30465e;text-align:right}.seoScores th:first-child{text-align:left;white-space:nowrap}.seoScores thead th{background:#263b55}footer{padding:24px 0 48px;font-size:14px}</style>'+
+    '<style>*{box-sizing:border-box}body{margin:0;background:#07101f;color:#edf4ff;font:16px/1.65 system-ui,-apple-system,sans-serif}header,main,footer{width:min(900px,calc(100% - 32px));margin:auto}header{padding:24px 0 14px}a{color:#a9c8ff}h1{font-size:clamp(25px,5vw,36px);line-height:1.3;overflow-wrap:anywhere}h2{font-size:19px;margin-bottom:4px}p{color:#bfcee2}section{background:#101f34;border:1px solid #294463;border-radius:14px;padding:16px 21px;margin:20px 0}ul{display:grid;gap:7px;padding-left:20px}li{overflow-wrap:anywhere}.actions{display:flex;flex-wrap:wrap;gap:10px}.actions a{display:inline-block;padding:12px 16px;border-radius:10px;background:#315cab;color:white;text-decoration:none;font-weight:800}.actions a.secondary{background:#203951}.seoTableScroll{overflow-x:auto;max-width:100%}.seoScores table{border-collapse:collapse;min-width:440px;width:100%;font-size:14px}.seoScores th,.seoScores td{padding:9px 10px;border-bottom:1px solid #30465e;text-align:right}.seoScores th:first-child{text-align:left;white-space:nowrap}.seoScores thead th{background:#263b55}footer{padding:24px 0 48px;font-size:14px}'+publicScoreVisualCss+'</style>'+
     '</head><body><header><a href="'+ORIGIN+'/">Stats Maker</a> / <a href="'+ORIGIN+'/discover">'+(en?'Browse works':'作品を探す')+'</a></header>'+
     '<main><p>'+intro+'</p><h1>'+esc(title)+'</h1><p>'+esc(desc)+'</p>'+
     '<div class="actions"><a href="'+viewer+'">'+open+'</a><a class="secondary" href="'+ORIGIN+(en?'/en/':'/ja/')+'">'+make+'</a></div>'+
+    scoreVisual+
     (list.length?'<section><h2>'+itemLabel+'</h2><ul>'+listHtml(list)+'</ul></section>':'')+
     (metrics.length?'<section><h2>'+metricLabel+'</h2><ul>'+listHtml(metrics)+'</ul></section>':'')+
     scoreTable+insightHtml+
