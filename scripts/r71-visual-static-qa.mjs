@@ -31,9 +31,17 @@ for(const lang of ['ja','en']){
    assert(html.includes('/ja/example-images/sample-'+chart+'.png'),'Native '+chart);
    assert(html.includes('/'+lang+'/examples.html#'+chart),'Native guide link');
  }
- for(const category of ['manga_anime','game','sports','movie_tv']){
-   assert(html.includes('/discover.html?lang='+lang+'&category='+category),'Real Discover filter '+category);
+ // Only categories with actual Public works are promoted on the landing.
+ // Empty categories remain selectable in Discover, not pushed as dead ends.
+ for(const category of ['sports','manga_anime']){
+   assert(html.includes('/discover.html?lang='+lang+'&category='+category),'Populated Discover filter '+category);
  }
+ const categoryRail=html.match(/<nav class="r71CategoryRail"[^>]*>([\s\S]*?)<\/nav>/)?.[1]||'';
+ assert(categoryRail.indexOf('category=sports')<categoryRail.indexOf('category=manga_anime'),
+   'Sports and Manga/Anime should be highlighted first');
+ for(const category of ['game','movie_tv'])
+   assert(!categoryRail.includes('category='+category),'Empty '+category+' category must not be prominently promoted');
+ assert(categoryRail.includes('href="/discover.html?lang='+lang+'"'),'Full Public catalog remains available');
  assert(html.includes('/discover.html?lang='+lang+'&view=community'));
  assert(html.includes('id="rating-guide"')&&html.includes('id="png-guide"'),'SEO guide copy retained');
  assert(html.includes('legal.html#contact'),'Contact retained');
