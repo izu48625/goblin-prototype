@@ -19,7 +19,9 @@
       "/api/security/*",
       "/api/guard/*",
       "/api/report/*",
-      "/api/discover"
+      "/api/discover",
+      "/discover",
+      "/discover.html"
     ]
   },
   "ratelimits": [
