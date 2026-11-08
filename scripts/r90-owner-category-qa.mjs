@@ -4,7 +4,7 @@ import {chromium,webkit} from 'playwright';
 
 const my=await readFile(new URL('../cloud/my.js',import.meta.url),'utf8');
 const markup=await readFile(new URL('../my.html',import.meta.url),'utf8');
-assert(markup.includes('id="r90CategoryHelp"')&&markup.includes('cloud/my.js?v=r97dup1'));
+assert(markup.includes('id="r90CategoryHelp"')&&/cloud\/my\.js\?v=[A-Za-z0-9_-]+/.test(markup),'Owner category help and versioned management script required');
 for(const marker of ['data-save-category','categoriesAllowed.has(next)',".eq('owner_id',state.user.id)",".eq('updated_at',fresh.updated_at)",'duplicatesAmongOwnedWorks()', 'r90CategorySelect']){
  assert(my.includes(marker),'R90 missing safety/UI invariant '+marker);
 }
