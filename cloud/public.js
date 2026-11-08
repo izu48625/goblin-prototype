@@ -14,6 +14,92 @@
   const fmtDate=(value,ja)=>{if(!value)return '';const d=new Date(value);if(Number.isNaN(d.getTime()))return '';try{return new Intl.DateTimeFormat(ja?'ja-JP':'en-US',{year:'numeric',month:'short',day:'numeric'}).format(d)}catch{return d.toLocaleDateString()}};
   const average=(scores,criteria,weighted)=>{let total=0,den=0;scores.forEach((raw,i)=>{const score=num(raw);if(score===null)return;const w=weighted?Math.max(0,Number(criteria[i]?.weight??1)):1;total+=score*w;den+=w});return den?Math.round(total/den*10)/10:null};
 
+
+  // R130: Make genuine published comparisons understandable above the score
+  // matrix. Reuse the existing creatorRanking values; no new DB calls or
+  // independent scoring rules. Radar polygons use raw criterion scores.
+  function publicGlance({rows,criteria,creatorRanking,scale,weighted,ja,publicTargetHtml}){
+    const color=['#b65c45','#367a91','#8464ad'];
+    const top=creatorRanking.slice(0,3);
+    const ranks=top.length?top.map((item,i)=>{
+      const pct=Math.max(0,Math.min(100,(item.value/scale)*100));
+      return '<div class="glanceRankRow">'+
+        '<span class="glanceRankNumber">'+(i+1)+'</span>'+
+        '<div class="glanceRankBody">'+
+          '<div class="glanceRankHeading"><span class="glanceRankName">'+publicTargetHtml(item.name,item.index)+'</span>'+
+            '<strong class="glanceRankScore">'+fmt(item.value)+' <small>/ '+scale+'</small></strong></div>'+
+          '<div class="glanceBarTrack"><span style="width:'+pct.toFixed(1)+'%"></span></div>'+
+        '</div></div>';
+    }).join(''):'<p class="glanceEmpty">'+(ja?'公開された点数はまだありません。':'No published scores yet.')+'</p>';
+
+    // Never turn missing values into zeros or connect an incomplete radar.
+    // A radar needs at least two fully scored subjects and 3–10 criteria.
+    const radarCandidates=criteria.length>=3&&criteria.length<=10?top.filter(item=>{
+      const scores=rows[item.index]?.scores;
+      return Array.isArray(scores)&&criteria.every((_,i)=>{
+        const n=num(scores[i]);
+        return n!==null&&n>=0&&n<=scale;
+      });
+    }).slice(0,3):[];
+    let graph='';
+    if(radarCandidates.length>=2){
+      const centerX=165,centerY=145,radius=91,n=criteria.length;
+      const xy=(i,val)=>{
+        const angle=-Math.PI/2+(2*Math.PI*i/n);
+        const distance=radius*Math.max(0,Math.min(1,val/scale));
+        return [(centerX+Math.cos(angle)*distance).toFixed(1),
+          (centerY+Math.sin(angle)*distance).toFixed(1)].join(',');
+      };
+      const polygon=(values)=>values.map((v,i)=>xy(i,v)).join(' ');
+      const rings=[.25,.5,.75,1].map(fraction=>
+        '<polygon points="'+polygon(criteria.map(()=>scale*fraction))+'" class="glanceRadarRing"/>').join('');
+      const axes=criteria.map((criterion,i)=>{
+        const angle=-Math.PI/2+(2*Math.PI*i/n);
+        const tx=(centerX+Math.cos(angle)*116).toFixed(1);
+        const ty=(centerY+Math.sin(angle)*116+4).toFixed(1);
+        return '<line x1="'+centerX+'" y1="'+centerY+'" x2="'+xy(i,scale).replace(',','" y2="')+
+          '" class="glanceRadarAxis"/><text x="'+tx+'" y="'+ty+'" text-anchor="middle" class="glanceRadarAxisLabel">'+(i+1)+'</text>';
+      }).join('');
+      const surfaces=radarCandidates.map((item,i)=>{
+        const scores=rows[item.index].scores.slice(0,n).map(Number);
+        return '<polygon points="'+polygon(scores)+'" fill="'+color[i]+'" fill-opacity="0.13" stroke="'+color[i]+
+          '" stroke-width="2.5" stroke-linejoin="round"/>';
+      }).join('');
+      const legend=radarCandidates.map((item,i)=>
+        '<span class="glanceLegendItem"><i style="background:'+color[i]+'"></i>'+esc(item.name)+'</span>').join('');
+      graph='<figure class="glanceRadarFigure"><svg class="glanceRadarSvg" viewBox="0 0 330 290" role="img" aria-labelledby="creatorRadarTitle creatorRadarDescription">'+
+        '<title id="creatorRadarTitle">'+(ja?'作成者の項目別レーダーチャート':'Creator criterion-by-criterion radar chart')+'</title>'+
+        '<desc id="creatorRadarDescription">'+esc(criteria.map((c,i)=>(i+1)+'. '+c.name).join(' / '))+'</desc>'+
+        rings+axes+surfaces+'</svg><figcaption class="glanceRadarLegend">'+legend+'</figcaption></figure>'+
+        '<div class="glanceCriteria">'+criteria.map((c,i)=>
+          '<span><b>'+(i+1)+'</b> '+esc(c.name)+'</span>').join('')+'</div>';
+    }else{
+      graph='<div class="glanceNoRadar">'+(ja
+        ?'レーダー比較は、3項目以上をすべて採点した対象が2つ以上ある場合に表示します。'
+        :'Radar comparison appears when at least two subjects have complete scores across 3 or more criteria.')+'</div>'+
+        '<div class="glanceCriteria">'+criteria.map((c,i)=>
+          '<span><b>'+(i+1)+'</b> '+esc(c.name)+'</span>').join('')+'</div>';
+    }
+    return '<section class="publicGlance" aria-labelledby="publicGlanceHeading">'+
+      '<div class="glanceHead"><h2 id="publicGlanceHeading">'+(ja?'比較結果をひと目で':'Comparison at a glance')+'</h2>'+
+      '<span>'+(weighted?(ja?'重み付け平均':'Weighted average'):(ja?'均等平均':'Equal-weight average'))+'</span></div>'+
+      '<div class="glanceLayout">'+
+        '<div class="glanceColumn glanceOverall"><h3>'+(ja?'作成者の総合TOP3':'Creator overall top 3')+'</h3>'+
+          '<div class="glanceRankList">'+ranks+'</div>'+
+          '<p class="glanceMethod">'+(ja
+            ?'総合点は公開された各項目の平均です。未採点は0点に置き換えません。'
+            :'Overall scores are based on published criterion averages. Missing scores are not zeros.')+'</p>'+
+        '</div>'+
+        '<div class="glanceColumn glanceBreakdown"><h3>'+(ja?'項目別の強みを比較':'Compare criterion scores')+'</h3>'+
+          graph+
+          '<p class="glanceMethod">'+(ja
+            ?'レーダーは入力された元の点数です。重み付けは総合点にのみ反映しています。'
+            :'Radar uses original entered scores; weighting only affects overall averages.')+'</p>'+
+        '</div>'+
+      '</div>'+
+    '</section>';
+  }
+
   function socialCategoryLabel(key,ja){
     const labels={
       sports:['スポーツ','Sports'],
@@ -433,6 +519,8 @@
             <div class="summarySub">${ja?'点満点':'point scale'}</div>
           </div>
         </div>
+
+        ${publicGlance({rows,criteria,creatorRanking,scale,weighted,ja,publicTargetHtml})}
 
         <div class="primaryActions">
           ${data.show_community===true&&data.allow_ratings===true&&data.visibility!=='private'
