@@ -2,6 +2,7 @@
 // Search Console's authenticated index inspection.
 // Does not follow private/unlisted URLs, change Supabase, or index content.
 import assert from 'node:assert/strict';
+import {setTimeout as delay} from 'node:timers/promises';
 
 const root=(process.env.BASE_URL||'https://statsmaker.app').replace(/\/$/,'');
 const get=async(path)=>{
@@ -21,6 +22,21 @@ const staticMap=await get('/sitemap-static.xml');
 for(const page of ['/','/ja/','/en/','/discover']){
   assert(staticMap.body.includes('<loc>'+root+page+'</loc>'),'Static sitemap missing '+page);
 }
+// Cloudflare deployment is asynchronous relative to the GitHub push.
+// Wait for the actual new navigation before making a definitive production claim.
+let navReady=false;
+for(let attempt=1;attempt<=8;attempt++){
+  const bodies=await Promise.all(['/ja/','/en/'].map(page=>get(page).then(x=>x.body)));
+  navReady=bodies.every(body=>{
+    const rail=body.match(/<nav class="r71CategoryRail"[^>]*>([\s\S]*?)<\/nav>/)?.[1]||'';
+    return rail.includes('category=sports')&&rail.includes('category=manga_anime')&&
+      !rail.includes('category=game')&&!rail.includes('category=movie_tv');
+  });
+  if(navReady)break;
+  console.log('New landing navigation not deployed yet; check '+attempt+'/8');
+  if(attempt<8)await delay(12000);
+}
+assert(navReady,'Landing navigation not deployed within the bounded check window');
 for(const page of ['/ja/','/en/']){
   const {body}=await get(page);
   assert(body.includes('<meta name="robots" content="index,follow">'));
