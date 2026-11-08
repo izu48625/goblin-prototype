@@ -28,7 +28,7 @@ let navReady=false;
 for(let attempt=1;attempt<=8;attempt++){
   const bodies=await Promise.all(['/ja/','/en/'].map(page=>get(page).then(x=>x.body)));
   navReady=bodies.every(body=>{
-    const rail=body.match(/<nav class="r71CategoryRail"[^>]*>([\\s\\S]*?)<\\/nav>/)?.[1]||'';
+    const rail=body.match(/<nav class="r71CategoryRail"[^>]*>([\s\S]*?)<\/nav>/)?.[1]||'';
     return rail.includes('category=sports')&&rail.includes('category=manga_anime')&&
       !rail.includes('category=game')&&!rail.includes('category=movie_tv');
   });
