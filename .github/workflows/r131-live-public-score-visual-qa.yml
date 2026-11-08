@@ -1,0 +1,26 @@
+name: R131 Live Public SSR Score Visual Audit
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'worker/seo.js'
+      - 'worker/public-score-visual.js'
+      - 'scripts/r131-live-public-score-visual-qa.mjs'
+      - '.github/workflows/r131-live-public-score-visual-qa.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  public-ssr-visual:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - run: node --check scripts/r131-live-public-score-visual-qa.mjs
+      - name: Verify current Public works on production domain
+        env:
+          BASE_URL: https://statsmaker.app
+        run: node scripts/r131-live-public-score-visual-qa.mjs
