@@ -54,7 +54,7 @@ const launcher=await text('app/src/launcher.js');
 const global=await text('cloud/global-locale.js');
 assert(root.includes('id="extExamplesLink" href="/ja/examples.html"'),'Need minimal root link');
 assert(launcher.includes('"/en/examples.html"')&&launcher.includes('"/ja/examples.html"'),'Root link follows language');
-assert(global.includes('data-global-guide="examples"'),'Global help link missing');
+assert(global.includes('class="globalIntroBtn globalExamplesBtn"')&&global.includes('href="/ja/use-cases.html"'),'Shared examples entry missing');
 assert(global.includes("examples.html"),'Global help localization missing');
 const sitemap=await staticSitemap().text();
 for(const lang of ['ja','en'])
