@@ -105,6 +105,9 @@ button{font:inherit}
 .communityMessage.error{color:#a93842}
 .communityLoading{position:fixed;inset:0;z-index:111;display:grid;place-items:center;background:#f6f5f1;color:#354249;font-size:15px;text-align:center;padding:20px}
 .communityLoading.error{color:#a93842}
+.communityLoading.error{display:flex;flex-direction:column;justify-content:center;align-items:center;gap:14px;line-height:1.6}
+.communityLoadBack{display:inline-flex;align-items:center;justify-content:center;min-height:44px;max-width:100%;padding:10px 16px;border:1px solid #b8cbc4;border-radius:10px;background:#fff;color:#245c54;text-decoration:none;font-size:13px;font-weight:800}
+.communityLoadBack:focus-visible{outline:3px solid #53a895;outline-offset:3px}
 body.communityShell #basicRoot{bottom:calc(178px + env(safe-area-inset-bottom))}
 body.communityShell #extLauncher{bottom:calc(8px + env(safe-area-inset-bottom))}
 @media(min-width:601px){
@@ -214,7 +217,7 @@ if(document.body.classList.contains('communityShell'))document.getElementById('c
 
 <script src="cloud/r89-home-intro.js?v=r120-locale1"></script>
 <script type="module" src="app/src/launcher.js?v=r126-storage1"></script>
-<script type="module" src="cloud/community-home.js?v=r123-community1"></script>
+<script type="module" src="cloud/community-home.js?v=r133-entry1"></script>
 <script src="cloud/analytics-config.js?v=r45ga4off1"></script>
 <script src="cloud/analytics.js?v=r45ga4off1"></script>
 <script src="cloud/global-locale.js?v=r123-community1"></script>

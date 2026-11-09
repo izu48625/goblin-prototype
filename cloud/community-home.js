@@ -1,4 +1,4 @@
-import {buildCommunitySheet,collectCommunityScores} from './community-rating-model.js';
+import {buildCommunitySheet,collectCommunityScores,canJoinCommunityTopic} from './community-rating-model.js';
 // R27: Community reuses the exact Home base/index.html scoring engine.
 // A separate in-memory sheet is mounted; Home localStorage is never changed.
 const query=new URLSearchParams(location.search);
@@ -24,16 +24,24 @@ if(uuid.test(topicId)){
     if(anonError||!anon?.user)throw anonError||new Error('Anonymous login unavailable.');
     return anon.user;
   }
-  async function loadData(sb){
+  // Validate the current Public/Unlisted + author consent *before* creating
+  // an anonymous user. Invalid, revoked and disabled links stay read-only.
+  async function loadTopic(sb){
     const {data:topic,error}=await sb.from('topics')
-      .select('id,title,description,language_code,score_scale,weighted,allow_ratings,visibility,community_minimum,topic_items(id,name,position),criteria(id,name,weight,position)')
+      .select('id,title,description,language_code,score_scale,weighted,allow_ratings,show_community,visibility,community_minimum,topic_items(id,name,position),criteria(id,name,weight,position)')
       .eq('id',topicId).single();
     if(error)throw error;
-    if(!topic.allow_ratings)throw new Error('This work is not accepting Community ratings.');
+    if(!canJoinCommunityTopic(topic))throw new Error(siteLanguage()==='ja'
+      ?'この作品は現在みんなで採点を受け付けていません。'
+      :'This work is not accepting Community ratings.');
     const items=[...(topic.topic_items||[])].sort((a,b)=>a.position-b.position);
     const criteria=[...(topic.criteria||[])].sort((a,b)=>a.position-b.position);
     if(!items.length||!criteria.length||items.length>40||criteria.length>10)
       throw new Error('Unsupported rating sheet size.');
+    return {topic,items,criteria};
+  }
+  async function loadData(sb,preflight){
+    const {topic,items,criteria}=preflight;
     const {data:existing,error:ownError}=await sb.from('rating_sets')
       .select('id,status,submitted_at').eq('topic_id',topicId).maybeSingle();
     if(ownError)throw ownError;
@@ -129,8 +137,9 @@ if(uuid.test(topicId)){
       await loadScript('cloud/community-gateway.js?v=r26p3');
       const sb=window.SM_SUPABASE?.client;
       if(!sb)throw new Error('Supabase is not available.');
+      const preflight=await loadTopic(sb);
       await ensureUser(sb);
-      context=await loadData(sb);
+      context=await loadData(sb,preflight);
       await mountSheet(context.sheet);
       syncButtons();
       const minimum=Number(context.topic.community_minimum)===1?1:5;
@@ -144,6 +153,11 @@ if(uuid.test(topicId)){
     }catch(error){
       console.error('[Stats Maker] Community home failed',error);
       loading.textContent=(siteLanguage()==='ja'?'Communityを開けませんでした：':'Could not load Community: ')+(error?.message||String(error));
+      const back=document.createElement('a');
+      back.className='communityLoadBack';
+      back.href='public.html?id='+encodeURIComponent(topicId);
+      back.textContent=siteLanguage()==='ja'?'← 作品の公開ページに戻る':'← Back to public work';
+      loading.appendChild(back);
       loading.classList.add('error');
     }
   })();

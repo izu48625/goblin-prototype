@@ -1,0 +1,55 @@
+name: R133 Community Join Flow and Permission QA
+on:
+  pull_request:
+    paths:
+      - 'index.html'
+      - 'cloud/community-home.js'
+      - 'cloud/community-rating-model.js'
+      - 'scripts/r27-community-home-test.mjs'
+      - 'scripts/r133-community-preflight-qa.mjs'
+      - 'scripts/r133-community-browser-qa.mjs'
+      - '.github/workflows/r133-community-join-qa.yml'
+  push:
+    branches: [main]
+    paths:
+      - 'index.html'
+      - 'cloud/community-home.js'
+      - 'cloud/community-rating-model.js'
+      - 'scripts/r133-community-preflight-qa.mjs'
+      - 'scripts/r133-community-browser-qa.mjs'
+      - '.github/workflows/r133-community-join-qa.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  permission-and-browser:
+    runs-on: ubuntu-latest
+    timeout-minutes: 12
+    container:
+      image: mcr.microsoft.com/playwright:v1.56.1-noble
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Check syntax and consent rules
+        run: |
+          node --check cloud/community-home.js
+          node --check cloud/community-rating-model.js
+          node --check scripts/r133-community-browser-qa.mjs
+          node scripts/r27-community-home-test.mjs
+          node scripts/r133-community-preflight-qa.mjs
+      - name: Build first-party assets
+        run: npm run build:cloudflare
+      - name: Install test-only browser driver
+        run: npm install --no-save playwright@1.56.1
+      - name: Start localhost-only test server
+        run: |
+          python3 -m http.server 4173 --bind 127.0.0.1 --directory dist >/tmp/r133-http.log 2>&1 &
+          for i in $(seq 1 30); do
+            if curl -fsS http://127.0.0.1:4173/index.html >/dev/null; then exit 0; fi
+            sleep 1
+          done
+          exit 1
+      - name: Test permitted and denied paths without network or data writes
+        run: node scripts/r133-community-browser-qa.mjs
