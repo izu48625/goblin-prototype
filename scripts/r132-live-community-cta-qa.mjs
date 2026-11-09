@@ -17,9 +17,9 @@ const rows=JSON.parse(payload)?.data?.rows;
 assert(Array.isArray(rows)&&rows.length>0&&rows.length<=12);
 const topics=rows.filter(row=>row?.visibility==='public'&&/^[0-9a-f-]{36}$/i.test(row.id));
 assert(topics.length>0);
-let checked=0,eligible=0;
+let checked=0,eligible=0,stale=false;
 for(let attempt=1;attempt<=7;attempt++){
-  checked=0;eligible=0;let stale=false;
+  checked=0;eligible=0;stale=false;
   for(const topic of topics){
     const id=topic.id;
     const {res,html}=await fetchHtml('/work/'+id);
@@ -41,6 +41,7 @@ for(let attempt=1;attempt<=7;attempt++){
   if(attempt<7)await delay(12000);
 }
 assert(checked>0,'No current Public topic checked');
+assert(!stale,'Some currently eligible Public works still lack the Community CTA');
 const active=topics.filter(row=>row.show_community===true&&row.allow_ratings===true);
 if(active.length){
   const result=await fetchHtml('/work/'+active[0].id);
