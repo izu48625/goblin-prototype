@@ -11,6 +11,7 @@ const snapshot={rows:[{name:'Messi & Ronaldo',scores:Array(10).fill(90),image_ur
                       {name:'<img src=x onerror=alert(1)>',scores:[66]}],
                 criteria:[{name:'Finishing',weight:1},'Agility']};
 const row={id:ids.public,title:'Football Best',description:'Compare elite football players',score_scale:100,weighted:false,
+            show_community:true,allow_ratings:true,
            language_code:'en',snapshot_updated_at:'2026-10-16T08:00:00Z',
            published_at:'2026-10-15T08:00:00Z'};
 const limiter={async limit(){return {success:true}}};
@@ -74,6 +75,10 @@ try{
   assert(calls.seo[0].select.includes('seo_scores_5:snapshot->rows->5->scores'));
   assert(!calls.seo[0].select.includes('seo_scores_6:'),'Public excerpt exceeds six rows');
   assert(html.includes('Published rating excerpt'),'SSR should show actual authored scores');
+  assert(calls.seo[0].select.includes('show_community')&&calls.seo[0].select.includes('allow_ratings'),
+    'Permission flags must be fetched in the existing single bounded Public-only query');
+  assert(html.includes('href="https://statsmaker.app/index.html?community='+ids.public+'"'),
+    'Author-enabled Community entry must reuse existing participant flow');
   assert(html.includes('>90</td>')&&html.includes('>66</td>'),'Keep original scores and distinguish missing cells');
   assert(!calls.seo[0].select.split(',').includes('snapshot'));
   res=await call('/work/'+ids.public,'HEAD');

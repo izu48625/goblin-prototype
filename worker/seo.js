@@ -17,7 +17,7 @@ const SEO_ROW_COUNT=18,SEO_METRIC_COUNT=10;
 const SEO_SCORE_ROWS=6,SEO_SCORE_COLUMNS=5;
 const SEO_PROJECTION=[
   'id','title','description','language_code','published_at',
-  'snapshot_updated_at','visibility',
+  'snapshot_updated_at','visibility','show_community','allow_ratings',
   ...Array.from({length:SEO_ROW_COUNT},(_,i)=>'seo_row_'+i+':snapshot->rows->'+i+'->>name'),
   ...Array.from({length:SEO_METRIC_COUNT},(_,i)=>'seo_metric_'+i+':snapshot->criteria->'+i),
   ...Array.from({length:SEO_SCORE_ROWS},(_,i)=>'seo_scores_'+i+':snapshot->rows->'+i+'->scores'),
@@ -99,11 +99,19 @@ export async function publicWorkHtml(id){
     :'Stats Makerで作成された公開評価・比較シートです。');
   const canonical=ORIGIN+'/work/'+encodeURIComponent(id);
   const viewer=ORIGIN+'/public.html?id='+encodeURIComponent(id);
+  // Only currently Public authors who enabled both permissions may invite
+  // participation. Exactly mirrors the full viewer's Community CTA condition.
+  const communityEnabled=work.show_community===true&&work.allow_ratings===true;
+  const communityHref=ORIGIN+'/index.html?community='+encodeURIComponent(id);
   // Links are created from server-owned host + validated UUID only.
   const titleText=title+' | Stats Maker';
   const intro=en?'Public rating sheet':'公開評価・比較シート';
   const open=en?'Explore ratings and rankings':'評価結果・ランキングを見る';
   const make=en?'Create your own charts':'自分のグラフを作る';
+  const joinLabel=en?'Add your ratings to this comparison':'この比較に自分も採点する';
+  const joinHelp=en
+    ?'The author enabled Community ratings. Submit your own scores to take part; aggregated results may depend on participation thresholds.'
+    :'作成者がみんなで採点を許可している作品です。自分の点数を投稿して参加できます。集計結果は参加人数などの条件によって表示されます。';
   const itemLabel=en?'Compared items':'比較対象';
   const metricLabel=en?'Rating criteria':'評価項目';
   const listHtml=items=>items.map(item=>'<li>'+esc(item)+'</li>').join('');
@@ -170,10 +178,13 @@ export async function publicWorkHtml(id){
     '<meta property="og:url" content="'+canonical+'"><meta property="og:image" content="'+esc(ogImage)+'">'+
     '<meta name="twitter:card" content="summary_large_image">'+
     '<script type="application/ld+json">'+jsonld+'</script>'+
-    '<style>*{box-sizing:border-box}body{margin:0;background:#07101f;color:#edf4ff;font:16px/1.65 system-ui,-apple-system,sans-serif}header,main,footer{width:min(900px,calc(100% - 32px));margin:auto}header{padding:24px 0 14px}a{color:#a9c8ff}h1{font-size:clamp(25px,5vw,36px);line-height:1.3;overflow-wrap:anywhere}h2{font-size:19px;margin-bottom:4px}p{color:#bfcee2}section{background:#101f34;border:1px solid #294463;border-radius:14px;padding:16px 21px;margin:20px 0}ul{display:grid;gap:7px;padding-left:20px}li{overflow-wrap:anywhere}.actions{display:flex;flex-wrap:wrap;gap:10px}.actions a{display:inline-block;padding:12px 16px;border-radius:10px;background:#315cab;color:white;text-decoration:none;font-weight:800}.actions a.secondary{background:#203951}.seoTableScroll{overflow-x:auto;max-width:100%}.seoScores table{border-collapse:collapse;min-width:440px;width:100%;font-size:14px}.seoScores th,.seoScores td{padding:9px 10px;border-bottom:1px solid #30465e;text-align:right}.seoScores th:first-child{text-align:left;white-space:nowrap}.seoScores thead th{background:#263b55}footer{padding:24px 0 48px;font-size:14px}'+publicScoreVisualCss+'</style>'+
+    '<style>*{box-sizing:border-box}body{margin:0;background:#07101f;color:#edf4ff;font:16px/1.65 system-ui,-apple-system,sans-serif}header,main,footer{width:min(900px,calc(100% - 32px));margin:auto}header{padding:24px 0 14px}a{color:#a9c8ff}h1{font-size:clamp(25px,5vw,36px);line-height:1.3;overflow-wrap:anywhere}h2{font-size:19px;margin-bottom:4px}p{color:#bfcee2}section{background:#101f34;border:1px solid #294463;border-radius:14px;padding:16px 21px;margin:20px 0}ul{display:grid;gap:7px;padding-left:20px}li{overflow-wrap:anywhere}.actions{display:flex;flex-wrap:wrap;gap:10px}.actions a{display:inline-block;padding:12px 16px;border-radius:10px;background:#315cab;color:white;text-decoration:none;font-weight:800}.actions a.secondary{background:#203951}.actions a.communityJoin{background:#147b67;border:1px solid #53b69d}.seoJoinNote{margin:12px 0 0;font-size:13px;color:#a8d8ce;line-height:1.65}.seoTableScroll{overflow-x:auto;max-width:100%}.seoScores table{border-collapse:collapse;min-width:440px;width:100%;font-size:14px}.seoScores th,.seoScores td{padding:9px 10px;border-bottom:1px solid #30465e;text-align:right}.seoScores th:first-child{text-align:left;white-space:nowrap}.seoScores thead th{background:#263b55}footer{padding:24px 0 48px;font-size:14px}'+publicScoreVisualCss+'</style>'+
     '</head><body><header><a href="'+ORIGIN+'/">Stats Maker</a> / <a href="'+ORIGIN+'/discover">'+(en?'Browse works':'作品を探す')+'</a></header>'+
     '<main><p>'+intro+'</p><h1>'+esc(title)+'</h1><p>'+esc(desc)+'</p>'+
-    '<div class="actions"><a href="'+viewer+'">'+open+'</a><a class="secondary" href="'+ORIGIN+(en?'/en/':'/ja/')+'">'+make+'</a></div>'+
+    '<div class="actions"><a href="'+viewer+'">'+open+'</a>'+ 
+    (communityEnabled?'<a class="communityJoin" href="'+communityHref+'">'+joinLabel+'</a>':'')+
+    '<a class="secondary" href="'+ORIGIN+(en?'/en/':'/ja/')+'">'+make+'</a></div>'+
+    (communityEnabled?'<p class="seoJoinNote">'+joinHelp+'</p>':'')+
     scoreVisual+
     (list.length?'<section><h2>'+itemLabel+'</h2><ul>'+listHtml(list)+'</ul></section>':'')+
     (metrics.length?'<section><h2>'+metricLabel+'</h2><ul>'+listHtml(metrics)+'</ul></section>':'')+
