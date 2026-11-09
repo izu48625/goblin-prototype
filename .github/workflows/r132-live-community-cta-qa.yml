@@ -1,0 +1,25 @@
+name: R132 Live Public Community CTA Audit
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'worker/seo.js'
+      - 'scripts/r132-live-community-cta-qa.mjs'
+      - '.github/workflows/r132-live-community-cta-qa.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  public-community-entry:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - run: node --check scripts/r132-live-community-cta-qa.mjs
+      - name: Verify current Public participation links on production domain
+        env:
+          BASE_URL: https://statsmaker.app
+        run: node scripts/r132-live-community-cta-qa.mjs
