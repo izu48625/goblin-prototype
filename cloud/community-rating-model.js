@@ -1,3 +1,10 @@
+// Validate the author's current permissions before opening a rating session.
+// Unlisted works may be reached by a direct link; private works cannot join.
+export function canJoinCommunityTopic(topic){
+  return !!topic && (topic.visibility==='public'||topic.visibility==='unlisted') &&
+    topic.show_community===true && topic.allow_ratings===true;
+}
+
 // Pure rating model: the Community page reuses the Home UI but does not
 // share its local sheet data. Scores remain associated with immutable item IDs.
 export function buildCommunitySheet(topic,items,criteria,existingScores=[]){
