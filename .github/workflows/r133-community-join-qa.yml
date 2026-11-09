@@ -8,6 +8,7 @@ on:
       - 'scripts/r27-community-home-test.mjs'
       - 'scripts/r133-community-preflight-qa.mjs'
       - 'scripts/r133-community-browser-qa.mjs'
+      - 'scripts/r133-live-community-entry-qa.mjs'
       - '.github/workflows/r133-community-join-qa.yml'
   push:
     branches: [main]
@@ -17,6 +18,7 @@ on:
       - 'cloud/community-rating-model.js'
       - 'scripts/r133-community-preflight-qa.mjs'
       - 'scripts/r133-community-browser-qa.mjs'
+      - 'scripts/r133-live-community-entry-qa.mjs'
       - '.github/workflows/r133-community-join-qa.yml'
   workflow_dispatch:
 permissions:
@@ -53,3 +55,19 @@ jobs:
           exit 1
       - name: Test permitted and denied paths without network or data writes
         run: node scripts/r133-community-browser-qa.mjs
+
+  live-deployed-assets:
+    if: github.event_name != 'pull_request'
+    needs: permission-and-browser
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - run: node --check scripts/r133-live-community-entry-qa.mjs
+      - name: Check Cloudflare Public entry and consent-first code
+        env:
+          BASE_URL: https://statsmaker.app
+        run: node scripts/r133-live-community-entry-qa.mjs
