@@ -1,16 +1,23 @@
 import assert from 'node:assert/strict';
 import {readFile} from 'node:fs/promises';
-const KEY='r119-fresh-home1';
-const STYLE_KEY='r38p15scores1';
-const I18N_KEY='r119-community-copy1';
-const PUB_CSS_KEY='r120-locale1';
-const PUB_KEY='r120-locale1';
+const version=(src,pattern,name)=>{const found=src.match(pattern)?.[1];assert(found,'Missing versioned '+name+' asset reference');return found;};
+const [outerDoc,homeDocForKey,publicDocForKey]=await Promise.all([
+  readFile(new URL('../index.html',import.meta.url),'utf8'),
+  readFile(new URL('../base/index.html',import.meta.url),'utf8'),
+  readFile(new URL('../public.html',import.meta.url),'utf8')
+]);
+const KEY=version(outerDoc,/base\/index\.html\?v=([a-z0-9._-]+)/i,'Home iframe');
+const STYLE_KEY=version(homeDocForKey,/css\/style\.css\?v=([a-z0-9._-]+)/i,'Home stylesheet');
+const APP_KEY=version(homeDocForKey,/js\/app\.js\?v=([a-z0-9._-]+)/i,'Home app');
+const I18N_KEY=version(homeDocForKey,/js\/i18n\.js\?v=([a-z0-9._-]+)/i,'Home translations');
+const PUB_CSS_KEY=version(publicDocForKey,/cloud\/public\.css\?v=([a-z0-9._-]+)/i,'Public CSS');
+const PUB_KEY=version(publicDocForKey,/cloud\/public\.js\?v=([a-z0-9._-]+)/i,'Public JS');
 const HOME='base/index.html?v='+KEY;
 const STYLE='css/style.css?v='+STYLE_KEY;
 const expectedColors=[
   'rgba(31,47,53,.20)','rgba(37,64,85,.24)','rgba(39,72,103,.31)','rgba(40,89,89,.29)','rgba(110,99,57,.32)','rgba(122,84,62,.35)','rgba(116,60,74,.42)'
 ];
-const local=[['index.html',HOME],['base/index.html',STYLE],['base/index.html','js/app.js?v='+KEY]];
+const local=[['index.html',HOME],['base/index.html',STYLE],['base/index.html','js/app.js?v='+APP_KEY]];
 for(const [path,needle] of local){
   const data=await readFile(new URL('../'+path,import.meta.url),'utf8');
   assert(data.includes(needle),path+' is not cache-busted: '+needle);
@@ -71,7 +78,7 @@ for(const host of hosts){
       assert(root.includes(HOME),'stale outer shell -> Home iframe');
       const home=await fetchText(host.base+'/base/index.html?v='+KEY);
       assert(home.includes(STYLE),'stale Home HTML -> CSS');
-      assert(home.includes('js/app.js?v='+KEY),'stale Home HTML -> color JS');
+      assert(home.includes('js/app.js?v='+APP_KEY),'stale Home HTML -> color JS');
       assert(home.includes('js/i18n.js?v='+I18N_KEY),'stale Home HTML -> translations');
       assert(home.includes('id="scoreColorToggleBtn"'),'no score color toggle on production');
       assert(!home.includes('id="gradeFilter"'),'retired grade filter visible in production');
