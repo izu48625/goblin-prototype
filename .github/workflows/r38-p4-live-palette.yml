@@ -38,11 +38,14 @@ jobs:
           node --check scripts/r38-p4-live-palette-qa.mjs
           node scripts/r38-p4-live-palette-qa.mjs
           npm run build:cloudflare
-          grep -q 'base/index.html?v=r119-fresh-home1' dist/index.html
-          grep -q 'css/style.css?v=r38p15scores1' dist/base/index.html
-          grep -q 'js/i18n.js?v=r119-community-copy1' dist/base/index.html
-          grep -q 'cloud/public.css?v=r120-locale1' dist/public.html
-          grep -q 'cloud/public.js?v=r120-locale1' dist/public.html
+          # Versioned references are independently updated; validate the
+          # built links rather than freezing a historical revision number.
+          grep -Eq 'base/index[.]html[?]v=[A-Za-z0-9._-]+' dist/index.html
+          grep -Eq 'css/style[.]css[?]v=[A-Za-z0-9._-]+' dist/base/index.html
+          grep -Eq 'js/app[.]js[?]v=[A-Za-z0-9._-]+' dist/base/index.html
+          grep -Eq 'js/i18n[.]js[?]v=[A-Za-z0-9._-]+' dist/base/index.html
+          grep -Eq 'cloud/public[.]css[?]v=[A-Za-z0-9._-]+' dist/public.html
+          grep -Eq 'cloud/public[.]js[?]v=[A-Za-z0-9._-]+' dist/public.html
   deployed-chain:
     if: github.event_name != 'pull_request'
     needs: source-chain
