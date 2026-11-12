@@ -244,7 +244,9 @@ try{
   await clickBasic(home,'scoreColorToggleBtn');
   assert.equal(await toggle.getAttribute('aria-pressed'),'false');
   await page.waitForTimeout(950); // let prior score edits autosave normally
-  await page.reload({waitUntil:'domcontentloaded'});
+  // Default entry is intentionally fresh. Explicitly resume to test that
+  // the saved score/color preference survive a browser navigation.
+  await page.goto(BASE+'/index.html?resume=1',{waitUntil:'domcontentloaded'});
   await home.locator('#scoreColorToggleBtn').waitFor({state:'attached'});
   assert.equal(await toggle.getAttribute('aria-pressed'),'false','OFF was not restored on reload');
   assert.equal(await toggle.innerText(),'色 OFF');
