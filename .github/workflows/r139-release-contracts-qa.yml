@@ -1,0 +1,42 @@
+name: R139 Current Release and Public Fixture Contracts
+on:
+  pull_request:
+    paths:
+      - 'scripts/r139-release-contracts-qa.mjs'
+      - 'scripts/r139-select-current-ogp-work.mjs'
+      - 'scripts/r38-p4-live-palette-qa.mjs'
+      - 'scripts/r38-p3-ui-regression-qa.mjs'
+      - 'scripts/r38-p17-prelaunch-readonly-qa.mjs'
+      - 'scripts/r38-readonly-readiness-qa.mjs'
+      - '.github/workflows/ogp-smoke.yml'
+      - '.github/workflows/r139-release-contracts-qa.yml'
+  push:
+    branches: [main]
+    paths:
+      - 'scripts/r139-release-contracts-qa.mjs'
+      - 'scripts/r139-select-current-ogp-work.mjs'
+      - 'scripts/r38-p4-live-palette-qa.mjs'
+      - 'scripts/r38-p3-ui-regression-qa.mjs'
+      - 'scripts/r38-p17-prelaunch-readonly-qa.mjs'
+      - 'scripts/r38-readonly-readiness-qa.mjs'
+      - '.github/workflows/ogp-smoke.yml'
+      - '.github/workflows/r139-release-contracts-qa.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  stable-release-references:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - run: node --check scripts/r139-release-contracts-qa.mjs
+      - run: node --check scripts/r139-select-current-ogp-work.mjs
+      - run: node --check scripts/r38-p17-prelaunch-readonly-qa.mjs
+      - run: node --check scripts/r38-p4-live-palette-qa.mjs
+      - run: node --check scripts/r38-p3-ui-regression-qa.mjs
+      - run: node scripts/r139-release-contracts-qa.mjs
+      - run: node scripts/r38-p17-prelaunch-readonly-qa.mjs local
+      - run: node scripts/r38-p4-live-palette-qa.mjs
