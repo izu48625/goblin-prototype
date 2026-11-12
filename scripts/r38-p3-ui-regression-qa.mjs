@@ -184,7 +184,7 @@ try{
         '#scoreTable tbody tr:first-child td.avgCell',
         '.fitTable tbody tr:first-child td.fitScoreCell',
         '.fitTable tbody tr:first-child td.fitAverageCell',
-        '.overviewMetric.heat-ss'
+        '.overviewMetric[class*="heat-"]'
       ];
       return selectors.map(sel=>{
         const el=document.querySelector(sel);

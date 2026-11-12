@@ -11,5 +11,9 @@ for(const k of ['#publishBtn','#newSheetBtn','#addRowBtn','#addColBtn','#r80Opti
  assert(css.includes(k),'Community unsafe control not guarded: '+k);
 assert(css.includes('display:none!important'));
 assert(!css.includes('scoreInput'),'Score inputs must remain usable');
-assert(!css.includes('scoreCell'),'Grade cells must not be changed');
+// Later light-theme palette rules intentionally style scored cells; verify
+// those rules do NOT appear under the Community-specific safety guard.
+const guard=css.slice(0,css.indexOf('/* R106:'));
+assert(!guard.includes('scoreCell'),'Community structural guard must not touch score cells');
+assert(!guard.includes('scoreInput'),'Community structural guard must not disable score inputs');
 console.log('R82 Community UI safety scoped to Community only; score input preserved PASS');

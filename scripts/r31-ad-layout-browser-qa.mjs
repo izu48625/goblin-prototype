@@ -84,9 +84,9 @@ try{
     if(item.label==='Discover'){
       await page.locator('[data-view="all"]').waitFor({state:'visible'});
       await page.waitForFunction(()=>document.querySelector('[data-view="all"]')?.textContent==='すべての作品');
-      assert.equal(await page.locator('[data-view="community"]').textContent(),'みんなで評価');
+      assert.equal(await page.locator('[data-view="community"]').textContent(),'みんなで採点');
       await page.locator('[data-view="community"]').click();
-      await page.waitForFunction(()=>document.querySelector('#sectionTitle')?.textContent==='みんなで評価できる作品');
+      await page.waitForFunction(()=>document.querySelector('#sectionTitle')?.textContent==='みんなで採点できる作品');
       assert(await page.locator('[data-sm-slot]').count()>=3,
         'Switching to Rate Together hid ad preview');
     }
