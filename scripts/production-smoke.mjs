@@ -390,10 +390,13 @@ async function browserPublic(){
 async function navigateRemix(page){
   await page.goto(BASE_URL+'/public.html?id='+encodeURIComponent(PUBLIC_TOPIC_ID),{waitUntil:'networkidle',timeout:60000});
   await page.locator('#content:not(.hidden)').waitFor({timeout:30000});
+  const publicTitle=(await page.locator('.hero h1').innerText()).trim();
+  assert(publicTitle.length>0,'Remix source title missing');
   assert((await page.locator('#remixBtn').innerText()).includes('コピーして採点する'),
     'Public copy action wording regressed');
   await page.locator('#remixBtn').click();
   await page.waitForURL(url=>url.searchParams.get('remixed')==='1',{timeout:30000});
+  return publicTitle;
 }
 
 async function browserRemixRedirect(){
@@ -404,15 +407,17 @@ async function browserRemixRedirect(){
 
 async function browserRemixStorage(){
   await withBrowser('Browser Remix storage',async page=>{
-    await navigateRemix(page);
+    const sourceTitle=await navigateRemix(page);
     const state=await page.evaluate(()=>{
       try{return JSON.parse(localStorage.getItem('statsMakerV014Library')||'null')}catch{return null}
     });
     assert(state&&Array.isArray(state.sheets)&&state.sheets.length>0,'Remix library was not saved');
     const active=state.sheets.find(sheet=>sheet.id===state.activeId);
     assert(active?.sourceTopicId===PUBLIC_TOPIC_ID,'Remix active sheet lost sourceTopicId');
-    assert(active.title.endsWith('（コピー）')&&!/\(Remix\)\s*\(Remix\)/i.test(active.title),
-      'Copied sheet name retained stacked Remix labels');
+    // The real R118 Remix model deliberately preserves the original title
+    // without stacking a Remix/Copy suffix. This is not ordinary Duplicate.
+    assert(active.title===sourceTitle && active.sourceTopicTitle===sourceTitle,
+      'Remix title must match the actual creator title without added suffixes');
     assert(active.rows.every(row=>row.scores.every(v=>v===null)),
       'Copy incorrectly inherited creator scores');
   });
