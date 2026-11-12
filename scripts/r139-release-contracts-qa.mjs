@@ -34,4 +34,8 @@ assert(selector.includes('resolveCurrentPublicSmokeTopic'));
 assert(selector.includes("appendFileSync(process.env.GITHUB_ENV"));
 assert(publicSelector.includes("visibility:'eq.public'") &&
   publicSelector.includes('row?.show_community===true'));
+assert((await read('scripts/r37-p3-backup-multitab-qa.mjs')).includes('index.html?resume=1'),
+  'Seeded large backup fixture must opt into resume mode');
+assert((await read('scripts/r82-community-controls-qa.mjs')).includes('const guard=css.slice('),
+  'Community safety audit must isolate structural controls from score palette');
 console.log('R139 PASS: actual independent asset versions, safe current Public SEO and OGP IDs',keys);
