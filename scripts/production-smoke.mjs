@@ -1,7 +1,15 @@
 import fs from 'node:fs/promises';
+import {resolveCurrentPublicSmokeTopic} from './r134-production-smoke-topic.mjs';
 
 const BASE_URL=process.env.BASE_URL||'https://statsmaker.app';
-const PUBLIC_TOPIC_ID=process.env.PUBLIC_TOPIC_ID||'1eed295e-9a79-449d-9fd7-e4405e0ae426';
+// Resolve only for flows that operate on a Public topic. No auth or writes.
+const topicModes=new Set(['http','browser-fresh-home','browser-public',
+  'browser-remix-redirect','browser-remix-storage','browser-remix-context',
+  'browser-community-panel','browser-community-home','browser-community-structure',
+  'browser-global-language']);
+const PUBLIC_TOPIC_ID=topicModes.has(process.argv[2]||'http')
+  ?await resolveCurrentPublicSmokeTopic(process.env.PUBLIC_TOPIC_ID||'')
+  :null;
 const mode=process.argv[2]||'http';
 
 function assert(condition,message){
@@ -96,7 +104,7 @@ async function securityDenialSmoke(){
   assert(visibleTopics.every(t=>t&&['public','unlisted'].includes(t.visibility)),
     'RLS leaked private topics to an anonymous user');
   assert(visibleTopics.some(t=>t.id===PUBLIC_TOPIC_ID),
-    'Known published topic unexpectedly inaccessible to anonymous visitors');
+    'Current verified Public work disappeared from anonymous topic list');
   const allowedIds=new Set(visibleTopics.map(t=>t.id));
   for(const table of ['topic_items','criteria']){
     const response=await fetch(url+'/rest/v1/'+table+'?select=topic_id&limit=100',{
@@ -439,7 +447,7 @@ async function browserCommunityHome(){
   await withBrowser('Browser Community Home parity',async page=>{
     const mockSdk=`
       (() => {
-        const id='57b432ed-fbf2-4261-b57d-9e0f27356d2e';
+        const id='${PUBLIC_TOPIC_ID}';
         let count=1;
         const client={
           auth:{
@@ -456,7 +464,7 @@ async function browserCommunityHome(){
                       single:async()=>table==='topics'?({data:{
                         id,title:'COMMUNITY HOME MOCK',description:'QA',
                         language_code:'ja',score_scale:10,weighted:false,
-                        allow_ratings:true,visibility:'public',
+                        allow_ratings:true,show_community:true,visibility:'public',
                         topic_items:[
                           {id:'aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa',name:'Alpha',position:0},
                           {id:'bbbbbbbb-bbbb-4bbb-8bbb-bbbbbbbbbbbb',name:'Beta',position:1}
