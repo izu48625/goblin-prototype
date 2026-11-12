@@ -52,15 +52,15 @@ for(const engine of [chromium,webkit]){
    assert(x.overflow<=2,'Light editor horizontal overflow at '+width);
    await frame.locator('[data-score-row="0"][data-score-col="0"]').fill('97');
    await frame.locator('#titleInput').click();
-   // The original scoring UI deliberately animates its RGBA transition (120ms).
+   // Current R139 light palette uses stable opaque, accessible colors.
    await page.waitForTimeout(240);
    const tile=await frame.locator('#scoreTable tbody tr:first-child td.scoreCell').first().evaluate(el=>({
      color:getComputedStyle(el).backgroundColor,
      alpha:el.style.getPropertyValue('--score-tile-overlay'),
      layer:getComputedStyle(el).backgroundImage
    }));
-   assert.equal(tile.alpha,'rgba(116,60,74,.42)','User-selected 7-band RGBA changed');
-   assert.equal(tile.color,'rgba(116, 60, 74, 0.42)','Grade should be true translucent rgba');
+   assert.equal(tile.alpha,'#edc9b9','Current light heat-S color drifted');
+   assert.equal(tile.color,'rgb(237, 201, 185)','Light heat-S must paint the submitted grade');
    assert.equal(tile.layer,'none','No glossy texture in grade tint');
    const toggle=frame.locator('#scoreColorToggleBtn');
    assert.equal(await toggle.getAttribute('aria-pressed'),'true');
@@ -75,7 +75,7 @@ for(const engine of [chromium,webkit]){
    const ext=await page.locator('#extSheet').evaluate(el=>({bg:getComputedStyle(el).backgroundColor,fg:getComputedStyle(el).color}));
    assert(luminosity(ext.bg)>.8&&contrast(ext.bg,ext.fg)>=4.5,'Extension picker should be light');
    await page.locator('#extClose').click();
-   console.log('R75 '+engine.name()+' '+width+'px Home light, RGB/contrast, RGBA grading and launcher PASS');
+   console.log('R75 '+engine.name()+' '+width+'px Home light, RGB/contrast, graded scores and launcher PASS');
    await ctx.close();
  }
  }finally{await browser.close()}
