@@ -20,7 +20,8 @@ jobs:
     timeout-minutes: 12
     env:
       BASE_URL: https://statsmaker.app
-      PUBLIC_TOPIC_ID: 57b432ed-fbf2-4261-b57d-9e0f27356d2e
+      # A current Community-enabled Public work is selected via anonymous GET
+      # at runtime; never hardcode an old fixture UUID here.
 
     steps:
       - uses: actions/checkout@v4
@@ -28,6 +29,9 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: "22"
+
+      - name: Verify dynamic public topic selection (no writes)
+        run: node scripts/r134-production-smoke-qa.mjs
 
       - name: HTTP production smoke
         run: node scripts/production-smoke.mjs http
