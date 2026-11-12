@@ -51,15 +51,17 @@ try{
   const after=await score();
   assert.deepEqual(after.map(x=>x.value),sample.map(String));
   assert.deepEqual(after.map(x=>x.grade),['heat-a','heat-a','heat-c','heat-e']);
-  const tints=['rgba(110, 99, 57, 0.32)','rgba(110, 99, 57, 0.32)',
-    'rgba(39, 72, 103, 0.31)','rgba(31, 47, 53, 0.2)'];
+  // Current light-score palette is solid, not the retired dark RGBA overlay.
+  const tints=['rgb(241, 217, 196)','rgb(241, 217, 196)',
+    'rgb(248, 237, 204)','rgb(209, 220, 233)'];
   assert(after.every((entry,i)=>entry.color===tints[i]),
-    'Score rebase lost a translucent overlay tint');
+    'Score rebase did not repaint the correct light score grade');
   const active=await home.locator('body').evaluate(()=>window.__statsMakerGetActiveSheet());
   assert.equal(active.scale,10);
   assert.deepEqual(active.rows[0].scores.slice(0,4).map(Number),sample);
   await page.waitForTimeout(900);
-  await page.reload({waitUntil:'domcontentloaded'});
+  // Home defaults to fresh; explicitly resume the saved score sheet.
+  await page.goto(BASE+'/index.html?resume=1',{waitUntil:'domcontentloaded'});
   await home.locator('#scoreTable .scoreInput').first().waitFor({state:'visible'});
   const persisted=await home.locator('body').evaluate(async()=>{
     for(let i=0;i<100;i++){
