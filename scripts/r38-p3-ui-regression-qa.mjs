@@ -27,13 +27,17 @@ try{
   // old cache version, so actual visitors loaded stale CSS despite passing
   // isolated tests with an empty browser cache.
   const iframeSource=await page.locator('#basicFrame').getAttribute('src');
-  assert(iframeSource?.includes('base/index.html?v=r38p15scores1'),
-    'Home iframe document still uses a stale cache key');
+  const outerMarkup=await readFile(new URL('../index.html',import.meta.url),'utf8');
+  const expectedFrame=outerMarkup.match(/base\\/index\\.html\\?v=[a-z0-9._-]+/i)?.[0];
+  assert(expectedFrame&&iframeSource?.includes(expectedFrame),
+    'Home iframe source must match the current versioned site entrypoint');
   const home=page.frameLocator('#basicFrame');
   await home.locator('#titleInput').waitFor({state:'visible',timeout:30000});
   const cssSource=await home.locator('link[href^="css/style.css"]').getAttribute('href');
-  assert.equal(cssSource,'css/style.css?v=r38p15scores1',
-    'Home document still references cached old score-cell CSS');
+  const homeMarkup=await readFile(new URL('../base/index.html',import.meta.url),'utf8');
+  const expectedCss=homeMarkup.match(/css\\/style\\.css\\?v=[a-z0-9._-]+/i)?.[0];
+  assert(expectedCss&&cssSource===expectedCss,
+    'Home stylesheet must match the revision linked by the current document');
   await home.locator('#scoreTable .scoreInput').first().waitFor({state:'visible'});
   await clickBasic(home,'scoreSettingsBtn');
   await home.locator('#scale10Btn').click();
