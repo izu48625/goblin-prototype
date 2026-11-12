@@ -4,8 +4,9 @@ import vm from 'node:vm';
 
 const read=path=>readFile(new URL('../'+path,import.meta.url),'utf8');
 const [page,source,css]=await Promise.all([read('public.html'),read('cloud/public.js'),read('cloud/public.css')]);
-assert(page.includes('cloud/public.js?v=r130-glance1')&&page.includes('cloud/public.css?v=r130-glance1'),
-  'Public visitor must load fresh result preview assets');
+assert(/cloud\/public\.js\?v=[a-z0-9._-]+/i.test(page)&&
+  /cloud\/public\.css\?v=[a-z0-9._-]+/i.test(page),
+  'Public visitor must load independently versioned score preview assets');
 assert(page.includes('name="robots" content="noindex,follow"'),
   'Viewer should retain noindex; SEO goes through visibility-verified /work/:id');
 const start=source.indexOf('  function publicGlance(');

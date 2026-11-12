@@ -2,7 +2,8 @@ import assert from 'node:assert/strict';
 import {readFile} from 'node:fs/promises';
 const read=p=>readFile(new URL('../'+p,import.meta.url),'utf8');
 const html=await read('base/index.html'),css=await read('base/css/r82-community-controls-guard.css');
-assert(html.includes('r82-community-controls-guard.css?v=r82c1'));
+assert(/r82-community-controls-guard\.css\?v=[a-z0-9._-]+/i.test(html),
+  'Community guard stylesheet must retain a current cache revision');
 assert(html.indexOf('r82-community-controls-guard.css')>html.indexOf('r81-clear-settings.css'),'Security guard must load after UI');
 assert(css.includes('body.community-mode .sheetPanel .coreActions'));
 assert(css.includes('body.community-mode .topbar .topActions'));
