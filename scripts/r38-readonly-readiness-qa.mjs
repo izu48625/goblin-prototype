@@ -4,10 +4,11 @@ import {brotliCompressSync,gzipSync} from 'node:zlib';
 import {join,dirname} from 'node:path';
 import {fileURLToPath} from 'node:url';
 import {publicWorkHtml} from '../worker/seo.js';
+import {resolveCurrentPublicSmokeTopic} from './r134-production-smoke-topic.mjs';
 
 const ROOT=dirname(dirname(fileURLToPath(import.meta.url)));
 const ORIGIN='https://statsmaker.app';
-const KNOWN_PUBLIC='57b432ed-fbf2-4261-b57d-9e0f27356d2e';
+// Resolve a currently Public, author-enabled work instead of a revoked fixture UUID.
 const mode=process.argv[2]||'local';
 const read=path=>readFile(join(ROOT,path),'utf8');
 const bytes=path=>readFile(join(ROOT,path));
@@ -112,11 +113,12 @@ async function liveAudit(){
       return {response,html};
     }finally{clearTimeout(timeout)}
   };
+  const currentPublicId=await resolveCurrentPublicSmokeTopic();
   // Waiting only for an HTTP-visible release marker, not performing any writes.
   let published=false;
   for(let i=0;i<24;i++){
     try{
-      const p=await fetchPage('/work/'+KNOWN_PUBLIC);
+      const p=await fetchPage('/work/'+currentPublicId);
       if(p.response.status===200 && /\/(ja|en)\/legal\.html#privacy/.test(p.html)){
         published=true;break;
       }

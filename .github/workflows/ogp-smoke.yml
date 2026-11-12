@@ -5,6 +5,8 @@ on:
     branches: [main]
     paths:
       - "worker/**"
+      - "scripts/r139-select-current-ogp-work.mjs"
+      - "scripts/r134-production-smoke-topic.mjs"
       - "api/**"
       - "cloud/runtime-config.js"
       - "cloud/public.js"
@@ -21,9 +23,15 @@ jobs:
     timeout-minutes: 5
     env:
       BASE_URL: https://statsmaker.app
-      PUBLIC_TOPIC_ID: 57b432ed-fbf2-4261-b57d-9e0f27356d2e
+      # PUBLIC_TOPIC_ID is discovered from current Public works on each run
 
     steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Select current Public OGP fixture (anonymous GET only)
+        run: node scripts/r139-select-current-ogp-work.mjs
       - name: Verify Cloudflare share metadata
         shell: bash
         run: |

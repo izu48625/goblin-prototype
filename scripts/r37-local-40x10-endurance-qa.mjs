@@ -41,7 +41,8 @@ try{
     const page=await ctx.newPage();
     page.on('dialog',d=>d.accept());
     const start=Date.now();
-    await page.goto(BASE+'/index.html?qa=r37-local-'+scale,
+    // Explicitly resume saved work. Normal Home entry intentionally creates a fresh blank.
+    await page.goto(BASE+'/index.html?resume=1&qa=r37-local-'+scale,
       {waitUntil:'domcontentloaded',timeout:30000});
     const home=page.frameLocator('#basicFrame');
     await home.locator('#titleInput').waitFor({state:'visible',timeout:30000});

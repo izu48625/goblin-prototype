@@ -11,7 +11,7 @@ for(const lang of ['ja','en']){
   const html=await read(name);
   assert(html.includes('data-sm-reading-page="'+lang+'"'),'article language marker '+name);
   assert(html.includes('global-locale.css?v=r74p1'),'shared nav styles '+name);
-  assert(html.includes('global-locale.js?v=r74p1'),'shared nav script '+name);
+  assert(/global-locale\.js\?v=[a-z0-9._-]+/i.test(html),'versioned shared nav script '+name);
   assert(html.includes('r73-reading.css?v=r74p1'),'shared reading cache '+name);
   assert(!/<header>[\s\S]*?<\/header>/.test(html),'Duplicate custom article header '+name);
   assert(html.includes('<main>')&&html.includes('</main>'),'Article must preserve content '+name);

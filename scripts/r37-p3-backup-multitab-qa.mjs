@@ -46,7 +46,7 @@ try{
   });
   const page=await context.newPage();
   page.on('dialog',dialog=>dialog.accept());
-  await page.goto(BASE+'/index.html?qa=r37p3safe',{waitUntil:'domcontentloaded'});
+  await page.goto(BASE+'/index.html?resume=1&qa=r37p3safe',{waitUntil:'domcontentloaded'});
   const home=page.frameLocator('#basicFrame');
   await home.locator('#titleInput').waitFor({state:'visible',timeout:30000});
   await home.locator('body').evaluate(async()=>{
