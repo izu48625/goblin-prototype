@@ -361,7 +361,7 @@ body.publicScoreColorsOff .creatorScoreTable td[data-score-value]{background:#ff
 .rankName .publicTargetThumb{flex-basis:34px;width:34px;height:34px;border-radius:8px}
 .rankName .publicTargetText{overflow:hidden;white-space:nowrap;text-overflow:ellipsis}
 @media(max-width:520px){
- .creatorScoreTable td:first-child{min-width:146px;max-width:170px}
+ .creatorScoreTable th:first-child,.creatorScoreTable td:first-child{min-width:112px;width:112px;max-width:112px}
  .creatorScoreTable .publicTargetIdentity{gap:6px}
  .creatorScoreTable .publicTargetThumb{flex-basis:32px;width:32px;height:32px;border-radius:7px}
  .rankName .publicTargetThumb{flex-basis:32px;width:32px;height:32px}
@@ -558,4 +558,13 @@ body.publicScoreColorsOff .creatorScoreTable td[data-score-value]{background:#ff
   .glanceColumn{padding:10px}
   .glanceRankName{font-size:11px}
   .glanceRankScore{font-size:14px}
+}
+
+/* R139: ensure the compact sticky subject still leaves two metric columns on
+   a narrow phone; the later thumbnail layout must not override R38 widths. */
+@media(max-width:360px){
+  .creatorScoreTable th:first-child,.creatorScoreTable td:first-child{
+    min-width:100px;width:100px;max-width:100px
+  }
+  .creatorScoreTable .publicTargetThumb{width:24px;height:24px;flex-basis:24px}
 }
