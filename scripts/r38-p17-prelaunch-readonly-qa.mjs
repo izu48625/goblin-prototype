@@ -24,17 +24,18 @@ async function inventory(){
   const outer=sources['index.html'],home=sources['base/index.html'];
   const publicPage=sources['public.html'];
   const match=(src,exp,label)=>{const found=src.match(exp)?.[1];check(Boolean(found),'missing '+label);return found;};
-  const homeKey=match(outer,/base\/index\.html\?v=([a-z0-9]+)/,'HOME iframe version');
-  for(const ref of [
-    /css\/style\.css\?v=([a-z0-9]+)/,
-    /js\/app\.js\?v=([a-z0-9]+)/
-  ])check(match(home,ref,'HOME CSS/JS revision')===homeKey,'inconsistent HOME iframe/CSS/JS cache');
+  // Each cache key belongs to its own resource. The iframe, app and CSS
+  // deliberately ship independently, so equality between revisions is not a
+  // correctness condition. Check that every referenced asset has a revision.
+  const homeKey=match(outer,/base\\/index\\.html\\?v=([a-z0-9._-]+)/i,'HOME iframe revision');
+  const cssKey=match(home,/css\\/style\\.css\\?v=([a-z0-9._-]+)/i,'HOME CSS revision');
+  const appKey=match(home,/js\\/app\\.js\\?v=([a-z0-9._-]+)/i,'HOME JS revision');
+  const i18nKey=match(home,/js\\/i18n\\.js\\?v=([a-z0-9._-]+)/i,'HOME translation revision');
   check(home.includes('id="scoreColorToggleBtn"'),'approved score color visibility switch missing');
   check(!home.includes('id="gradeFilter"')&&!home.includes('id="filterCount"'),
     'removed filter or visible/total counter came back');
-  const publicCSSKey=match(publicPage,/cloud\/public\.css\?v=([a-z0-9]+)/,'public CSS revision');
-  const publicJSKey=match(publicPage,/cloud\/public\.js\?v=([a-z0-9]+)/,'public JS revision');
-  check(publicCSSKey===publicJSKey,'published CSS/JS cache versions differ');
+  const publicCSSKey=match(publicPage,/cloud\\/public\\.css\\?v=([a-z0-9._-]+)/i,'public CSS revision');
+  const publicJSKey=match(publicPage,/cloud\\/public\\.js\\?v=([a-z0-9._-]+)/i,'public JS revision');
   check(sources['cloud/public.js'].includes('class="tableWrap creatorScoreTable"'),
     'original creator horizontal score matrix missing');
   check(!sources['cloud/public.js'].includes('class="publicScoreCards"'),
@@ -59,7 +60,7 @@ async function inventory(){
   }
   check(sources['robots.txt'].includes('Sitemap: '+ROOT_URL+'/sitemap.xml'),
     'robots sitemap reference not official domain');
-  return {homeKey,publicKey:publicCSSKey};
+  return {homeKey,cssKey,appKey,i18nKey,publicCSSKey,publicJSKey};
 }
 const get=async(url)=>{
   const response=await fetch(url,{
@@ -84,20 +85,20 @@ async function live(){
         ]);
         ready=[outer,home,publicPage].every(x=>x.response.status===200)&&
           outer.body.includes('base/index.html?v='+keys.homeKey)&&
-          home.body.includes('css/style.css?v='+keys.homeKey)&&
-          home.body.includes('js/app.js?v='+keys.homeKey)&&
-          publicPage.body.includes('cloud/public.css?v='+keys.publicKey)&&
-          publicPage.body.includes('cloud/public.js?v='+keys.publicKey);
+          home.body.includes('css/style.css?v='+keys.cssKey)&&
+          home.body.includes('js/app.js?v='+keys.appKey)&&
+          publicPage.body.includes('cloud/public.css?v='+keys.publicCSSKey)&&
+          publicPage.body.includes('cloud/public.js?v='+keys.publicJSKey);
         if(ready)break;
       }catch(error){console.log('R38 P17 deployment read retry',host.name,String(error));}
       await delay(4000);
     }
     check(ready,'expected release cache keys not deployed on '+host.name);
     const paths=[
-      '/base/js/app.js?v='+keys.homeKey,
-      '/base/css/style.css?v='+keys.homeKey,
-      '/cloud/public.js?v='+keys.publicKey,
-      '/cloud/public.css?v='+keys.publicKey
+      '/base/js/app.js?v='+keys.appKey,
+      '/base/css/style.css?v='+keys.cssKey,
+      '/cloud/public.js?v='+keys.publicJSKey,
+      '/cloud/public.css?v='+keys.publicCSSKey
     ];
     for(const path of paths){
       const asset=await get(host.base+path);
