@@ -105,6 +105,8 @@ try{
     await home.locator('[data-score-row="0"][data-score-col="'+i+'"]')
       .fill(String(referenceValues[i]));
   await home.locator('#titleInput').click();
+  // Wait for the original 120ms background transition after editing scores.
+  await page.waitForTimeout(240);
   const expectedGrades100=['heat-s','heat-s','heat-a','heat-c'];
   const reference=await home.locator('#scoreTable').evaluate(el=>
     [...el.querySelectorAll('tbody tr:first-child td.scoreCell')].slice(0,4)
