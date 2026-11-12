@@ -25,7 +25,7 @@ assert(p17.includes('keys.cssKey')&&p17.includes('keys.appKey')&&p17.includes('k
 assert(p17.includes('keys.publicCSSKey')&&p17.includes('keys.publicJSKey'));
 assert(!p17.includes('home.cssKey===homeKey'));
 assert(p3.includes('expectedFrame&&iframeSource?.includes(expectedFrame)'));
-assert(p3.includes('expectedCss&&cssSource===expectedCss'));
+assert(p3.includes('expectedCssHref&&cssSource===expectedCssHref'));
 assert(!readiness.includes("const KNOWN_PUBLIC='57b432ed-"));
 assert(readiness.includes('const currentPublicId=await resolveCurrentPublicSmokeTopic()'));
 assert(ogWorkflow.includes('node scripts/r139-select-current-ogp-work.mjs'));
