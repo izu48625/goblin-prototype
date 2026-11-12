@@ -16,7 +16,7 @@ async function waitForProductionRelease(){
       const [html,js]=await Promise.all([page.text(),script.text()]);
       if(page.ok&&script.ok&&
           html.includes('data-sm-ad-page="discover"')&&
-          html.includes('みんなで評価')&&
+          html.includes('みんなで採点')&&
           js.includes('desktopRail')){
         console.log('R31 production assets ready; canonical URL =',page.url);
         return;
@@ -68,9 +68,9 @@ try{
   assert.equal(await page.locator('[data-sm-slot="discover-anchor"]').count(),0,'Anchor did not close');
 
   assert.equal(await page.locator('[data-view="all"]').innerText(),'すべての作品');
-  assert.equal(await page.locator('[data-view="community"]').innerText(),'みんなで評価');
+  assert.equal(await page.locator('[data-view="community"]').innerText(),'みんなで採点');
   await page.locator('[data-view="community"]').click();
-  await page.waitForFunction(()=>document.querySelector('#sectionTitle')?.textContent==='みんなで評価できる作品');
+  await page.waitForFunction(()=>document.querySelector('#sectionTitle')?.textContent==='みんなで採点できる作品');
   assert(await page.locator('[data-sm-slot]').count()>=3);
 
   await check('/public.html?id='+TOPIC_ID+'&adPreview=1','public-primary',4);
