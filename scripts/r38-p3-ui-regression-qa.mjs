@@ -35,8 +35,8 @@ try{
   await home.locator('#titleInput').waitFor({state:'visible',timeout:30000});
   const cssSource=await home.locator('link[href^="css/style.css"]').getAttribute('href');
   const homeMarkup=await readFile(new URL('../base/index.html',import.meta.url),'utf8');
-  const expectedCss=homeMarkup.match(/css\/style\.css\?v=[a-z0-9._-]+/i)?.[0];
-  assert(expectedCss&&cssSource===expectedCss,
+  const expectedCssHref=homeMarkup.match(/css\/style\.css\?v=[a-z0-9._-]+/i)?.[0];
+  assert(expectedCssHref&&cssSource===expectedCssHref,
     'Home stylesheet must match the revision linked by the current document');
   await home.locator('#scoreTable .scoreInput').first().waitFor({state:'visible'});
   await clickBasic(home,'scoreSettingsBtn');
