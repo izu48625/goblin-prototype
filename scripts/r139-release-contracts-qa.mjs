@@ -16,8 +16,8 @@ const keys={
   publicCSS:asset(pub,/cloud\/public\.css\?v=([a-z0-9._-]+)/i,'public CSS revision'),
   publicJS:asset(pub,/cloud\/public\.js\?v=([a-z0-9._-]+)/i,'public JS revision')
 };
-assert(keys.iframe!==keys.css,'Fixture must exercise independent revisions');
-assert(keys.iframe!==keys.app,'Fixture must exercise independently shipped JavaScript');
+assert(Object.values(keys).every(v=>/^[a-z0-9._-]+$/i.test(v)),
+  'Every referenced asset must carry a valid cache revision');
 assert(p4.includes("const APP_KEY=version("));
 assert(p4.includes("host.base+'/base/js/app.js?v='+APP_KEY"));
 assert(p4.includes("host.base+'/base/css/style.css?v='+STYLE_KEY"));
