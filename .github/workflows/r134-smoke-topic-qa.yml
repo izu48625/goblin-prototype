@@ -5,6 +5,9 @@ on:
       - 'scripts/r134-production-smoke-topic.mjs'
       - 'scripts/r134-production-smoke-qa.mjs'
       - 'scripts/production-smoke.mjs'
+      - 'scripts/r28-publish-lifecycle-test.mjs'
+      - 'scripts/r138-publish-mock-security-qa.mjs'
+      - 'security/R136_INTERNAL_FUNCTION_EXECUTE_RESTRICTION.sql'
       - 'scripts/r135-smoke-remix-title-qa.mjs'
       - '.github/workflows/production-smoke.yml'
       - '.github/workflows/r134-smoke-topic-qa.yml'
@@ -14,6 +17,9 @@ on:
       - 'scripts/r134-production-smoke-topic.mjs'
       - 'scripts/r134-production-smoke-qa.mjs'
       - 'scripts/production-smoke.mjs'
+      - 'scripts/r28-publish-lifecycle-test.mjs'
+      - 'scripts/r138-publish-mock-security-qa.mjs'
+      - 'security/R136_INTERNAL_FUNCTION_EXECUTE_RESTRICTION.sql'
       - 'scripts/r135-smoke-remix-title-qa.mjs'
       - '.github/workflows/production-smoke.yml'
       - '.github/workflows/r134-smoke-topic-qa.yml'
@@ -33,3 +39,4 @@ jobs:
       - run: node --check scripts/r134-production-smoke-qa.mjs
       - run: node scripts/r134-production-smoke-qa.mjs
       - run: node scripts/r135-smoke-remix-title-qa.mjs
+      - run: node scripts/r138-publish-mock-security-qa.mjs

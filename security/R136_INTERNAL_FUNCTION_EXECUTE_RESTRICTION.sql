@@ -1,26 +1,35 @@
--- R136 targeted privilege hardening: already applied to live Supabase on
--- 2026-11-12. This file documents the exact idempotent permission change.
+-- R136 security-function review / privilege baseline (2026-11-12).
+-- IMPORTANT R138 CORRECTION: this helper is NOT exclusively an internal
+-- trigger helper. The initial R136 audit missed an actual browser dependency:
+-- base/js/app.js calls sb.rpc('topic_has_submissions') during *owned Public
+-- publication updates* to protect prior Community participants.
 --
--- WHY:
--- topic_has_submissions(uuid) is a SECURITY DEFINER helper that reads private
--- rating_sets. Its only DB callers are the three postgres-owned SECURITY
--- DEFINER structural-lock trigger functions. It must not be directly invoked
--- by arbitrary anonymous or signed-in clients.
+-- Final production privileges confirmed:
+--   anon          = false (no unauthenticated direct RPC)
+--   authenticated = true  (needed for current owned-work update flow)
+--   service_role  = true  (backend permissions preserved)
+--   postgres      = true  (three structural-lock triggers preserved)
 --
--- Preserve the privileged backend's explicit grant and leave trigger owner
--- PostgreSQL's intrinsic EXECUTE privilege intact.
-GRANT EXECUTE ON FUNCTION public.topic_has_submissions(uuid) TO service_role;
+-- The following statements reflect the ACTUAL current live configuration
+-- and are safe to reapply. Never revoke authenticated access until an
+-- owner-scoped replacement RPC has been deployed, and all clients/mocks
+-- updated and tested. The generic Supabase definer advisor warning therefore
+-- remains; full elimination requires a distinct reviewed API change.
+GRANT EXECUTE ON FUNCTION public.topic_has_submissions(uuid)
+  TO authenticated, service_role;
 REVOKE EXECUTE ON FUNCTION public.topic_has_submissions(uuid)
-  FROM PUBLIC, anon, authenticated;
+  FROM PUBLIC, anon;
 
--- Read-only verification (run separately):
+-- Read-only verification:
 -- SELECT
 --   has_function_privilege('anon','public.topic_has_submissions(uuid)','EXECUTE') AS anonymous_access,
---   has_function_privilege('authenticated','public.topic_has_submissions(uuid)','EXECUTE') AS signed_in_access,
+--   has_function_privilege('authenticated','public.topic_has_submissions(uuid)','EXECUTE') AS owner_client_access,
 --   has_function_privilege('postgres','public.topic_has_submissions(uuid)','EXECUTE') AS trigger_owner_access;
--- Expected: false, false, true.
+-- Expected: false, true, true.
 --
--- Narrow rollback if direct client invocation is found to be legitimately
--- necessary in a future release:
--- GRANT EXECUTE ON FUNCTION public.topic_has_submissions(uuid) TO authenticated;
--- (Do not grant it to PUBLIC unless there is a reviewed public requirement.)
+-- Remaining concern: the helper returns a boolean for any supplied UUID,
+-- irrespective of ownership; authenticated browser RPC calls can infer
+-- submission existence if they already know another work's ID. Investigate
+-- an owner-scoped read RPC and separate unexposed internal helper as a future
+-- hardening change. Do not blindly grant/revoke or change SECURITY DEFINER
+-- without trigger and publication-update regression coverage.
