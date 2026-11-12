@@ -1,0 +1,28 @@
+name: R140 Community Consent DB Function Audit
+on:
+  pull_request:
+    paths:
+      - 'security/R140_RATING_CONSENT_SERVER_GATE.sql'
+      - 'security/R140_SECURITY_DEFINER_REVIEW.md'
+      - 'scripts/r140-security-contract-qa.mjs'
+      - '.github/workflows/r140-security-contract-qa.yml'
+  push:
+    branches: [main]
+    paths:
+      - 'security/R140_RATING_CONSENT_SERVER_GATE.sql'
+      - 'security/R140_SECURITY_DEFINER_REVIEW.md'
+      - 'scripts/r140-security-contract-qa.mjs'
+      - '.github/workflows/r140-security-contract-qa.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  privilege-readonly:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - run: node --check scripts/r140-security-contract-qa.mjs
+      - run: node scripts/r140-security-contract-qa.mjs
