@@ -90,7 +90,7 @@ for(const host of hosts){
       assert(publicStyle.includes('.creatorScoreTable table'),'compact scroll CSS missing at '+host.base);
       assert(publicLogic.includes('class="tableWrap creatorScoreTable"'),'horizontal table markup missing at '+host.base);
       const css=await fetchText(host.base+'/base/css/style.css?v='+STYLE_KEY);
-      const app=await fetchText(host.base+'/base/js/app.js?v='+KEY);
+      const app=await fetchText(host.base+'/base/js/app.js?v='+APP_KEY);
       assert(app.includes('scoreTileColors'),'missing real per-cell JS colors');
       assert(app.includes('statsMaker.scoreColorsVisible.v1'),'missing ON/OFF toggle behavior');
       assert(css.includes('body.score-colors-off #scoreTable td.scoreCell'),'missing OFF color rule');
