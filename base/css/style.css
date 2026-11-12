@@ -1904,3 +1904,65 @@ body.score-colors-off .overviewMetric{
   .filterBar{grid-template-columns:minmax(0,1fr) 80px}
   .filterBar .scoreColorToggle{height:34px;min-height:34px;font-size:10px}
 }
+
+/* R139: Current light score palette across all representations. The Home
+   score table already renders these original hex colors inline. Earlier CSS
+   kept the retired dark RGBA tint for Fit/Overview and darkened color OFF.
+   Reconcile visual modes without changing scores, grades or stored data. */
+#scoreTable td.scoreCell.heat-ss,
+#scoreTable td.avgCell.heat-ss,
+.fitTable td.fitScoreCell.heat-ss,
+.fitTable td.fitAverageCell.heat-ss,
+.overviewMetric.heat-ss{--score-tile-overlay:#e8b9b2;background-color:#e8b9b2;background-image:none;box-shadow:none}
+
+#scoreTable td.scoreCell.heat-s,
+#scoreTable td.avgCell.heat-s,
+.fitTable td.fitScoreCell.heat-s,
+.fitTable td.fitAverageCell.heat-s,
+.overviewMetric.heat-s{--score-tile-overlay:#edc9b9;background-color:#edc9b9;background-image:none;box-shadow:none}
+
+#scoreTable td.scoreCell.heat-a,
+#scoreTable td.avgCell.heat-a,
+.fitTable td.fitScoreCell.heat-a,
+.fitTable td.fitAverageCell.heat-a,
+.overviewMetric.heat-a{--score-tile-overlay:#f1d9c4;background-color:#f1d9c4;background-image:none;box-shadow:none}
+
+#scoreTable td.scoreCell.heat-b,
+#scoreTable td.avgCell.heat-b,
+.fitTable td.fitScoreCell.heat-b,
+.fitTable td.fitAverageCell.heat-b,
+.overviewMetric.heat-b{--score-tile-overlay:#efd2a6;background-color:#efd2a6;background-image:none;box-shadow:none}
+
+#scoreTable td.scoreCell.heat-c,
+#scoreTable td.avgCell.heat-c,
+.fitTable td.fitScoreCell.heat-c,
+.fitTable td.fitAverageCell.heat-c,
+.overviewMetric.heat-c{--score-tile-overlay:#f8edcc;background-color:#f8edcc;background-image:none;box-shadow:none}
+
+#scoreTable td.scoreCell.heat-d,
+#scoreTable td.avgCell.heat-d,
+.fitTable td.fitScoreCell.heat-d,
+.fitTable td.fitAverageCell.heat-d,
+.overviewMetric.heat-d{--score-tile-overlay:#e3edc9;background-color:#e3edc9;background-image:none;box-shadow:none}
+
+#scoreTable td.scoreCell.heat-e,
+#scoreTable td.avgCell.heat-e,
+.fitTable td.fitScoreCell.heat-e,
+.fitTable td.fitAverageCell.heat-e,
+.overviewMetric.heat-e{--score-tile-overlay:#d1dce9;background-color:#d1dce9;background-image:none;box-shadow:none}
+
+#scoreTable td.scoreCell.heat-zero,
+#scoreTable td.avgCell.heat-zero,
+.fitTable td.fitScoreCell.heat-zero,
+.fitTable td.fitAverageCell.heat-zero,
+.overviewMetric.heat-zero{--score-tile-overlay:#c0cfdf;background-color:#c0cfdf;background-image:none;box-shadow:none}
+
+body.score-colors-off #scoreTable td.scoreCell,
+body.score-colors-off #scoreTable td.avgCell,
+body.score-colors-off .fitTable td.fitScoreCell,
+body.score-colors-off .fitTable td.fitAverageCell,
+body.score-colors-off .overviewMetric{
+  background-color:#fff!important;
+  background-image:none!important;
+  box-shadow:none!important;
+}
