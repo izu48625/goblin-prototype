@@ -430,8 +430,9 @@ async function browserRemixContext(){
     await remixFrame.locator('#remixContextPanel:not(.hidden)').waitFor({timeout:30000});
     assert(await remixFrame.locator('.remixChoiceGrid').count()===0,
       'Verbose Remix choice cards were not removed');
-    assert((await remixFrame.locator('.remixContextHelp').innerText()).includes('点数は空欄です'),
-      'Short copy explanation did not display');
+    const help=(await remixFrame.locator('.remixContextHelp').innerText()).trim();
+    assert(help.includes('点数と説明欄は空欄です'),
+      'Remix must explain that both scores and description start blank: '+help);
     assert((await remixFrame.locator('#remixPublishOwnBtn').innerText())==='別作品として公開',
       'Separate publish label is unclear');
   });
