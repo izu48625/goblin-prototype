@@ -1,0 +1,26 @@
+name: R136 Internal Helper Permission Smoke
+on:
+  pull_request:
+    paths:
+      - 'security/R136_INTERNAL_FUNCTION_EXECUTE_RESTRICTION.sql'
+      - 'scripts/r136-security-helper-qa.mjs'
+      - '.github/workflows/r136-security-helper-qa.yml'
+  push:
+    branches: [main]
+    paths:
+      - 'security/R136_INTERNAL_FUNCTION_EXECUTE_RESTRICTION.sql'
+      - 'scripts/r136-security-helper-qa.mjs'
+      - '.github/workflows/r136-security-helper-qa.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  anon-denial:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - run: node --check scripts/r136-security-helper-qa.mjs
+      - run: node scripts/r136-security-helper-qa.mjs
