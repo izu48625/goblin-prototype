@@ -95,6 +95,7 @@ async function live(){
     }
     check(ready,'expected release cache keys not deployed on '+host.name);
     const paths=[
+      '/base/js/i18n.js?v='+keys.i18nKey,
       '/base/js/app.js?v='+keys.appKey,
       '/base/css/style.css?v='+keys.cssKey,
       '/cloud/public.js?v='+keys.publicJSKey,
