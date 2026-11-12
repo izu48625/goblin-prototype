@@ -28,14 +28,14 @@ try{
   // isolated tests with an empty browser cache.
   const iframeSource=await page.locator('#basicFrame').getAttribute('src');
   const outerMarkup=await readFile(new URL('../index.html',import.meta.url),'utf8');
-  const expectedFrame=outerMarkup.match(/base\\/index\\.html\\?v=[a-z0-9._-]+/i)?.[0];
+  const expectedFrame=outerMarkup.match(/base\/index\.html\?v=[a-z0-9._-]+/i)?.[0];
   assert(expectedFrame&&iframeSource?.includes(expectedFrame),
     'Home iframe source must match the current versioned site entrypoint');
   const home=page.frameLocator('#basicFrame');
   await home.locator('#titleInput').waitFor({state:'visible',timeout:30000});
   const cssSource=await home.locator('link[href^="css/style.css"]').getAttribute('href');
   const homeMarkup=await readFile(new URL('../base/index.html',import.meta.url),'utf8');
-  const expectedCss=homeMarkup.match(/css\\/style\\.css\\?v=[a-z0-9._-]+/i)?.[0];
+  const expectedCss=homeMarkup.match(/css\/style\.css\?v=[a-z0-9._-]+/i)?.[0];
   assert(expectedCss&&cssSource===expectedCss,
     'Home stylesheet must match the revision linked by the current document');
   await home.locator('#scoreTable .scoreInput').first().waitFor({state:'visible'});
