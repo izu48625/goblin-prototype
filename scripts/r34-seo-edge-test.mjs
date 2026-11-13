@@ -98,7 +98,7 @@ try{
 
   const staticSite=await req('/sitemap-static.xml');
   const staticXML=await staticSite.text();
-  for(const path of ['/en/','/ja/','/discover'])
+  for(const path of ['/en/','/ja/','/en/legal.html','/ja/legal.html','/discover'])
     assert(staticXML.includes('https://statsmaker.app'+path));
   assert(staticXML.includes('<loc>https://statsmaker.app/</loc>'),
     'The actual root scoring app must be discoverable, not only language landings');
